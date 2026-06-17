@@ -132,7 +132,15 @@ export default function LoginPage() {
       navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
     } catch (error) {
       console.error('Google Auth failed:', error);
-      showToast('Google Sign-in failed or cancelled.', 'error');
+      if (error?.code === 'auth/unauthorized-domain') {
+        showToast('Google Sign-in failed: Domain is not authorized in Firebase Console. Please add your domain to Authorized Domains under Authentication settings.', 'error');
+      } else if (error?.code === 'auth/operation-not-allowed') {
+        showToast('Google Sign-in failed: Google sign-in provider is disabled in Firebase Console.', 'error');
+      } else if (error?.code === 'auth/popup-closed-by-user') {
+        showToast('Google Sign-in cancelled (popup closed).', 'warning');
+      } else {
+        showToast(`Google Sign-in failed: ${error?.message || 'Unknown error'}`, 'error');
+      }
     }
   };
 
@@ -240,7 +248,7 @@ export default function LoginPage() {
                 <div className="login-otp-wrap">
                   <h2 className="login-card-title">Verify Phone Number</h2>
                   <p className="login-card-subtitle">
-                    Enter the 4-digit verification code sent to <br />
+                    Enter the 6-digit verification code sent to <br />
                     <span style={{ fontWeight: 700, color: '#000f22' }}>{countryCode} {phone}</span>
                   </p>
 
