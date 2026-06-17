@@ -19,6 +19,7 @@ import {
 import { mockCustomers } from '../../data/mockUsers';
 import { categories } from '../../data/categories';
 import ImageWithFallback from '../../components/ImageWithFallback';
+import CustomerNav from '../../components/CustomerNav';
 import { useToast } from '../../context/ToastContext';
 import './CustomerProfile.css';
 
@@ -135,6 +136,9 @@ export default function CustomerProfile() {
               )}
             </button>
           </div>
+
+          {/* Customer Sub-Navigation */}
+          <CustomerNav />
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* Left Column: Personal Form */}

@@ -19,6 +19,7 @@ import {
 import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/constants';
 import { useToast } from '../../context/ToastContext';
+import CustomerNav from '../../components/CustomerNav';
 import './CustomerOrdersPage.css';
 
 function CountdownTimer({ initialMinutes }) {
@@ -115,6 +116,9 @@ export default function CustomerOrdersPage() {
             </div>
           </div>
         </div>
+
+        {/* Customer Sub-Navigation */}
+        <CustomerNav />
 
         {/* Toolbar: Tabs and Search */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-white border border-slate-200/80 p-3 rounded-3xl shadow-sm">

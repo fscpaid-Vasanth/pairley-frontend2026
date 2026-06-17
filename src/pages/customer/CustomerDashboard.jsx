@@ -17,6 +17,7 @@ import { mockCustomers } from '../../data/mockUsers';
 import { getTimeGreeting, formatPrice, ROUTES } from '../../utils/constants';
 import { getCategoryById } from '../../data/categories';
 import ImageWithFallback from '../../components/ImageWithFallback';
+import CustomerNav from '../../components/CustomerNav';
 import './CustomerDashboard.css';
 
 /* Current user */
@@ -72,6 +73,9 @@ export default function CustomerDashboard() {
             Explore New Deals
           </Link>
         </motion.div>
+
+        {/* Customer Sub-Navigation */}
+        <CustomerNav />
 
         {/* ===== Stats Row ===== */}
         <motion.div
