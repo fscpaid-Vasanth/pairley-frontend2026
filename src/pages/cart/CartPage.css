@@ -1,0 +1,16 @@
+.cart-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Card lines styling details */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Align control button icons */
+.cart-page button svg {
+  display: inline-block;
+}

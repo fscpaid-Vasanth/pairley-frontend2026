@@ -1,0 +1,45 @@
+.customer-orders-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Glassmorphism containers */
+.customer-orders-page .bg-white {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* Tab button transition */
+.customer-orders-page button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tab count badge alignment */
+.customer-orders-page span[class*="rounded-full"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card list animations */
+.customer-orders-page .bg-white:hover {
+  border-color: rgba(78, 43, 196, 0.2);
+  box-shadow: 0 10px 25px -5px rgba(78, 43, 196, 0.05), 0 8px 10px -6px rgba(78, 43, 196, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Countdown pulsing timer style */
+@keyframes clockPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.customer-orders-page .animate-pulse {
+  animation: clockPulse 2s infinite ease-in-out;
+}

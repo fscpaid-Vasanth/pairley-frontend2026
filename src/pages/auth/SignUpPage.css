@@ -1,0 +1,658 @@
+/* ===================================================
+   SIGNUP PAGE — Full custom CSS
+   =================================================== */
+
+/* ── Root wrapper ── */
+.signup-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f7f9ff 0%, #edf4ff 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ── Header ── */
+.signup-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(196, 198, 206, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 64px;
+  height: 72px;
+}
+
+.signup-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #000f22;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.signup-brand-icon {
+  font-size: 26px !important;
+  color: #7C3AED;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.signup-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #43474d;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.signup-back-btn:hover { color: #000f22; }
+
+/* ── Main ── */
+.signup-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 64px;
+}
+
+.signup-split {
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  gap: 80px;
+  width: 100%;
+  max-width: 1220px;
+  align-items: start;
+}
+
+/* ── LEFT PANEL ── */
+.signup-left {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-top: 24px;
+}
+
+.signup-left-top {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signup-left-title {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  color: #000f22;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.signup-left-desc {
+  font-size: 17px;
+  color: #43474d;
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0;
+}
+
+/* Steps */
+.signup-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.signup-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.signup-step-num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C3AED, #4a3ee6);
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(74, 62, 230, 0.3);
+}
+
+.signup-step-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000f22;
+  margin: 0 0 4px 0;
+}
+
+.signup-step-desc {
+  font-size: 13px;
+  color: #43474d;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Decoration */
+.signup-decoration {
+  background: linear-gradient(135deg, #edf4ff 0%, #e3efff 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(196, 198, 206, 0.3);
+  padding: 32px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.signup-decoration-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.signup-decoration-emoji {
+  font-size: 64px;
+  z-index: 2;
+  filter: drop-shadow(0 8px 24px rgba(78, 62, 230, 0.2));
+  animation: su-float 3s ease-in-out infinite;
+}
+
+@keyframes su-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.signup-decoration-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: white;
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 3;
+}
+
+.signup-decoration-badge-val {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #4a3ee6;
+  line-height: 1;
+}
+
+.signup-decoration-badge-lbl {
+  font-size: 11px;
+  color: #43474d;
+  font-weight: 500;
+}
+
+/* ── RIGHT PANEL — Card ── */
+.signup-right {
+  display: flex;
+  justify-content: center;
+}
+
+.signup-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  box-shadow:
+    0 4px 6px -1px rgba(10, 37, 64, 0.04),
+    0 10px 24px -3px rgba(10, 37, 64, 0.06),
+    0 0 0 1px rgba(196, 198, 206, 0.15);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Role tabs */
+.signup-role-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f7f9ff;
+  border: 1px solid rgba(196, 198, 206, 0.4);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 28px;
+}
+
+.signup-role-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: #43474d;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.signup-role-tab--active {
+  background: #4a3ee6;
+  color: white;
+  box-shadow: 0 2px 8px rgba(74, 62, 230, 0.3);
+}
+
+.signup-role-tab:not(.signup-role-tab--active):hover {
+  color: #000f22;
+  background: rgba(74, 62, 230, 0.06);
+}
+
+/* Card heading */
+.signup-card-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #000f22;
+  margin: 0 0 4px 0;
+}
+
+.signup-card-subtitle {
+  font-size: 14px;
+  color: #43474d;
+  margin: 0 0 24px 0;
+}
+
+/* Form */
+.signup-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.su-field {
+  margin-bottom: 14px;
+}
+
+.su-half { flex: 1; min-width: 0; }
+
+.su-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000f22;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.su-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.su-input-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 18px !important;
+  color: #74777e;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.su-input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border: 1.5px solid rgba(196, 198, 206, 0.6);
+  border-radius: 10px;
+  background: #f7f9ff;
+  font-size: 13px;
+  color: #000f22;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.su-input:focus {
+  border-color: #4a3ee6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(74, 62, 230, 0.12);
+}
+
+.su-input--error {
+  border-color: #ba1a1a;
+  background: #fff8f8;
+}
+
+.su-input--pw { padding-right: 38px; }
+
+.su-pw-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #74777e;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.su-pw-toggle:hover { color: #000f22; }
+
+.su-error {
+  display: block;
+  font-size: 11px;
+  color: #ba1a1a;
+  margin-top: 4px;
+}
+
+/* Phone row */
+.su-phone-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.su-country-code {
+  padding: 10px 8px;
+  border: 1.5px solid rgba(196, 198, 206, 0.6);
+  border-radius: 10px;
+  background: #f7f9ff;
+  font-size: 13px;
+  color: #000f22;
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.su-country-code:focus {
+  border-color: #4a3ee6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(74, 62, 230, 0.12);
+}
+
+.su-phone-input { flex: 1; }
+
+/* Password row */
+.su-password-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+/* Terms */
+.su-terms-wrap {
+  margin-bottom: 16px;
+}
+
+.su-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #43474d;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.su-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #4a3ee6;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.su-terms-link {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a3ee6;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.su-terms-link:hover { color: #7C3AED; }
+
+/* Submit */
+.su-submit-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #7C3AED 0%, #4a3ee6 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+  transition: all 0.2s;
+}
+
+.su-submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+  opacity: 0.95;
+}
+
+.su-submit-btn:active { transform: translateY(0); }
+
+/* Divider */
+.su-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.su-divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(196, 198, 206, 0.4);
+}
+
+.su-divider-text {
+  font-size: 11px;
+  color: #74777e;
+  white-space: nowrap;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Social */
+.su-social-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.su-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px solid rgba(196, 198, 206, 0.5);
+  border-radius: 10px;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  color: #000f22;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.su-social-btn:hover {
+  background: #f7f9ff;
+  border-color: rgba(196, 198, 206, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Login link */
+.su-login-link {
+  text-align: center;
+  font-size: 13px;
+  color: #43474d;
+  margin: 0;
+}
+
+.su-login-anchor {
+  color: #4a3ee6;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+
+.su-login-anchor:hover { color: #7C3AED; }
+
+/* ── Footer ── */
+.signup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 16px 64px;
+  border-top: 1px solid rgba(196, 198, 206, 0.25);
+  background: rgba(255,255,255,0.7);
+}
+
+.signup-footer-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #74777e;
+  font-weight: 500;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .signup-main { padding: 40px 32px; }
+  .signup-header { padding: 0 32px; }
+  .signup-footer { padding: 16px 32px; }
+  .signup-split {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    max-width: 520px;
+  }
+  .signup-left { display: none; }
+}
+
+@media (max-width: 600px) {
+  .signup-main { padding: 28px 16px; }
+  .signup-header { padding: 0 20px; }
+  .signup-card { padding: 24px 20px; }
+  .signup-footer { padding: 16px 20px; gap: 16px; }
+  .su-password-row { flex-direction: column; }
+}
+
+/* ── OTP Verification Styles ── */
+.su-otp-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.su-otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.su-otp-digit {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(196, 198, 206, 0.6);
+  background: #f7f9ff;
+  font-size: 20px;
+  font-weight: 800;
+  color: #000f22;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.su-otp-digit:focus {
+  border-color: #4a3ee6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(74, 62, 230, 0.12);
+}
+
+@media (max-width: 400px) {
+  .su-otp-digit {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+  .su-otp-inputs {
+    gap: 6px;
+  }
+}
+
+.su-otp-timer {
+  font-size: 12px;
+  color: #74777e;
+  font-weight: 600;
+}
+
+.su-otp-resend {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a3ee6;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+.su-otp-resend:hover {
+  color: #7C3AED;
+}
+
+.su-otp-resend:disabled {
+  color: #c4c6ce;
+  cursor: not-allowed;
+  text-decoration: none;
+}

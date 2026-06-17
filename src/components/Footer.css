@@ -1,0 +1,282 @@
+/* ===== FOOTER ===== */
+.footer {
+  background: linear-gradient(160deg, #1a1040 0%, #0f0a2e 60%, #16082e 100%);
+  border-top: none;
+  padding-top: var(--space-16);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle decorative glow behind footer content */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Override text colors for dark footer */
+.footer__brand-tagline,
+.footer__brand-desc,
+.footer__link,
+.footer__copyright,
+.footer__legal-link,
+.footer__newsletter-label {
+  color: rgba(196, 198, 230, 0.75);
+}
+
+.footer__col-title {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.footer__link:hover,
+.footer__legal-link:hover {
+  color: #a78bfa;
+}
+
+.footer__social-link {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(196, 198, 230, 0.8);
+}
+
+.footer__newsletter-input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.footer__newsletter-input::placeholder {
+  color: rgba(196, 198, 230, 0.5);
+}
+
+.footer__newsletter-input:focus {
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+.footer__bottom {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.footer__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
+  gap: var(--space-10);
+}
+
+/* --- Brand Column --- */
+.footer__brand-logo {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-2);
+}
+
+.footer__brand-tagline {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.footer__brand-desc {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  max-width: 280px;
+}
+
+/* --- Column Titles --- */
+.footer__col-title {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-5);
+  position: relative;
+  padding-bottom: var(--space-3);
+}
+
+.footer__col-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 32px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+  border-radius: var(--radius-full);
+}
+
+/* --- Links List --- */
+.footer__links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.footer__link {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  display: inline-block;
+}
+
+.footer__link:hover {
+  color: var(--primary-light);
+  transform: translateX(4px);
+}
+
+/* --- Social Links --- */
+.footer__socials {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.footer__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.footer__social-link:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px var(--primary-glow);
+}
+
+/* --- Newsletter --- */
+.footer__newsletter-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.footer__newsletter-form {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.footer__newsletter-input {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.footer__newsletter-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.footer__newsletter-input::placeholder {
+  color: var(--text-muted);
+}
+
+.footer__newsletter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  flex-shrink: 0;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.footer__newsletter-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md), 0 0 20px var(--primary-glow);
+}
+
+/* --- Bottom Bar --- */
+.footer__bottom {
+  margin-top: var(--space-12);
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer__copyright {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.footer__legal {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.footer__legal-link {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer__legal-link:hover {
+  color: var(--primary-light);
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+  }
+}
+
+@media (max-width: 640px) {
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .footer__bottom {
+    flex-direction: column;
+    gap: var(--space-4);
+    text-align: center;
+  }
+
+  .footer__legal {
+    gap: var(--space-4);
+  }
+}

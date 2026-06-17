@@ -1,0 +1,228 @@
+import { createContext, useContext, useState, useEffect } from 'react';
+import { mockDeals } from '../data/mockDeals';
+
+const CartContext = createContext(null);
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+};
+
+const defaultOrders = [
+  {
+    id: 'ORD-A39B22',
+    dealId: 'deal-001',
+    dealTitle: 'Samsung Galaxy Buds FE — Buy 1 Get 1',
+    dealImage: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=600&h=400&fit=crop',
+    quantity: 1,
+    originalPrice: 6999,
+    pairleyPrice: 3499,
+    totalPaid: 3499,
+    status: 'searching',
+    date: '2026-06-16',
+    matchPartner: null,
+    countdownMinutes: 45,
+    progressPercent: 50,
+    deliveryDetails: {
+      name: 'Arjun Mehta',
+      email: 'arjun.mehta@email.com',
+      phone: '+91 98765 43210',
+      address: 'Apt 402, Sea Breeze, Marine Drive',
+      city: 'Mumbai',
+      zipCode: '400002'
+    }
+  },
+  {
+    id: 'ORD-B92F11',
+    dealId: 'deal-003',
+    dealTitle: 'Luxury Spa Day — Couples BOGO Package',
+    dealImage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&h=400&fit=crop',
+    quantity: 1,
+    originalPrice: 4500,
+    pairleyPrice: 2250,
+    totalPaid: 2250,
+    status: 'matched',
+    date: '2026-06-15',
+    matchPartner: {
+      name: 'Priya Sharma',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Priya',
+      city: 'Delhi',
+      matchDate: '2026-06-15'
+    },
+    countdownMinutes: 0,
+    progressPercent: 100,
+    deliveryDetails: {
+      name: 'Arjun Mehta',
+      email: 'arjun.mehta@email.com',
+      phone: '+91 98765 43210',
+      address: 'Apt 402, Sea Breeze, Marine Drive',
+      city: 'Mumbai',
+      zipCode: '400002'
+    }
+  },
+  {
+    id: 'ORD-C88D44',
+    dealId: 'deal-002',
+    dealTitle: 'Nike Air Max 270 — BOGO Pair Deal',
+    dealImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop',
+    quantity: 1,
+    originalPrice: 12995,
+    pairleyPrice: 6497,
+    totalPaid: 6497,
+    status: 'delivered',
+    date: '2026-05-10',
+    matchPartner: {
+      name: 'Rahul Krishnan',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul',
+      city: 'Bangalore',
+      matchDate: '2026-05-10'
+    },
+    countdownMinutes: 0,
+    progressPercent: 100,
+    deliveryDetails: {
+      name: 'Arjun Mehta',
+      email: 'arjun.mehta@email.com',
+      phone: '+91 98765 43210',
+      address: 'Apt 402, Sea Breeze, Marine Drive',
+      city: 'Mumbai',
+      zipCode: '400002'
+    }
+  }
+];
+
+export function CartProvider({ children }) {
+  const [cartItems, setCartItems] = useState([]);
+  const [orders, setOrders] = useState([]);
+
+  // Load cart and orders from session storage or pre-populate
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('pairley_cart');
+      if (stored) {
+        setCartItems(JSON.parse(stored));
+      } else {
+        const defaultItem = mockDeals.find(d => d.id === 'deal-1') || mockDeals[0];
+        if (defaultItem) {
+          const prePopulated = [{
+            id: defaultItem.id,
+            title: defaultItem.title,
+            category: defaultItem.category,
+            images: defaultItem.images || [],
+            originalPrice: defaultItem.originalPrice,
+            pairleyPrice: defaultItem.pairleyPrice,
+            mode: defaultItem.mode,
+            location: defaultItem.location,
+            quantity: 1
+          }];
+          setCartItems(prePopulated);
+          sessionStorage.setItem('pairley_cart', JSON.stringify(prePopulated));
+        }
+      }
+
+      const storedOrders = sessionStorage.getItem('pairley_orders');
+      if (storedOrders) {
+        setOrders(JSON.parse(storedOrders));
+      } else {
+        setOrders(defaultOrders);
+        sessionStorage.setItem('pairley_orders', JSON.stringify(defaultOrders));
+      }
+    } catch (e) {
+      console.error('Failed to load storage state:', e);
+    }
+  }, []);
+
+  const saveCart = (items) => {
+    setCartItems(items);
+    sessionStorage.setItem('pairley_cart', JSON.stringify(items));
+  };
+
+  const addToCart = (deal) => {
+    const existingIdx = cartItems.findIndex(item => item.id === deal.id);
+    if (existingIdx > -1) {
+      const nextItems = [...cartItems];
+      nextItems[existingIdx].quantity += 1;
+      saveCart(nextItems);
+    } else {
+      const newItem = {
+        id: deal.id,
+        title: deal.title,
+        category: deal.category,
+        images: deal.images || [],
+        originalPrice: deal.originalPrice,
+        pairleyPrice: deal.pairleyPrice,
+        mode: deal.mode,
+        location: deal.location,
+        quantity: 1
+      };
+      saveCart([...cartItems, newItem]);
+    }
+  };
+
+  const removeFromCart = (dealId) => {
+    saveCart(cartItems.filter(item => item.id !== dealId));
+  };
+
+  const updateQuantity = (dealId, quantity) => {
+    if (quantity <= 0) {
+      removeFromCart(dealId);
+      return;
+    }
+    saveCart(
+      cartItems.map(item => item.id === dealId ? { ...item, quantity: parseInt(quantity) } : item)
+    );
+  };
+
+  const clearCart = () => {
+    saveCart([]);
+  };
+
+  const createOrder = (orderId, items, totalPaid, deliveryDetails) => {
+    const newOrders = items.map(item => ({
+      id: orderId,
+      dealId: item.id,
+      dealTitle: item.title,
+      dealImage: item.images?.[0] || '',
+      quantity: item.quantity,
+      originalPrice: item.originalPrice,
+      pairleyPrice: item.pairleyPrice,
+      totalPaid: totalPaid,
+      status: 'searching',
+      date: new Date().toISOString().split('T')[0],
+      matchPartner: null,
+      countdownMinutes: 120,
+      progressPercent: 50,
+      deliveryDetails: deliveryDetails
+    }));
+
+    const nextOrders = [...newOrders, ...orders];
+    setOrders(nextOrders);
+    sessionStorage.setItem('pairley_orders', JSON.stringify(nextOrders));
+  };
+
+  // Pricing calculations
+  const cartSubtotalOriginal = cartItems.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
+  const cartSubtotalPairley = cartItems.reduce((sum, item) => sum + (item.pairleyPrice * item.quantity), 0);
+  const cartSavings = cartSubtotalOriginal - cartSubtotalPairley;
+  const cartSavingsPercentage = cartSubtotalOriginal > 0 ? Math.round((cartSavings / cartSubtotalOriginal) * 100) : 0;
+
+  return (
+    <CartContext.Provider value={{
+      cartItems,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      cartSubtotalOriginal,
+      cartSubtotalPairley,
+      cartSavings,
+      cartSavingsPercentage,
+      orders,
+      createOrder
+    }}>
+      {children}
+    </CartContext.Provider>
+  );
+}

@@ -1,0 +1,33 @@
+.support-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Glass indicators and headers */
+.support-page .bg-white {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Buttons transition */
+.support-page button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ticket form fields transition */
+.support-page form input,
+.support-page form textarea,
+.support-page form select {
+  transition: all 0.2s ease;
+}
+
+.support-page form input:focus,
+.support-page form textarea:focus,
+.support-page form select:focus {
+  border-color: #4E2BC4;
+  box-shadow: 0 0 0 3px rgba(78, 43, 196, 0.12);
+}
+
+/* Chat bubble styling height */
+.support-page .fixed {
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+}

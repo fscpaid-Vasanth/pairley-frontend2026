@@ -1,0 +1,481 @@
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { signInWithGoogle } from '../../firebase';
+import { useToast } from '../../context/ToastContext';
+import './LoginPage.css';
+
+const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const validatePhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));
+
+export default function LoginPage() {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const [role, setRole] = useState('customer');
+  
+  // Credentials Login States
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({});
+
+  // OTP Login States & Refs
+  const [loginMethod, setLoginMethod] = useState('password'); // 'password' or 'otp'
+  const [otpStep, setOtpStep] = useState('phone'); // 'phone' or 'verify'
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
+  const [resendSeconds, setResendSeconds] = useState(30);
+  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+
+  // Resend Countdown Timer Effect
+  useEffect(() => {
+    if (loginMethod !== 'otp' || otpStep !== 'verify' || resendSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setResendSeconds((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [loginMethod, otpStep, resendSeconds]);
+
+  const update = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
+  };
+
+  const validate = () => {
+    const errs = {};
+    if (!form.email.trim()) errs.email = 'Email Address is required';
+    else if (!validateEmail(form.email)) errs.email = 'Invalid email format';
+    if (!form.password) errs.password = 'Password is required';
+    else if (form.password.length < 8) errs.password = 'Minimum 8 characters required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!validate()) {
+      showToast('Please correct the validation errors in the form.', 'error');
+      return;
+    }
+    showToast('Logged in successfully!', 'success');
+    navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
+  };
+
+  const handleSendOtp = (e) => {
+    e.preventDefault();
+    if (!phone.trim()) {
+      setErrors({ phone: 'Mobile Number is required' });
+      showToast('Please enter a mobile number.', 'error');
+      return;
+    }
+    if (!validatePhone(phone)) {
+      setErrors({ phone: 'Phone must be exactly 10 digits' });
+      showToast('Please enter a valid 10-digit mobile number.', 'error');
+      return;
+    }
+    setErrors({});
+    setOtpStep('verify');
+    setOtpValues(['', '', '', '', '', '']);
+    setResendSeconds(30);
+    showToast(`OTP verification code sent to ${countryCode} ${phone}. Enter 123456 to verify.`, 'info');
+    setTimeout(() => {
+      otpRefs[0].current?.focus();
+    }, 100);
+  };
+
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    const code = otpValues.join('');
+    if (code.length < 6) {
+      showToast('Please enter all 6 digits of the OTP.', 'error');
+      return;
+    }
+    if (code === '123456' || code === '1234') {
+      showToast('Logged in successfully!', 'success');
+      navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
+    } else {
+      showToast('Invalid verification code. Try again using 123456.', 'error');
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    const cleanVal = value.replace(/\D/g, '').slice(0, 1);
+    const nextOtp = [...otpValues];
+    nextOtp[index] = cleanVal;
+    setOtpValues(nextOtp);
+
+    // Auto focus next input
+    if (cleanVal && index < 5) {
+      otpRefs[index + 1].current?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+      otpRefs[index - 1].current?.focus();
+    }
+  };
+
+  const handleResendOtp = () => {
+    setOtpValues(['', '', '', '', '', '']);
+    setResendSeconds(30);
+    showToast(`OTP code resent to ${countryCode} ${phone}. Enter 123456 to verify.`, 'info');
+    setTimeout(() => {
+      otpRefs[0].current?.focus();
+    }, 100);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      showToast('Logged in with Google!', 'success');
+      navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
+    } catch (error) {
+      console.error('Google Auth failed:', error);
+      showToast('Google Sign-in failed or cancelled.', 'error');
+    }
+  };
+
+  const leftContent = {
+    customer: {
+      title: 'Welcome Back!',
+      desc: 'Login to your account and continue discovering amazing group deals with your community.',
+      benefits: [
+        { title: 'Manage Your Purchases', desc: 'Track your group buys and recent orders seamlessly.', icon: 'shopping_cart' },
+        { title: 'Grow Your Savings', desc: "See how much you've saved by participating in collective action.", icon: 'trending_down' },
+        { title: 'Trusted Platform', desc: 'Secure transactions and verified community members.', icon: 'verified_user' },
+      ],
+    },
+    business: {
+      title: 'Welcome Back!',
+      desc: 'Log in to manage your store, track orders, and grow your business with Pairley.',
+      benefits: [
+        { title: 'Manage Your Store', desc: 'Easily update products, control inventory, and fulfill orders in real-time.', icon: 'storefront' },
+        { title: 'Grow Your Business', desc: 'Tap into our community buying power to reach more customers.', icon: 'trending_up' },
+        { title: 'Trusted Platform', desc: 'A secure ecosystem built specifically for premium retail shop owners.', icon: 'verified_user' },
+      ],
+    },
+  };
+
+  const c = leftContent[role];
+
+  return (
+    <div className="login-root">
+      {/* ── Header ── */}
+      <header className="login-header">
+        <Link className="login-brand" to="/">
+          <span className="material-symbols-outlined login-brand-icon">shopping_bag</span>
+          Pairley
+        </Link>
+        <Link className="login-back-btn" to="/">
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>
+          Back to Home
+        </Link>
+      </header>
+
+      {/* ── Main ── */}
+      <main className="login-main">
+        <div className="login-split">
+
+          {/* ── LEFT: Value Prop ── */}
+          <div className="login-left">
+            <div className="login-left-top">
+              <h1 className="login-left-title">{c.title}</h1>
+              <p className="login-left-desc">{c.desc}</p>
+            </div>
+
+            <div className="login-benefits">
+              {c.benefits.map((b, i) => (
+                <div key={i} className="login-benefit-row">
+                  <div className="login-benefit-icon-wrap">
+                    <span className="material-symbols-outlined">{b.icon}</span>
+                  </div>
+                  <div>
+                    <h3 className="login-benefit-title">{b.title}</h3>
+                    <p className="login-benefit-desc">{b.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Illustration — pure CSS, no broken image */}
+            <div className="login-illustration">
+              <div className="login-illustration-inner">
+                <span className="login-illustration-emoji">🛍️</span>
+                <div className="login-illustration-rings">
+                  <div className="login-illustration-ring login-illustration-ring--1" />
+                  <div className="login-illustration-ring login-illustration-ring--2" />
+                </div>
+                <div className="login-illustration-stat">
+                  <span className="login-illustration-stat-val">50K+</span>
+                  <span className="login-illustration-stat-lbl">Community Members</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── RIGHT: Form Card ── */}
+          <div className="login-right">
+            <div className="login-card">
+
+              {/* Role Switcher */}
+              <div className="login-role-tabs">
+                <button
+                  type="button"
+                  className={`login-role-tab ${role === 'customer' ? 'login-role-tab--active' : ''}`}
+                  onClick={() => setRole('customer')}
+                >
+                  👤 Customer
+                </button>
+                <button
+                  type="button"
+                  className={`login-role-tab ${role === 'business' ? 'login-role-tab--active' : ''}`}
+                  onClick={() => setRole('business')}
+                >
+                  🏪 Shop Owner
+                </button>
+              </div>
+
+              {loginMethod === 'otp' && otpStep === 'verify' ? (
+                <div className="login-otp-wrap">
+                  <h2 className="login-card-title">Verify Phone Number</h2>
+                  <p className="login-card-subtitle">
+                    Enter the 4-digit verification code sent to <br />
+                    <span style={{ fontWeight: 700, color: '#000f22' }}>{countryCode} {phone}</span>
+                  </p>
+
+                  <form onSubmit={handleVerifyOtp} className="login-form w-full">
+                    <div className="login-otp-inputs">
+                      {otpValues.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          ref={otpRefs[idx]}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength="1"
+                          value={digit}
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                          className="login-otp-digit"
+                          autoFocus={idx === 0}
+                        />
+                      ))}
+                    </div>
+
+                    <button type="submit" className="login-submit-btn">
+                      Verify OTP
+                    </button>
+                  </form>
+
+                  <div className="login-otp-timer">
+                    {resendSeconds > 0 ? (
+                      <span>Resend OTP in <span style={{ fontWeight: 800, color: '#000f22' }}>{resendSeconds}s</span></span>
+                    ) : (
+                      <span>
+                        Didn't receive the code? 
+                        <button type="button" onClick={handleResendOtp} className="login-otp-resend">
+                          Resend Code
+                        </button>
+                      </span>
+                    )}
+                  </div>
+
+                  <button 
+                    type="button" 
+                    onClick={() => { setOtpStep('phone'); setOtpValues(['', '', '', '']); }}
+                    className="login-signup-anchor"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginTop: '16px' }}
+                  >
+                    ← Back to edit phone number
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <h2 className="login-card-title">Login</h2>
+                  <p className="login-card-subtitle">Enter your credentials to access your account</p>
+
+                  {/* Method Switcher */}
+                  <div className="login-method-tabs">
+                    <button
+                      type="button"
+                      className={`login-method-tab ${loginMethod === 'password' ? 'login-method-tab--active' : ''}`}
+                      onClick={() => {
+                        setLoginMethod('password');
+                        setErrors({});
+                      }}
+                    >
+                      🔑 Password Login
+                    </button>
+                    <button
+                      type="button"
+                      className={`login-method-tab ${loginMethod === 'otp' ? 'login-method-tab--active' : ''}`}
+                      onClick={() => {
+                        setLoginMethod('otp');
+                        setErrors({});
+                      }}
+                    >
+                      📱 Mobile OTP Login
+                    </button>
+                  </div>
+
+                  {loginMethod === 'password' ? (
+                    <form onSubmit={handleSubmit} noValidate className="login-form">
+                      {/* Email */}
+                      <div className="login-field">
+                        <label className="login-label" htmlFor="lp-email">Email Address</label>
+                        <div className="login-input-wrap">
+                          <span className="material-symbols-outlined login-input-icon">mail</span>
+                          <input
+                            id="lp-email"
+                            type="text"
+                            placeholder="Enter email address"
+                            className={`login-input ${errors.email ? 'login-input--error' : ''}`}
+                            value={form.email}
+                            onChange={(e) => update('email', e.target.value)}
+                          />
+                        </div>
+                        {errors.email && <span className="login-error">{errors.email}</span>}
+                      </div>
+
+                      {/* Password */}
+                      <div className="login-field">
+                        <label className="login-label" htmlFor="lp-password">Password</label>
+                        <div className="login-input-wrap">
+                          <span className="material-symbols-outlined login-input-icon">lock</span>
+                          <input
+                            id="lp-password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter your password"
+                            className={`login-input login-input--pw ${errors.password ? 'login-input--error' : ''}`}
+                            value={form.password}
+                            onChange={(e) => update('password', e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            className="login-pw-toggle"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                              {showPassword ? 'visibility' : 'visibility_off'}
+                            </span>
+                          </button>
+                        </div>
+                        {errors.password && <span className="login-error">{errors.password}</span>}
+                      </div>
+
+                      {/* Remember / Forgot */}
+                      <div className="login-options-row">
+                        <label className="login-remember">
+                          <input
+                            type="checkbox"
+                            className="login-checkbox"
+                            checked={remember}
+                            onChange={(e) => setRemember(e.target.checked)}
+                          />
+                          Remember Me
+                        </label>
+                        <button type="button" className="login-forgot" onClick={() => alert('Password reset (demo only)')}>
+                          Forgot Password?
+                        </button>
+                      </div>
+
+                      {/* Submit */}
+                      <button type="submit" className="login-submit-btn">
+                        {role === 'customer' ? 'Login' : 'Login to Dashboard'}
+                      </button>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleSendOtp} noValidate className="login-form">
+                      {/* Phone */}
+                      <div className="login-field">
+                        <label className="login-label" htmlFor="lp-phone">Mobile Number</label>
+                        <div className="login-phone-row">
+                          <select
+                            className="login-country-code"
+                            value={countryCode}
+                            onChange={(e) => setCountryCode(e.target.value)}
+                          >
+                            <option value="+91">🇮🇳 +91</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+61">🇦🇺 +61</option>
+                          </select>
+                          <input
+                            id="lp-phone"
+                            type="tel"
+                            placeholder="10-digit mobile number"
+                            className={`login-input login-phone-input ${errors.phone ? 'login-input--error' : ''}`}
+                            value={phone}
+                            onChange={(e) => {
+                              setPhone(e.target.value);
+                              if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+                            }}
+                          />
+                        </div>
+                        {errors.phone && <span className="login-error">{errors.phone}</span>}
+                      </div>
+
+                      {/* Submit */}
+                      <button type="submit" className="login-submit-btn" style={{ marginTop: '8px' }}>
+                        Send OTP
+                      </button>
+                    </form>
+                  )}
+
+                  {/* Divider */}
+                  <div className="login-divider">
+                    <span className="login-divider-line" />
+                    <span className="login-divider-text">or continue with</span>
+                    <span className="login-divider-line" />
+                  </div>
+
+                  {/* Social */}
+                  <div className="login-social-row">
+                    <button type="button" className="login-social-btn" onClick={handleGoogleSignIn}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      </svg>
+                      Google
+                    </button>
+                    <button type="button" className="login-social-btn" onClick={() => alert('Facebook Login (demo only)')}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+                        <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd"/>
+                      </svg>
+                      Facebook
+                    </button>
+                  </div>
+
+                  {/* Signup link */}
+                  <p className="login-signup-link">
+                    Don't have an account?{' '}
+                    <Link to="/signup" className="login-signup-anchor">Sign Up</Link>
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="login-footer">
+        <span className="login-footer-item">
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>verified_user</span>
+          Secure Payments
+        </span>
+        <span className="login-footer-item">
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>support_agent</span>
+          24/7 Support
+        </span>
+        <span className="login-footer-item">
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>local_offer</span>
+          Best Prices
+        </span>
+      </footer>
+    </div>
+  );
+}

@@ -1,0 +1,32 @@
+.business-payouts-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Glass indicators and headers */
+.business-payouts-page .bg-white {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Tab button transition */
+.business-payouts-page button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chart bars transitions */
+.business-payouts-page .flex-1 div {
+  transition: height 0.5s ease-out, background-color 0.2s ease;
+}
+
+.business-payouts-page .flex-1:hover div {
+  box-shadow: 0 4px 12px rgba(78, 43, 196, 0.25);
+}
+
+/* Bank account inputs borders transition */
+.business-payouts-page form input {
+  transition: all 0.2s ease;
+}
+
+.business-payouts-page form input:focus {
+  box-shadow: 0 0 0 3px rgba(78, 43, 196, 0.12);
+}

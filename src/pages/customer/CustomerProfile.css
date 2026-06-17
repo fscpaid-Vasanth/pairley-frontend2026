@@ -1,0 +1,9 @@
+/* Custom Styles for CustomerProfile */
+.customer-profile {
+  position: relative;
+}
+
+.customer-profile__avatar-wrap {
+  position: relative;
+}
+

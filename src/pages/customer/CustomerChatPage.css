@@ -1,0 +1,45 @@
+.customer-chat-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Glass sidebar cards and headers overrides */
+.customer-chat-page .bg-white {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Scrollbar customizations for chat container */
+.customer-chat-page .overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.customer-chat-page .overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customer-chat-page .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+
+.customer-chat-page .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Smooth transitions for animations */
+.customer-chat-page a,
+.customer-chat-page button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Utility buttons hover */
+.customer-chat-page .flex-col button:hover {
+  transform: translateX(4px);
+  border-color: rgba(78, 43, 196, 0.3);
+  background-color: rgba(78, 43, 196, 0.02);
+}
+
+/* System message text border light */
+.customer-chat-page .bg-indigo-50 {
+  background-color: rgba(78, 43, 196, 0.04);
+}

@@ -1,0 +1,398 @@
+/* ===================================================
+   NAVBAR — Premium glassmorphic, scroll-aware
+   =================================================== */
+
+/* ── Base navbar ── */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  padding: var(--space-3) 0;
+  transition: all 0.3s ease;
+  /* Transparent on top of hero */
+  background: rgba(244, 246, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid transparent;
+}
+
+/* ── Scrolled state — opaque glass ── */
+.navbar--scrolled {
+  padding: var(--space-2) 0;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(196, 198, 220, 0.35);
+  box-shadow:
+    0 1px 3px rgba(78, 43, 196, 0.04),
+    0 4px 20px rgba(78, 43, 196, 0.07);
+}
+
+/* ── Inner layout ── */
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  gap: var(--space-4);
+}
+
+/* ══════════════════════════════
+   LOGO
+══════════════════════════════ */
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* Gradient badge icon behind logo */
+.navbar__logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7C3AED 0%, #4a3ee6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.navbar__logo:hover .navbar__logo-badge {
+  transform: rotate(-6deg) scale(1.08);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45);
+}
+
+.navbar__logo-badge svg {
+  color: white;
+}
+
+.navbar__logo-text {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #4E2BC4 0%, #7C3AED 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* ══════════════════════════════
+   NAV LINKS
+══════════════════════════════ */
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.navbar__link {
+  position: relative;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-2) 2px;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.navbar__link:hover {
+  color: #4E2BC4;
+}
+
+/* Underline slide-in */
+.navbar__link::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #7C3AED, #4a3ee6);
+  border-radius: 99px;
+  transition: width 0.25s ease;
+}
+
+.navbar__link:hover::after,
+.navbar__link--active::after {
+  width: 100%;
+}
+
+.navbar__link--active {
+  color: #4E2BC4;
+}
+
+/* ── Explore Deals pill ── */
+.navbar__link--pill {
+  background: rgba(78, 43, 196, 0.08);
+  color: #4E2BC4;
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid rgba(78, 43, 196, 0.18);
+  transition: all 0.2s ease;
+}
+
+.navbar__link--pill:hover {
+  background: rgba(78, 43, 196, 0.14);
+  color: #4E2BC4;
+  transform: translateY(-1px);
+}
+
+.navbar__link--pill::after { display: none; }
+
+/* ══════════════════════════════
+   ACTIONS
+══════════════════════════════ */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.navbar__search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.navbar__search-btn:hover {
+  background: rgba(78, 43, 196, 0.08);
+  border-color: rgba(78, 43, 196, 0.15);
+  color: #4E2BC4;
+}
+
+/* Sign Up — gradient pill */
+.navbar__signup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: linear-gradient(135deg, #7C3AED 0%, #4a3ee6 100%);
+  color: white !important;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
+  white-space: nowrap;
+}
+
+.navbar__signup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+  color: white;
+}
+
+/* Log In — ghost */
+.navbar__login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1.5px solid rgba(78, 43, 196, 0.25);
+  color: #4E2BC4;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.navbar__login-btn:hover {
+  background: rgba(78, 43, 196, 0.06);
+  border-color: #4E2BC4;
+  color: #4E2BC4;
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════
+   HAMBURGER (Mobile)
+══════════════════════════════ */
+.navbar__hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: var(--text);
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.navbar__hamburger:hover {
+  background: rgba(78, 43, 196, 0.08);
+  color: #4E2BC4;
+}
+
+/* ══════════════════════════════
+   MOBILE DRAWER
+══════════════════════════════ */
+.navbar__drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 5, 20, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--z-modal);
+}
+
+/* Dark glassmorphic drawer */
+.navbar__drawer--dark {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 300px;
+  max-width: 85vw;
+  height: 100vh;
+  background: rgba(8, 12, 24, 0.94) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-modal);
+  font-family: 'Outfit', 'Inter', sans-serif;
+  color: #f8fafc;
+}
+
+.navbar__drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.navbar__logo-text--drawer {
+  background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.navbar__drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+  background: transparent;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.navbar__drawer-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  transform: rotate(90deg);
+}
+
+.navbar__drawer-nav {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.navbar__drawer-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 13px var(--space-6);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  border-left: 3px solid transparent;
+  background: transparent;
+}
+
+.navbar__drawer-link:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.03);
+  border-left-color: rgba(78, 43, 196, 0.4);
+}
+
+.navbar__drawer-link--active {
+  color: white !important;
+  background: rgba(78, 43, 196, 0.15) !important;
+  border-left-color: #4E2BC4 !important;
+  text-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
+}
+
+.navbar__drawer-actions {
+  padding: var(--space-5);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.navbar__drawer-actions .navbar__signup-btn,
+.navbar__drawer-actions .navbar__login-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 11px;
+}
+
+/* ══════════════════════════════
+   SPACER
+══════════════════════════════ */
+.navbar__spacer {
+  height: 68px;
+}
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 900px) {
+  .navbar__links {
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar__links,
+  .navbar__actions {
+    display: none;
+  }
+
+  .navbar__hamburger {
+    display: flex;
+  }
+
+  .navbar__spacer {
+    height: 60px;
+  }
+
+  .navbar {
+    padding: var(--space-2) 0;
+  }
+}

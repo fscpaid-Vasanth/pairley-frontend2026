@@ -1,0 +1,116 @@
+// Route paths
+export const ROUTES = {
+  HOME: '/',
+  DEALS: '/deals',
+  DEAL_DETAIL: '/deals/:id',
+  HOW_IT_WORKS: '/how-it-works',
+  ABOUT: '/about',
+  SUPPORT: '/support',
+  REFUND_POLICY: '/refund-policy',
+
+  // Cart & Checkout
+  CART: '/cart',
+  CHECKOUT: '/checkout',
+  ORDER_SUCCESS: '/order-success/:id',
+
+  // Auth
+  SIGNUP: '/signup',
+  LOGIN: '/login',
+
+  // Customer
+  CUSTOMER_DASHBOARD: '/customer/dashboard',
+  CUSTOMER_PROFILE: '/customer/profile',
+  CUSTOMER_ORDERS: '/customer/orders',
+  CUSTOMER_ORDER_DETAIL: '/customer/orders/:id',
+  CUSTOMER_CHAT: '/customer/chat/:id',
+
+  // Business
+  BUSINESS_DASHBOARD: '/business/dashboard',
+  CREATE_DEAL: '/business/create-deal',
+  MANAGE_DEALS: '/business/manage-deals',
+  BUSINESS_ORDERS: '/business/orders',
+  BUSINESS_PAYOUTS: '/business/payouts',
+  BUSINESS_SETTINGS: '/business/settings',
+};
+
+// App info
+export const APP_NAME = 'Pairley';
+export const APP_TAGLINE = 'Pair Up. Pay Less. Get More.';
+export const APP_DESCRIPTION =
+  'Pairley connects people with common buying interests to unlock better prices together. Split BOGO deals with a partner or join groups to bring down per-head costs.';
+
+// Deal modes
+export const DEAL_MODES = {
+  PAIR: 'pair',
+  GROUP: 'group',
+};
+
+// Deal statuses
+export const DEAL_STATUS = {
+  ACTIVE: 'active',
+  DRAFT: 'draft',
+  PAIRED: 'paired',
+  COMPLETE: 'complete',
+  EXPIRED: 'expired',
+};
+
+// Interest statuses
+export const INTEREST_STATUS = {
+  SEARCHING: 'searching',
+  WAITING: 'waiting',
+  PAIRED: 'paired',
+  GROUPED: 'grouped',
+};
+
+// Stats for homepage
+export const PLATFORM_STATS = {
+  totalDeals: 1034,
+  happyPairs: 5280,
+  groupsFormed: 892,
+  moneySaved: 2450000, // in rupees
+};
+
+// Social links
+export const SOCIAL_LINKS = {
+  instagram: 'https://instagram.com/pairley',
+  twitter: 'https://twitter.com/pairley',
+  youtube: 'https://youtube.com/@pairley',
+  linkedin: 'https://linkedin.com/company/pairley',
+};
+
+// Utility functions
+export const formatPrice = (amount) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+export const formatNumber = (num) => {
+  if (num >= 10000000) return `${(num / 10000000).toFixed(1)}Cr`;
+  if (num >= 100000) return `${(num / 100000).toFixed(1)}L`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
+};
+
+export const getTimeGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+};
+
+export const calculateSavings = (originalPrice, pairleyPrice) => {
+  const saved = originalPrice - pairleyPrice;
+  const percentage = Math.round((saved / originalPrice) * 100);
+  return { saved, percentage };
+};
+
+export const getDaysRemaining = (dateString) => {
+  const now = new Date();
+  const target = new Date(dateString);
+  const diff = target - now;
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+};

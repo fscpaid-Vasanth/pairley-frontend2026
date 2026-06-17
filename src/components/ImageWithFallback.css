@@ -1,0 +1,102 @@
+/* ===== IMAGE FALLBACK SYSTEM ===== */
+.image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Avatar fallback circular styles */
+.image-fallback--avatar {
+  border-radius: 50%;
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  animation: avatarPulse 3s infinite ease-in-out;
+  aspect-ratio: 1 / 1;
+}
+
+.image-fallback__initials {
+  letter-spacing: -0.02em;
+}
+
+@keyframes avatarPulse {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 20px rgba(78, 43, 196, 0.15);
+  }
+}
+
+/* Business fallback styles */
+.image-fallback--business {
+  color: white;
+}
+
+.image-fallback__icon {
+  animation: floatEmoji 4s infinite ease-in-out;
+}
+
+/* Deal fallback card styles */
+.image-fallback--deal {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+}
+
+.image-fallback__circle-glow {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  filter: blur(12px);
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  animation: bgPulse 5s infinite ease-in-out;
+}
+
+.image-fallback__emoji-wrap {
+  position: relative;
+  z-index: 2;
+  font-size: 3.4rem;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15));
+  animation: floatEmoji 3s infinite ease-in-out;
+}
+
+.image-fallback__emoji {
+  display: block;
+}
+
+/* Keyframe animations */
+@keyframes floatEmoji {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.06);
+  }
+}
+
+@keyframes bgPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0.95;
+  }
+}

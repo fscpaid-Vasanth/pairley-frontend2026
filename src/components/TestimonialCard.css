@@ -1,0 +1,25 @@
+.testimonial-card {
+  min-height: 220px;
+  position: relative;
+}
+
+.testimonial-card__quote-icon {
+  opacity: 0.3;
+}
+
+.testimonial-card__star--filled {
+  color: var(--warning);
+}
+
+.testimonial-card__star--empty {
+  color: var(--text-muted);
+}
+
+.testimonial-card__text {
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.border-t.border-glass {
+  border-top: 1px solid var(--border);
+}

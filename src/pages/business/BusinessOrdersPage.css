@@ -1,0 +1,30 @@
+.business-orders-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Glass headers and cards details */
+.business-orders-page .bg-white {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Tab button transition */
+.business-orders-page button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tab count badge alignment */
+.business-orders-page span[class*="rounded-full"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Quick verify button transition */
+.business-orders-page form button {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.business-orders-page form button:hover {
+  box-shadow: 0 4px 12px rgba(78, 43, 196, 0.15);
+}

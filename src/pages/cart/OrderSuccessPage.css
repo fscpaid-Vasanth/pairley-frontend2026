@@ -1,0 +1,53 @@
+.order-success-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Success orb styling */
+.order-success-page__visual {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Step tracker style tweaks */
+.order-success-page .relative.flex.flex-col {
+  transition: all 0.2s ease-in-out;
+}
+
+.order-success-page .relative.flex.flex-col:hover {
+  transform: translateX(4px);
+}
+
+/* Timeline dot icons size alignment */
+.order-success-page span[class*="-left-"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pulse animation helper for active step */
+@keyframes activePulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.15);
+  }
+}
+
+.order-success-page .animate-pulse {
+  animation: activePulse 2s infinite ease-in-out;
+}
+
+/* Subtle glassmorphism and transition styles */
+.order-success-page .bg-white {
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+.order-success-page a,
+.order-success-page button {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

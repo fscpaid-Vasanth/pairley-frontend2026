@@ -1,0 +1,276 @@
+/* ===== DEAL CARD — Premium redesign ===== */
+
+.deal-card {
+  display: block;
+  background: white;
+  border: 1.5px solid rgba(196, 198, 220, 0.4);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(78, 43, 196, 0.05),
+    0 0 0 0 rgba(78, 43, 196, 0);
+  transition: all 0.25s ease;
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+}
+
+.deal-card:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow:
+    0 12px 32px rgba(78, 43, 196, 0.13),
+    0 0 0 3px rgba(124, 58, 237, 0.06);
+  transform: translateY(-5px);
+}
+
+/* ── Image wrapper ── */
+.deal-card__image-wrap {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  overflow: hidden;
+  background: var(--surface-light);
+}
+
+.deal-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.deal-card:hover .deal-card__image {
+  transform: scale(1.06);
+}
+
+/* Gradient overlay at bottom of image */
+.deal-card__image-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0,0,0,0.35), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── BOGO / GROUP badge ── */
+.deal-card__type-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 11px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  z-index: 2;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: linear-gradient(135deg, #7C3AED, #4a3ee6);
+  color: white;
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+}
+
+/* GROUP tag variant */
+.deal-card__type-tag--group {
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* ── Category tag ── */
+.deal-card__cat-tag {
+  position: absolute;
+  top: 12px;
+  left: 75px;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* ── Wishlist ── */
+.deal-card__wishlist {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(6px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  z-index: 3;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.deal-card__wishlist:hover {
+  background: white;
+  transform: scale(1.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.deal-card__wishlist--active {
+  color: #EF4444 !important;
+  background: #FFF5F5;
+}
+
+/* ── Card body ── */
+.deal-card__content {
+  padding: 14px 16px 16px;
+}
+
+.deal-card__title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 42px;
+}
+
+.deal-card__merchant {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.deal-card__merchant-name {
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.deal-card__location {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+}
+
+/* ── Joined badge ── */
+.deal-card__joined-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(78, 43, 196, 0.06);
+  border: 1px solid rgba(78, 43, 196, 0.12);
+  padding: 4px 10px;
+  border-radius: 99px;
+  margin-bottom: 10px;
+}
+
+.deal-card__joined-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4E2BC4;
+}
+
+/* ── Progress bar ── */
+.deal-card__progress-wrap {
+  margin-bottom: 12px;
+}
+
+.deal-card__progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.deal-card__progress-bar {
+  height: 5px;
+  background: var(--bg-darker);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.deal-card__progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #7C3AED, #4a3ee6);
+  transition: width 0.6s ease;
+}
+
+/* ── Bottom bar: price + badge ── */
+.deal-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--bg-darker);
+}
+
+.deal-card__price-pairley {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  line-height: 1;
+}
+
+.deal-card__price-original {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+.deal-card__savings-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08));
+  border: 1px solid rgba(16,185,129,0.2);
+  color: #059669;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* ── Join CTA button shown on hover ── */
+.deal-card__join-cta {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 9px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7C3AED, #4a3ee6);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 10px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.deal-card:hover .deal-card__join-cta {
+  opacity: 1;
+  transform: translateY(0);
+}

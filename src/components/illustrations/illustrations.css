@@ -1,0 +1,124 @@
+/* ===== VECTOR ILLUSTRATION ANIMATIONS ===== */
+
+/* 1. Global Glow Pulsing */
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(0.98);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.55;
+  }
+}
+
+.pulse-glow {
+  transform-origin: center;
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* 2. Smartwatch Interface Drawing & Ring Glow */
+@keyframes drawWatchRingOuter {
+  0% {
+    stroke-dashoffset: 125;
+  }
+  50% {
+    stroke-dashoffset: 20;
+  }
+  100% {
+    stroke-dashoffset: 35;
+  }
+}
+
+@keyframes drawWatchRingInner {
+  0% {
+    stroke-dashoffset: 88;
+  }
+  50% {
+    stroke-dashoffset: 5;
+  }
+  100% {
+    stroke-dashoffset: 18;
+  }
+}
+
+.watch-ring-outer {
+  transform-origin: center;
+  animation: drawWatchRingOuter 5s ease-in-out infinite;
+}
+
+.watch-ring-inner {
+  transform-origin: center;
+  animation: drawWatchRingInner 4s ease-in-out infinite;
+}
+
+/* 3. Hero Characters Arm Movements */
+@keyframes armWaveLeft {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes armWaveRight {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+.char-left {
+  transform-origin: 150px 240px;
+  animation: armWaveLeft 6s ease-in-out infinite;
+}
+
+.char-right-girl {
+  transform-origin: 350px 240px;
+  animation: armWaveRight 5s ease-in-out infinite;
+}
+
+/* 4. Customer Checklist Checkmark Bobbing */
+@keyframes bobFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.float-bubble {
+  animation: bobFloat 3s ease-in-out infinite;
+}
+
+/* 5. Smartwatch Card & Main Graphics Floating */
+.smartwatch-illustration {
+  animation: bobFloat 5s ease-in-out infinite;
+  display: block;
+  max-width: 100%;
+}
+
+.hero-illustration {
+  display: block;
+  max-width: 100%;
+  transition: transform var(--transition-slow);
+}
+
+.hero-illustration:hover {
+  transform: scale(1.02);
+}
+
+.customer-illustration, .shopkeeper-illustration {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  transition: transform var(--transition-base);
+}
+
+.customer-illustration:hover, .shopkeeper-illustration:hover {
+  transform: translateY(-4px) scale(1.03);
+}

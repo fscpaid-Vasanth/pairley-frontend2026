@@ -1,0 +1,36 @@
+.deal-type-toggle {
+  width: fit-content;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.deal-type-toggle__btn {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  z-index: 1;
+  padding: var(--space-2) var(--space-6);
+  min-width: 120px;
+}
+
+.deal-type-toggle__btn.active {
+  color: white !important;
+  background: transparent !important; /* Managed by framer-motion active-bg */
+  box-shadow: none !important;
+}
+
+.deal-type-toggle__active-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: var(--radius-md);
+  z-index: -1;
+  box-shadow: var(--shadow-sm);
+}
+
+.deal-type-toggle__text {
+  position: relative;
+  z-index: 2;
+}

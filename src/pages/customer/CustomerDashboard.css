@@ -1,0 +1,30 @@
+/* Custom Styles for CustomerDashboard */
+.customer-dashboard {
+  position: relative;
+}
+
+/* Custom Timeline styles that supplement Tailwind */
+.timeline-dot {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.timeline-dot:hover {
+  transform: scale(1.25);
+}
+
+/* Add custom animations for searching status */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+  }
+}
+
+.searching-glow {
+  animation: pulseGlow 2s infinite;
+}
+
