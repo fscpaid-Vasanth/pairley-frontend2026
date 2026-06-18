@@ -76,7 +76,7 @@
   width: 100%;
   max-width: 1220px;
   align-items: start;
-  margin: auto 0;
+  margin: 32px 0;
 }
 
 /* ── LEFT PANEL ── */
@@ -323,6 +323,7 @@
   color: #74777e;
   pointer-events: none;
   z-index: 1;
+  text-transform: none !important;
 }
 
 .su-input {
@@ -380,6 +381,7 @@
 }
 
 .su-country-code {
+  width: 90px !important;
   padding: 10px 8px !important;
   border: 1.5px solid rgba(196, 198, 206, 0.6) !important;
   border-radius: 10px !important;

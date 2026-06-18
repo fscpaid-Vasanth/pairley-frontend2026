@@ -321,22 +321,24 @@ export default function LoginPage() {
             <div className="login-card">
 
               {/* Role Switcher */}
-              <div className="login-role-tabs">
-                <button
-                  type="button"
-                  className={`login-role-tab ${role === 'customer' ? 'login-role-tab--active' : ''}`}
-                  onClick={() => setRole('customer')}
-                >
-                  👤 Customer
-                </button>
-                <button
-                  type="button"
-                  className={`login-role-tab ${role === 'business' ? 'login-role-tab--active' : ''}`}
-                  onClick={() => setRole('business')}
-                >
-                  🏪 Shop Owner
-                </button>
-              </div>
+              {!showGoogleOnboarding && (
+                <div className="login-role-tabs">
+                  <button
+                    type="button"
+                    className={`login-role-tab ${role === 'customer' ? 'login-role-tab--active' : ''}`}
+                    onClick={() => setRole('customer')}
+                  >
+                    👤 Customer
+                  </button>
+                  <button
+                    type="button"
+                    className={`login-role-tab ${role === 'business' ? 'login-role-tab--active' : ''}`}
+                    onClick={() => setRole('business')}
+                  >
+                    🏪 Shop Owner
+                  </button>
+                </div>
+              )}
 
               {showGoogleOnboarding ? (
                 <div className="login-otp-wrap">
@@ -371,7 +373,7 @@ export default function LoginPage() {
                     <div className="login-field">
                       <label className="login-label">City</label>
                       <div className="login-input-wrap">
-                        <span className="material-symbols-outlined login-input-icon">map_pin</span>
+                        <span className="material-symbols-outlined login-input-icon">location_on</span>
                         <select
                           className="login-input"
                           style={{ paddingLeft: '40px', background: 'white' }}
@@ -398,33 +400,33 @@ export default function LoginPage() {
                               className={`login-input ${onboardingErrors.businessName ? 'login-input--error' : ''}`}
                               value={onboardingForm.businessName}
                               onChange={(e) => {
-                                setOnboardingForm(prev => ({ ...prev, businessName: e.target.value }));
-                                if (onboardingErrors.businessName) setOnboardingErrors(prev => ({ ...prev, businessName: '' }));
-                              }}
-                            />
+                                  setOnboardingForm(prev => ({ ...prev, businessName: e.target.value }));
+                                  if (onboardingErrors.businessName) setOnboardingErrors(prev => ({ ...prev, businessName: '' }));
+                                }}
+                              />
+                            </div>
+                            {onboardingErrors.businessName && <span className="login-error">{onboardingErrors.businessName}</span>}
                           </div>
-                          {onboardingErrors.businessName && <span className="login-error">{onboardingErrors.businessName}</span>}
-                        </div>
 
-                        {/* Business Type */}
-                        <div className="login-field">
-                          <label className="login-label">Business Type</label>
-                          <div className="login-input-wrap">
-                            <span className="material-symbols-outlined login-input-icon">briefcase</span>
-                            <select
-                              className="login-input"
-                              style={{ paddingLeft: '40px', background: 'white' }}
-                              value={onboardingForm.businessType}
-                              onChange={(e) => setOnboardingForm(prev => ({ ...prev, businessType: e.target.value }))}
-                            >
-                              {['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym/Fitness', 'Academy/Institute', 'Service Provider', 'Other'].map(type => (
-                                <option key={type} value={type}>{type}</option>
-                              ))}
-                            </select>
+                          {/* Business Type */}
+                          <div className="login-field">
+                            <label className="login-label">Business Type</label>
+                            <div className="login-input-wrap">
+                              <span className="material-symbols-outlined login-input-icon">work</span>
+                              <select
+                                className="login-input"
+                                style={{ paddingLeft: '40px', background: 'white' }}
+                                value={onboardingForm.businessType}
+                                onChange={(e) => setOnboardingForm(prev => ({ ...prev, businessType: e.target.value }))}
+                              >
+                                {['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym/Fitness', 'Academy/Institute', 'Service Provider', 'Other'].map(type => (
+                                  <option key={type} value={type}>{type}</option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    )}
+                        </>
+                      )}
 
                     <button type="submit" className="login-submit-btn" style={{ marginTop: '16px' }}>
                       Complete Profile

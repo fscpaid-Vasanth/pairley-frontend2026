@@ -351,22 +351,24 @@ export default function SignUpPage() {
             <div className="signup-card">
 
               {/* Role tabs */}
-              <div className="signup-role-tabs">
-                <button
-                  type="button"
-                  className={`signup-role-tab ${role === 'customer' ? 'signup-role-tab--active' : ''}`}
-                  onClick={() => setRole('customer')}
-                >
-                  👤 Customer
-                </button>
-                <button
-                  type="button"
-                  className={`signup-role-tab ${role === 'business' ? 'signup-role-tab--active' : ''}`}
-                  onClick={() => setRole('business')}
-                >
-                  🏪 Shop Owner
-                </button>
-              </div>
+              {!showGoogleOnboarding && (
+                <div className="signup-role-tabs">
+                  <button
+                    type="button"
+                    className={`signup-role-tab ${role === 'customer' ? 'signup-role-tab--active' : ''}`}
+                    onClick={() => setRole('customer')}
+                  >
+                    👤 Customer
+                  </button>
+                  <button
+                    type="button"
+                    className={`signup-role-tab ${role === 'business' ? 'signup-role-tab--active' : ''}`}
+                    onClick={() => setRole('business')}
+                  >
+                    🏪 Shop Owner
+                  </button>
+                </div>
+              )}
 
               {showGoogleOnboarding ? (
                 <div className="su-otp-wrap">
@@ -401,7 +403,7 @@ export default function SignUpPage() {
                     <div className="su-field">
                       <label className="su-label">City</label>
                       <div className="su-input-wrap">
-                        <span className="material-symbols-outlined su-input-icon">map_pin</span>
+                        <span className="material-symbols-outlined su-input-icon">location_on</span>
                         <select
                           className="su-input"
                           style={{ paddingLeft: '40px', background: 'white' }}
@@ -428,33 +430,33 @@ export default function SignUpPage() {
                               className={`su-input ${onboardingErrors.businessName ? 'su-input--error' : ''}`}
                               value={onboardingForm.businessName}
                               onChange={(e) => {
-                                setOnboardingForm(prev => ({ ...prev, businessName: e.target.value }));
-                                if (onboardingErrors.businessName) setOnboardingErrors(prev => ({ ...prev, businessName: '' }));
-                              }}
-                            />
+                                  setOnboardingForm(prev => ({ ...prev, businessName: e.target.value }));
+                                  if (onboardingErrors.businessName) setOnboardingErrors(prev => ({ ...prev, businessName: '' }));
+                                }}
+                              />
+                            </div>
+                            {onboardingErrors.businessName && <span className="su-error">{onboardingErrors.businessName}</span>}
                           </div>
-                          {onboardingErrors.businessName && <span className="su-error">{onboardingErrors.businessName}</span>}
-                        </div>
 
-                        {/* Business Type */}
-                        <div className="su-field">
-                          <label className="su-label">Business Type</label>
-                          <div className="su-input-wrap">
-                            <span className="material-symbols-outlined su-input-icon">briefcase</span>
-                            <select
-                              className="su-input"
-                              style={{ paddingLeft: '40px', background: 'white' }}
-                              value={onboardingForm.businessType}
-                              onChange={(e) => setOnboardingForm(prev => ({ ...prev, businessType: e.target.value }))}
-                            >
-                              {['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym/Fitness', 'Academy/Institute', 'Service Provider', 'Other'].map(type => (
-                                <option key={type} value={type}>{type}</option>
-                              ))}
-                            </select>
+                          {/* Business Type */}
+                          <div className="su-field">
+                            <label className="su-label">Business Type</label>
+                            <div className="su-input-wrap">
+                              <span className="material-symbols-outlined su-input-icon">work</span>
+                              <select
+                                className="su-input"
+                                style={{ paddingLeft: '40px', background: 'white' }}
+                                value={onboardingForm.businessType}
+                                onChange={(e) => setOnboardingForm(prev => ({ ...prev, businessType: e.target.value }))}
+                              >
+                                {['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym/Fitness', 'Academy/Institute', 'Service Provider', 'Other'].map(type => (
+                                  <option key={type} value={type}>{type}</option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    )}
+                        </>
+                      )}
 
                     <button type="submit" className="su-submit-btn" style={{ marginTop: '16px' }}>
                       Complete Profile
