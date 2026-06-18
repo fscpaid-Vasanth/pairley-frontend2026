@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { mockDeals } from '../data/mockDeals';
+import { api } from '../utils/api';
 
 const CartContext = createContext(null);
 
@@ -104,33 +105,71 @@ export function CartProvider({ children }) {
       if (stored) {
         setCartItems(JSON.parse(stored));
       } else {
-        const defaultItem = mockDeals.find(d => d.id === 'deal-1') || mockDeals[0];
-        if (defaultItem) {
-          const prePopulated = [{
-            id: defaultItem.id,
-            title: defaultItem.title,
-            category: defaultItem.category,
-            images: defaultItem.images || [],
-            originalPrice: defaultItem.originalPrice,
-            pairleyPrice: defaultItem.pairleyPrice,
-            mode: defaultItem.mode,
-            location: defaultItem.location,
-            quantity: 1
-          }];
-          setCartItems(prePopulated);
-          sessionStorage.setItem('pairley_cart', JSON.stringify(prePopulated));
-        }
-      }
-
-      const storedOrders = sessionStorage.getItem('pairley_orders');
-      if (storedOrders) {
-        setOrders(JSON.parse(storedOrders));
-      } else {
-        setOrders(defaultOrders);
-        sessionStorage.setItem('pairley_orders', JSON.stringify(defaultOrders));
+        setCartItems([]);
       }
     } catch (e) {
-      console.error('Failed to load storage state:', e);
+      console.error('Failed to load cart state:', e);
+    }
+
+    const token = localStorage.getItem('pairley_token');
+    if (token) {
+      api.get('/customers/history')
+        .then((history) => {
+          const statusMapping = {
+            'INTERESTED': 'searching',
+            'READY_TO_BUY': 'matched',
+            'CONTACTED': 'shipped',
+            'COMPLETED': 'delivered',
+            'CANCELLED': 'delivered'
+          };
+
+          const mappedOrders = history.map((item) => ({
+            id: `ORD-${item.id.slice(0, 6).toUpperCase()}`,
+            dealId: item.offer.id,
+            dealTitle: item.offer.title,
+            dealImage: item.offer.offer_image || 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=600&h=400&fit=crop',
+            quantity: 1,
+            originalPrice: item.offer.original_price,
+            pairleyPrice: item.offer.offer_price,
+            totalPaid: item.offer.offer_price,
+            status: statusMapping[item.status] || 'searching',
+            date: new Date(item.created_at).toISOString().split('T')[0],
+            matchPartner: item.status !== 'INTERESTED' ? {
+              name: 'Matched Partner',
+              avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=partner',
+              city: item.offer.city || 'Mumbai',
+              matchDate: new Date(item.updated_at).toISOString().split('T')[0]
+            } : null,
+            countdownMinutes: item.status === 'INTERESTED' ? 120 : 0,
+            progressPercent: item.status === 'INTERESTED' ? 50 : 100,
+            deliveryDetails: {
+              name: 'Me',
+              email: '',
+              phone: '',
+              address: 'Customer Address',
+              city: item.offer.city || 'Mumbai',
+              zipCode: ''
+            }
+          }));
+
+          setOrders(mappedOrders);
+          sessionStorage.setItem('pairley_orders', JSON.stringify(mappedOrders));
+        })
+        .catch((err) => {
+          console.error('Failed to load user order history:', err);
+          setOrders([]);
+        });
+    } else {
+      try {
+        const storedOrders = sessionStorage.getItem('pairley_orders');
+        if (storedOrders) {
+          setOrders(JSON.parse(storedOrders));
+        } else {
+          setOrders([]);
+        }
+      } catch (e) {
+        setOrders([]);
+      }
     }
   }, []);
 

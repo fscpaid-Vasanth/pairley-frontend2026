@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Building2, 
@@ -14,41 +14,82 @@ import {
   Info
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { api } from '../../utils/api';
 import BusinessNav from '../../components/BusinessNav';
 import './BusinessSettingsPage.css';
 
 export default function BusinessSettingsPage() {
   const { showToast } = useToast();
 
-  // Settings State (with localStorage persistence fallback)
-  const [store, setStore] = useState(() => {
-    const saved = localStorage.getItem('pairley_business_settings');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // ignore
-      }
-    }
-    return {
-      businessName: 'TechZone Electronics',
-      email: 'contact@techzone.in',
-      phone: '98765 11111',
-      gstin: '27AABCU9603R1ZM',
-      type: 'shopping',
-      address: 'Shop 22, Cyber Plaza, Sector 62',
-      city: 'Mumbai',
-      openTime: '10:00 AM',
-      closeTime: '09:00 PM',
-      autoConfirm: true,
-      notificationEmails: true,
-      smsNumber1: '',
-      smsNumber2: '',
-      smsNumber3: ''
-    };
+  const [store, setStore] = useState({
+    businessName: '',
+    email: '',
+    phone: '',
+    gstin: '',
+    type: 'shopping',
+    address: '',
+    city: 'Mumbai',
+    openTime: '10:00 AM',
+    closeTime: '09:00 PM',
+    autoConfirm: true,
+    notificationEmails: true,
+    smsNumber1: '',
+    smsNumber2: '',
+    smsNumber3: ''
   });
 
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    // Load profile from backend
+    api.get('/business/profile')
+      .then((data) => {
+        const smsNumbers = (data.notification_mobiles || '').split(',').map(s => s.trim());
+        setStore({
+          businessName: data.business_name || data.owner_name || '',
+          email: data.email || '',
+          phone: data.mobile || '',
+          gstin: data.gst_number || '',
+          type: data.category || 'shopping',
+          address: data.address || '',
+          city: data.city || 'Mumbai',
+          openTime: '10:00 AM',
+          closeTime: '09:00 PM',
+          autoConfirm: true,
+          notificationEmails: true,
+          smsNumber1: smsNumbers[0] || '',
+          smsNumber2: smsNumbers[1] || '',
+          smsNumber3: smsNumbers[2] || ''
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to load profile from server, using local fallback:', err);
+        // Fallback to local storage cached user
+        const userJson = localStorage.getItem('pairley_user');
+        if (userJson) {
+          try {
+            const u = JSON.parse(userJson);
+            const smsNumbers = (u.notification_mobiles || '').split(',').map(s => s.trim());
+            setStore({
+              businessName: u.business_name || u.owner_name || '',
+              email: u.email || '',
+              phone: u.mobile || '',
+              gstin: u.gst_number || '',
+              type: u.category || 'shopping',
+              address: u.address || '',
+              city: u.city || 'Mumbai',
+              openTime: '10:00 AM',
+              closeTime: '09:00 PM',
+              autoConfirm: true,
+              notificationEmails: true,
+              smsNumber1: smsNumbers[0] || '',
+              smsNumber2: smsNumbers[1] || '',
+              smsNumber3: smsNumbers[2] || ''
+            });
+          } catch (e) {}
+        }
+      });
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -64,12 +105,7 @@ export default function BusinessSettingsPage() {
     if (!store.businessName.trim()) errs.businessName = 'Business Name is required';
     if (!store.email.trim()) errs.email = 'Contact Email is required';
     if (!store.phone.trim()) errs.phone = 'Contact Phone is required';
-    if (!store.gstin.trim()) errs.gstin = 'GSTIN is required';
-    else if (!/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/.test(store.gstin)) {
-      errs.gstin = 'Invalid GSTIN format (e.g. 27AABCU9603R1ZM)';
-    }
-    if (!store.address.trim()) errs.address = 'Store Address is required';
-
+    
     // SMS Notifications mobile validation
     if (store.smsNumber1 && store.smsNumber1.trim() && !/^\d{10}$/.test(store.smsNumber1.trim())) {
       errs.smsNumber1 = 'SMS number must be exactly 10 digits';
@@ -91,8 +127,36 @@ export default function BusinessSettingsPage() {
       showToast('Please correct form errors.', 'error');
       return;
     }
-    localStorage.setItem('pairley_business_settings', JSON.stringify(store));
-    showToast('Merchant profile settings updated successfully!', 'success');
+
+    const mobiles = [store.smsNumber1, store.smsNumber2, store.smsNumber3]
+      .map(s => s.trim())
+      .filter(Boolean)
+      .join(',');
+
+    const updates = {
+      business_name: store.businessName,
+      category: store.type,
+      address: store.address,
+      city: store.city,
+      gst_number: store.gstin,
+      notification_mobiles: mobiles
+    };
+
+    api.put('/business/profile', updates)
+      .then((res) => {
+        // Save locally to local storage as well
+        localStorage.setItem('pairley_business_settings', JSON.stringify(store));
+        // Update user in localStorage
+        const user = JSON.parse(localStorage.getItem('pairley_user') || '{}');
+        const updatedUser = { ...user, ...updates };
+        localStorage.setItem('pairley_user', JSON.stringify(updatedUser));
+        
+        showToast('Merchant profile settings updated successfully!', 'success');
+      })
+      .catch((err) => {
+        console.error(err);
+        showToast('Failed to save settings on server.', 'error');
+      });
   };
 
   return (

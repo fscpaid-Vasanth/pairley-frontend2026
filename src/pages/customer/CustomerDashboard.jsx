@@ -141,17 +141,9 @@ export default function CustomerDashboard() {
       })
       .catch((err) => {
         console.error('Failed to fetch customer history:', err);
-        // fallback to dummy data
-        setActiveInterests(mockDeals.filter(d => d.status === 'active').slice(0, 3));
-        setPairedDeals(mockDeals.filter(d => d.status === 'paired').slice(0, 2).map(d => ({
-          ...d,
-          partnerName: 'Priya Sharma'
-        })));
-        setActivities([
-          { id: 1, text: 'Showed interest in Samsung Galaxy Buds FE deal', time: '2 hours ago', type: 'interest', dotColor: 'bg-purple-500 shadow-purple-500/30' },
-          { id: 2, text: 'Paired with Priya Sharma for Luxury Spa Package', time: '5 hours ago', type: 'pair', dotColor: 'bg-emerald-500 shadow-emerald-500/30' },
-          { id: 3, text: 'Joined Manali Adventure Trip group (13/25 joined)', time: '1 day ago', type: 'group', dotColor: 'bg-blue-500 shadow-blue-500/30' }
-        ]);
+        setActiveInterests([]);
+        setPairedDeals([]);
+        setActivities([]);
       });
 
     // 2. Fetch recommended deals
@@ -162,7 +154,7 @@ export default function CustomerDashboard() {
       })
       .catch((err) => {
         console.error('Failed to load recommended deals:', err);
-        setRecommended([mockDeals[4], mockDeals[5], mockDeals[8]]);
+        setRecommended([]);
         setLoading(false);
       });
   }, []);

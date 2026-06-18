@@ -130,24 +130,9 @@ export default function BusinessDashboard() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Failed to load storefront data, using mock fallback:', err);
-        // Fallback to mock
-        const fallbackDeals = mockDeals.filter(deal => deal.businessOwner?.id === business.id).map(d => ({
-          id: d.id,
-          title: d.title,
-          category: d.category,
-          mode: d.mode,
-          location: d.location,
-          interestCount: d.interestCount,
-          maxParticipants: d.maxParticipants || 2,
-          images: d.images
-        }));
-        setDeals(fallbackDeals);
-        setActivities([
-          { id: 1, type: 'interest', text: 'Arjun Mehta showed interest in Samsung Galaxy Buds', time: '5 mins ago', badge: 'New Interest' },
-          { id: 2, type: 'match', text: 'Pair Complete! Pooja and Priya matched for Spa Day BOGO', time: '40 mins ago', badge: 'Match Completed' },
-          { id: 3, type: 'join', text: 'Rohan joined Kerala Group Tour circle (9/15 joined)', time: '2 hours ago', badge: 'Group Joined' }
-        ]);
+        console.error('Failed to load storefront data:', err);
+        setDeals([]);
+        setActivities([]);
         setLoading(false);
       });
   }, [business.id, business.city]);

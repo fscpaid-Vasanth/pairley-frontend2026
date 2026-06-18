@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
@@ -21,25 +21,37 @@ import { categories } from '../../data/categories';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import CustomerNav from '../../components/CustomerNav';
 import { useToast } from '../../context/ToastContext';
+import { api } from '../../utils/api';
 import './CustomerProfile.css';
 
 export default function CustomerProfile() {
-  const customer = mockCustomers[0]; // Arjun Mehta
   const { showToast } = useToast();
   
+  const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [totalSaved, setTotalSaved] = useState(0);
+  const [originalProfile, setOriginalProfile] = useState({
+    id: '',
+    name: '',
+    email: '',
+    phone: '',
+    city: '',
+    profile_photo: '',
+    created_at: ''
+  });
+  
   const [profile, setProfile] = useState({
-    name: customer.name,
-    email: customer.email,
-    phone: customer.phone,
-    city: customer.city,
+    id: '',
+    name: '',
+    email: '',
+    phone: '',
+    city: '',
+    profile_photo: '',
+    created_at: ''
   });
 
   const [interests, setInterests] = useState(
-    categories.map(cat => ({
-      ...cat,
-      selected: customer.interests.includes(cat.id)
-    }))
+    categories.map(cat => ({ ...cat, selected: false }))
   );
 
   const [notifications, setNotifications] = useState({
@@ -47,6 +59,88 @@ export default function CustomerProfile() {
     push: true,
     matching: true,
   });
+
+  useEffect(() => {
+    setLoading(true);
+    // 1. Fetch customer profile
+    api.get('/customers/profile')
+      .then((data) => {
+        const prof = {
+          id: data.id,
+          name: data.name || '',
+          email: data.email || '',
+          phone: data.mobile || '',
+          city: data.city || '',
+          profile_photo: data.profile_photo || '',
+          created_at: data.created_at || ''
+        };
+        setProfile(prof);
+        setOriginalProfile(prof);
+
+        // Load preferred categories
+        const localInterestsKey = `pairley_interests_${data.id}`;
+        const savedCategories = localStorage.getItem(localInterestsKey)
+          ? JSON.parse(localStorage.getItem(localInterestsKey))
+          : [];
+        setInterests(
+          categories.map(cat => ({
+            ...cat,
+            selected: savedCategories.includes(cat.id)
+          }))
+        );
+
+        // Load notifications
+        const localNotifsKey = `pairley_notifications_${data.id}`;
+        const savedNotifs = localStorage.getItem(localNotifsKey);
+        if (savedNotifs) {
+          try {
+            setNotifications(JSON.parse(savedNotifs));
+          } catch (e) {}
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load customer profile, falling back:', err);
+        const localUser = JSON.parse(localStorage.getItem('pairley_user') || 'null') || mockCustomers[0];
+        const prof = {
+          id: localUser.id || 'demo-id',
+          name: localUser.name || localUser.owner_name || 'Demo User',
+          email: localUser.email || '',
+          phone: localUser.mobile || localUser.phone || '',
+          city: localUser.city || 'Mumbai',
+          profile_photo: localUser.profile_photo || '',
+          created_at: localUser.created_at || ''
+        };
+        setProfile(prof);
+        setOriginalProfile(prof);
+        
+        const localInterestsKey = `pairley_interests_${prof.id}`;
+        const savedCategories = localStorage.getItem(localInterestsKey)
+          ? JSON.parse(localStorage.getItem(localInterestsKey))
+          : localUser.interests || [];
+        setInterests(
+          categories.map(cat => ({
+            ...cat,
+            selected: savedCategories.includes(cat.id)
+          }))
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
+    // 2. Fetch history to compute totalSaved
+    api.get('/customers/history')
+      .then((history) => {
+        const saved = history.filter(h => h.status === 'READY_TO_BUY' || h.status === 'COMPLETED')
+          .reduce((acc, h) => acc + (h.offer.original_price - h.offer.offer_price), 0);
+        setTotalSaved(saved);
+      })
+      .catch(() => {
+        // Fallback saved calculation
+        const localUser = JSON.parse(localStorage.getItem('pairley_user') || '{}');
+        setTotalSaved(localUser.totalSaved || 12500);
+      });
+  }, []);
 
   const handleInterestToggle = (id) => {
     if (!editMode) return; // Only editable in edit mode
@@ -62,8 +156,64 @@ export default function CustomerProfile() {
 
   const handleSave = (e) => {
     e.preventDefault();
+    
+    const updates = {
+      name: profile.name,
+      email: profile.email,
+      city: profile.city
+    };
+
+    api.put('/customers/profile', updates)
+      .then((res) => {
+        const updatedProf = {
+          ...originalProfile,
+          name: res.name,
+          email: res.email,
+          city: res.city,
+          profile_photo: res.profile_photo
+        };
+        setProfile(updatedProf);
+        setOriginalProfile(updatedProf);
+
+        // Save selected categories
+        const selectedIds = interests.filter(c => c.selected).map(c => c.id);
+        localStorage.setItem(`pairley_interests_${profile.id}`, JSON.stringify(selectedIds));
+
+        // Save notifications
+        localStorage.setItem(`pairley_notifications_${profile.id}`, JSON.stringify(notifications));
+
+        // Update local cache
+        const localUser = JSON.parse(localStorage.getItem('pairley_user') || '{}');
+        const updatedUser = {
+          ...localUser,
+          ...updates,
+          interests: selectedIds
+        };
+        localStorage.setItem('pairley_user', JSON.stringify(updatedUser));
+
+        showToast('Profile settings saved successfully!', 'success');
+        setEditMode(false);
+      })
+      .catch((err) => {
+        console.error('Failed to save profile details:', err);
+        showToast(err.message || 'Failed to save profile details.', 'error');
+      });
+  };
+
+  const handleCancelEdit = () => {
+    setProfile(originalProfile);
+    // Revert interests
+    const localInterestsKey = `pairley_interests_${profile.id}`;
+    const savedCategories = localStorage.getItem(localInterestsKey)
+      ? JSON.parse(localStorage.getItem(localInterestsKey))
+      : [];
+    setInterests(
+      categories.map(cat => ({
+        ...cat,
+        selected: savedCategories.includes(cat.id)
+      }))
+    );
     setEditMode(false);
-    showToast('Profile preferences saved successfully!', 'success');
   };
 
   return (
@@ -81,7 +231,7 @@ export default function CustomerProfile() {
             
             <div className="flex items-center gap-5">
               <div className="customer-profile__avatar-wrap relative">
-                <ImageWithFallback src={customer.avatar} alt={profile.name} className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-purple-50" fallbackType="avatar" name={profile.name} />
+                <ImageWithFallback src={profile.profile_photo || mockCustomers[0].avatar} alt={profile.name} className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-purple-50" fallbackType="avatar" name={profile.name} />
                 {editMode && (
                   <button className="absolute bottom-0 right-0 w-7 h-7 bg-[#4E2BC4] hover:bg-[#6D4EE3] text-white rounded-full flex items-center justify-center border-2 border-white shadow-md transition-colors duration-200" aria-label="Upload photo">
                     <Camera size={12} />
@@ -89,15 +239,17 @@ export default function CustomerProfile() {
                 )}
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-extrabold text-slate-800">{profile.name}</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Customer Account • Member since Nov 2025</p>
+                <h2 className="text-xl md:text-2xl font-extrabold text-slate-800">{profile.name || 'Loading profile...'}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Customer Account • Member since {profile.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Nov 2025'}
+                </p>
                 <div className="flex gap-3 mt-2">
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100/60 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
                     Online
                   </span>
                   <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
-                    Saved {formatPrice(customer.totalSaved)} overall
+                    Saved {formatPrice(totalSaved)} overall
                   </span>
                 </div>
               </div>
@@ -107,15 +259,10 @@ export default function CustomerProfile() {
             <button
               onClick={() => {
                 if (editMode) {
-                  // Revert changes if cancel
-                  setProfile({
-                    name: customer.name,
-                    email: customer.email,
-                    phone: customer.phone,
-                    city: customer.city,
-                  });
+                  handleCancelEdit();
+                } else {
+                  setEditMode(true);
                 }
-                setEditMode(!editMode);
               }}
               className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all duration-200 shadow-sm ${
                 editMode 

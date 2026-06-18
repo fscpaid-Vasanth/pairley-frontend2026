@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -18,74 +18,14 @@ import {
 import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/constants';
 import { useToast } from '../../context/ToastContext';
+import { api } from '../../utils/api';
 import BusinessNav from '../../components/BusinessNav';
 import './BusinessOrdersPage.css';
 
-// Mock business orders pre-population
-const defaultBusinessOrders = [
-  {
-    id: 'ORD-A39B22',
-    customerName: 'Arjun Mehta',
-    customerPhone: '+91 98765 43210',
-    customerEmail: 'arjun@example.com',
-    partnerName: 'Sneha Patel',
-    partnerPhone: '+91 91234 56789',
-    partnerEmail: 'sneha@example.com',
-    productTitle: 'Samsung Galaxy Buds FE — Buy 1 Get 1',
-    productImage: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=600&h=400&fit=crop',
-    quantity: 2, // 1 pair BOGO
-    originalPrice: 13998,
-    pairleyPrice: 6998, // total paid by both
-    status: 'awaiting_dispatch', // awaiting_dispatch, shipped, completed
-    date: '2026-06-16',
-    pickupCode: '9021-F',
-    deliveryMethod: 'shipping',
-    address: 'Apt 402, Sea Breeze, Marine Drive, Mumbai - 400002'
-  },
-  {
-    id: 'ORD-B92F11',
-    customerName: 'Arjun Mehta',
-    customerPhone: '+91 98765 43210',
-    customerEmail: 'arjun@example.com',
-    partnerName: 'Priya Sharma',
-    partnerPhone: '+91 93456 78901',
-    partnerEmail: 'priya@example.com',
-    productTitle: 'Luxury Spa Day — Couples BOGO Package',
-    productImage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&h=400&fit=crop',
-    quantity: 2,
-    originalPrice: 9000,
-    pairleyPrice: 4500,
-    status: 'completed',
-    date: '2026-06-15',
-    pickupCode: '489-A21',
-    deliveryMethod: 'pickup',
-    address: 'Store Pickup: GlowUp Salon & Spa, Bandra West'
-  },
-  {
-    id: 'ORD-C88D44',
-    customerName: 'Arjun Mehta',
-    customerPhone: '+91 98765 43210',
-    customerEmail: 'arjun@example.com',
-    partnerName: 'Rahul Krishnan',
-    partnerPhone: '+91 94567 89012',
-    partnerEmail: 'rahul@example.com',
-    productTitle: 'Nike Air Max 270 — BOGO Pair Deal',
-    productImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop',
-    quantity: 2,
-    originalPrice: 25990,
-    pairleyPrice: 12990,
-    status: 'shipped',
-    date: '2026-05-10',
-    pickupCode: '312-C90',
-    deliveryMethod: 'shipping',
-    address: 'Apt 402, Sea Breeze, Marine Drive, Mumbai - 400002',
-    trackingNumber: 'DTDC-PK-8919A'
-  }
-];
-
 export default function BusinessOrdersPage() {
   const { showToast } = useToast();
-  const [orders, setOrders] = useState(defaultBusinessOrders);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('awaiting_dispatch'); // awaiting_dispatch, shipped, completed
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -98,6 +38,104 @@ export default function BusinessOrdersPage() {
   // Direct Sidebar verification input
   const [directCode, setDirectCode] = useState('');
 
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = () => {
+    setLoading(true);
+    api.get('/offers/interested-customers')
+      .then((data) => {
+        const mappedOrders = [];
+        
+        data.forEach((offer) => {
+          const isPair = offer.offer_type?.toLowerCase() === 'bogo' || offer.required_people === 2;
+          
+          // Filter interests that have matched (status is READY_TO_BUY, CONTACTED, or COMPLETED)
+          const matchedInterests = (offer.interests || []).filter(i => 
+            i.status === 'READY_TO_BUY' || i.status === 'CONTACTED' || i.status === 'COMPLETED'
+          );
+
+          if (isPair) {
+            // Chunk BOGO interests in groups of 2
+            for (let i = 0; i < matchedInterests.length; i += 2) {
+              const interestA = matchedInterests[i];
+              const interestB = matchedInterests[i + 1];
+              
+              if (interestA && interestB) {
+                const statusMapping = {
+                  'READY_TO_BUY': 'awaiting_dispatch',
+                  'CONTACTED': 'shipped',
+                  'COMPLETED': 'completed'
+                };
+
+                mappedOrders.push({
+                  id: `MATCH-${interestA.id.slice(0, 6).toUpperCase()}`,
+                  customerName: interestA.customer?.name || 'Customer A',
+                  customerPhone: interestA.customer?.mobile || '',
+                  customerEmail: interestA.customer?.email || '',
+                  partnerName: interestB.customer?.name || 'Customer B',
+                  partnerPhone: interestB.customer?.mobile || '',
+                  partnerEmail: interestB.customer?.email || '',
+                  productTitle: offer.title,
+                  productImage: offer.offer_image || 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=600&h=400&fit=crop',
+                  quantity: 2,
+                  originalPrice: offer.original_price * 2,
+                  pairleyPrice: offer.offer_price * 2,
+                  status: statusMapping[interestA.status] || 'awaiting_dispatch',
+                  date: new Date(interestA.created_at).toLocaleDateString(),
+                  pickupCode: interestA.id.slice(-6).toUpperCase(),
+                  deliveryMethod: 'shipping',
+                  address: `${interestA.customer?.city || 'Mumbai'} Delivery`,
+                  interestAId: interestA.id,
+                  interestBId: interestB.id
+                });
+              }
+            }
+          } else {
+            // For group discount or others: list matched interests individually
+            matchedInterests.forEach(interest => {
+              const statusMapping = {
+                'READY_TO_BUY': 'awaiting_dispatch',
+                'CONTACTED': 'shipped',
+                'COMPLETED': 'completed'
+              };
+
+              mappedOrders.push({
+                id: `MATCH-${interest.id.slice(0, 6).toUpperCase()}`,
+                customerName: interest.customer?.name || 'Customer',
+                customerPhone: interest.customer?.mobile || '',
+                customerEmail: interest.customer?.email || '',
+                partnerName: 'Group Discount Match',
+                partnerPhone: '',
+                partnerEmail: '',
+                productTitle: offer.title,
+                productImage: offer.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop',
+                quantity: 1,
+                originalPrice: offer.original_price,
+                pairleyPrice: offer.offer_price,
+                status: statusMapping[interest.status] || 'awaiting_dispatch',
+                date: new Date(interest.created_at).toLocaleDateString(),
+                pickupCode: interest.id.slice(-6).toUpperCase(),
+                deliveryMethod: 'pickup',
+                address: `Store Pickup: ${interest.customer?.city || 'Mumbai'}`,
+                interestAId: interest.id,
+                interestBId: null
+              });
+            });
+          }
+        });
+        
+        setOrders(mappedOrders);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load business orders:', err);
+        setOrders([]);
+        setLoading(false);
+      });
+  };
+
   const handleVerifyCodeDirect = (e) => {
     e.preventDefault();
     if (!directCode.trim()) return;
@@ -107,9 +145,21 @@ export default function BusinessOrdersPage() {
     );
 
     if (matchedOrder) {
-      setOrders(prev => prev.map(o => o.id === matchedOrder.id ? { ...o, status: 'completed' } : o));
-      showToast(`Code Verified! Order ${matchedOrder.id} marked as Completed.`, 'success');
-      setDirectCode('');
+      const updateA = api.put(`/offers/interest/${matchedOrder.interestAId}/status`, { status: 'COMPLETED' });
+      const updateB = matchedOrder.interestBId 
+        ? api.put(`/offers/interest/${matchedOrder.interestBId}/status`, { status: 'COMPLETED' })
+        : Promise.resolve();
+
+      Promise.all([updateA, updateB])
+        .then(() => {
+          showToast(`Code Verified! Order ${matchedOrder.id} marked as Completed.`, 'success');
+          fetchOrders();
+          setDirectCode('');
+        })
+        .catch(err => {
+          console.error(err);
+          showToast('Failed to update status on server.', 'error');
+        });
     } else {
       showToast('Invalid customer verification code. Please check and try again.', 'error');
     }
@@ -120,10 +170,22 @@ export default function BusinessOrdersPage() {
     if (!verifyingOrder) return;
 
     if (verificationCode.trim().toLowerCase() === verifyingOrder.pickupCode.toLowerCase()) {
-      setOrders(prev => prev.map(o => o.id === verifyingOrder.id ? { ...o, status: 'completed' } : o));
-      showToast(`Pickup code verified! Order marked as complete.`, 'success');
-      setVerifyingOrder(null);
-      setVerificationCode('');
+      const updateA = api.put(`/offers/interest/${verifyingOrder.interestAId}/status`, { status: 'COMPLETED' });
+      const updateB = verifyingOrder.interestBId 
+        ? api.put(`/offers/interest/${verifyingOrder.interestBId}/status`, { status: 'COMPLETED' })
+        : Promise.resolve();
+
+      Promise.all([updateA, updateB])
+        .then(() => {
+          showToast(`Pickup code verified! Order marked as complete.`, 'success');
+          fetchOrders();
+          setVerifyingOrder(null);
+          setVerificationCode('');
+        })
+        .catch(err => {
+          console.error(err);
+          showToast('Failed to update status on server.', 'error');
+        });
     } else {
       showToast('Invalid pickup code.', 'error');
     }
@@ -133,14 +195,22 @@ export default function BusinessOrdersPage() {
     e.preventDefault();
     if (!fulfillingOrder || !trackingIdInput.trim()) return;
 
-    setOrders(prev => prev.map(o => 
-      o.id === fulfillingOrder.id 
-        ? { ...o, status: 'shipped', trackingNumber: trackingIdInput.trim() } 
-        : o
-    ));
-    showToast(`Order ${fulfillingOrder.id} successfully marked as Shipped!`, 'success');
-    setFulfillingOrder(null);
-    setTrackingIdInput('');
+    const updateA = api.put(`/offers/interest/${fulfillingOrder.interestAId}/status`, { status: 'CONTACTED' });
+    const updateB = fulfillingOrder.interestBId 
+      ? api.put(`/offers/interest/${fulfillingOrder.interestBId}/status`, { status: 'CONTACTED' })
+      : Promise.resolve();
+
+    Promise.all([updateA, updateB])
+      .then(() => {
+        showToast(`Order ${fulfillingOrder.id} successfully marked as Shipped!`, 'success');
+        fetchOrders();
+        setFulfillingOrder(null);
+        setTrackingIdInput('');
+      })
+      .catch(err => {
+        console.error(err);
+        showToast('Failed to update tracking info on server.', 'error');
+      });
   };
 
   const handlePrintLabel = (order) => {
@@ -248,9 +318,21 @@ export default function BusinessOrdersPage() {
 
             {/* Orders Feed */}
             <AnimatePresence mode="wait">
-              {filteredOrders.length > 0 ? (
+              {loading ? (
+                <motion.div
+                  key="loading"
+                  className="bg-white border border-slate-200 p-12 text-center rounded-2xl flex flex-col items-center justify-center gap-4 shadow-sm w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="w-8 h-8 border-4 border-[#4E2BC4] border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-xs text-slate-400">Loading orders...</p>
+                </motion.div>
+              ) : filteredOrders.length > 0 ? (
                 <motion.div 
-                  className="flex flex-col gap-4"
+                  key="feed"
+                  className="flex flex-col gap-4 w-full"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -300,11 +382,13 @@ export default function BusinessOrdersPage() {
                               📞 <a href={`tel:${order.customerPhone}`} className="text-[#4E2BC4] hover:underline font-bold">{order.customerPhone}</a> &nbsp;|&nbsp; 
                               ✉️ <a href={`mailto:${order.customerEmail}`} className="text-[#4E2BC4] hover:underline">{order.customerEmail}</a>
                             </div>
-                            <div>
-                              <span className="font-bold text-slate-800">👤 Buyer B:</span> {order.partnerName} &nbsp;|&nbsp; 
-                              📞 <a href={`tel:${order.partnerPhone}`} className="text-[#4E2BC4] hover:underline font-bold">{order.partnerPhone}</a> &nbsp;|&nbsp; 
-                              ✉️ <a href={`mailto:${order.partnerEmail}`} className="text-[#4E2BC4] hover:underline">{order.partnerEmail}</a>
-                            </div>
+                            {order.partnerPhone && (
+                              <div>
+                                <span className="font-bold text-slate-800">👤 Buyer B:</span> {order.partnerName} &nbsp;|&nbsp; 
+                                📞 <a href={`tel:${order.partnerPhone}`} className="text-[#4E2BC4] hover:underline font-bold">{order.partnerPhone}</a> &nbsp;|&nbsp; 
+                                ✉️ <a href={`mailto:${order.partnerEmail}`} className="text-[#4E2BC4] hover:underline">{order.partnerEmail}</a>
+                              </div>
+                            )}
                           </div>
                           {!isPickup && (
                             <p className="mt-1.5 text-slate-400 truncate">📍 Ship Target: {order.address}</p>
@@ -355,7 +439,8 @@ export default function BusinessOrdersPage() {
               ) : (
                 /* Empty state */
                 <motion.div 
-                  className="bg-white border border-slate-200 p-12 text-center rounded-2xl flex flex-col items-center gap-4 shadow-sm"
+                  key="empty"
+                  className="bg-white border border-slate-200 p-12 text-center rounded-2xl flex flex-col items-center gap-4 shadow-sm w-full"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >

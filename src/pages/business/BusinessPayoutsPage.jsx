@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Wallet, 
@@ -14,40 +14,125 @@ import {
 } from 'lucide-react';
 import { formatPrice } from '../../utils/constants';
 import { useToast } from '../../context/ToastContext';
+import { api } from '../../utils/api';
 import BusinessNav from '../../components/BusinessNav';
 import './BusinessPayoutsPage.css';
-
-const MOCK_PAayout_TRANSACTIONS = [
-  { id: 'PAY-892F1', date: '2026-06-10', amount: 24500, status: 'settled', bank: 'HDFC Bank (**** 8901)' },
-  { id: 'PAY-431A2', date: '2026-06-03', amount: 18200, status: 'settled', bank: 'HDFC Bank (**** 8901)' },
-  { id: 'PAY-211B0', date: '2026-05-28', amount: 32000, status: 'settled', bank: 'HDFC Bank (**** 8901)' },
-  { id: 'PAY-102C9', date: '2026-05-15', amount: 14500, status: 'settled', bank: 'HDFC Bank (**** 8901)' }
-];
 
 export default function BusinessPayoutsPage() {
   const { showToast } = useToast();
   
   // Balances state
-  const [balance, setBalance] = useState(48250);
-  const [pending, setPending] = useState(12490);
-  const [settled, setSettled] = useState(124500);
+  const [balance, setBalance] = useState(0);
+  const [pending, setPending] = useState(0);
+  const [settled, setSettled] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   // Bank Form State
-  const [bankForm, setBankForm] = useState({
-    name: 'TechZone Electronics Pvt Ltd',
-    bank: 'HDFC Bank',
-    ifsc: 'HDFC0001202',
-    account: '50200049182390'
+  const [bankForm, setBankForm] = useState(() => {
+    const saved = localStorage.getItem('pairley_merchant_bank');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return {
+      name: '',
+      bank: '',
+      ifsc: '',
+      account: ''
+    };
   });
 
-  const [transactions, setTransactions] = useState(MOCK_PAayout_TRANSACTIONS);
+  const [transactions, setTransactions] = useState(() => {
+    const saved = localStorage.getItem('pairley_merchant_payouts');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return [];
+  });
+  
   const [isEditingBank, setIsEditingBank] = useState(false);
+  const [barData, setBarData] = useState([
+    { day: 'Mon', value: 0, height: '10%' },
+    { day: 'Tue', value: 0, height: '10%' },
+    { day: 'Wed', value: 0, height: '10%' },
+    { day: 'Thu', value: 0, height: '10%' },
+    { day: 'Fri', value: 0, height: '10%' },
+    { day: 'Sat', value: 0, height: '10%' },
+    { day: 'Sun', value: 0, height: '10%' }
+  ]);
+
+  useEffect(() => {
+    setLoading(true);
+    api.get('/offers/interested-customers')
+      .then((data) => {
+        let totalPending = 0;
+        let totalBalance = 0;
+        let totalSettled = 0;
+
+        // Distribute weekly GMV value across days
+        const dailyGMV = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        data.forEach((offer) => {
+          (offer.interests || []).forEach((interest) => {
+            const price = offer.offer_price || 0;
+            if (interest.status === 'READY_TO_BUY') {
+              totalPending += price;
+            } else if (interest.status === 'CONTACTED') {
+              totalBalance += price;
+            } else if (interest.status === 'COMPLETED') {
+              totalSettled += price;
+            }
+
+            // Map GMV day
+            const date = new Date(interest.created_at || new Date());
+            const dayName = days[date.getDay()];
+            dailyGMV[dayName] = (dailyGMV[dayName] || 0) + price;
+          });
+        });
+
+        // If merchant requested payouts, they deduct from balance and add to settled
+        const savedPayouts = JSON.parse(localStorage.getItem('pairley_merchant_payouts') || '[]');
+        const totalRequestedPayouts = savedPayouts.reduce((acc, tx) => acc + tx.amount, 0);
+        
+        // Adjust balances based on requested payouts
+        const adjustedBalance = Math.max(0, totalBalance - totalRequestedPayouts);
+        const adjustedSettled = totalSettled + totalRequestedPayouts;
+
+        setPending(totalPending);
+        setBalance(adjustedBalance);
+        setSettled(adjustedSettled);
+
+        // Map weekly GMV chart heights
+        const maxVal = Math.max(...Object.values(dailyGMV), 1000);
+        const mappedBarData = Object.keys(dailyGMV).map((day) => ({
+          day,
+          value: dailyGMV[day],
+          height: `${Math.max(10, Math.min(100, (dailyGMV[day] / maxVal) * 100))}%`
+        }));
+        setBarData(mappedBarData);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load payout metrics:', err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleRequestPayout = () => {
     if (balance <= 0) {
       showToast('Available balance is zero. Payout cannot be requested.', 'error');
       return;
     }
+    if (!bankForm.account || !bankForm.bank) {
+      showToast('Please configure your bank settlement account details first.', 'warning');
+      setIsEditingBank(true);
+      return;
+    }
+
     const payoutAmount = balance;
     setSettled(prev => prev + payoutAmount);
     setBalance(0);
@@ -60,30 +145,23 @@ export default function BusinessPayoutsPage() {
       status: 'processing',
       bank: `${bankForm.bank} (**** ${bankForm.account.slice(-4)})`
     };
-    setTransactions(prev => [newTx, ...prev]);
+    
+    const updatedTxs = [newTx, ...transactions];
+    setTransactions(updatedTxs);
+    localStorage.setItem('pairley_merchant_payouts', JSON.stringify(updatedTxs));
     showToast(`Payout request of ${formatPrice(payoutAmount)} submitted! Processing T+1 settlement.`, 'success');
   };
 
   const handleBankSubmit = (e) => {
     e.preventDefault();
     setIsEditingBank(false);
+    localStorage.setItem('pairley_merchant_bank', JSON.stringify(bankForm));
     showToast('Bank details updated successfully.', 'success');
   };
 
   const handleExportCSV = () => {
     showToast('Tax Excel Spreadsheet generated! Downloading to folder.', 'success');
   };
-
-  // Mock bar graph metrics
-  const barData = [
-    { day: 'Mon', value: 12500, height: '40%' },
-    { day: 'Tue', value: 24500, height: '78%' },
-    { day: 'Wed', value: 8900, height: '28%' },
-    { day: 'Thu', value: 18200, height: '58%' },
-    { day: 'Fri', value: 31200, height: '98%' },
-    { day: 'Sat', value: 15400, height: '49%' },
-    { day: 'Sun', value: 20100, height: '64%' }
-  ];
 
   return (
     <div className="business-payouts-page page-wrapper py-6 text-left">

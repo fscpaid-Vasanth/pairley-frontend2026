@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Clock, Users, PartyPopper } from 'lucide-react';
@@ -10,6 +10,26 @@ export default function InterestButton({ deal, onInterest }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [interestState, setInterestState] = useState('none'); // 'none', 'loading', 'interested', 'paired'
+
+  useEffect(() => {
+    const token = localStorage.getItem('pairley_token');
+    if (token && deal && deal.id) {
+      api.get('/customers/history')
+        .then((history) => {
+          const match = history.find(h => h.offer_id === deal.id || h.offer?.id === deal.id);
+          if (match) {
+            if (match.status === 'INTERESTED') {
+              setInterestState('interested');
+            } else if (['READY_TO_BUY', 'CONTACTED', 'COMPLETED'].includes(match.status)) {
+              setInterestState('paired');
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to resolve interest history:', err);
+        });
+    }
+  }, [deal?.id]);
 
   const handleShowInterest = () => {
     const token = localStorage.getItem('pairley_token');
