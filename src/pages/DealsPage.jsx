@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, SlidersHorizontal, PackageSearch } from 'lucide-react';
 import DealCard from '../components/DealCard';
 import DealTypeToggle from '../components/DealTypeToggle';
 import CategorySection from '../components/CategorySection';
 import SearchOverlay from '../components/SearchOverlay';
-import { mockDeals, getDealsByMode, getDealsByCategory } from '../data/mockDeals';
+import { mockDeals } from '../data/mockDeals';
+import { api } from '../utils/api';
 import './DealsPage.css';
 
 /* Animation variants */
@@ -27,14 +28,52 @@ const SORT_OPTIONS = [
 ];
 
 const DealsPage = () => {
+  const [dealsList, setDealsList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [dealType, setDealType] = useState('all'); // 'all' | 'pair' | 'group'
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [sortBy, setSortBy] = useState('newest');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  useEffect(() => {
+    api.get('/offers/list?status=ACTIVE')
+      .then((data) => {
+        // Map backend fields to frontend DealCard format
+        const mapped = data.map((d) => ({
+          id: d.id,
+          title: d.title,
+          description: d.description,
+          category: d.category ? d.category.toLowerCase() : 'shopping',
+          mode: d.offer_type ? d.offer_type.toLowerCase() : 'pair',
+          originalPrice: d.original_price,
+          pairleyPrice: d.offer_price,
+          images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          businessOwner: {
+            id: d.business_id,
+            name: d.business?.business_name || 'Local Seller',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (d.business?.business_name || 'Seller'),
+            rating: 4.5
+          },
+          interestCount: d.joined_people || 0,
+          maxParticipants: d.required_people || 2,
+          location: d.business?.city || 'Select Location',
+          validUntil: d.end_date || '2026-12-31',
+          status: d.status ? d.status.toLowerCase() : 'active',
+          createdAt: d.created_at || d.createdAt || '2026-06-01'
+        }));
+        setDealsList(mapped);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load live deals from backend, falling back to mock:', err);
+        setDealsList(mockDeals);
+        setLoading(false);
+      });
+  }, []);
+
   /* Filtered + sorted deals */
   const filteredDeals = useMemo(() => {
-    let deals = [...mockDeals];
+    let deals = [...dealsList];
 
     /* Filter by mode */
     if (dealType === 'pair') {
@@ -143,7 +182,11 @@ const DealsPage = () => {
           </div>
 
           {/* Deals grid — or empty state */}
-          {filteredDeals.length > 0 ? (
+          {loading ? (
+            <div className="py-20 text-center text-slate-400 font-semibold animate-pulse">
+              ⚡ Loading live matching deals...
+            </div>
+          ) : filteredDeals.length > 0 ? (
             <motion.div
               className="deals-grid-page"
               variants={containerVariants}

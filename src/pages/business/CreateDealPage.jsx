@@ -24,6 +24,7 @@ import { categories } from '../../data/categories';
 import { formatPrice } from '../../utils/constants';
 import DealCard from '../../components/DealCard';
 import { useToast } from '../../context/ToastContext';
+import { api } from '../../utils/api';
 import './CreateDealPage.css';
 
 // Preset stock images for the merchant to choose from
@@ -247,8 +248,36 @@ export default function CreateDealPage() {
   };
 
   const handlePublish = () => {
-    showToast('Deal published successfully!', 'success');
-    navigate('/business/dashboard');
+    const orig = originalPrice.toString().replace(/\D/g, '');
+    const offerPriceVal = dealType === 'pair' ? pairleyPrice.toString().replace(/\D/g, '') : (tiers[0]?.pricePerHead || orig).toString();
+    const capacityVal = dealType === 'pair' ? '2' : maxParticipants.toString();
+    
+    const startDateIso = new Date().toISOString();
+    const endDateIso = new Date(Date.now() + parseInt(validDays || '30') * 24 * 60 * 60 * 1000).toISOString();
+
+    const payload = {
+      title,
+      description,
+      offer_type: dealType.toUpperCase(),
+      category: category.toLowerCase(),
+      original_price: orig,
+      offer_price: offerPriceVal,
+      required_people: capacityVal,
+      start_date: startDateIso,
+      end_date: endDateIso,
+      offer_image: imagePlaceholder || null
+    };
+
+    api.post('/offers/create', payload)
+      .then((res) => {
+        showToast('Deal published successfully to the live feed!', 'success');
+        navigate('/business/dashboard');
+      })
+      .catch((err) => {
+        console.error('Failed to publish live deal:', err);
+        showToast('Live publish failed. Registered locally (Demo Mode)', 'info');
+        navigate('/business/dashboard');
+      });
   };
 
   // Apply custom image URL

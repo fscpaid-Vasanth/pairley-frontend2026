@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, Search, Users, Gift, ArrowRight, Check, TrendingUp, Sparkles, BarChart2, Target, PieChart, Store } from 'lucide-react';
+import { api } from '../utils/api';
 import HeroSection from '../components/HeroSection';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { ROUTES, formatPrice } from '../utils/constants';
@@ -65,6 +66,48 @@ const POPULAR_OFFERS = [
 ];
 
 export default function HomePage() {
+  const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/offers/list?status=ACTIVE')
+      .then((data) => {
+        // Sort by createdAt / created_at descending so newly uploaded deals show first (high priority)
+        const sorted = data.sort((a, b) => {
+          const dateA = new Date(a.created_at || a.createdAt || 0);
+          const dateB = new Date(b.created_at || b.createdAt || 0);
+          return dateB - dateA;
+        });
+        setOffers(sorted.slice(0, 4));
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load live deals, falling back to mock data:', err);
+        setOffers(POPULAR_OFFERS);
+        setLoading(false);
+      });
+  }, []);
+
+  const getMappedDeal = (deal) => {
+    if (deal.original_price !== undefined) {
+      const discountPct = Math.round(((deal.original_price - deal.offer_price) / deal.original_price) * 100);
+      const categoryName = deal.category ? deal.category.toLowerCase() : 'shopping';
+      return {
+        id: deal.id,
+        title: deal.title,
+        merchant: deal.business?.business_name || 'Local Seller',
+        category: categoryName,
+        originalPrice: deal.original_price,
+        pairleyPrice: deal.offer_price,
+        discount: `${discountPct}% OFF`,
+        progress: Math.min(100, Math.round(((deal.joined_people || 0) / (deal.required_people || 2)) * 100)),
+        joined: `${deal.joined_people || 0}/${deal.required_people || 2} Joined`,
+        image: deal.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=350&fit=crop'
+      };
+    }
+    return deal;
+  };
+
   return (
     <div className="homepage page-wrapper">
       {/* Viewport 1: Hero Section */}
@@ -93,67 +136,77 @@ export default function HomePage() {
                 </div>
 
                 <div className="popular-offers-grid">
-                  {POPULAR_OFFERS.map((deal) => {
-                    const catColors = {
-                      dining:  { bg: '#FFF1F0', accent: '#EF4444', bar: '#EF4444' },
-                      fitness: { bg: '#F5F0FF', accent: '#8B5CF6', bar: '#8B5CF6' },
-                      beauty:  { bg: '#FFF0F7', accent: '#EC4899', bar: '#EC4899' },
-                      tours:   { bg: '#F0FDF4', accent: '#10B981', bar: '#10B981' },
-                    };
-                    const colors = catColors[deal.category] || { bg: '#EEF2FF', accent: '#4E2BC4', bar: '#4E2BC4' };
-                    return (
-                      <div key={deal.id} className="popular-deal-card">
-                        {/* Colored top accent bar */}
-                        <div style={{ height: 4, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}aa)`, borderRadius: '12px 12px 0 0' }} />
+                  {loading ? (
+                    <div className="col-span-full py-8 text-center text-slate-400 font-semibold animate-pulse">
+                      ⚡ Loading live matching deals...
+                    </div>
+                  ) : offers.length === 0 ? (
+                    <div className="col-span-full py-8 text-center text-slate-400 font-semibold">
+                      🛍️ No active deals currently running. Check back soon!
+                    </div>
+                  ) : (
+                    offers.map(getMappedDeal).map((deal) => {
+                      const catColors = {
+                        dining:  { bg: '#FFF1F0', accent: '#EF4444', bar: '#EF4444' },
+                        fitness: { bg: '#F5F0FF', accent: '#8B5CF6', bar: '#8B5CF6' },
+                        beauty:  { bg: '#FFF0F7', accent: '#EC4899', bar: '#EC4899' },
+                        tours:   { bg: '#F0FDF4', accent: '#10B981', bar: '#10B981' },
+                      };
+                      const colors = catColors[deal.category] || { bg: '#EEF2FF', accent: '#4E2BC4', bar: '#4E2BC4' };
+                      return (
+                        <div key={deal.id} className="popular-deal-card">
+                          {/* Colored top accent bar */}
+                          <div style={{ height: 4, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}aa)`, borderRadius: '12px 12px 0 0' }} />
 
-                        <div className="popular-deal-image-wrap">
-                          <ImageWithFallback
-                            src={deal.image}
-                            alt={deal.title}
-                            className="popular-deal-image"
-                            fallbackType="deal"
-                            category={deal.category}
-                          />
-                          {/* Discount badge */}
-                          <div className="popular-deal-badge">{deal.discount}</div>
-                          {/* Wishlist */}
-                          <button className="popular-deal-wishlist" aria-label="Add to wishlist">
-                            <Heart size={13} className="text-white" />
-                          </button>
+                          <div className="popular-deal-image-wrap">
+                            <ImageWithFallback
+                              src={deal.image}
+                              alt={deal.title}
+                              className="popular-deal-image"
+                              fallbackType="deal"
+                              category={deal.category}
+                            />
+                            {/* Discount badge */}
+                            <div className="popular-deal-badge">{deal.discount}</div>
+                            {/* Wishlist */}
+                            <button className="popular-deal-wishlist" aria-label="Add to wishlist">
+                              <Heart size={13} className="text-white" />
+                            </button>
+                          </div>
+
+                          <div className="popular-deal-body">
+                            {/* Category chip */}
+                            <span className="popular-deal-chip" style={{ background: colors.bg, color: colors.accent }}>
+                              {deal.category}
+                            </span>
+
+                            <h3 className="popular-deal-title">{deal.title}</h3>
+                            <p className="popular-deal-merchant">{deal.merchant}</p>
+
+                            {/* Pricing */}
+                            <div className="popular-deal-pricing">
+                              <span className="popular-deal-price">{formatPrice(deal.pairleyPrice)}</span>
+                              <span className="popular-deal-original">{formatPrice(deal.originalPrice)}</span>
+                            </div>
+
+                            {/* Progress */}
+                            <div className="popular-deal-progress-row">
+                              <Users size={11} style={{ color: colors.accent, flexShrink: 0 }} />
+                              <span className="popular-deal-progress-label">{deal.joined}</span>
+                            </div>
+                            <div className="progress-bar-bg">
+                              <div className="progress-bar-fill" style={{ width: `${deal.progress}%`, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}bb)` }} />
+                            </div>
+
+                            {/* CTA */}
+                            <Link to={`${ROUTES.DEALS}/${deal.id}`} className="popular-deal-cta" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)` }}>
+                              Join Deal
+                            </Link>
+                          </div>
                         </div>
-
-                        <div className="popular-deal-body">
-                          {/* Category chip */}
-                          <span className="popular-deal-chip" style={{ background: colors.bg, color: colors.accent }}>
-                            {deal.category}
-                          </span>
-
-                          <h3 className="popular-deal-title">{deal.title}</h3>
-                          <p className="popular-deal-merchant">{deal.merchant}</p>
-
-                          {/* Pricing */}
-                          <div className="popular-deal-pricing">
-                            <span className="popular-deal-price">{formatPrice(deal.pairleyPrice)}</span>
-                            <span className="popular-deal-original">{formatPrice(deal.originalPrice)}</span>
-                          </div>
-
-                          {/* Progress */}
-                          <div className="popular-deal-progress-row">
-                            <Users size={11} style={{ color: colors.accent, flexShrink: 0 }} />
-                            <span className="popular-deal-progress-label">{deal.joined}</span>
-                          </div>
-                          <div className="progress-bar-bg">
-                            <div className="progress-bar-fill" style={{ width: `${deal.progress}%`, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}bb)` }} />
-                          </div>
-
-                          {/* CTA */}
-                          <Link to={`${ROUTES.DEALS}/${deal.id}`} className="popular-deal-cta" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)` }}>
-                            Join Deal
-                          </Link>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
               </motion.div>
 

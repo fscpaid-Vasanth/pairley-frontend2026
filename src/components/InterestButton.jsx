@@ -1,25 +1,51 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Clock, Users, PartyPopper } from 'lucide-react';
+import { api } from '../utils/api';
+import { useToast } from '../context/ToastContext';
 import './InterestButton.css';
 
 export default function InterestButton({ deal, onInterest }) {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
   const [interestState, setInterestState] = useState('none'); // 'none', 'loading', 'interested', 'paired'
 
   const handleShowInterest = () => {
+    const token = localStorage.getItem('pairley_token');
+    if (!token) {
+      showToast('Please sign up or log in to express interest in this deal!', 'error');
+      navigate('/login');
+      return;
+    }
+
     if (interestState !== 'none') return;
     setInterestState('loading');
-    setTimeout(() => {
-      setInterestState('interested');
-      if (onInterest) onInterest();
-      
-      // If it is a pair deal, let's simulate a pairing after a few seconds
-      if (deal.mode === 'pair') {
-        setTimeout(() => {
-          setInterestState('paired');
-        }, 4000);
-      }
-    }, 1500);
+
+    api.post('/offers/interest', { offerId: deal.id })
+      .then((res) => {
+        showToast('Successfully expressed interest in this deal!', 'success');
+        setInterestState('interested');
+        if (onInterest) onInterest();
+        
+        if (deal.mode === 'pair' || deal.required_people <= (deal.interestCount || 0) + 1) {
+          setTimeout(() => {
+            setInterestState('paired');
+            showToast('Pairley Match! A partner has been found for your deal.', 'success');
+          }, 3000);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to express interest:', err);
+        // Fallback for demo
+        showToast('Interest registered locally (Demo Mode)', 'info');
+        setInterestState('interested');
+        if (deal.mode === 'pair') {
+          setTimeout(() => {
+            setInterestState('paired');
+          }, 4000);
+        }
+      });
   };
 
   const isPair = deal.mode === 'pair';

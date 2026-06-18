@@ -20,19 +20,32 @@ import './BusinessSettingsPage.css';
 export default function BusinessSettingsPage() {
   const { showToast } = useToast();
 
-  // Settings State
-  const [store, setStore] = useState({
-    businessName: 'TechZone Electronics',
-    email: 'contact@techzone.in',
-    phone: '98765 11111',
-    gstin: '27AABCU9603R1ZM',
-    type: 'shopping',
-    address: 'Shop 22, Cyber Plaza, Sector 62',
-    city: 'Mumbai',
-    openTime: '10:00 AM',
-    closeTime: '09:00 PM',
-    autoConfirm: true,
-    notificationEmails: true
+  // Settings State (with localStorage persistence fallback)
+  const [store, setStore] = useState(() => {
+    const saved = localStorage.getItem('pairley_business_settings');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // ignore
+      }
+    }
+    return {
+      businessName: 'TechZone Electronics',
+      email: 'contact@techzone.in',
+      phone: '98765 11111',
+      gstin: '27AABCU9603R1ZM',
+      type: 'shopping',
+      address: 'Shop 22, Cyber Plaza, Sector 62',
+      city: 'Mumbai',
+      openTime: '10:00 AM',
+      closeTime: '09:00 PM',
+      autoConfirm: true,
+      notificationEmails: true,
+      smsNumber1: '',
+      smsNumber2: '',
+      smsNumber3: ''
+    };
   });
 
   const [errors, setErrors] = useState({});
@@ -57,6 +70,17 @@ export default function BusinessSettingsPage() {
     }
     if (!store.address.trim()) errs.address = 'Store Address is required';
 
+    // SMS Notifications mobile validation
+    if (store.smsNumber1 && store.smsNumber1.trim() && !/^\d{10}$/.test(store.smsNumber1.trim())) {
+      errs.smsNumber1 = 'SMS number must be exactly 10 digits';
+    }
+    if (store.smsNumber2 && store.smsNumber2.trim() && !/^\d{10}$/.test(store.smsNumber2.trim())) {
+      errs.smsNumber2 = 'SMS number must be exactly 10 digits';
+    }
+    if (store.smsNumber3 && store.smsNumber3.trim() && !/^\d{10}$/.test(store.smsNumber3.trim())) {
+      errs.smsNumber3 = 'SMS number must be exactly 10 digits';
+    }
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -67,6 +91,7 @@ export default function BusinessSettingsPage() {
       showToast('Please correct form errors.', 'error');
       return;
     }
+    localStorage.setItem('pairley_business_settings', JSON.stringify(store));
     showToast('Merchant profile settings updated successfully!', 'success');
   };
 
@@ -301,6 +326,71 @@ export default function BusinessSettingsPage() {
                     <span className="block text-[9.5px] text-slate-400 mt-0.5 font-medium">Send carrier tracking links to paired buyers automatically.</span>
                   </span>
                 </label>
+              </div>
+            </div>
+
+            {/* SMS Match Alert Contacts */}
+            <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left flex flex-col gap-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 pb-2 border-b border-slate-100">
+                <Phone size={14} className="text-[#4E2BC4]" /> Match Alert SMS Contacts
+              </h4>
+              <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                Add up to 3 staff mobile numbers to receive full customer details (name and phone) instantly when a BOGO match is successfully completed.
+              </p>
+
+              <div className="flex flex-col gap-3.5 text-xs font-semibold">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-600">Primary Alert Mobile</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-sans">+91</span>
+                    <input
+                      type="text"
+                      name="smsNumber1"
+                      placeholder="9876543210"
+                      value={store.smsNumber1 || ''}
+                      onChange={handleInputChange}
+                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber1 ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    />
+                  </div>
+                  {errors.smsNumber1 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber1}</span>}
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-600">Secondary Alert Mobile (Optional)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-sans">+91</span>
+                    <input
+                      type="text"
+                      name="smsNumber2"
+                      placeholder="9876543210"
+                      value={store.smsNumber2 || ''}
+                      onChange={handleInputChange}
+                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber2 ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    />
+                  </div>
+                  {errors.smsNumber2 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber2}</span>}
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-600">Tertiary Alert Mobile (Optional)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-sans">+91</span>
+                    <input
+                      type="text"
+                      name="smsNumber3"
+                      placeholder="9876543210"
+                      value={store.smsNumber3 || ''}
+                      onChange={handleInputChange}
+                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber3 ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    />
+                  </div>
+                  {errors.smsNumber3 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber3}</span>}
+                </div>
+
+                <div className="p-3 bg-indigo-50/50 border border-indigo-100/60 rounded-xl flex items-start gap-2 text-[10px] text-indigo-700 font-bold">
+                  <Info size={14} className="text-[#4E2BC4] flex-shrink-0 mt-0.5" />
+                  <span>If no alert numbers are saved, notifications will fallback to the primary store phone number: {store.phone}.</span>
+                </div>
               </div>
             </div>
 

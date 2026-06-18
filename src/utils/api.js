@@ -1,0 +1,64 @@
+const API_URL = import.meta.env.VITE_API_URL || 'https://pairley-backend2026.onrender.com/api';
+
+const getHeaders = (token) => {
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  const activeToken = token || localStorage.getItem('pairley_token');
+  if (activeToken) {
+    headers['Authorization'] = `Bearer ${activeToken}`;
+  }
+  return headers;
+};
+
+export const api = {
+  get: async (endpoint, token) => {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: 'GET',
+      headers: getHeaders(token),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: 'Request failed' }));
+      throw new Error(err.message || 'Request failed');
+    }
+    return response.json();
+  },
+
+  post: async (endpoint, body, token) => {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: 'POST',
+      headers: getHeaders(token),
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: 'Request failed' }));
+      throw new Error(err.message || 'Request failed');
+    }
+    return response.json();
+  },
+
+  put: async (endpoint, body, token) => {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: 'PUT',
+      headers: getHeaders(token),
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: 'Request failed' }));
+      throw new Error(err.message || 'Request failed');
+    }
+    return response.json();
+  },
+
+  delete: async (endpoint, token) => {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: 'DELETE',
+      headers: getHeaders(token),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ message: 'Request failed' }));
+      throw new Error(err.message || 'Request failed');
+    }
+    return response.json();
+  },
+};

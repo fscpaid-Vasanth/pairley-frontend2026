@@ -19,21 +19,57 @@ import {
   Tag
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { mockDeals } from '../../data/mockDeals';
 import { mockBusinessOwners } from '../../data/mockUsers';
 import { formatPrice } from '../../utils/constants';
+import { api } from '../../utils/api';
 import { getCategoryById } from '../../data/categories';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import BusinessNav from '../../components/BusinessNav';
 import './ManageDealsPage.css';
 
 export default function ManageDealsPage() {
-  const business = mockBusinessOwners[0]; // TechZone Electronics
+  const business = JSON.parse(localStorage.getItem('pairley_user') || 'null') || mockBusinessOwners[0];
   
-  // Initialize deal list in state to make actions fully interactive
-  const [dealsList, setDealsList] = useState(() => 
-    mockDeals.filter((d) => d.businessOwner?.id === business.id)
-  );
+  const [dealsList, setDealsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const bId = business.id || 'biz-001';
+    api.get(`/offers/list?businessId=${bId}`)
+      .then((data) => {
+        const mapped = data.map((d) => ({
+          id: d.id,
+          title: d.title,
+          description: d.description,
+          category: d.category ? d.category.toLowerCase() : 'shopping',
+          mode: d.offer_type ? d.offer_type.toLowerCase() : 'pair',
+          originalPrice: d.original_price,
+          pairleyPrice: d.offer_price,
+          images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          businessOwner: {
+            id: d.business_id,
+            name: d.business?.business_name || 'Local Seller',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (d.business?.business_name || 'Seller'),
+            rating: 4.5
+          },
+          interestCount: d.joined_people || 0,
+          maxParticipants: d.required_people || 2,
+          location: d.business?.city || 'Select Location',
+          validUntil: d.end_date || '2026-12-31',
+          status: d.status ? d.status.toLowerCase() : 'active',
+          createdAt: d.created_at || d.createdAt || '2026-06-01'
+        }));
+        setDealsList(mapped);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load merchant deals, falling back to mock:', err);
+        setDealsList(mockDeals.filter((d) => d.businessOwner?.id === bId));
+        setLoading(false);
+      });
+  }, [business.id]);
 
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'active', 'draft', 'paired', 'expired'
   const [searchQuery, setSearchQuery] = useState('');
@@ -249,7 +285,11 @@ export default function ManageDealsPage() {
           </div>
 
           {/* ===== List & Grid Display ===== */}
-          {filteredDeals.length > 0 ? (
+          {loading ? (
+            <div className="py-20 text-center text-slate-400 font-semibold animate-pulse bg-white border border-slate-200 p-6 rounded-3xl">
+              ⚡ Loading listings from server...
+            </div>
+          ) : filteredDeals.length > 0 ? (
             <AnimatePresence mode="wait">
               {viewMode === 'table' ? (
                 // TABLE MODE (Falls back to grid on small screens via CSS wrapper)

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -21,6 +21,7 @@ import InterestButton from '../components/InterestButton';
 import PricingTierCard from '../components/PricingTierCard';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { getDealById, mockDeals } from '../data/mockDeals';
+import { api } from '../utils/api';
 import {
   formatPrice,
   calculateSavings,
@@ -69,9 +70,57 @@ const fadeInUp = {
 
 const DealDetailPage = () => {
   const { id } = useParams();
-  const deal = getDealById(id);
+  const [deal, setDeal] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [openTermIndex, setOpenTermIndex] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
+
+  useEffect(() => {
+    api.get(`/offers/details/${id}`)
+      .then((data) => {
+        const mapped = {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          category: data.category ? data.category.toLowerCase() : 'shopping',
+          mode: data.offer_type ? data.offer_type.toLowerCase() : 'pair',
+          originalPrice: data.original_price,
+          pairleyPrice: data.offer_price,
+          images: [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          businessOwner: {
+            id: data.business?.id || data.business_id,
+            name: data.business?.business_name || 'Local Seller',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (data.business?.business_name || 'Seller'),
+            rating: 4.5
+          },
+          interestCount: data.joined_people || 0,
+          maxParticipants: data.required_people || 2,
+          location: data.business?.city || data.business?.address || 'Select Location',
+          validUntil: data.end_date || '2026-12-31',
+          status: data.status ? data.status.toLowerCase() : 'active',
+          createdAt: data.created_at || data.createdAt || '2026-06-01'
+        };
+        setDeal(mapped);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load deal details from backend, falling back to mock:', err);
+        const mock = getDealById(id);
+        setDeal(mock);
+        setLoading(false);
+      });
+  }, [id]);
+
+  /* ---- Loading ---- */
+  if (loading) {
+    return (
+      <div className="page-wrapper">
+        <div className="deal-detail-page py-20 text-center text-slate-400 font-semibold animate-pulse">
+          ⚡ Loading deal details...
+        </div>
+      </div>
+    );
+  }
 
   /* ---- 404 ---- */
   if (!deal) {

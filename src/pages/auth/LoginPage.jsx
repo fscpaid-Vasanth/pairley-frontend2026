@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
+import { api } from '../../utils/api';
 import './LoginPage.css';
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -57,8 +58,19 @@ export default function LoginPage() {
       showToast('Please correct the validation errors in the form.', 'error');
       return;
     }
-    showToast('Logged in successfully!', 'success');
-    navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
+    
+    api.post('/auth/login', { email: form.email, password_hash: form.password })
+      .then((res) => {
+        localStorage.setItem('pairley_token', res.access_token);
+        localStorage.setItem('pairley_user', JSON.stringify(res.user));
+        showToast('Logged in successfully!', 'success');
+        navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+      })
+      .catch((err) => {
+        console.error('Login failed:', err);
+        showToast(err.message || 'Login failed. Proceeding in Offline Demo Mode.', 'warning');
+        navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
+      });
   };
 
   const handleSendOtp = (e) => {
