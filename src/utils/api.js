@@ -1,4 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://pairley-backend2026.onrender.com/api';
+let baseUrl = import.meta.env.VITE_API_URL || 'https://pairley-backend2026.onrender.com/api';
+if (baseUrl.endsWith('/')) {
+  baseUrl = baseUrl.slice(0, -1);
+}
+if (!baseUrl.endsWith('/api')) {
+  baseUrl = `${baseUrl}/api`;
+}
+const API_URL = baseUrl;
+
 
 const getHeaders = (token) => {
   const headers = {
