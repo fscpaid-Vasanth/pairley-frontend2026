@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Plus, 
@@ -18,15 +19,8 @@ import { mockBusinessOwners } from '../../data/mockUsers';
 import { formatPrice } from '../../utils/constants';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import BusinessNav from '../../components/BusinessNav';
+import { api } from '../../utils/api';
 import './BusinessDashboard.css';
-
-/* Mock Merchant Live Activity Log */
-const merchantActivities = [
-  { id: 1, type: 'interest', text: 'Arjun Mehta showed interest in Samsung Galaxy Buds', time: '5 mins ago', badge: 'New Interest' },
-  { id: 2, type: 'match', text: 'Pair Complete! Pooja and Priya matched for Spa Day BOGO', time: '40 mins ago', badge: 'Match Completed' },
-  { id: 3, type: 'join', text: 'Rohan joined Kerala Group Tour circle (9/15 joined)', time: '2 hours ago', badge: 'Group Joined' },
-  { id: 4, type: 'match', text: 'Pair Complete! Vicky and Sarah matched for Buffet BOGO', time: '1 day ago', badge: 'Match Completed' }
-];
 
 /* Stagger animation container */
 const containerVariants = {
@@ -40,16 +34,129 @@ const itemVariants = {
 };
 
 export default function BusinessDashboard() {
-  const business = mockBusinessOwners[0]; // Rajesh Kumar - TechZone Electronics
+  const business = JSON.parse(localStorage.getItem('pairley_user') || 'null') || mockBusinessOwners[0];
 
-  // Filter deals created by this business owner
-  const myDeals = mockDeals.filter(deal => deal.businessOwner?.id === business.id);
+  const [metrics, setMetrics] = useState({
+    activeOffers: 0,
+    interestedCustomers: 0,
+    readyToBuyCustomers: 0,
+    completedDeals: 0
+  });
+  const [deals, setDeals] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const formatTimeAgo = (dateStr) => {
+    const date = new Date(dateStr);
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 0) return 'Just now';
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return `${interval}y ago`;
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return `${interval}mo ago`;
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return `${interval}d ago`;
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return `${interval}h ago`;
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return `${interval}m ago`;
+    return 'Just now';
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    // 1. Fetch dashboard metrics
+    api.get('/business/dashboard')
+      .then((data) => {
+        setMetrics(data);
+      })
+      .catch((err) => console.error('Failed to fetch business metrics:', err));
+
+    // 2. Fetch storefront deals and their interests
+    api.get('/offers/interested-customers')
+      .then((data) => {
+        // Map offers
+        const mappedDeals = data.map((d) => ({
+          id: d.id,
+          title: d.title,
+          category: d.category ? d.category.toLowerCase() : 'shopping',
+          mode: d.offer_type ? d.offer_type.toLowerCase() : 'pair',
+          location: d.city || business.city || 'Mumbai',
+          interestCount: d.joined_people || 0,
+          maxParticipants: d.required_people || 2,
+          images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          status: d.status ? d.status.toLowerCase() : 'active'
+        }));
+        setDeals(mappedDeals);
+
+        // Generate activity items dynamically from offer interests
+        const acts = [];
+        data.forEach((offer) => {
+          (offer.interests || []).forEach((interest) => {
+            const customerName = interest.customer?.name || 'A customer';
+            const isPair = offer.offer_type?.toLowerCase() === 'pair';
+            let actText = `${customerName} joined the deal "${offer.title}"`;
+            let badgeText = 'New Interest';
+            let actType = 'interest';
+
+            if (interest.status === 'READY_TO_BUY') {
+              actText = `Target met! ${customerName} and others matched for "${offer.title}"`;
+              badgeText = 'Match Completed';
+              actType = 'match';
+            } else if (interest.status === 'COMPLETED') {
+              actText = `Match finalized for "${offer.title}" with ${customerName}`;
+              badgeText = 'Completed';
+              actType = 'match';
+            } else if (!isPair) {
+              actText = `${customerName} joined the group for "${offer.title}" (${offer.joined_people}/${offer.required_people})`;
+              badgeText = 'Group Joined';
+              actType = 'join';
+            }
+
+            acts.push({
+              id: interest.id,
+              type: actType,
+              text: actText,
+              timestamp: new Date(interest.created_at || new Date()),
+              time: formatTimeAgo(interest.created_at || new Date()),
+              badge: badgeText
+            });
+          });
+        });
+
+        // Sort activities by timestamp descending
+        acts.sort((a, b) => b.timestamp - a.timestamp);
+        setActivities(acts.slice(0, 10)); // Top 10 activities
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load storefront data, using mock fallback:', err);
+        // Fallback to mock
+        const fallbackDeals = mockDeals.filter(deal => deal.businessOwner?.id === business.id).map(d => ({
+          id: d.id,
+          title: d.title,
+          category: d.category,
+          mode: d.mode,
+          location: d.location,
+          interestCount: d.interestCount,
+          maxParticipants: d.maxParticipants || 2,
+          images: d.images
+        }));
+        setDeals(fallbackDeals);
+        setActivities([
+          { id: 1, type: 'interest', text: 'Arjun Mehta showed interest in Samsung Galaxy Buds', time: '5 mins ago', badge: 'New Interest' },
+          { id: 2, type: 'match', text: 'Pair Complete! Pooja and Priya matched for Spa Day BOGO', time: '40 mins ago', badge: 'Match Completed' },
+          { id: 3, type: 'join', text: 'Rohan joined Kerala Group Tour circle (9/15 joined)', time: '2 hours ago', badge: 'Group Joined' }
+        ]);
+        setLoading(false);
+      });
+  }, [business.id, business.city]);
 
   // Stats
   const stats = [
     { 
       label: 'Total Deals Listed', 
-      value: business.totalDeals, 
+      value: loading ? '...' : (deals.length || metrics.activeOffers + metrics.completedDeals), 
       icon: ShoppingBag, 
       color: 'text-purple-600 bg-purple-100 border-purple-200/50', 
       trend: '+2 new this week', 
@@ -58,7 +165,7 @@ export default function BusinessDashboard() {
     },
     { 
       label: 'Active Listings', 
-      value: business.activeDeals, 
+      value: loading ? '...' : metrics.activeOffers, 
       icon: Zap, 
       color: 'text-emerald-600 bg-emerald-100 border-emerald-200/50', 
       trend: '94% match rate', 
@@ -67,7 +174,7 @@ export default function BusinessDashboard() {
     },
     { 
       label: 'Interests Received', 
-      value: business.successfulPairs * 2 + 10, 
+      value: loading ? '...' : (metrics.interestedCustomers + metrics.readyToBuyCustomers + metrics.completedDeals), 
       icon: Users, 
       color: 'text-blue-600 bg-blue-100 border-blue-200/50', 
       trend: '+12% vs last month', 
@@ -76,10 +183,10 @@ export default function BusinessDashboard() {
     },
     { 
       label: 'Successful matches', 
-      value: business.successfulPairs, 
+      value: loading ? '...' : (metrics.completedDeals + metrics.readyToBuyCustomers), 
       icon: TrendingUp, 
       color: 'text-amber-600 bg-amber-100 border-amber-200/50', 
-      trend: '₹48,000 GMV unlocked', 
+      trend: `₹${(metrics.completedDeals + metrics.readyToBuyCustomers) * 800} saved`, 
       trendColor: 'text-amber-600',
       gradient: 'from-amber-500 to-orange-500'
     },
@@ -98,7 +205,7 @@ export default function BusinessDashboard() {
         >
           <div>
             <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 flex items-center gap-2">
-              Welcome back, {business.businessName}! 📊
+              Welcome back, {business.business_name || business.businessName || 'Merchant'}! 📊
             </h2>
             <p className="text-sm text-slate-500 mt-1">Manage your storefront BOGO deals and tiered group discounts.</p>
           </div>
@@ -165,57 +272,67 @@ export default function BusinessDashboard() {
             </div>
 
             <div className="space-y-4">
-              {myDeals.slice(0, 4).map((deal) => {
-                const isPair = deal.mode === 'pair';
-                const completion = isPair
-                  ? (deal.interestCount / 2) * 100
-                  : Math.min(100, (deal.interestCount / deal.maxParticipants) * 100);
+              {loading ? (
+                <div className="text-center py-12 text-slate-400 text-xs font-semibold">
+                  Loading listings from database...
+                </div>
+              ) : deals.length === 0 ? (
+                <div className="text-center py-12 text-slate-400 text-xs font-semibold bg-white border border-slate-200/80 rounded-2xl shadow-sm">
+                  No storefront listings found. Publish a BOGO or group deal to see it here!
+                </div>
+              ) : (
+                deals.slice(0, 4).map((deal) => {
+                  const isPair = deal.mode === 'pair';
+                  const completion = isPair
+                    ? (deal.interestCount / 2) * 100
+                    : Math.min(100, (deal.interestCount / deal.maxParticipants) * 100);
 
-                return (
-                  <div key={deal.id} className="bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all duration-300 group">
-                    <div className="flex items-center gap-4">
-                      <ImageWithFallback
-                        src={deal.images?.[0]}
-                        alt={deal.title}
-                        className="w-14 h-14 rounded-xl object-cover border border-slate-100 flex-shrink-0 group-hover:scale-102 transition-transform duration-300"
-                        fallbackType="deal"
-                        category={deal.category}
-                      />
-                      <div>
-                        <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-[#4E2BC4] transition-colors duration-200 line-clamp-1">{deal.title}</h4>
-                        <div className="flex items-center gap-3 mt-1.5">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                            isPair ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'
-                          }`}>
-                            {isPair ? '🤝 Pair BOGO' : '👥 Group Tiers'}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-medium">{deal.location}</span>
+                  return (
+                    <div key={deal.id} className="bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all duration-300 group">
+                      <div className="flex items-center gap-4">
+                        <ImageWithFallback
+                          src={deal.images?.[0]}
+                          alt={deal.title}
+                          className="w-14 h-14 rounded-xl object-cover border border-slate-100 flex-shrink-0 group-hover:scale-102 transition-transform duration-300"
+                          fallbackType="deal"
+                          category={deal.category}
+                        />
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-[#4E2BC4] transition-colors duration-200 line-clamp-1">{deal.title}</h4>
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                              isPair ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'
+                            }`}>
+                              {isPair ? '🤝 Pair BOGO' : '👥 Group Tiers'}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium">{deal.location}</span>
+                          </div>
                         </div>
+                      </div>
+
+                      <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
+                        <div className="text-left sm:text-right">
+                          <span className="text-[10px] text-slate-400 uppercase font-semibold">Active Interest</span>
+                          <div className="text-xs font-bold text-slate-700 mt-0.5">
+                            {deal.interestCount} {isPair ? '/ 2 waiting' : `joined`}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1 items-end w-20">
+                          <span className="text-[9px] text-slate-400 font-semibold">{Math.round(completion)}% filled</span>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${isPair ? 'bg-purple-500' : 'bg-indigo-500'}`} style={{ width: `${completion}%` }}></div>
+                          </div>
+                        </div>
+
+                        <Link to={`/deals/${deal.id}`} className="p-2 bg-slate-50 text-slate-400 hover:text-[#4E2BC4] hover:bg-purple-50 rounded-xl transition-colors duration-200">
+                          <ChevronRight size={16} />
+                        </Link>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
-                      <div className="text-left sm:text-right">
-                        <span className="text-[10px] text-slate-400 uppercase font-semibold">Active Interest</span>
-                        <div className="text-xs font-bold text-slate-700 mt-0.5">
-                          {deal.interestCount} {isPair ? '/ 2 waiting' : `joined`}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-1 items-end w-20">
-                        <span className="text-[9px] text-slate-400 font-semibold">{Math.round(completion)}% filled</span>
-                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${isPair ? 'bg-purple-500' : 'bg-indigo-500'}`} style={{ width: `${completion}%` }}></div>
-                        </div>
-                      </div>
-
-                      <Link to={`/deals/${deal.id}`} className="p-2 bg-slate-50 text-slate-400 hover:text-[#4E2BC4] hover:bg-purple-50 rounded-xl transition-colors duration-200">
-                        <ChevronRight size={16} />
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -230,22 +347,32 @@ export default function BusinessDashboard() {
               </h3>
 
               <div className="space-y-4">
-                {merchantActivities.map((act) => (
-                  <div key={act.id} className="relative pl-4 border-l-2 border-slate-100 last:border-transparent py-1">
-                    {/* Small dot */}
-                    <div className={`absolute left-[-6px] top-2.5 w-2 h-2 rounded-full ring-2 ring-white ${
-                      act.type === 'match' ? 'bg-emerald-500' : act.type === 'interest' ? 'bg-purple-500' : 'bg-blue-500'
-                    }`}></div>
-                    
-                    <div className="text-[11px] text-slate-700 leading-normal">{act.text}</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-[9px] text-slate-400">{act.time}</span>
-                      <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                        act.type === 'match' ? 'bg-emerald-50 text-emerald-700' : 'bg-purple-50 text-purple-700'
-                      }`}>{act.badge}</span>
-                    </div>
+                {loading ? (
+                  <div className="text-center py-6 text-slate-400 text-xs font-semibold">
+                    Loading activity...
                   </div>
-                ))}
+                ) : activities.length === 0 ? (
+                  <div className="text-center py-6 text-slate-400 text-xs font-semibold">
+                    No buyer interactions yet.
+                  </div>
+                ) : (
+                  activities.map((act) => (
+                    <div key={act.id} className="relative pl-4 border-l-2 border-slate-100 last:border-transparent py-1">
+                      {/* Small dot */}
+                      <div className={`absolute left-[-6px] top-2.5 w-2 h-2 rounded-full ring-2 ring-white ${
+                        act.type === 'match' ? 'bg-emerald-500' : act.type === 'interest' ? 'bg-purple-500' : 'bg-blue-500'
+                      }`}></div>
+                      
+                      <div className="text-[11px] text-slate-700 leading-normal">{act.text}</div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-[9px] text-slate-400">{act.time}</span>
+                        <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                          act.type === 'match' ? 'bg-emerald-50 text-emerald-700' : 'bg-purple-50 text-purple-700'
+                        }`}>{act.badge}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 

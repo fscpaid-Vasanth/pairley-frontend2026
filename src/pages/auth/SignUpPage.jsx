@@ -32,6 +32,17 @@ export default function SignUpPage() {
   const [resendSeconds, setResendSeconds] = useState(30);
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
+  // Google Onboarding States
+  const [googleUser, setGoogleUser] = useState(null);
+  const [showGoogleOnboarding, setShowGoogleOnboarding] = useState(false);
+  const [onboardingForm, setOnboardingForm] = useState({
+    mobile: '',
+    city: 'Mumbai',
+    businessName: '',
+    businessType: 'Shop'
+  });
+  const [onboardingErrors, setOnboardingErrors] = useState({});
+
   // Resend Countdown Timer Effect
   useEffect(() => {
     if (!isOtpStep || resendSeconds <= 0) return;
@@ -174,21 +185,92 @@ export default function SignUpPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
-      showToast('Registered successfully with Google!', 'success');
-      navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
+      const firebaseUser = await signInWithGoogle();
+      const checkPayload = {
+        name: firebaseUser.displayName || 'Google User',
+        email: firebaseUser.email,
+        role: role === 'customer' ? 'Customer' : 'Business',
+        google_uid: firebaseUser.uid,
+        profile_photo: firebaseUser.photoURL || undefined
+      };
+
+      // Call backend to verify if registered
+      api.post('/auth/google', checkPayload)
+        .then((res) => {
+          if (res.exists) {
+            localStorage.setItem('pairley_token', res.access_token || res.token);
+            localStorage.setItem('pairley_user', JSON.stringify(res.user));
+            showToast('Registered successfully with Google!', 'success');
+            navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+          } else {
+            // User does not exist, trigger onboarding step
+            setGoogleUser(checkPayload);
+            setShowGoogleOnboarding(true);
+            showToast('Please complete your profile to continue.', 'info');
+          }
+        })
+        .catch((err) => {
+          console.error('Google check failed, using fallback onboarding:', err);
+          setGoogleUser(checkPayload);
+          setShowGoogleOnboarding(true);
+        });
     } catch (error) {
       console.error('Google Auth failed:', error);
       if (error?.code === 'auth/unauthorized-domain') {
-        showToast('Google Sign-in failed: Domain is not authorized in Firebase Console. Please add your domain to Authorized Domains under Authentication settings.', 'error');
-      } else if (error?.code === 'auth/operation-not-allowed') {
-        showToast('Google Sign-in failed: Google sign-in provider is disabled in Firebase Console.', 'error');
+        showToast('Google Sign-in failed: Domain is not authorized in Firebase Console.', 'error');
       } else if (error?.code === 'auth/popup-closed-by-user') {
         showToast('Google Sign-in cancelled (popup closed).', 'warning');
       } else {
         showToast(`Google Sign-in failed: ${error?.message || 'Unknown error'}`, 'error');
       }
     }
+  };
+
+  const handleOnboardingSubmit = (e) => {
+    e.preventDefault();
+    const errs = {};
+    if (!onboardingForm.mobile.trim()) {
+      errs.mobile = 'Mobile Number is required';
+    } else if (!validatePhone(onboardingForm.mobile)) {
+      errs.mobile = 'Phone must be exactly 10 digits';
+    }
+    if (role === 'business' && !onboardingForm.businessName.trim()) {
+      errs.businessName = 'Business/Shop name is required';
+    }
+    setOnboardingErrors(errs);
+
+    if (Object.keys(errs).length > 0) {
+      showToast('Please fix the validation errors.', 'error');
+      return;
+    }
+
+    const payload = {
+      ...googleUser,
+      mobile: onboardingForm.mobile,
+      city: onboardingForm.city,
+      business_name: role === 'business' ? onboardingForm.businessName : undefined,
+      business_type: role === 'business' ? onboardingForm.businessType : undefined,
+      category: role === 'business' ? 'shopping' : undefined,
+      address: 'Select Address',
+      state: 'Maharashtra',
+      pincode: '400001'
+    };
+
+    api.post('/auth/google', payload)
+      .then((res) => {
+        if (res.exists) {
+          localStorage.setItem('pairley_token', res.access_token || res.token);
+          localStorage.setItem('pairley_user', JSON.stringify(res.user));
+          showToast('Profile completed and logged in!', 'success');
+          navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+        } else {
+          showToast(res.message || 'Profile completion failed.', 'error');
+        }
+      })
+      .catch((err) => {
+        console.error('Google registration failed:', err);
+        showToast(err.message || 'Onboarding failed.', 'error');
+      });
   };
 
   const leftContent = {
@@ -286,7 +368,109 @@ export default function SignUpPage() {
                 </button>
               </div>
 
-              {!isOtpStep ? (
+              {showGoogleOnboarding ? (
+                <div className="su-otp-wrap">
+                  <h2 className="signup-card-title">Complete Your Profile</h2>
+                  <p className="signup-card-subtitle" style={{ marginBottom: '20px' }}>
+                    We need a few details to finalize your {role === 'customer' ? 'Customer' : 'Shop Owner'} account
+                  </p>
+
+                  <form onSubmit={handleOnboardingSubmit} className="signup-form w-full">
+                    {/* Mobile */}
+                    <div className="su-field">
+                      <label className="su-label">Mobile Number</label>
+                      <div className="su-phone-row">
+                        <select className="su-country-code" defaultValue="+91">
+                          <option value="+91">🇮🇳 +91</option>
+                        </select>
+                        <input
+                          type="tel"
+                          placeholder="10-digit mobile number"
+                          className={`su-input su-phone-input ${onboardingErrors.mobile ? 'su-input--error' : ''}`}
+                          value={onboardingForm.mobile}
+                          onChange={(e) => {
+                            setOnboardingForm(prev => ({ ...prev, mobile: e.target.value }));
+                            if (onboardingErrors.mobile) setOnboardingErrors(prev => ({ ...prev, mobile: '' }));
+                          }}
+                        />
+                      </div>
+                      {onboardingErrors.mobile && <span className="su-error">{onboardingErrors.mobile}</span>}
+                    </div>
+
+                    {/* City */}
+                    <div className="su-field">
+                      <label className="su-label">City</label>
+                      <div className="su-input-wrap">
+                        <span className="material-symbols-outlined su-input-icon">map_pin</span>
+                        <select
+                          className="su-input"
+                          style={{ paddingLeft: '40px', background: 'white' }}
+                          value={onboardingForm.city}
+                          onChange={(e) => setOnboardingForm(prev => ({ ...prev, city: e.target.value }))}
+                        >
+                          {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'].map(city => (
+                            <option key={city} value={city}>{city}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {role === 'business' && (
+                      <>
+                        {/* Shop Name */}
+                        <div className="su-field">
+                          <label className="su-label">Shop Name</label>
+                          <div className="su-input-wrap">
+                            <span className="material-symbols-outlined su-input-icon">storefront</span>
+                            <input
+                              type="text"
+                              placeholder="Your shop or business name"
+                              className={`su-input ${onboardingErrors.businessName ? 'su-input--error' : ''}`}
+                              value={onboardingForm.businessName}
+                              onChange={(e) => {
+                                setOnboardingForm(prev => ({ ...prev, businessName: e.target.value }));
+                                if (onboardingErrors.businessName) setOnboardingErrors(prev => ({ ...prev, businessName: '' }));
+                              }}
+                            />
+                          </div>
+                          {onboardingErrors.businessName && <span className="su-error">{onboardingErrors.businessName}</span>}
+                        </div>
+
+                        {/* Business Type */}
+                        <div className="su-field">
+                          <label className="su-label">Business Type</label>
+                          <div className="su-input-wrap">
+                            <span className="material-symbols-outlined su-input-icon">briefcase</span>
+                            <select
+                              className="su-input"
+                              style={{ paddingLeft: '40px', background: 'white' }}
+                              value={onboardingForm.businessType}
+                              onChange={(e) => setOnboardingForm(prev => ({ ...prev, businessType: e.target.value }))}
+                            >
+                              {['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym/Fitness', 'Academy/Institute', 'Service Provider', 'Other'].map(type => (
+                                <option key={type} value={type}>{type}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <button type="submit" className="su-submit-btn" style={{ marginTop: '16px' }}>
+                      Complete Profile
+                    </button>
+                  </form>
+
+                  <button 
+                    type="button" 
+                    onClick={() => { setShowGoogleOnboarding(false); setGoogleUser(null); }}
+                    className="su-terms-link"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginTop: '16px' }}
+                  >
+                    ← Cancel Google Onboarding
+                  </button>
+                </div>
+              ) : !isOtpStep ? (
                 <>
                   <h2 className="signup-card-title">Create Account</h2>
                   <p className="signup-card-subtitle">Fill in your details to get started</p>
