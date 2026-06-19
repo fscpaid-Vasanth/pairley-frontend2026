@@ -261,7 +261,7 @@ export default function SignUpPage() {
       })
       .catch((err) => {
         console.error('Google registration failed, using fallback onboarding:', err);
-        showToast('Onboarding completed (Offline Mode)', 'success');
+        showToast(`Registration failed: ${err.message || 'Server error'}. Falling back to Offline Demo Mode.`, 'warning');
         localStorage.setItem('pairley_token', 'mock_demo_token');
         if (role === 'customer') {
           localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Customer', email: googleUser?.email, role: 'Customer', city: onboardingForm.city, state: onboardingForm.state, pincode: onboardingForm.pincode, address: onboardingForm.address }));
