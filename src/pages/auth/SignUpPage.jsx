@@ -260,16 +260,8 @@ export default function SignUpPage() {
         }
       })
       .catch((err) => {
-        console.error('Google registration failed, using fallback onboarding:', err);
-        showToast(`Registration failed: ${err.message || 'Server error'}. Falling back to Offline Demo Mode.`, 'warning');
-        localStorage.setItem('pairley_token', 'mock_demo_token');
-        if (role === 'customer') {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Customer', email: googleUser?.email, role: 'Customer', city: onboardingForm.city, state: onboardingForm.state, pincode: onboardingForm.pincode, address: onboardingForm.address }));
-          navigate('/customer/dashboard');
-        } else {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Merchant', email: googleUser?.email, business_name: onboardingForm.businessName || 'Demo Shop', role: 'Business', city: onboardingForm.city, state: onboardingForm.state, pincode: onboardingForm.pincode }));
-          navigate('/business/dashboard');
-        }
+        console.error('Google registration failed:', err);
+        showToast(err.message || 'Registration failed. Please check your network and try again.', 'error');
       });
   };
 

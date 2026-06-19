@@ -102,15 +102,7 @@ export default function LoginPage() {
       })
       .catch((err) => {
         console.error('Login failed:', err);
-        showToast(err.message || 'Login failed. Proceeding in Offline Demo Mode.', 'warning');
-        localStorage.setItem('pairley_token', 'mock_demo_token');
-        if (role === 'customer') {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: 'Demo Customer', email: form.email, role: 'Customer' }));
-          navigate('/customer/dashboard');
-        } else {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: 'Demo Merchant', email: form.email, business_name: 'Demo Shop', role: 'Business' }));
-          navigate('/business/dashboard');
-        }
+        showToast(err.message || 'Login failed. Invalid email or password.', 'error');
       });
   };
 
@@ -337,16 +329,8 @@ export default function LoginPage() {
         }
       })
       .catch((err) => {
-        console.error('Google registration failed, using fallback:', err);
-        showToast(`Registration failed: ${err.message || 'Server error'}. Falling back to Offline Demo Mode.`, 'warning');
-        localStorage.setItem('pairley_token', 'mock_demo_token');
-        if (role === 'customer') {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Customer', email: googleUser?.email, role: 'Customer', city: onboardingForm.city, state: onboardingForm.state, pincode: onboardingForm.pincode, address: onboardingForm.address }));
-          navigate('/customer/dashboard');
-        } else {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Merchant', email: googleUser?.email, business_name: onboardingForm.businessName || 'Demo Shop', role: 'Business', city: onboardingForm.city, state: onboardingForm.state, pincode: onboardingForm.pincode }));
-          navigate('/business/dashboard');
-        }
+        console.error('Google registration failed:', err);
+        showToast(err.message || 'Registration failed. Please check your network and try again.', 'error');
       });
   };
 
