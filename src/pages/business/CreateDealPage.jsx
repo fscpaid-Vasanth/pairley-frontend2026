@@ -258,7 +258,7 @@ export default function CreateDealPage() {
     const payload = {
       title,
       description,
-      offer_type: dealType.toUpperCase(),
+      offer_type: dealType === 'pair' ? 'BOGO' : 'GROUP_DISCOUNT',
       category: category.toLowerCase(),
       original_price: orig,
       offer_price: offerPriceVal,
