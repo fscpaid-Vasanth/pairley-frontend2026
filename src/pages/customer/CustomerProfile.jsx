@@ -36,6 +36,7 @@ export default function CustomerProfile() {
     email: '',
     phone: '',
     city: '',
+    address: '',
     profile_photo: '',
     created_at: ''
   });
@@ -46,6 +47,7 @@ export default function CustomerProfile() {
     email: '',
     phone: '',
     city: '',
+    address: '',
     profile_photo: '',
     created_at: ''
   });
@@ -71,6 +73,7 @@ export default function CustomerProfile() {
           email: data.email || '',
           phone: data.mobile || '',
           city: data.city || '',
+          address: data.address || '',
           profile_photo: data.profile_photo || '',
           created_at: data.created_at || ''
         };
@@ -107,6 +110,7 @@ export default function CustomerProfile() {
           email: localUser.email || '',
           phone: localUser.mobile || localUser.phone || '',
           city: localUser.city || 'Mumbai',
+          address: localUser.address || '',
           profile_photo: localUser.profile_photo || '',
           created_at: localUser.created_at || ''
         };
@@ -160,7 +164,8 @@ export default function CustomerProfile() {
     const updates = {
       name: profile.name,
       email: profile.email,
-      city: profile.city
+      city: profile.city,
+      address: profile.address
     };
 
     api.put('/customers/profile', updates)
@@ -170,6 +175,7 @@ export default function CustomerProfile() {
           name: res.name,
           email: res.email,
           city: res.city,
+          address: res.address || '',
           profile_photo: res.profile_photo
         };
         setProfile(updatedProf);
@@ -381,6 +387,29 @@ export default function CustomerProfile() {
                             ? 'border-purple-300 shadow-sm bg-purple-50/5' 
                             : 'border-slate-200 opacity-70 cursor-not-allowed'
                         }`}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-600 block mb-1.5">Detailed Address</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none text-slate-400">
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>home</span>
+                      </div>
+                      <textarea
+                        name="address"
+                        value={profile.address}
+                        onChange={handleProfileChange}
+                        disabled={!editMode}
+                        required
+                        placeholder="Detailed address is important"
+                        className={`w-full bg-white border rounded-xl pl-9 pr-4 py-2.5 text-xs focus:ring-2 focus:ring-purple-200 focus:outline-none transition-all duration-200 ${
+                          editMode 
+                            ? 'border-purple-300 shadow-sm bg-purple-50/5' 
+                            : 'border-slate-200 opacity-70 cursor-not-allowed'
+                        }`}
+                        rows={2}
                       />
                     </div>
                   </div>

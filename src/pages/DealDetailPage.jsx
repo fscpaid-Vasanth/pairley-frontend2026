@@ -98,7 +98,8 @@ const DealDetailPage = () => {
           location: data.business?.city || data.business?.address || 'Select Location',
           validUntil: data.end_date || '2026-12-31',
           status: data.status ? data.status.toLowerCase() : 'active',
-          createdAt: data.created_at || data.createdAt || '2026-06-01'
+          createdAt: data.created_at || data.createdAt || '2026-06-01',
+          interests: data.interests || []
         };
         setDeal(mapped);
         setLoading(false);
@@ -433,8 +434,47 @@ const DealDetailPage = () => {
                   {/* Interest button */}
                   <div className="deal-interest-area">
                     {isBusiness ? (
-                      <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500 font-bold">
-                        🏪 Merchant Account View
+                      <div className="flex flex-col gap-3">
+                        <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500 font-bold">
+                          🏪 Merchant Account View
+                        </div>
+                        {deal.businessOwner.id === currentUser?.id && (
+                          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm text-left">
+                            <h4 className="text-xs font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-[#4E2BC4]" style={{ fontSize: 16 }}>group</span>
+                              Interested Customers ({deal.interests?.length || 0})
+                            </h4>
+                            {deal.interests && deal.interests.length > 0 ? (
+                              <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                                {deal.interests.map((interest, idx) => (
+                                  <div key={idx} className="flex flex-col gap-1 text-[11px] border-b border-slate-100 last:border-0 pb-2.5 mb-2.5 last:pb-0 last:mb-0">
+                                    <div className="flex items-center justify-between font-bold text-slate-800">
+                                      <span>{interest.customer?.name || 'Buyer'}</span>
+                                      <span className="text-[9px] text-slate-400 font-semibold px-2 py-0.5 bg-slate-50 rounded-md border border-slate-100">{interest.customer?.city || 'No City'}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-slate-500 mt-1">
+                                      <a href={`tel:${interest.customer?.mobile}`} className="hover:underline text-[#4E2BC4] flex items-center gap-0.5 font-bold">
+                                        📞 {interest.customer?.mobile}
+                                      </a>
+                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase ${
+                                        interest.status === 'READY_TO_BUY' || interest.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700' : 'bg-purple-50 text-purple-700'
+                                      }`}>
+                                        {interest.status}
+                                      </span>
+                                    </div>
+                                    {interest.customer?.address && (
+                                      <div className="text-[10px] text-slate-400 mt-1 bg-slate-50/50 p-2 rounded-lg border border-slate-100/60 leading-normal">
+                                        📍 {interest.customer.address}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-4 text-slate-400 text-[11px]">No active interests yet.</div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <InterestButton deal={deal} />

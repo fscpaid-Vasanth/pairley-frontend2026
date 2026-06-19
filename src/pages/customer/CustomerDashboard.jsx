@@ -98,16 +98,14 @@ export default function CustomerDashboard() {
 
         // Map paired deals
         setPairedDeals(
-          history.filter(h => h.status === 'READY_TO_BUY' || h.status === 'COMPLETED').map((h, index) => {
-            const partners = ['Priya Sharma', 'Rahul Sen', 'Sneha Patel', 'Vijay Krishnan', 'Karan Johar'];
-            const partner = partners[index % partners.length];
+          history.filter(h => h.status === 'READY_TO_BUY' || h.status === 'COMPLETED').map((h) => {
             return {
               id: h.offer.id,
               title: h.offer.title,
               category: h.offer.category ? h.offer.category.toLowerCase() : 'shopping',
               pairleyPrice: h.offer.offer_price,
               images: [h.offer.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
-              partnerName: partner,
+              partnerName: 'Matched Partner',
               status: h.status
             };
           }).slice(0, 4)

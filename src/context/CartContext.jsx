@@ -123,6 +123,14 @@ export function CartProvider({ children }) {
             'CANCELLED': 'delivered'
           };
 
+          const userStr = localStorage.getItem('pairley_user');
+          const user = userStr ? JSON.parse(userStr) : null;
+          const uName = user?.name || 'Me';
+          const uEmail = user?.email || '';
+          const uPhone = user?.mobile || '';
+          const uAddress = user?.address || 'Customer Address';
+          const uCity = user?.city || 'Mumbai';
+
           const mappedOrders = history.map((item) => ({
             id: `ORD-${item.id.slice(0, 6).toUpperCase()}`,
             dealId: item.offer.id,
@@ -137,17 +145,17 @@ export function CartProvider({ children }) {
             matchPartner: item.status !== 'INTERESTED' ? {
               name: 'Matched Partner',
               avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=partner',
-              city: item.offer.city || 'Mumbai',
+              city: item.offer.city || uCity,
               matchDate: new Date(item.updated_at).toISOString().split('T')[0]
             } : null,
             countdownMinutes: item.status === 'INTERESTED' ? 120 : 0,
             progressPercent: item.status === 'INTERESTED' ? 50 : 100,
             deliveryDetails: {
-              name: 'Me',
-              email: '',
-              phone: '',
-              address: 'Customer Address',
-              city: item.offer.city || 'Mumbai',
+              name: uName,
+              email: uEmail,
+              phone: uPhone,
+              address: uAddress,
+              city: item.offer.city || uCity,
               zipCode: ''
             }
           }));
