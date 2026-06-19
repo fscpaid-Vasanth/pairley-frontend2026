@@ -98,22 +98,10 @@ export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [orders, setOrders] = useState([]);
 
-  // Load cart and orders from session storage or pre-populate
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem('pairley_cart');
-      if (stored) {
-        setCartItems(JSON.parse(stored));
-      } else {
-        setCartItems([]);
-      }
-    } catch (e) {
-      console.error('Failed to load cart state:', e);
-    }
-
+  const refreshOrders = () => {
     const token = localStorage.getItem('pairley_token');
     if (token) {
-      api.get('/customers/history')
+      return api.get('/customers/history')
         .then((history) => {
           const statusMapping = {
             'INTERESTED': 'searching',
@@ -162,23 +150,40 @@ export function CartProvider({ children }) {
 
           setOrders(mappedOrders);
           sessionStorage.setItem('pairley_orders', JSON.stringify(mappedOrders));
+          return mappedOrders;
         })
         .catch((err) => {
           console.error('Failed to load user order history:', err);
           setOrders([]);
+          return [];
         });
     } else {
       try {
         const storedOrders = sessionStorage.getItem('pairley_orders');
-        if (storedOrders) {
-          setOrders(JSON.parse(storedOrders));
-        } else {
-          setOrders([]);
-        }
+        const parsed = storedOrders ? JSON.parse(storedOrders) : [];
+        setOrders(parsed);
+        return Promise.resolve(parsed);
       } catch (e) {
         setOrders([]);
+        return Promise.resolve([]);
       }
     }
+  };
+
+  // Load cart and orders from session storage or pre-populate
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('pairley_cart');
+      if (stored) {
+        setCartItems(JSON.parse(stored));
+      } else {
+        setCartItems([]);
+      }
+    } catch (e) {
+      console.error('Failed to load cart state:', e);
+    }
+
+    refreshOrders();
   }, []);
 
   const saveCart = (items) => {
@@ -267,7 +272,8 @@ export function CartProvider({ children }) {
       cartSavings,
       cartSavingsPercentage,
       orders,
-      createOrder
+      createOrder,
+      refreshOrders
     }}>
       {children}
     </CartContext.Provider>

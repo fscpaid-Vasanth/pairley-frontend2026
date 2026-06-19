@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Clock, Users, PartyPopper } from 'lucide-react';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import './InterestButton.css';
 
 export default function InterestButton({ deal, onInterest }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { orders, refreshOrders } = useCart();
   const [interestState, setInterestState] = useState('none'); // 'none', 'loading', 'interested', 'paired'
 
   const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
@@ -66,6 +68,7 @@ export default function InterestButton({ deal, onInterest }) {
           setTimeout(() => {
             setInterestState('paired');
             showToast('Pairley Match! A partner has been found for your deal.', 'success');
+            refreshOrders();
           }, 3000);
         }
       })
@@ -74,6 +77,27 @@ export default function InterestButton({ deal, onInterest }) {
         showToast(err.message || 'Failed to register interest. Please try again.', 'error');
         setInterestState('none');
       });
+  };
+
+  const handleCheckChat = () => {
+    const matchingOrder = orders.find(o => o.dealId === deal.id && o.status === 'matched');
+    const fallbackOrder = orders.find(o => o.dealId === deal.id);
+    const selectedOrder = matchingOrder || fallbackOrder;
+
+    if (selectedOrder) {
+      navigate(`/customer/chat/${selectedOrder.id}`);
+    } else {
+      // Force refresh match orders first
+      refreshOrders().then((updatedOrders) => {
+        const found = updatedOrders.find(o => o.dealId === deal.id);
+        if (found) {
+          navigate(`/customer/chat/${found.id}`);
+        } else {
+          // If still not loaded or match is offline mock, redirect to orders list where they see their matches
+          navigate('/customer/orders');
+        }
+      });
+    }
   };
 
   const isPair = deal.mode === 'pair';
@@ -144,8 +168,10 @@ export default function InterestButton({ deal, onInterest }) {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1.05, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             className="btn btn-secondary btn-lg w-full interest-btn interest-btn--paired"
-            disabled
+            onClick={handleCheckChat}
           >
             <PartyPopper size={20} className="interest-btn__icon" />
             You're Paired! Check Chat 🎉

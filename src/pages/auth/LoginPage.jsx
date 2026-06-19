@@ -28,22 +28,40 @@ export default function LoginPage() {
   const [resendSeconds, setResendSeconds] = useState(30);
   const [otpSending, setOtpSending] = useState(false);
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
-
   // Google Onboarding States
   const [googleUser, setGoogleUser] = useState(null);
   const [showGoogleOnboarding, setShowGoogleOnboarding] = useState(false);
   const [onboardingForm, setOnboardingForm] = useState({
     mobile: '',
     city: 'Mumbai',
+    state: '',
+    pincode: '',
     businessName: '',
     businessType: 'Shop',
     address: '',
     aadhaar: '',
     gst: '',
-    pan: ''
+    pan: '',
+    shopPhoto: '',
+    aadhaarPhoto: '',
+    panPhoto: ''
   });
   const [onboardingErrors, setOnboardingErrors] = useState({});
 
+  const handleFileChange = (field, file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setOnboardingForm(prev => ({ ...prev, [field]: reader.result }));
+      if (onboardingErrors[field]) {
+        setOnboardingErrors(prev => ({ ...prev, [field]: '' }));
+      }
+    };
+    reader.onerror = (error) => {
+      console.error('File conversion error:', error);
+    };
+  };
   // Resend Countdown Timer Effect
   useEffect(() => {
     if (loginMethod !== 'otp' || otpStep !== 'verify' || resendSeconds <= 0) return;
@@ -238,6 +256,16 @@ export default function LoginPage() {
       errs.mobile = 'Phone must be exactly 10 digits';
     }
 
+    if (!onboardingForm.state.trim()) {
+      errs.state = 'State is required';
+    }
+
+    if (!onboardingForm.pincode.trim()) {
+      errs.pincode = 'Pincode is required';
+    } else if (!/^\d{6}$/.test(onboardingForm.pincode.replace(/\D/g, ''))) {
+      errs.pincode = 'Pincode must be exactly 6 digits';
+    }
+
     if (role === 'customer') {
       if (!onboardingForm.address.trim()) {
         errs.address = 'Detailed Address is required';
@@ -259,6 +287,17 @@ export default function LoginPage() {
       if (onboardingForm.pan.trim() && onboardingForm.pan.trim().length !== 10) {
         errs.pan = 'PAN Number must be exactly 10 characters';
       }
+
+      // Photos validation
+      if (!onboardingForm.shopPhoto) {
+        errs.shopPhoto = 'Shop Image is required';
+      }
+      if (!onboardingForm.aadhaarPhoto) {
+        errs.aadhaarPhoto = 'Aadhaar Card Image is required';
+      }
+      if (onboardingForm.pan.trim() && !onboardingForm.panPhoto) {
+        errs.panPhoto = 'PAN Card Image is required when PAN Number is provided';
+      }
     }
     
     setOnboardingErrors(errs);
@@ -272,6 +311,8 @@ export default function LoginPage() {
       ...googleUser,
       mobile: onboardingForm.mobile,
       city: onboardingForm.city,
+      state: onboardingForm.state,
+      pincode: onboardingForm.pincode,
       address: role === 'customer' ? onboardingForm.address : 'Registered Office Address',
       business_name: role === 'business' ? onboardingForm.businessName : undefined,
       business_type: role === 'business' ? onboardingForm.businessType : undefined,
@@ -279,8 +320,9 @@ export default function LoginPage() {
       aadhaar_number: role === 'business' ? onboardingForm.aadhaar : undefined,
       gst_number: (role === 'business' && onboardingForm.gst.trim()) ? onboardingForm.gst : undefined,
       pan_number: (role === 'business' && onboardingForm.pan.trim()) ? onboardingForm.pan : undefined,
-      state: 'Maharashtra',
-      pincode: '400001'
+      shop_photo: role === 'business' ? onboardingForm.shopPhoto : undefined,
+      aadhaar_photo: role === 'business' ? onboardingForm.aadhaarPhoto : undefined,
+      pan_photo: (role === 'business' && onboardingForm.panPhoto) ? onboardingForm.panPhoto : undefined
     };
 
     api.post('/auth/google', payload)
@@ -299,10 +341,10 @@ export default function LoginPage() {
         showToast('Onboarding completed (Offline Mode)', 'success');
         localStorage.setItem('pairley_token', 'mock_demo_token');
         if (role === 'customer') {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Customer', email: googleUser?.email, role: 'Customer', city: onboardingForm.city, address: onboardingForm.address }));
+          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Customer', email: googleUser?.email, role: 'Customer', city: onboardingForm.city, state: onboardingForm.state, pincode: onboardingForm.pincode, address: onboardingForm.address }));
           navigate('/customer/dashboard');
         } else {
-          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Merchant', email: googleUser?.email, business_name: onboardingForm.businessName || 'Demo Shop', role: 'Business', city: onboardingForm.city }));
+          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Merchant', email: googleUser?.email, business_name: onboardingForm.businessName || 'Demo Shop', role: 'Business', city: onboardingForm.city, state: onboardingForm.state, pincode: onboardingForm.pincode }));
           navigate('/business/dashboard');
         }
       });
@@ -437,25 +479,69 @@ export default function LoginPage() {
                           }}
                         />
                       </div>
-                      {onboardingErrors.mobile && <span className="login-error">{onboardingErrors.mobile}</span>}
+                       {onboardingErrors.mobile && <span className="login-error">{onboardingErrors.mobile}</span>}
+                     </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      {/* City */}
+                      <div className="login-field" style={{ flex: 1 }}>
+                        <label className="login-label">City</label>
+                        <div className="login-input-wrap">
+                          <span className="material-symbols-outlined login-input-icon">location_on</span>
+                          <select
+                            className="login-input"
+                            style={{ paddingLeft: '40px', background: 'white' }}
+                            value={onboardingForm.city}
+                            onChange={(e) => setOnboardingForm(prev => ({ ...prev, city: e.target.value }))}
+                          >
+                            {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'].map(city => (
+                              <option key={city} value={city}>{city}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* State */}
+                      <div className="login-field" style={{ flex: 1 }}>
+                        <label className="login-label">State</label>
+                        <div className="login-input-wrap">
+                          <span className="material-symbols-outlined login-input-icon">map</span>
+                          <select
+                            className={`login-input ${onboardingErrors.state ? 'login-input--error' : ''}`}
+                            style={{ paddingLeft: '40px', background: 'white' }}
+                            value={onboardingForm.state}
+                            onChange={(e) => {
+                              setOnboardingForm(prev => ({ ...prev, state: e.target.value }));
+                              if (onboardingErrors.state) setOnboardingErrors(prev => ({ ...prev, state: '' }));
+                            }}
+                          >
+                            <option value="">Select State</option>
+                            {['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'Gujarat', 'Kerala', 'West Bengal', 'Rajasthan'].map(st => (
+                              <option key={st} value={st}>{st}</option>
+                            ))}
+                          </select>
+                        </div>
+                        {onboardingErrors.state && <span className="login-error">{onboardingErrors.state}</span>}
+                      </div>
                     </div>
 
-                    {/* City */}
+                    {/* Pincode */}
                     <div className="login-field">
-                      <label className="login-label">City</label>
+                      <label className="login-label">Pincode</label>
                       <div className="login-input-wrap">
-                        <span className="material-symbols-outlined login-input-icon">location_on</span>
-                        <select
-                          className="login-input"
-                          style={{ paddingLeft: '40px', background: 'white' }}
-                          value={onboardingForm.city}
-                          onChange={(e) => setOnboardingForm(prev => ({ ...prev, city: e.target.value }))}
-                        >
-                          {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'].map(city => (
-                            <option key={city} value={city}>{city}</option>
-                          ))}
-                        </select>
+                        <span className="material-symbols-outlined login-input-icon">pin</span>
+                        <input
+                          type="text"
+                          placeholder="6-digit pincode"
+                          className={`login-input ${onboardingErrors.pincode ? 'login-input--error' : ''}`}
+                          value={onboardingForm.pincode}
+                          maxLength={6}
+                          onChange={(e) => {
+                            setOnboardingForm(prev => ({ ...prev, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) }));
+                            if (onboardingErrors.pincode) setOnboardingErrors(prev => ({ ...prev, pincode: '' }));
+                          }}
+                        />
                       </div>
+                      {onboardingErrors.pincode && <span className="login-error">{onboardingErrors.pincode}</span>}
                     </div>
 
                     {role === 'customer' && (
@@ -576,8 +662,89 @@ export default function LoginPage() {
                             </div>
                             {onboardingErrors.gst && <span className="login-error">{onboardingErrors.gst}</span>}
                           </div>
-                        </>
-                      )}
+
+                          {/* Shop photo file upload */}
+                          <div className="login-field">
+                            <label className="login-label">Shop Image (Required)</label>
+                            <div className="su-file-upload-wrap">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                id="onboarding-shop-photo"
+                                style={{ display: 'none' }}
+                                onChange={(e) => handleFileChange('shopPhoto', e.target.files[0])}
+                              />
+                              <label
+                                htmlFor="onboarding-shop-photo"
+                                className={`su-file-upload-label ${onboardingErrors.shopPhoto ? 'su-file-upload-label--error' : ''}`}
+                              >
+                                <span className="material-symbols-outlined">add_a_photo</span>
+                                {onboardingForm.shopPhoto ? 'Change Shop Image' : 'Upload Shop Image'}
+                              </label>
+                              {onboardingForm.shopPhoto && (
+                                <div className="su-image-preview-container">
+                                  <img src={onboardingForm.shopPhoto} alt="Shop Preview" className="su-image-preview" />
+                                </div>
+                              )}
+                            </div>
+                            {onboardingErrors.shopPhoto && <span className="login-error">{onboardingErrors.shopPhoto}</span>}
+                          </div>
+
+                          {/* Aadhaar Card photo file upload */}
+                          <div className="login-field">
+                            <label className="login-label">Aadhaar Card Image (Required)</label>
+                            <div className="su-file-upload-wrap">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                id="onboarding-aadhaar-photo"
+                                style={{ display: 'none' }}
+                                onChange={(e) => handleFileChange('aadhaarPhoto', e.target.files[0])}
+                              />
+                              <label
+                                htmlFor="onboarding-aadhaar-photo"
+                                className={`su-file-upload-label ${onboardingErrors.aadhaarPhoto ? 'su-file-upload-label--error' : ''}`}
+                              >
+                                <span className="material-symbols-outlined">description</span>
+                                {onboardingForm.aadhaarPhoto ? 'Change Aadhaar Card Image' : 'Upload Aadhaar Card Image'}
+                              </label>
+                              {onboardingForm.aadhaarPhoto && (
+                                <div className="su-image-preview-container">
+                                  <img src={onboardingForm.aadhaarPhoto} alt="Aadhaar Preview" className="su-image-preview" />
+                                </div>
+                              )}
+                            </div>
+                            {onboardingErrors.aadhaarPhoto && <span className="login-error">{onboardingErrors.aadhaarPhoto}</span>}
+                          </div>
+
+                          {/* PAN Card photo file upload */}
+                          <div className="login-field">
+                            <label className="login-label">PAN Card Image (Optional)</label>
+                            <div className="su-file-upload-wrap">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                id="onboarding-pan-photo"
+                                style={{ display: 'none' }}
+                                onChange={(e) => handleFileChange('panPhoto', e.target.files[0])}
+                              />
+                              <label
+                                htmlFor="onboarding-pan-photo"
+                                className={`su-file-upload-label ${onboardingErrors.panPhoto ? 'su-file-upload-label--error' : ''}`}
+                              >
+                                <span className="material-symbols-outlined">badge</span>
+                                {onboardingForm.panPhoto ? 'Change PAN Card Image' : 'Upload PAN Card Image'}
+                              </label>
+                              {onboardingForm.panPhoto && (
+                                <div className="su-image-preview-container">
+                                  <img src={onboardingForm.panPhoto} alt="PAN Preview" className="su-image-preview" />
+                                </div>
+                              )}
+                            </div>
+                            {onboardingErrors.panPhoto && <span className="login-error">{onboardingErrors.panPhoto}</span>}
+                          </div>
+                      </>
+                    )}
 
                     <button type="submit" className="login-submit-btn" style={{ marginTop: '16px' }}>
                       Complete Profile
