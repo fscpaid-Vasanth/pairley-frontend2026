@@ -31,19 +31,13 @@
 .signup-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  color: #000f22;
   text-decoration: none;
-  letter-spacing: -0.02em;
 }
 
-.signup-brand-icon {
-  font-size: 26px !important;
-  color: #7C3AED;
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+.signup-logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
 }
 
 .signup-back-btn {

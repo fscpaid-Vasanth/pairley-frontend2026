@@ -45,44 +45,14 @@
 .navbar__logo {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
 }
 
-/* Gradient badge icon behind logo */
-.navbar__logo-badge {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #7C3AED 0%, #4a3ee6 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
-  flex-shrink: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.navbar__logo:hover .navbar__logo-badge {
-  transform: rotate(-6deg) scale(1.08);
-  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45);
-}
-
-.navbar__logo-badge svg {
-  color: white;
-}
-
-.navbar__logo-text {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #4E2BC4 0%, #7C3AED 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.03em;
-  line-height: 1;
+.navbar__logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
 }
 
 /* ══════════════════════════════

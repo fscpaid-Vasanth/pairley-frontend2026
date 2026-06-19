@@ -94,10 +94,7 @@ export default function Navbar({ onSearchClick }) {
 
           {/* ── Logo ── */}
           <Link to={ROUTES.HOME} className="navbar__logo">
-            <div className="navbar__logo-badge">
-              <ShoppingBag size={18} strokeWidth={2.5} color="white" />
-            </div>
-            <span className="navbar__logo-text">Pairley</span>
+            <img src="/logo.png" alt="Pairley Logo" className="navbar__logo-img" />
           </Link>
 
           {/* ── Desktop Nav Links ── */}

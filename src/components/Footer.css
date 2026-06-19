@@ -78,14 +78,24 @@
 
 /* --- Brand Column --- */
 .footer__brand-logo {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
+  display: inline-block;
+}
+
+.footer__logo-img {
+  height: 40px;
+  width: auto;
+  display: block;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 6px 14px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.footer__logo-img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);
 }
 
 .footer__brand-tagline {

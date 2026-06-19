@@ -16,7 +16,9 @@ export default function Footer() {
         <div className="footer__grid">
           {/* Column 1 — Brand */}
           <div>
-            <div className="footer__brand-logo">Pairley</div>
+            <div className="footer__brand-logo">
+              <img src="/logo.png" alt="Pairley Logo" className="footer__logo-img" />
+            </div>
             <p className="footer__brand-tagline">Pair Up. Pay Less. Get More.</p>
             <p className="footer__brand-desc">{APP_DESCRIPTION}</p>
           </div>

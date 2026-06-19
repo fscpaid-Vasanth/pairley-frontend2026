@@ -362,8 +362,7 @@ export default function LoginPage() {
       {/* ── Header ── */}
       <header className="login-header">
         <Link className="login-brand" to="/">
-          <span className="material-symbols-outlined login-brand-icon">shopping_bag</span>
-          Pairley
+          <img src="/logo.png" alt="Pairley Logo" className="login-logo-img" />
         </Link>
         <Link className="login-back-btn" to="/">
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>
