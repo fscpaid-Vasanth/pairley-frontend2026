@@ -83,7 +83,7 @@ const DealDetailPage = () => {
           title: data.title,
           description: data.description,
           category: data.category ? data.category.toLowerCase() : 'shopping',
-          mode: data.offer_type ? data.offer_type.toLowerCase() : 'pair',
+          mode: data.offer_type && (data.offer_type.toLowerCase() === 'bogo' || data.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
           originalPrice: data.original_price,
           pairleyPrice: data.offer_price,
           images: [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
@@ -152,6 +152,8 @@ const DealDetailPage = () => {
 
   /* ---- Helpers ---- */
   const category = getCategoryById(deal.category);
+  const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+  const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name || !!currentUser?.businessName;
   const { saved, percentage } = calculateSavings(deal.originalPrice, deal.pairleyPrice);
   const daysLeft = getDaysRemaining(deal.validUntil);
   const isPair = deal.mode === 'pair';
@@ -412,7 +414,7 @@ const DealDetailPage = () => {
                     <div className="deal-per-person">
                       <div className="deal-per-person-label">Each person pays</div>
                       <div className="deal-per-person-price">
-                        {formatPrice(Math.round(deal.pairleyPrice / 2))}
+                        {formatPrice(Math.round(deal.pairleyPrice))}
                       </div>
                     </div>
                   )}
@@ -430,7 +432,13 @@ const DealDetailPage = () => {
 
                   {/* Interest button */}
                   <div className="deal-interest-area">
-                    <InterestButton deal={deal} />
+                    {isBusiness ? (
+                      <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500 font-bold">
+                        🏪 Merchant Account View
+                      </div>
+                    ) : (
+                      <InterestButton deal={deal} />
+                    )}
                   </div>
 
                   {/* Days remaining */}

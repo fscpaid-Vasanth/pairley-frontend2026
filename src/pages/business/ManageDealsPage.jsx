@@ -37,14 +37,14 @@ export default function ManageDealsPage() {
 
   useEffect(() => {
     const bId = business.id || 'biz-001';
-    api.get(`/offers/list?businessId=${bId}`)
+    api.get(`/offers/list?businessId=${bId}&status=ALL`)
       .then((data) => {
         const mapped = data.map((d) => ({
           id: d.id,
           title: d.title,
           description: d.description,
           category: d.category ? d.category.toLowerCase() : 'shopping',
-          mode: d.offer_type ? d.offer_type.toLowerCase() : 'pair',
+          mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
           originalPrice: d.original_price,
           pairleyPrice: d.offer_price,
           images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
@@ -84,13 +84,17 @@ export default function ManageDealsPage() {
 
   // Status handlers
   const handleToggleStatus = (dealId) => {
-    setDealsList(prev => prev.map(deal => {
-      if (deal.id === dealId) {
-        const nextStatus = deal.status === 'active' ? 'draft' : 'active';
-        return { ...deal, status: nextStatus };
-      }
-      return deal;
-    }));
+    const deal = dealsList.find(d => d.id === dealId);
+    if (!deal) return;
+    const nextStatus = deal.status === 'active' ? 'draft' : 'active';
+    
+    // Optimistic UI update
+    setDealsList(prev => prev.map(d => d.id === dealId ? { ...d, status: nextStatus } : d));
+    
+    api.put(`/offers/update/${dealId}`, { status: nextStatus.toUpperCase() })
+      .catch((err) => {
+        console.error('Failed to update status on server:', err);
+      });
   };
 
   const handleDelete = (dealId) => {
@@ -100,18 +104,27 @@ export default function ManageDealsPage() {
       setDealsList(prev => prev.filter(d => d.id !== dealId));
       setShowUndoToast(true);
       
-      // Auto-hide undo notification after 6 seconds
-      setTimeout(() => {
+      // Auto-hide undo notification after 6 seconds and execute backend delete
+      const timeoutId = setTimeout(() => {
         setShowUndoToast(prev => {
-          if (prev) return false;
+          if (prev) {
+            api.delete(`/offers/delete/${dealId}`)
+              .catch(err => console.error('Failed to delete offer on server:', err));
+            return false;
+          }
           return prev;
         });
       }, 6000);
+      
+      targetDeal._deleteTimeoutId = timeoutId;
     }
   };
 
   const handleUndoDelete = () => {
     if (deletedDeal) {
+      if (deletedDeal._deleteTimeoutId) {
+        clearTimeout(deletedDeal._deleteTimeoutId);
+      }
       setDealsList(prev => [...prev, deletedDeal].sort((a, b) => a.id.localeCompare(b.id)));
       setDeletedDeal(null);
       setShowUndoToast(false);

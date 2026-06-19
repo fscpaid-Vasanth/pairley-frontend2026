@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
@@ -15,6 +15,7 @@ export default function SignUpPage() {
   const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     fullName: '',
     shopName: '',
@@ -23,14 +24,9 @@ export default function SignUpPage() {
     phone: '',
     password: '',
     confirmPassword: '',
+    city: 'Mumbai',
   });
   const [errors, setErrors] = useState({});
-
-  // OTP Verification States & Refs
-  const [isOtpStep, setIsOtpStep] = useState(false);
-  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
-  const [resendSeconds, setResendSeconds] = useState(30);
-  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
   // Google Onboarding States
   const [googleUser, setGoogleUser] = useState(null);
@@ -42,15 +38,6 @@ export default function SignUpPage() {
     businessType: 'Shop'
   });
   const [onboardingErrors, setOnboardingErrors] = useState({});
-
-  // Resend Countdown Timer Effect
-  useEffect(() => {
-    if (!isOtpStep || resendSeconds <= 0) return;
-    const interval = setInterval(() => {
-      setResendSeconds(prev => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isOtpStep, resendSeconds]);
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -74,113 +61,50 @@ export default function SignUpPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleOtpChange = (index, value) => {
-    const cleanVal = value.replace(/\D/g, '').slice(0, 1);
-    const nextOtp = [...otpValues];
-    nextOtp[index] = cleanVal;
-    setOtpValues(nextOtp);
-
-    // Auto focus next input
-    if (cleanVal && index < 5) {
-      otpRefs[index + 1].current?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
-      otpRefs[index - 1].current?.focus();
-    }
-  };
-
-  const handleResendOtp = () => {
-    setOtpValues(['', '', '', '', '', '']);
-    setResendSeconds(30);
-    showToast('OTP code resent to ' + form.countryCode + ' ' + form.phone + '. Enter 123456 to verify.', 'info');
-    setTimeout(() => {
-      otpRefs[0].current?.focus();
-    }, 100);
-  };
-
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    const enteredCode = otpValues.join('');
-    if (enteredCode.length < 6) {
-      showToast('Please enter the complete 6-digit code.', 'error');
-      return;
-    }
-
-    const payload = {
-      name: form.fullName,
-      mobile: form.phone,
-      email: form.email || undefined,
-      role: role === 'customer' ? 'Customer' : 'Business',
-      password: form.password,
-      // For business
-      business_name: role === 'business' ? form.shopName : undefined,
-      business_type: role === 'business' ? 'Shop' : undefined,
-      category: role === 'business' ? 'shopping' : undefined,
-      address: 'Select Address',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400001'
-    };
-
-    api.post('/auth/verify-otp', { mobile: form.phone, code: enteredCode })
-      .then(() => {
-        // Now register user profile
-        api.post('/auth/register', payload)
-          .then((res) => {
-            localStorage.setItem('pairley_token', res.access_token);
-            localStorage.setItem('pairley_user', JSON.stringify(res.user));
-            showToast('Registration successful! Welcome to Pairley.', 'success');
-            navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
-          })
-          .catch((err) => {
-            console.error('Registration failed:', err);
-            showToast(err.message || 'Registration failed. Proceeding in Offline Demo Mode.', 'warning');
-            navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
-          });
-      })
-      .catch((err) => {
-        console.error('OTP Verification failed:', err);
-        // Fallback for sandboxes
-        if (enteredCode === '123456' || enteredCode === '1234') {
-          api.post('/auth/register', payload)
-            .then((res) => {
-              localStorage.setItem('pairley_token', res.access_token);
-              localStorage.setItem('pairley_user', JSON.stringify(res.user));
-              showToast('Registration successful! Welcome to Pairley.', 'success');
-              navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
-            })
-            .catch(() => {
-              showToast('Registration fallback successful (Demo Mode)', 'info');
-              navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
-            });
-        } else {
-          showToast('Invalid verification code. Enter 123456 for bypass.', 'error');
-        }
-      });
-  };
-
+  // Direct registration — no OTP step required
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) {
       showToast('Please correct the validation errors in the form.', 'error');
       return;
     }
-    
-    api.post('/auth/send-otp', { mobile: form.phone })
-      .then(() => {
-        setIsOtpStep(true);
-        setResendSeconds(30);
-        showToast('OTP sent to ' + form.countryCode + ' ' + form.phone + '. Enter the code to verify.', 'info');
+    setSubmitting(true);
+
+    const payload = {
+      name: form.fullName,
+      mobile: form.phone.replace(/\D/g, ''),
+      email: form.email,
+      role: role === 'customer' ? 'Customer' : 'Business',
+      password: form.password,
+      business_name: role === 'business' ? form.shopName : undefined,
+      business_type: role === 'business' ? 'Shop' : undefined,
+      category: role === 'business' ? 'shopping' : undefined,
+      address: 'Select Address',
+      city: form.city || 'Mumbai',
+      state: 'Maharashtra',
+      pincode: '400001',
+    };
+
+    api.post('/auth/register', payload)
+      .then((res) => {
+        const token = res.token || res.access_token;
+        const userObj = { ...(res.user || {}), role: res.role };
+        localStorage.setItem('pairley_token', token);
+        localStorage.setItem('pairley_user', JSON.stringify(userObj));
+        showToast('Account created successfully! Welcome to Pairley 🎉', 'success');
+        navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
       })
       .catch((err) => {
-        console.error('Failed to send OTP:', err);
-        setIsOtpStep(true);
-        setResendSeconds(30);
-        showToast('OTP sent to ' + form.countryCode + ' ' + form.phone + '. Enter 123456 to verify (Demo Mode).', 'info');
-      });
+        console.error('Registration failed:', err);
+        const msg = err.message || '';
+        if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
+          showToast('This mobile number or email is already registered. Please log in instead.', 'warning');
+          navigate('/login');
+        } else {
+          showToast(msg || 'Registration failed. Please try again.', 'error');
+        }
+      })
+      .finally(() => setSubmitting(false));
   };
 
   const handleGoogleSignIn = async () => {
@@ -194,16 +118,14 @@ export default function SignUpPage() {
         profile_photo: firebaseUser.photoURL || undefined
       };
 
-      // Call backend to verify if registered
       api.post('/auth/google', checkPayload)
         .then((res) => {
           if (res.exists) {
             localStorage.setItem('pairley_token', res.access_token || res.token);
-            localStorage.setItem('pairley_user', JSON.stringify(res.user));
+            localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
             showToast('Registered successfully with Google!', 'success');
-            navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+            navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
           } else {
-            // User does not exist, trigger onboarding step
             setGoogleUser(checkPayload);
             setShowGoogleOnboarding(true);
             showToast('Please complete your profile to continue.', 'info');
@@ -260,16 +182,16 @@ export default function SignUpPage() {
       .then((res) => {
         if (res.exists) {
           localStorage.setItem('pairley_token', res.access_token || res.token);
-          localStorage.setItem('pairley_user', JSON.stringify(res.user));
+          localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
           showToast('Profile completed and logged in!', 'success');
-          navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+          navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
         } else {
           showToast(res.message || 'Profile completion failed.', 'error');
         }
       })
       .catch((err) => {
         console.error('Google registration failed:', err);
-        showToast(err.message || 'Onboarding failed.', 'error');
+        showToast(err.message || 'Onboarding failed. Please try again.', 'error');
       });
   };
 
@@ -278,7 +200,7 @@ export default function SignUpPage() {
       title: 'Join the Community!',
       desc: 'Sign up and start saving more by buying together with your local community.',
       steps: [
-        { label: 'Create your account', desc: 'Sign up in under 2 minutes — no credit card needed.' },
+        { label: 'Create your account', desc: 'Sign up in under 2 minutes — no OTP required.' },
         { label: 'Explore group deals', desc: 'Browse thousands of deals curated for your community.' },
         { label: 'Save together', desc: 'Unlock better prices the more people join your group.' },
       ],
@@ -391,7 +313,7 @@ export default function SignUpPage() {
                           className={`su-input su-phone-input ${onboardingErrors.mobile ? 'su-input--error' : ''}`}
                           value={onboardingForm.mobile}
                           onChange={(e) => {
-                            setOnboardingForm(prev => ({ ...prev, mobile: e.target.value }));
+                            setOnboardingForm(prev => ({ ...prev, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) }));
                             if (onboardingErrors.mobile) setOnboardingErrors(prev => ({ ...prev, mobile: '' }));
                           }}
                         />
@@ -430,41 +352,41 @@ export default function SignUpPage() {
                               className={`su-input ${onboardingErrors.businessName ? 'su-input--error' : ''}`}
                               value={onboardingForm.businessName}
                               onChange={(e) => {
-                                  setOnboardingForm(prev => ({ ...prev, businessName: e.target.value }));
-                                  if (onboardingErrors.businessName) setOnboardingErrors(prev => ({ ...prev, businessName: '' }));
-                                }}
-                              />
-                            </div>
-                            {onboardingErrors.businessName && <span className="su-error">{onboardingErrors.businessName}</span>}
+                                setOnboardingForm(prev => ({ ...prev, businessName: e.target.value }));
+                                if (onboardingErrors.businessName) setOnboardingErrors(prev => ({ ...prev, businessName: '' }));
+                              }}
+                            />
                           </div>
+                          {onboardingErrors.businessName && <span className="su-error">{onboardingErrors.businessName}</span>}
+                        </div>
 
-                          {/* Business Type */}
-                          <div className="su-field">
-                            <label className="su-label">Business Type</label>
-                            <div className="su-input-wrap">
-                              <span className="material-symbols-outlined su-input-icon">work</span>
-                              <select
-                                className="su-input"
-                                style={{ paddingLeft: '40px', background: 'white' }}
-                                value={onboardingForm.businessType}
-                                onChange={(e) => setOnboardingForm(prev => ({ ...prev, businessType: e.target.value }))}
-                              >
-                                {['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym/Fitness', 'Academy/Institute', 'Service Provider', 'Other'].map(type => (
-                                  <option key={type} value={type}>{type}</option>
-                                ))}
-                              </select>
-                            </div>
+                        {/* Business Type */}
+                        <div className="su-field">
+                          <label className="su-label">Business Type</label>
+                          <div className="su-input-wrap">
+                            <span className="material-symbols-outlined su-input-icon">work</span>
+                            <select
+                              className="su-input"
+                              style={{ paddingLeft: '40px', background: 'white' }}
+                              value={onboardingForm.businessType}
+                              onChange={(e) => setOnboardingForm(prev => ({ ...prev, businessType: e.target.value }))}
+                            >
+                              {['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym/Fitness', 'Academy/Institute', 'Service Provider', 'Other'].map(type => (
+                                <option key={type} value={type}>{type}</option>
+                              ))}
+                            </select>
                           </div>
-                        </>
-                      )}
+                        </div>
+                      </>
+                    )}
 
                     <button type="submit" className="su-submit-btn" style={{ marginTop: '16px' }}>
                       Complete Profile
                     </button>
                   </form>
 
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => { setShowGoogleOnboarding(false); setGoogleUser(null); }}
                     className="su-terms-link"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginTop: '16px' }}
@@ -472,10 +394,10 @@ export default function SignUpPage() {
                     ← Cancel Google Onboarding
                   </button>
                 </div>
-              ) : !isOtpStep ? (
+              ) : (
                 <>
                   <h2 className="signup-card-title">Create Account</h2>
-                  <p className="signup-card-subtitle">Fill in your details to get started</p>
+                  <p className="signup-card-subtitle">Fill in your details to get started instantly</p>
 
                   <form onSubmit={handleSubmit} noValidate className="signup-form">
 
@@ -552,10 +474,30 @@ export default function SignUpPage() {
                           placeholder="10-digit mobile number"
                           className={`su-input su-phone-input ${errors.phone ? 'su-input--error' : ''}`}
                           value={form.phone}
-                          onChange={(e) => update('phone', e.target.value)}
+                          maxLength={10}
+                          onChange={(e) => update('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                         />
                       </div>
                       {errors.phone && <span className="su-error">{errors.phone}</span>}
+                    </div>
+
+                    {/* City */}
+                    <div className="su-field">
+                      <label className="su-label" htmlFor="su-city">City</label>
+                      <div className="su-input-wrap">
+                        <span className="material-symbols-outlined su-input-icon">location_on</span>
+                        <select
+                          id="su-city"
+                          className="su-input"
+                          style={{ paddingLeft: '40px', background: 'white' }}
+                          value={form.city}
+                          onChange={(e) => update('city', e.target.value)}
+                        >
+                          {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'].map(city => (
+                            <option key={city} value={city}>{city}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     {/* Password row */}
@@ -618,16 +560,16 @@ export default function SignUpPage() {
                           }}
                         />
                         I agree to the{' '}
-                        <button type="button" className="su-terms-link" onClick={() => alert('Terms of Use (demo only)')}>Terms of Use</button>
+                        <button type="button" className="su-terms-link" onClick={() => alert('Terms of Use (coming soon)')}>Terms of Use</button>
                         {' '}and{' '}
-                        <button type="button" className="su-terms-link" onClick={() => alert('Privacy Policy (demo only)')}>Privacy Policy</button>
+                        <button type="button" className="su-terms-link" onClick={() => alert('Privacy Policy (coming soon)')}>Privacy Policy</button>
                       </label>
                       {errors.terms && <span className="su-error">{errors.terms}</span>}
                     </div>
 
                     {/* Submit */}
-                    <button type="submit" className="su-submit-btn">
-                      {role === 'customer' ? 'Create Account' : 'Register Your Shop'}
+                    <button type="submit" className="su-submit-btn" disabled={submitting}>
+                      {submitting ? 'Creating Account...' : (role === 'customer' ? 'Create Account' : 'Register Your Shop')}
                     </button>
                   </form>
 
@@ -649,7 +591,7 @@ export default function SignUpPage() {
                       </svg>
                       Google
                     </button>
-                    <button type="button" className="su-social-btn" onClick={() => alert('Facebook signup (demo only)')}>
+                    <button type="button" className="su-social-btn" onClick={() => alert('Facebook signup (coming soon)')}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
                         <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd"/>
                       </svg>
@@ -663,59 +605,6 @@ export default function SignUpPage() {
                     <Link to="/login" className="su-login-anchor">Log In</Link>
                   </p>
                 </>
-              ) : (
-                <div className="su-otp-wrap">
-                  <h2 className="signup-card-title">Verify Phone Number</h2>
-                  <p className="signup-card-subtitle">
-                    Enter the 6-digit verification code sent to <br />
-                    <span className="font-bold text-slate-800">{form.countryCode} {form.phone}</span>
-                  </p>
-
-                  <form onSubmit={handleVerifyOtp} className="signup-form w-full">
-                    <div className="su-otp-inputs">
-                      {otpValues.map((digit, idx) => (
-                        <input
-                          key={idx}
-                          ref={otpRefs[idx]}
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          maxLength="1"
-                          value={digit}
-                          onChange={(e) => handleOtpChange(idx, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                          className="su-otp-digit"
-                          autoFocus={idx === 0}
-                        />
-                      ))}
-                    </div>
-
-                    <button type="submit" className="su-submit-btn">
-                      Verify OTP
-                    </button>
-                  </form>
-
-                  <div className="su-otp-timer">
-                    {resendSeconds > 0 ? (
-                      <span>Resend OTP in <span className="text-slate-800 font-extrabold">{resendSeconds}s</span></span>
-                    ) : (
-                      <span>
-                        Didn't receive the code? 
-                        <button type="button" onClick={handleResendOtp} className="su-otp-resend">
-                          Resend Code
-                        </button>
-                      </span>
-                    )}
-                  </div>
-
-                  <button 
-                    type="button" 
-                    onClick={() => { setIsOtpStep(false); setOtpValues(['', '', '', '']); }}
-                    className="su-terms-link mt-2 font-bold text-xs"
-                  >
-                    ← Back to edit registration details
-                  </button>
-                </div>
               )}
             </div>
           </div>
@@ -726,7 +615,7 @@ export default function SignUpPage() {
       <footer className="signup-footer">
         <span className="signup-footer-item">
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>verified_user</span>
-          Secure Payments
+          Secure Platform
         </span>
         <span className="signup-footer-item">
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>support_agent</span>

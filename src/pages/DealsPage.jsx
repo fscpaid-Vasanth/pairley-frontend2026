@@ -44,7 +44,7 @@ const DealsPage = () => {
           title: d.title,
           description: d.description,
           category: d.category ? d.category.toLowerCase() : 'shopping',
-          mode: d.offer_type ? d.offer_type.toLowerCase() : 'pair',
+          mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
           originalPrice: d.original_price,
           pairleyPrice: d.offer_price,
           images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],

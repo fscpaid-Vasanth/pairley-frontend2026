@@ -41,6 +41,36 @@ export default function Navbar({ onSearchClick }) {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Reactive auth state — re-read on every route change so Login/Signup
+  // buttons disappear immediately after login without a full page reload.
+  const [authUser, setAuthUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pairley_user') || 'null'); } catch { return null; }
+  });
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem('pairley_token'));
+
+  // Re-sync auth state whenever the URL changes (after navigate()) or another
+  // tab writes to storage.
+  useEffect(() => {
+    const sync = () => {
+      try { setAuthUser(JSON.parse(localStorage.getItem('pairley_user') || 'null')); } catch { setAuthUser(null); }
+      setAuthToken(localStorage.getItem('pairley_token'));
+    };
+    sync(); // run immediately on mount / location change
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, [location.pathname]); // re-run whenever the route changes
+
+  const user = authUser;
+  const token = authToken;
+
+  const handleLogout = () => {
+    localStorage.removeItem('pairley_token');
+    localStorage.removeItem('pairley_user');
+    setAuthUser(null);
+    setAuthToken(null);
+    window.location.href = '/';
+  };
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -92,7 +122,6 @@ export default function Navbar({ onSearchClick }) {
             ))}
           </div>
 
-          {/* ── Desktop Actions ── */}
           <div className="navbar__actions">
             <button
               className="navbar__search-btn"
@@ -102,15 +131,62 @@ export default function Navbar({ onSearchClick }) {
               <Search size={19} />
             </button>
 
-            <Link to={ROUTES.LOGIN} className="navbar__login-btn">
-              <LogIn size={15} />
-              Log In
-            </Link>
+            {token && user ? (
+              <>
+                <Link
+                  to={user.role?.toLowerCase() === 'customer' ? ROUTES.CUSTOMER_DASHBOARD : ROUTES.BUSINESS_DASHBOARD}
+                  className="navbar__dashboard-btn"
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    background: '#FFF',
+                    border: '1px solid #E2E8F0',
+                    color: '#4E2BC4',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="navbar__logout-btn"
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    background: '#4E2BC4',
+                    color: '#FFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    border: 'none',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to={ROUTES.LOGIN} className="navbar__login-btn">
+                  <LogIn size={15} />
+                  Log In
+                </Link>
 
-            <Link to={ROUTES.SIGNUP} className="navbar__signup-btn">
-              <UserPlus size={15} />
-              Sign Up
-            </Link>
+                <Link to={ROUTES.SIGNUP} className="navbar__signup-btn">
+                  <UserPlus size={15} />
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* ── Mobile Hamburger ── */}
@@ -207,22 +283,43 @@ export default function Navbar({ onSearchClick }) {
                 </motion.div>
               </motion.div>
 
-              {/* Drawer Actions */}
               <div className="navbar__drawer-actions">
-                <Link
-                  to={ROUTES.SIGNUP}
-                  className="navbar__signup-btn"
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <UserPlus size={15} /> Sign Up
-                </Link>
-                <Link
-                  to={ROUTES.LOGIN}
-                  className="navbar__login-btn"
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <LogIn size={15} /> Log In
-                </Link>
+                {token && user ? (
+                  <>
+                    <Link
+                      to={user.role?.toLowerCase() === 'customer' ? ROUTES.CUSTOMER_DASHBOARD : ROUTES.BUSINESS_DASHBOARD}
+                      className="navbar__signup-btn"
+                      onClick={() => setDrawerOpen(false)}
+                      style={{ display: 'flex', justifyContent: 'center' }}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      className="navbar__login-btn w-full justify-center"
+                      onClick={() => { setDrawerOpen(false); handleLogout(); }}
+                      style={{ border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '14px', background: 'transparent', color: '#fff', cursor: 'pointer' }}
+                    >
+                      Log Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to={ROUTES.SIGNUP}
+                      className="navbar__signup-btn"
+                      onClick={() => setDrawerOpen(false)}
+                    >
+                      <UserPlus size={15} /> Sign Up
+                    </Link>
+                    <Link
+                      to={ROUTES.LOGIN}
+                      className="navbar__login-btn"
+                      onClick={() => setDrawerOpen(false)}
+                    >
+                      <LogIn size={15} /> Log In
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* Brand Socials at Bottom */}

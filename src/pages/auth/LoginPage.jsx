@@ -26,6 +26,7 @@ export default function LoginPage() {
   const [countryCode, setCountryCode] = useState('+91');
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [resendSeconds, setResendSeconds] = useState(30);
+  const [otpSending, setOtpSending] = useState(false);
   const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
   // Google Onboarding States
@@ -72,15 +73,22 @@ export default function LoginPage() {
     
     api.post('/auth/login', { email: form.email, password_hash: form.password })
       .then((res) => {
-        localStorage.setItem('pairley_token', res.access_token);
-        localStorage.setItem('pairley_user', JSON.stringify(res.user));
+        localStorage.setItem('pairley_token', res.access_token || res.token);
+        localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
         showToast('Logged in successfully!', 'success');
-        navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+        navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
       })
       .catch((err) => {
         console.error('Login failed:', err);
         showToast(err.message || 'Login failed. Proceeding in Offline Demo Mode.', 'warning');
-        navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
+        localStorage.setItem('pairley_token', 'mock_demo_token');
+        if (role === 'customer') {
+          localStorage.setItem('pairley_user', JSON.stringify({ name: 'Demo Customer', email: form.email, role: 'Customer' }));
+          navigate('/customer/dashboard');
+        } else {
+          localStorage.setItem('pairley_user', JSON.stringify({ name: 'Demo Merchant', email: form.email, business_name: 'Demo Shop', role: 'Business' }));
+          navigate('/business/dashboard');
+        }
       });
   };
 
@@ -97,28 +105,47 @@ export default function LoginPage() {
       return;
     }
     setErrors({});
-    setOtpStep('verify');
-    setOtpValues(['', '', '', '', '', '']);
-    setResendSeconds(30);
-    showToast(`OTP verification code sent to ${countryCode} ${phone}. Enter 123456 to verify.`, 'info');
-    setTimeout(() => {
-      otpRefs[0].current?.focus();
-    }, 100);
+    setOtpSending(true);
+    
+    api.post('/auth/send-otp', { mobile: phone.trim() })
+      .then(() => {
+        setOtpStep('verify');
+        setOtpValues(['', '', '', '', '', '']);
+        setResendSeconds(30);
+        showToast(`OTP verification code sent to ${countryCode} ${phone}.`, 'success');
+        setTimeout(() => { otpRefs[0].current?.focus(); }, 100);
+      })
+      .catch((err) => {
+        console.error('Failed to send OTP:', err);
+        showToast(err.message || 'Failed to send OTP. Please check your mobile number and try again.', 'error');
+      })
+      .finally(() => setOtpSending(false));
   };
 
   const handleVerifyOtp = (e) => {
     e.preventDefault();
-    const code = otpValues.join('');
-    if (code.length < 6) {
+    const enteredCode = otpValues.join('');
+    if (enteredCode.length < 6) {
       showToast('Please enter all 6 digits of the OTP.', 'error');
       return;
     }
-    if (code === '123456' || code === '1234') {
-      showToast('Logged in successfully!', 'success');
-      navigate(role === 'customer' ? '/customer/dashboard' : '/business/dashboard');
-    } else {
-      showToast('Invalid verification code. Try again using 123456.', 'error');
-    }
+
+    api.post('/auth/verify-otp', { mobile: phone.trim(), code: enteredCode })
+      .then((res) => {
+        if (res.exists) {
+          localStorage.setItem('pairley_token', res.token);
+          localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
+          showToast('Logged in successfully!', 'success');
+          navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+        } else {
+          showToast('No profile found with this mobile number. Please register/signup first.', 'warning');
+          navigate('/signup');
+        }
+      })
+      .catch((err) => {
+        console.error('OTP Verification failed:', err);
+        showToast(err.message || 'Invalid verification code. Please try again.', 'error');
+      });
   };
 
   const handleOtpChange = (index, value) => {
@@ -142,10 +169,17 @@ export default function LoginPage() {
   const handleResendOtp = () => {
     setOtpValues(['', '', '', '', '', '']);
     setResendSeconds(30);
-    showToast(`OTP code resent to ${countryCode} ${phone}. Enter 123456 to verify.`, 'info');
-    setTimeout(() => {
-      otpRefs[0].current?.focus();
-    }, 100);
+    api.post('/auth/send-otp', { mobile: phone.trim() })
+      .then(() => {
+        showToast(`OTP code resent to ${countryCode} ${phone}.`, 'success');
+        setTimeout(() => {
+          otpRefs[0].current?.focus();
+        }, 100);
+      })
+      .catch((err) => {
+        console.error('Failed to resend OTP:', err);
+        showToast(err.message || 'Failed to resend OTP. Please try again.', 'error');
+      });
   };
 
   const handleGoogleSignIn = async () => {
@@ -164,9 +198,9 @@ export default function LoginPage() {
         .then((res) => {
           if (res.exists) {
             localStorage.setItem('pairley_token', res.access_token || res.token);
-            localStorage.setItem('pairley_user', JSON.stringify(res.user));
+            localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
             showToast('Logged in with Google!', 'success');
-            navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+            navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
           } else {
             // User does not exist, trigger onboarding step
             setGoogleUser(checkPayload);
@@ -225,16 +259,24 @@ export default function LoginPage() {
       .then((res) => {
         if (res.exists) {
           localStorage.setItem('pairley_token', res.access_token || res.token);
-          localStorage.setItem('pairley_user', JSON.stringify(res.user));
+          localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
           showToast('Profile completed and logged in!', 'success');
-          navigate(res.user.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+          navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
         } else {
           showToast(res.message || 'Profile completion failed.', 'error');
         }
       })
       .catch((err) => {
         console.error('Google registration failed:', err);
-        showToast(err.message || 'Onboarding failed.', 'error');
+        showToast(err.message || 'Onboarding failed. Proceeding in Demo Mode.', 'warning');
+        localStorage.setItem('pairley_token', 'mock_demo_token');
+        if (role === 'customer') {
+          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Customer', email: googleUser?.email, role: 'Customer' }));
+          navigate('/customer/dashboard');
+        } else {
+          localStorage.setItem('pairley_user', JSON.stringify({ name: googleUser?.name || 'Demo Merchant', email: googleUser?.email, business_name: onboardingForm.businessName || 'Demo Shop', role: 'Business' }));
+          navigate('/business/dashboard');
+        }
       });
   };
 
@@ -487,14 +529,24 @@ export default function LoginPage() {
                     )}
                   </div>
 
-                  <button 
-                    type="button" 
-                    onClick={() => { setOtpStep('phone'); setOtpValues(['', '', '', '']); }}
-                    className="login-signup-anchor"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginTop: '16px' }}
-                  >
-                    ← Back to edit phone number
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', marginTop: '16px' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => { setOtpStep('phone'); setOtpValues(['', '', '', '', '', '']); }}
+                      className="login-signup-anchor"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                    >
+                      ← Back to edit phone number
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => { setLoginMethod('password'); setOtpStep('phone'); setErrors({}); }}
+                      className="login-signup-anchor"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: 'var(--color-primary)', fontWeight: 'bold' }}
+                    >
+                      🔑 Switch to Password Login
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <>
@@ -613,8 +665,9 @@ export default function LoginPage() {
                             placeholder="10-digit mobile number"
                             className={`login-input login-phone-input ${errors.phone ? 'login-input--error' : ''}`}
                             value={phone}
+                            maxLength={10}
                             onChange={(e) => {
-                              setPhone(e.target.value);
+                              setPhone(e.target.value.replace(/\D/g, '').slice(0, 10));
                               if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
                             }}
                           />
@@ -623,8 +676,8 @@ export default function LoginPage() {
                       </div>
 
                       {/* Submit */}
-                      <button type="submit" className="login-submit-btn" style={{ marginTop: '8px' }}>
-                        Send OTP
+                      <button type="submit" className="login-submit-btn" style={{ marginTop: '8px' }} disabled={otpSending}>
+                        {otpSending ? 'Sending OTP...' : 'Send OTP'}
                       </button>
                     </form>
                   )}

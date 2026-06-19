@@ -72,68 +72,76 @@ export default function BusinessDashboard() {
       })
       .catch((err) => console.error('Failed to fetch business metrics:', err));
 
-    // 2. Fetch storefront deals and their interests
-    api.get('/offers/interested-customers')
+    const bId = business.id || 'biz-001';
+    api.get(`/offers/list?businessId=${bId}&status=ALL`)
       .then((data) => {
-        // Map offers
         const mappedDeals = data.map((d) => ({
           id: d.id,
           title: d.title,
           category: d.category ? d.category.toLowerCase() : 'shopping',
-          mode: d.offer_type ? d.offer_type.toLowerCase() : 'pair',
-          location: d.city || business.city || 'Mumbai',
+          mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
+          location: d.business?.city || d.city || business.city || 'Mumbai',
           interestCount: d.joined_people || 0,
           maxParticipants: d.required_people || 2,
           images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
           status: d.status ? d.status.toLowerCase() : 'active'
         }));
         setDeals(mappedDeals);
-
-        // Generate activity items dynamically from offer interests
-        const acts = [];
-        data.forEach((offer) => {
-          (offer.interests || []).forEach((interest) => {
-            const customerName = interest.customer?.name || 'A customer';
-            const isPair = offer.offer_type?.toLowerCase() === 'pair';
-            let actText = `${customerName} joined the deal "${offer.title}"`;
-            let badgeText = 'New Interest';
-            let actType = 'interest';
-
-            if (interest.status === 'READY_TO_BUY') {
-              actText = `Target met! ${customerName} and others matched for "${offer.title}"`;
-              badgeText = 'Match Completed';
-              actType = 'match';
-            } else if (interest.status === 'COMPLETED') {
-              actText = `Match finalized for "${offer.title}" with ${customerName}`;
-              badgeText = 'Completed';
-              actType = 'match';
-            } else if (!isPair) {
-              actText = `${customerName} joined the group for "${offer.title}" (${offer.joined_people}/${offer.required_people})`;
-              badgeText = 'Group Joined';
-              actType = 'join';
-            }
-
-            acts.push({
-              id: interest.id,
-              type: actType,
-              text: actText,
-              timestamp: new Date(interest.created_at || new Date()),
-              time: formatTimeAgo(interest.created_at || new Date()),
-              badge: badgeText
-            });
-          });
-        });
-
-        // Sort activities by timestamp descending
-        acts.sort((a, b) => b.timestamp - a.timestamp);
-        setActivities(acts.slice(0, 10)); // Top 10 activities
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Failed to load storefront data:', err);
-        setDeals([]);
-        setActivities([]);
-        setLoading(false);
+        console.error('Failed to load storefront listings, trying interested-customers endpoint:', err);
+        // Fallback: try the interested-customers endpoint
+        api.get('/offers/interested-customers')
+          .then((data) => {
+            const mappedDeals = data.map((d) => ({
+              id: d.id,
+              title: d.title,
+              category: d.category ? d.category.toLowerCase() : 'shopping',
+              mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
+              location: d.city || business.city || 'Mumbai',
+              interestCount: d.joined_people || 0,
+              maxParticipants: d.required_people || 2,
+              images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+              status: d.status ? d.status.toLowerCase() : 'active'
+            }));
+            setDeals(mappedDeals);
+
+            // Generate activity items from interest data
+            const acts = [];
+            data.forEach((offer) => {
+              (offer.interests || []).forEach((interest) => {
+                const customerName = interest.customer?.name || 'A customer';
+                const isPairOffer = offer.offer_type?.toLowerCase() === 'pair' || offer.offer_type?.toLowerCase() === 'bogo';
+                let actText = `${customerName} joined the deal "${offer.title}"`;
+                let badgeText = 'New Interest';
+                let actType = 'interest';
+                if (interest.status === 'READY_TO_BUY') {
+                  actText = `Target met! ${customerName} and others matched for "${offer.title}"`;
+                  badgeText = 'Match Completed';
+                  actType = 'match';
+                } else if (interest.status === 'COMPLETED') {
+                  actText = `Match finalized for "${offer.title}" with ${customerName}`;
+                  badgeText = 'Completed';
+                  actType = 'match';
+                } else if (!isPairOffer) {
+                  actText = `${customerName} joined the group for "${offer.title}" (${offer.joined_people}/${offer.required_people})`;
+                  badgeText = 'Group Joined';
+                  actType = 'join';
+                }
+                acts.push({ id: interest.id, type: actType, text: actText, timestamp: new Date(interest.created_at || new Date()), time: formatTimeAgo(interest.created_at || new Date()), badge: badgeText });
+              });
+            });
+            acts.sort((a, b) => b.timestamp - a.timestamp);
+            setActivities(acts.slice(0, 10));
+            setLoading(false);
+          })
+          .catch((err2) => {
+            console.error('Both endpoints failed:', err2);
+            setDeals([]);
+            setActivities([]);
+            setLoading(false);
+          });
       });
   }, [business.id, business.city]);
 

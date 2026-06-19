@@ -11,7 +11,12 @@ export default function InterestButton({ deal, onInterest }) {
   const { showToast } = useToast();
   const [interestState, setInterestState] = useState('none'); // 'none', 'loading', 'interested', 'paired'
 
+  const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+  const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name || !!currentUser?.businessName;
+
+  // Always call hooks before any conditional return (React rules of hooks)
   useEffect(() => {
+    if (isBusiness) return; // Skip for business accounts
     const token = localStorage.getItem('pairley_token');
     if (token && deal && deal.id) {
       api.get('/customers/history')
@@ -29,7 +34,16 @@ export default function InterestButton({ deal, onInterest }) {
           console.error('Failed to resolve interest history:', err);
         });
     }
-  }, [deal?.id]);
+  }, [deal?.id, isBusiness]);
+
+  // Show merchant view AFTER hooks
+  if (isBusiness) {
+    return (
+      <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-xs text-slate-500 font-bold w-full">
+        🏪 Merchant Account View
+      </div>
+    );
+  }
 
   const handleShowInterest = () => {
     const token = localStorage.getItem('pairley_token');
@@ -57,14 +71,8 @@ export default function InterestButton({ deal, onInterest }) {
       })
       .catch((err) => {
         console.error('Failed to express interest:', err);
-        // Fallback for demo
-        showToast('Interest registered locally (Demo Mode)', 'info');
-        setInterestState('interested');
-        if (deal.mode === 'pair') {
-          setTimeout(() => {
-            setInterestState('paired');
-          }, 4000);
-        }
+        showToast(err.message || 'Failed to register interest. Please try again.', 'error');
+        setInterestState('none');
       });
   };
 
