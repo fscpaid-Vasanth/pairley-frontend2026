@@ -117,9 +117,33 @@ const DealDetailPage = () => {
   /* ---- Loading ---- */
   if (loading) {
     return (
-      <div className="page-wrapper">
-        <div className="deal-detail-page py-20 text-center text-slate-400 font-semibold animate-pulse">
-          ⚡ Loading deal details...
+      <div className="page-wrapper py-24 flex items-center justify-center min-h-[70vh]">
+        <div className="container max-w-xl mx-auto px-4">
+          <div className="bg-white/80 backdrop-blur-lg border border-slate-200/80 p-10 md:p-14 rounded-3xl shadow-xl text-center flex flex-col items-center gap-8">
+            {/* Beautiful Dual-Ring Loader */}
+            <div className="relative flex items-center justify-center w-24 h-24">
+              {/* Outer Spin Ring (Primary Violet color) */}
+              <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#4E2BC4] animate-spin"></div>
+              {/* Inner Reverse-Spin Ring (Secondary Green color) */}
+              <div className="absolute w-16 h-16 rounded-full border-4 border-slate-100 border-b-[#10B981] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }}></div>
+              {/* Center bouncing element (Accent orange) */}
+              <div className="w-5 h-5 bg-[#F97316] rounded-full animate-bounce"></div>
+            </div>
+
+            <div>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight flex items-center justify-center gap-2">
+                ⚡ Loading Deal Details...
+              </h2>
+              <p className="text-sm md:text-base text-slate-500 font-medium max-w-sm mx-auto mt-4 leading-relaxed">
+                Finding the best matching discount, checking group pricing tiers, and loading partner information to pair you up!
+              </p>
+            </div>
+
+            {/* Glowing progress slider bar */}
+            <div className="w-64 h-2 bg-slate-100 rounded-full overflow-hidden mt-2 relative">
+              <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#4E2BC4] via-[#10B981] to-[#F97316] rounded-full animate-pulse w-4/5"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
