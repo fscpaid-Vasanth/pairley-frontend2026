@@ -239,7 +239,7 @@
   box-shadow: 
     0 10px 30px -10px rgba(78, 43, 196, 0.15),
     0 1px 3px rgba(78, 43, 196, 0.05);
-  max-width: 580px;
+  max-width: 680px;
   width: 100%;
 }
 
@@ -252,11 +252,11 @@
 }
 
 .search-console__field--mall {
-  max-width: 220px;
+  max-width: 280px;
 }
 
 .search-console__field--query {
-  max-width: 280px;
+  max-width: 320px;
 }
 
 .search-console__icon {
