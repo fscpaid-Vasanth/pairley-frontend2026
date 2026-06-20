@@ -112,8 +112,8 @@
   --z-toast: 500;
 
   /* Container */
-  --max-width: 1280px;
-  --max-width-wide: 1440px;
+  --max-width: 1440px;
+  --max-width-wide: 1600px;
 }
 
 /* ---------- Category Colors ---------- */
