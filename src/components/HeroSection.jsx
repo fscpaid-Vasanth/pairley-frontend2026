@@ -94,63 +94,6 @@ export default function HeroSection({ selectedMall, onMallChange, searchQuery, o
           <div className="hero__middle">
             <InteractiveDealSimulator />
           </div>
-
-          {/* Right Column (col-span-4): Category Quick Links */}
-          <div className="hero__right">
-            <div className="category-quick-card">
-              {/* Card header */}
-              <div className="category-quick-header">
-                <span className="category-quick-header-title">Browse Categories</span>
-                <Link to={ROUTES.DEALS} className="category-quick-header-sub">View All →</Link>
-              </div>
-
-              {/* Category grid */}
-              <div className="category-quick-body">
-                <div className="category-quick-grid">
-                  <Link to={`${ROUTES.DEALS}?category=dining`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#FFF1F0' }}>🍕</div>
-                    <span className="category-quick-label">Food</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=fitness`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#F5F0FF' }}>💪</div>
-                    <span className="category-quick-label">Fitness</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=beauty`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#FFF0F7' }}>💆</div>
-                    <span className="category-quick-label">Salon</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=shopping`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#FFF7ED' }}>🛍️</div>
-                    <span className="category-quick-label">Retail</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=tours`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#EFF6FF' }}>✈️</div>
-                    <span className="category-quick-label">Travel</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=education`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#F0FDF4' }}>📚</div>
-                    <span className="category-quick-label">Education</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=healthcare`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#FFF1F0' }}>🏥</div>
-                    <span className="category-quick-label">Healthcare</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=home-services`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#EEF2FF' }}>🏠</div>
-                    <span className="category-quick-label">Home</span>
-                  </Link>
-                  <Link to={`${ROUTES.DEALS}?category=electronics`} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#F5F0FF' }}>📺</div>
-                    <span className="category-quick-label">Electronics</span>
-                  </Link>
-                  <Link to={ROUTES.DEALS} className="category-quick-item">
-                    <div className="category-quick-icon" style={{ background: '#F9FAFB' }}>🔖</div>
-                    <span className="category-quick-label">More</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
         </motion.div>
       </div>
     </section>

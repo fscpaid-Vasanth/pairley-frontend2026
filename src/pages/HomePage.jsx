@@ -127,6 +127,60 @@ export default function HomePage() {
         onSearchChange={setSearchQuery}
       />
 
+      {/* Viewport 1.5: Horizontal Categories Layer */}
+      <section className="homepage-categories-section">
+        <div className="container">
+          <div className="categories-horizontal-card">
+            <div className="categories-horizontal-header">
+              <h3 className="categories-horizontal-title">Browse Categories</h3>
+              <Link to={ROUTES.DEALS} className="categories-horizontal-view-all">View All →</Link>
+            </div>
+            <div className="categories-horizontal-grid">
+              <Link to={`${ROUTES.DEALS}?category=dining`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#FFF1F0' }}>🍕</span>
+                <span className="categories-horizontal-label">Food</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=fitness`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#F5F0FF' }}>💪</span>
+                <span className="categories-horizontal-label">Fitness</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=beauty`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#FFF0F7' }}>💆</span>
+                <span className="categories-horizontal-label">Salon</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=shopping`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#FFF7ED' }}>🛍️</span>
+                <span className="categories-horizontal-label">Retail</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=tours`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#EFF6FF' }}>✈️</span>
+                <span className="categories-horizontal-label">Travel</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=education`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#F0FDF4' }}>📚</span>
+                <span className="categories-horizontal-label">Education</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=healthcare`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#FFF1F0' }}>🏥</span>
+                <span className="categories-horizontal-label">Healthcare</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=home-services`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#EEF2FF' }}>🏠</span>
+                <span className="categories-horizontal-label">Home</span>
+              </Link>
+              <Link to={`${ROUTES.DEALS}?category=electronics`} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#F5F0FF' }}>📺</span>
+                <span className="categories-horizontal-label">Electronics</span>
+              </Link>
+              <Link to={ROUTES.DEALS} className="categories-horizontal-item">
+                <span className="categories-horizontal-icon" style={{ background: '#F9FAFB' }}>🔖</span>
+                <span className="categories-horizontal-label">More</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Viewport 2: Popular Offers, How It Works, Business Banner & Trust Bar */}
       <section className="homepage-bottom-section">
         <div className="container">

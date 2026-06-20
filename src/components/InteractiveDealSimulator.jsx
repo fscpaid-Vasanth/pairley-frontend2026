@@ -41,7 +41,7 @@ export default function InteractiveDealSimulator() {
       <div className="sim-card__header">
         <h3 className="sim-card__title">
           <Sparkles className="text-purple-600 animate-pulse" size={16} />
-          Interactive Deal Simulator
+          Power of the Pairley
         </h3>
         <p className="sim-card__subtitle">See how Pairley matches buyers and drops prices.</p>
       </div>
@@ -216,8 +216,8 @@ export default function InteractiveDealSimulator() {
                 animate={{ width: `${(groupPeople / 10) * 100}%` }}
                 transition={{ type: 'spring', stiffness: 60 }}
               />
-              <div className="group-progress-marker left-[40%]" />
-              <div className="group-progress-marker left-[80%]" />
+              <div className="group-progress-marker" style={{ left: '40%' }} />
+              <div className="group-progress-marker" style={{ left: '80%' }} />
             </div>
 
             {/* Progress Tiers */}

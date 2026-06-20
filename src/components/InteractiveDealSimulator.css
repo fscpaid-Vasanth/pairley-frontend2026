@@ -150,7 +150,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 320px;
+  max-width: 580px;
   margin: 10px auto;
   position: relative;
 }
@@ -267,7 +267,7 @@
   font-size: 11px;
   line-height: 1.5;
   color: #475569;
-  max-width: 260px;
+  max-width: 480px;
 }
 
 .sim-dots {
