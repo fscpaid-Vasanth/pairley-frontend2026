@@ -22,8 +22,8 @@
 }
 
 .popular-offers-box {
-  background: white;
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 245, 255, 0.95) 100%);
+  border: 1.5px solid rgba(78, 43, 196, 0.12);
   border-radius: var(--radius-2xl);
   padding: var(--space-6);
   box-shadow: var(--shadow-sm);
@@ -245,8 +245,8 @@
 }
 
 .how-works-box {
-  background: white;
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(244, 247, 255, 0.95) 100%);
+  border: 1.5px solid rgba(78, 43, 196, 0.12);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-sm);
   flex: 0 0 auto;
@@ -490,11 +490,11 @@
 }
 
 .categories-horizontal-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 244, 255, 0.92) 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(196, 198, 220, 0.35);
-  border-radius: 24px;
+  border: 1.5px solid rgba(78, 43, 196, 0.12);
+  border-radius: var(--radius-2xl);
   padding: 24px;
   box-shadow: 
     0 10px 15px -3px rgba(78, 43, 196, 0.05),
@@ -541,8 +541,8 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  background: white;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: linear-gradient(135deg, #ffffff 0%, #f6f3ff 100%);
+  border: 1px solid rgba(78, 43, 196, 0.08);
   padding: 10px 14px;
   border-radius: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);

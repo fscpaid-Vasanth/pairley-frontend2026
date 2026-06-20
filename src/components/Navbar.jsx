@@ -94,7 +94,7 @@ export default function Navbar({ onSearchClick }) {
 
           {/* ── Logo ── */}
           <Link to={ROUTES.HOME} className="navbar__logo">
-            <img src="/logo.png" alt="Pairley Logo" className="navbar__logo-img" />
+            <img src="/logo.svg" alt="Pairley Logo" className="navbar__logo-img" />
           </Link>
 
           {/* ── Desktop Nav Links ── */}

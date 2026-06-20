@@ -298,7 +298,7 @@ export default function SignUpPage() {
       {/* ── Header ── */}
       <header className="signup-header">
         <Link className="signup-brand" to="/">
-          <img src="/logo.png" alt="Pairley Logo" className="signup-logo-img" />
+          <img src="/logo.svg" alt="Pairley Logo" className="signup-logo-img" />
         </Link>
         <Link className="signup-back-btn" to="/">
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>

@@ -17,7 +17,7 @@ export default function Footer() {
           {/* Column 1 — Brand */}
           <div>
             <div className="footer__brand-logo">
-              <img src="/logo.png" alt="Pairley Logo" className="footer__logo-img" />
+              <img src="/logo.svg" alt="Pairley Logo" className="footer__logo-img" />
             </div>
             <p className="footer__brand-tagline">Pair Up. Pay Less. Get More.</p>
             <p className="footer__brand-desc">{APP_DESCRIPTION}</p>
