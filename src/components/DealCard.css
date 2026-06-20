@@ -2,12 +2,8 @@
 
 .deal-card {
   display: block;
-  background: white;
   border-radius: 18px;
   overflow: hidden;
-  box-shadow:
-    0 2px 8px rgba(78, 43, 196, 0.05),
-    0 0 0 0 rgba(78, 43, 196, 0);
   transition: all 0.25s ease;
   text-decoration: none;
   color: var(--text);
@@ -16,25 +12,34 @@
 
 .deal-card--pair {
   border: 1.5px solid rgba(78, 43, 196, 0.28); /* Thin dark blue border */
+  background: linear-gradient(135deg, #ffffff 0%, #faf8ff 50%, #f1efff 100%);
+  box-shadow: 0 4px 15px rgba(78, 43, 196, 0.04);
 }
 
 .deal-card--group {
   border: 1.5px solid rgba(16, 185, 129, 0.35); /* Thin green border */
+  background: linear-gradient(135deg, #ffffff 0%, #f9fefe 50%, #f0fdf7 100%);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.04);
 }
 
 .deal-card:hover {
-  box-shadow:
-    0 12px 32px rgba(78, 43, 196, 0.13),
-    0 0 0 3px rgba(124, 58, 237, 0.06);
   transform: translateY(-5px);
 }
 
 .deal-card--pair:hover {
   border-color: rgba(78, 43, 196, 0.65);
+  background: linear-gradient(135deg, #ffffff 0%, #f4f0ff 100%);
+  box-shadow:
+    0 12px 32px rgba(78, 43, 196, 0.13),
+    0 0 0 3px rgba(78, 43, 196, 0.06);
 }
 
 .deal-card--group:hover {
   border-color: rgba(16, 185, 129, 0.70);
+  background: linear-gradient(135deg, #ffffff 0%, #e6fcf0 100%);
+  box-shadow:
+    0 12px 32px rgba(16, 185, 129, 0.13),
+    0 0 0 3px rgba(16, 185, 129, 0.06);
 }
 
 /* ── Image wrapper ── */

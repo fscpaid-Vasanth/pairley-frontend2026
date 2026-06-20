@@ -22,11 +22,11 @@
 }
 
 .popular-offers-box {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 245, 255, 0.95) 100%);
-  border: 1.5px solid rgba(78, 43, 196, 0.12);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 243, 255, 0.97) 50%, rgba(238, 242, 255, 0.97) 100%);
+  border: 1.5px solid rgba(78, 43, 196, 0.15);
   border-radius: var(--radius-2xl);
   padding: var(--space-6);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 10px 30px -10px rgba(78, 43, 196, 0.08), var(--shadow-sm);
   flex: 1;
 }
 
@@ -37,20 +37,21 @@
 }
 
 .popular-deal-card {
-  border: 1.5px solid rgba(78, 43, 196, 0.25);
+  border: 1.5px solid rgba(78, 43, 196, 0.22);
   border-radius: 12px;
   overflow: hidden;
-  background: white;
+  background: linear-gradient(135deg, #ffffff 0%, #faf8ff 50%, #f1efff 100%);
   display: flex;
   flex-direction: column;
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-  box-shadow: 0 2px 8px rgba(78, 43, 196, 0.05);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  box-shadow: 0 4px 12px rgba(78, 43, 196, 0.04);
 }
 
 .popular-deal-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(78, 43, 196, 0.13);
   border-color: rgba(78, 43, 196, 0.60);
+  background: linear-gradient(135deg, #ffffff 0%, #f4f0ff 100%);
 }
 
 .popular-deal-body {
@@ -490,15 +491,15 @@
 }
 
 .categories-horizontal-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 244, 255, 0.92) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 244, 255, 0.96) 50%, rgba(238, 242, 255, 0.96) 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(78, 43, 196, 0.12);
+  border: 1.5px solid rgba(78, 43, 196, 0.15);
   border-radius: var(--radius-2xl);
   padding: 24px;
   box-shadow: 
-    0 10px 15px -3px rgba(78, 43, 196, 0.05),
-    0 4px 6px -2px rgba(78, 43, 196, 0.05);
+    0 10px 30px -10px rgba(78, 43, 196, 0.10),
+    0 4px 6px -2px rgba(78, 43, 196, 0.04);
 }
 
 .categories-horizontal-header {
@@ -541,20 +542,21 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  background: linear-gradient(135deg, #ffffff 0%, #f6f3ff 100%);
-  border: 1px solid rgba(78, 43, 196, 0.08);
+  background: linear-gradient(135deg, #ffffff 0%, #faf8ff 50%, #f1efff 100%);
+  border: 1px solid rgba(78, 43, 196, 0.1);
   padding: 10px 14px;
   border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 6px rgba(78, 43, 196, 0.02);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .categories-horizontal-item:hover {
   transform: translateY(-2px);
-  border-color: rgba(78, 43, 196, 0.35);
+  border-color: rgba(78, 43, 196, 0.4);
+  background: linear-gradient(135deg, #ffffff 0%, #f0edff 100%);
   box-shadow: 
-    0 10px 15px -3px rgba(78, 43, 196, 0.08),
-    0 4px 6px -2px rgba(78, 43, 196, 0.05);
+    0 10px 20px -5px rgba(78, 43, 196, 0.12),
+    0 4px 6px -2px rgba(78, 43, 196, 0.06);
 }
 
 .categories-horizontal-icon {
