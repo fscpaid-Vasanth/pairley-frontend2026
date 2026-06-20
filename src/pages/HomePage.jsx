@@ -68,6 +68,8 @@ const POPULAR_OFFERS = [
 export default function HomePage() {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedMall, setSelectedMall] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     api.get('/offers/list?status=ACTIVE')
@@ -78,12 +80,19 @@ export default function HomePage() {
           const dateB = new Date(b.created_at || b.createdAt || 0);
           return dateB - dateA;
         });
-        setOffers(sorted.slice(0, 4));
+        setOffers(sorted);
         setLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load live deals, falling back to mock data:', err);
-        setOffers(POPULAR_OFFERS);
+        const mappedMock = POPULAR_OFFERS.map((o, i) => ({
+          ...o,
+          business: {
+            business_name: o.merchant,
+            mall_name: i % 2 === 0 ? 'Orion Mall, Rajajinagar' : 'Phoenix Marketcity, Whitefield'
+          }
+        }));
+        setOffers(mappedMock);
         setLoading(false);
       });
   }, []);
@@ -111,7 +120,12 @@ export default function HomePage() {
   return (
     <div className="homepage page-wrapper">
       {/* Viewport 1: Hero Section */}
-      <HeroSection />
+      <HeroSection 
+        selectedMall={selectedMall} 
+        onMallChange={setSelectedMall} 
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       {/* Viewport 2: Popular Offers, How It Works, Business Banner & Trust Bar */}
       <section className="homepage-bottom-section">
@@ -129,8 +143,23 @@ export default function HomePage() {
                 variants={fadeInUp}
               >
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-extrabold text-dark">Popular Offers</h2>
-                  <Link to={ROUTES.DEALS} className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+                  <h2 className="text-2xl font-extrabold text-dark">
+                    {selectedMall && searchQuery 
+                      ? `${selectedMall.split(',')[0]}: "${searchQuery}"`
+                      : selectedMall
+                      ? `Offers at ${selectedMall.split(',')[0]}`
+                      : searchQuery
+                      ? `Offers matching "${searchQuery}"`
+                      : 'Popular Offers'}
+                  </h2>
+                  <Link 
+                    to={
+                      selectedMall || searchQuery
+                        ? `${ROUTES.DEALS}?${selectedMall ? `mall=${encodeURIComponent(selectedMall)}` : ''}${selectedMall && searchQuery ? '&' : ''}${searchQuery ? `search=${encodeURIComponent(searchQuery)}` : ''}`
+                        : ROUTES.DEALS
+                    } 
+                    className="text-primary text-sm font-semibold hover:underline flex items-center gap-1"
+                  >
                     View All <ArrowRight size={14} />
                   </Link>
                 </div>
@@ -145,67 +174,89 @@ export default function HomePage() {
                       🛍️ No active deals currently running. Check back soon!
                     </div>
                   ) : (
-                    offers.map(getMappedDeal).map((deal) => {
-                      const catColors = {
-                        dining:  { bg: '#FFF1F0', accent: '#EF4444', bar: '#EF4444' },
-                        fitness: { bg: '#F5F0FF', accent: '#8B5CF6', bar: '#8B5CF6' },
-                        beauty:  { bg: '#FFF0F7', accent: '#EC4899', bar: '#EC4899' },
-                        tours:   { bg: '#F0FDF4', accent: '#10B981', bar: '#10B981' },
-                      };
-                      const colors = catColors[deal.category] || { bg: '#EEF2FF', accent: '#4E2BC4', bar: '#4E2BC4' };
-                      return (
-                        <div key={deal.id} className="popular-deal-card">
-                          {/* Colored top accent bar */}
-                          <div style={{ height: 4, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}aa)`, borderRadius: '12px 12px 0 0' }} />
-
-                          <div className="popular-deal-image-wrap">
-                            <ImageWithFallback
-                              src={deal.image}
-                              alt={deal.title}
-                              className="popular-deal-image"
-                              fallbackType="deal"
-                              category={deal.category}
-                            />
-                            {/* Discount badge */}
-                            <div className="popular-deal-badge">{deal.discount}</div>
-                            {/* Wishlist */}
-                            <button className="popular-deal-wishlist" aria-label="Add to wishlist">
-                              <Heart size={13} className="text-white" />
-                            </button>
+                    (() => {
+                      let filtered = offers;
+                      if (selectedMall) {
+                        filtered = filtered.filter(o => o.business?.mall_name === selectedMall);
+                      }
+                      if (searchQuery) {
+                        const q = searchQuery.toLowerCase();
+                        filtered = filtered.filter(o => 
+                          o.title?.toLowerCase().includes(q) || 
+                          o.description?.toLowerCase().includes(q) || 
+                          o.category?.toLowerCase().includes(q) || 
+                          (o.business?.business_name && o.business.business_name.toLowerCase().includes(q))
+                        );
+                      }
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="col-span-full py-8 text-center text-slate-400 font-semibold">
+                            🛍️ No matching deals found in your selected filters.
                           </div>
+                        );
+                      }
+                      return filtered.slice(0, 4).map(getMappedDeal).map((deal) => {
+                        const catColors = {
+                          dining:  { bg: '#FFF1F0', accent: '#EF4444', bar: '#EF4444' },
+                          fitness: { bg: '#F5F0FF', accent: '#8B5CF6', bar: '#8B5CF6' },
+                          beauty:  { bg: '#FFF0F7', accent: '#EC4899', bar: '#EC4899' },
+                          tours:   { bg: '#F0FDF4', accent: '#10B981', bar: '#10B981' },
+                        };
+                        const colors = catColors[deal.category] || { bg: '#EEF2FF', accent: '#4E2BC4', bar: '#4E2BC4' };
+                        return (
+                          <div key={deal.id} className="popular-deal-card">
+                            {/* Colored top accent bar */}
+                            <div style={{ height: 4, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}aa)`, borderRadius: '12px 12px 0 0' }} />
 
-                          <div className="popular-deal-body">
-                            {/* Category chip */}
-                            <span className="popular-deal-chip" style={{ background: colors.bg, color: colors.accent }}>
-                              {deal.category}
-                            </span>
-
-                            <h3 className="popular-deal-title">{deal.title}</h3>
-                            <p className="popular-deal-merchant">{deal.merchant}</p>
-
-                            {/* Pricing */}
-                            <div className="popular-deal-pricing">
-                              <span className="popular-deal-price">{formatPrice(deal.pairleyPrice)}</span>
-                              <span className="popular-deal-original">{formatPrice(deal.originalPrice)}</span>
+                            <div className="popular-deal-image-wrap">
+                              <ImageWithFallback
+                                src={deal.image}
+                                alt={deal.title}
+                                className="popular-deal-image"
+                                fallbackType="deal"
+                                category={deal.category}
+                              />
+                              {/* Discount badge */}
+                              <div className="popular-deal-badge">{deal.discount}</div>
+                              {/* Wishlist */}
+                              <button className="popular-deal-wishlist" aria-label="Add to wishlist">
+                                <Heart size={13} className="text-white" />
+                              </button>
                             </div>
 
-                            {/* Progress */}
-                            <div className="popular-deal-progress-row">
-                              <Users size={11} style={{ color: colors.accent, flexShrink: 0 }} />
-                              <span className="popular-deal-progress-label">{deal.joined}</span>
-                            </div>
-                            <div className="progress-bar-bg">
-                              <div className="progress-bar-fill" style={{ width: `${deal.progress}%`, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}bb)` }} />
-                            </div>
+                            <div className="popular-deal-body">
+                              {/* Category chip */}
+                              <span className="popular-deal-chip" style={{ background: colors.bg, color: colors.accent }}>
+                                {deal.category}
+                              </span>
 
-                            {/* CTA */}
-                            <Link to={`${ROUTES.DEALS}/${deal.id}`} className="popular-deal-cta" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)` }}>
-                              Join Deal
-                            </Link>
+                              <h3 className="popular-deal-title">{deal.title}</h3>
+                              <p className="popular-deal-merchant">{deal.merchant}</p>
+
+                              {/* Pricing */}
+                              <div className="popular-deal-pricing">
+                                <span className="popular-deal-price">{formatPrice(deal.pairleyPrice)}</span>
+                                <span className="popular-deal-original">{formatPrice(deal.originalPrice)}</span>
+                              </div>
+
+                              {/* Progress */}
+                              <div className="popular-deal-progress-row">
+                                <Users size={11} style={{ color: colors.accent, flexShrink: 0 }} />
+                                <span className="popular-deal-progress-label">{deal.joined}</span>
+                              </div>
+                              <div className="progress-bar-bg">
+                                <div className="progress-bar-fill" style={{ width: `${deal.progress}%`, background: `linear-gradient(90deg, ${colors.accent}, ${colors.accent}bb)` }} />
+                              </div>
+
+                              {/* CTA */}
+                              <Link to={`${ROUTES.DEALS}/${deal.id}`} className="popular-deal-cta" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)` }}>
+                                Join Deal
+                              </Link>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })
+                        );
+                      });
+                    })()
                   )}
                 </div>
               </motion.div>

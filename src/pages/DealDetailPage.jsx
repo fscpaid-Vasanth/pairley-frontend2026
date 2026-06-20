@@ -99,7 +99,9 @@ const DealDetailPage = () => {
           validUntil: data.end_date || '2026-12-31',
           status: data.status ? data.status.toLowerCase() : 'active',
           createdAt: data.created_at || data.createdAt || '2026-06-01',
-          interests: data.interests || []
+          interests: data.interests || [],
+          facilityImages: data.facility_images || [],
+          facilityDetails: data.facility_details || null
         };
         setDeal(mapped);
         setLoading(false);
@@ -210,6 +212,41 @@ const DealDetailPage = () => {
     `Just found an amazing deal on @Pairley: ${deal.title}`
   )}&url=${encodeURIComponent(window.location.href)}`;
 
+  /* Handle user join interest reactively */
+  const handleInterestExpressed = () => {
+    if (!currentUser) return;
+    setDeal((prev) => {
+      if (!prev) return prev;
+      
+      const userHasJoined = prev.interests?.some(
+        (i) => i.customer_id === currentUser.id || 
+               i.customer_id === currentUser.sub || 
+               i.customer?.id === currentUser.id || 
+               i.customer?.id === currentUser.sub ||
+               (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
+               (currentUser.email && i.customer?.email === currentUser.email)
+      );
+      if (userHasJoined) return prev;
+
+      const newInterest = {
+        customer_id: currentUser.id,
+        customer: {
+          id: currentUser.id,
+          name: currentUser.name || 'You',
+          mobile: currentUser.mobile,
+          city: currentUser.city || 'Your City',
+        },
+        status: 'INTERESTED',
+      };
+
+      return {
+        ...prev,
+        interestCount: prev.interestCount + 1,
+        interests: [...(prev.interests || []), newInterest],
+      };
+    });
+  };
+
   /* Interested avatars (show up to 4, then +N) */
   const shownAvatars = MOCK_INTERESTED_AVATARS.slice(0, Math.min(deal.interestCount, 4));
   const extraCount = Math.max(0, deal.interestCount - 4);
@@ -284,6 +321,55 @@ const DealDetailPage = () => {
 
               {/* Description */}
               <p className="deal-description">{deal.description}</p>
+
+              {/* Facility Showcase Gallery */}
+              {deal.facilityImages && deal.facilityImages.length > 0 && (
+                <div className="deal-facilities-gallery mt-8 border-t border-slate-100 pt-6 text-left">
+                  <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                    🏢 Facility &amp; Equipment Showcase
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {deal.facilityImages.map((img, idx) => (
+                      <div key={idx} className="relative rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer aspect-video border border-slate-100 bg-slate-50">
+                        <img src={img} alt={`Facility ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Meet the Staff / Trainers / Stylists */}
+              {(() => {
+                let staff = [];
+                if (deal.facilityDetails) {
+                  try {
+                    staff = JSON.parse(deal.facilityDetails);
+                  } catch (e) {
+                    console.error('Failed to parse facility details:', e);
+                  }
+                }
+                if (staff.length === 0) return null;
+                return (
+                  <div className="deal-staff-section mt-8 border-t border-slate-100 pt-6 text-left">
+                    <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                      👤 Meet the Team &amp; Specialists
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {staff.map((s, idx) => (
+                        <div key={idx} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm hover:shadow-md transition-all duration-200">
+                          <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                            {s.name ? s.name.charAt(0).toUpperCase() : '👤'}
+                          </div>
+                          <div className="text-left">
+                            <h4 className="text-xs font-extrabold text-slate-800">{s.name || 'Specialist'}</h4>
+                            <p className="text-[10px] text-slate-500 font-semibold mt-0.5">{s.role || 'Team Member'}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Info cards */}
               <div className="deal-info-cards">
@@ -420,13 +506,13 @@ const DealDetailPage = () => {
                     </div>
                   )}
 
-                  {/* Group: pricing tiers */}
                   {!isPair && deal.pricingTiers && (
                     <div className="deal-group-pricing">
                       <div className="deal-group-pricing-title">Group Pricing Tiers</div>
                       <PricingTierCard
                         tiers={deal.pricingTiers}
-                        interestCount={deal.interestCount}
+                        currentCount={deal.interestCount}
+                        maxParticipants={deal.maxParticipants}
                       />
                     </div>
                   )}
@@ -477,7 +563,7 @@ const DealDetailPage = () => {
                         )}
                       </div>
                     ) : (
-                      <InterestButton deal={deal} />
+                      <InterestButton deal={deal} onInterest={handleInterestExpressed} />
                     )}
                   </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingBag, 
   Handshake, 
@@ -13,8 +13,7 @@ import {
   ArrowUpRight,
   Zap
 } from 'lucide-react';
-import { mockDeals } from '../../data/mockDeals';
-import { mockCustomers } from '../../data/mockUsers';
+// Removed mock imports to prevent dashboard fallbacks
 import { getTimeGreeting, formatPrice, ROUTES } from '../../utils/constants';
 import { getCategoryById } from '../../data/categories';
 import ImageWithFallback from '../../components/ImageWithFallback';
@@ -34,7 +33,15 @@ const itemVariants = {
 };
 
 export default function CustomerDashboard() {
-  const user = JSON.parse(localStorage.getItem('pairley_user') || 'null') || mockCustomers[0];
+  const navigate = useNavigate();
+  const token = localStorage.getItem('pairley_token');
+  const user = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+
+  useEffect(() => {
+    if (!token || !user) {
+      navigate('/login');
+    }
+  }, [token, user, navigate]);
 
   const [loading, setLoading] = useState(true);
   const [activeInterests, setActiveInterests] = useState([]);
@@ -66,6 +73,7 @@ export default function CustomerDashboard() {
   };
 
   useEffect(() => {
+    if (!token || !user) return;
     setLoading(true);
 
     // 1. Fetch customer participation history
@@ -156,6 +164,10 @@ export default function CustomerDashboard() {
         setLoading(false);
       });
   }, []);
+
+  if (!token || !user) {
+    return null;
+  }
 
   return (
     <div className="customer-dashboard page-wrapper py-6">
@@ -281,48 +293,49 @@ export default function CustomerDashboard() {
               activeInterests.map((deal) => {
                 const cat = getCategoryById(deal.category);
                 return (
-                  <motion.div
-                    key={deal.id}
-                    className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group"
-                    whileHover={{ y: -4 }}
-                  >
-                    <div>
-                      <div className="relative overflow-hidden h-40 bg-slate-100">
-                        <ImageWithFallback className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={deal.images?.[0]} alt={deal.title} fallbackType="deal" category={deal.category} />
-                        <div className="absolute top-3 left-3">
-                          <span className="px-2.5 py-1 bg-white/95 backdrop-blur-sm shadow-sm rounded-full text-[10px] font-bold text-slate-700 flex items-center gap-1">
-                            {cat?.icon || '🛍️'} {cat?.name || 'General'}
-                          </span>
-                        </div>
-                        <div className="absolute bottom-3 left-3">
-                          <span className="px-2.5 py-1 bg-purple-600 text-white rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm">
-                            BOGO Split
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-4">
-                        <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px]">{deal.title}</h4>
-                        
-                        <div className="flex items-center gap-1.5 mt-3">
-                          <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-                          <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100/60">
-                            🔍 Searching for Pair...
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 pt-0 border-t border-slate-100 mt-2 flex justify-between items-center">
+                  <Link to={`/deals/${deal.id}`} key={deal.id} className="block group">
+                    <motion.div
+                      className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between h-full"
+                      whileHover={{ y: -4 }}
+                    >
                       <div>
-                        <span className="text-xs text-slate-400">Split Price</span>
-                        <div className="text-sm font-bold text-emerald-600 mt-0.5">{formatPrice(deal.pairleyPrice)}</div>
+                        <div className="relative overflow-hidden h-40 bg-slate-100">
+                          <ImageWithFallback className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={deal.images?.[0]} alt={deal.title} fallbackType="deal" category={deal.category} />
+                          <div className="absolute top-3 left-3">
+                            <span className="px-2.5 py-1 bg-white/95 backdrop-blur-sm shadow-sm rounded-full text-[10px] font-bold text-slate-700 flex items-center gap-1.5">
+                              {cat?.icon || '🛍️'} {cat?.name || 'General'}
+                            </span>
+                          </div>
+                          <div className="absolute bottom-3 left-3">
+                            <span className="px-2.5 py-1 bg-purple-600 text-white rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm">
+                              BOGO Split
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-4">
+                          <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px]">{deal.title}</h4>
+                          
+                          <div className="flex items-center gap-1.5 mt-3">
+                            <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+                            <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100/60">
+                              🔍 Searching for Pair...
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <Link to={`/deals/${deal.id}`} className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:text-[#4E2BC4] hover:bg-purple-50 transition-colors duration-200">
-                        <ArrowUpRight size={16} />
-                      </Link>
-                    </div>
-                  </motion.div>
+
+                      <div className="p-4 pt-0 border-t border-slate-100 mt-2 flex justify-between items-center">
+                        <div>
+                          <span className="text-xs text-slate-400">Split Price</span>
+                          <div className="text-sm font-bold text-emerald-600 mt-0.5">{formatPrice(deal.pairleyPrice)}</div>
+                        </div>
+                        <div className="p-1.5 rounded-lg bg-slate-50 text-slate-500 group-hover:text-[#4E2BC4] group-hover:bg-purple-50 transition-colors duration-200">
+                          <ArrowUpRight size={16} />
+                        </div>
+                      </div>
+                    </motion.div>
+                  </Link>
                 );
               })
             )}

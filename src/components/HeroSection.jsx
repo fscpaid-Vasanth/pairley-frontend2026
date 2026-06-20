@@ -1,47 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Tag, Store, Search, Users } from 'lucide-react';
-import { ROUTES } from '../utils/constants';
-import ImageWithFallback from './ImageWithFallback';
+import { Search, Users, Wallet, MapPin } from 'lucide-react';
+import { ROUTES, MALLS } from '../utils/constants';
 import './HeroSection.css';
-
-// Avatars around the dashed circle
-const AVATAR_SEEDS = [
-  { seed: 'Arjun', name: 'Arjun Mehta' },
-  { seed: 'Priya', name: 'Priya Sharma' },
-  { seed: 'Rahul', name: 'Rahul Krishnan' },
-  { seed: 'Sneha', name: 'Sneha Patel' },
-  { seed: 'Vikram', name: 'Vikram Singh' },
-  { seed: 'Meera', name: 'Meera Nair' }
-];
 
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 25 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
-const floatAnim = {
-  animate: {
-    y: [0, -6, 0],
-    transition: {
-      duration: 4,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }
-  }
-};
-
-export default function HeroSection() {
+export default function HeroSection({ selectedMall, onMallChange, searchQuery, onSearchChange }) {
   return (
     <section className="hero">
       <div className="container hero__container">
@@ -66,74 +44,103 @@ export default function HeroSection() {
               Shop, save and unlock amazing deals by buying together.
             </motion.p>
 
-            <motion.div className="hero__cta-group" variants={fadeUp}>
-              <Link to={ROUTES.DEALS} className="btn btn-primary btn-lg hero__btn--primary">
-                <Search size={18} style={{ marginRight: 6 }} /> Explore Deals
-              </Link>
-              <Link to={ROUTES.SIGNUP} className="btn btn-outline btn-lg hero__btn--outline">
-                <Store size={18} style={{ marginRight: 6 }} /> For Businesses
+            {/* Unified Search & Mall Selector Console */}
+            <motion.div className="hero__search-console" variants={fadeUp}>
+              <div className="search-console__field search-console__field--mall">
+                <MapPin size={18} className="search-console__icon text-primary" />
+                <select
+                  value={selectedMall || ''}
+                  onChange={(e) => onMallChange?.(e.target.value || null)}
+                  className="search-console__select"
+                  aria-label="Select Mall"
+                >
+                  <option value="">All Malls (Bangalore)</option>
+                  {MALLS.map((mall) => (
+                    <option key={mall} value={mall}>{mall}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="search-console__divider" />
+
+              <div className="search-console__field search-console__field--query">
+                <Search size={18} className="search-console__icon text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery || ''}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
+                  placeholder="Search deals, products, stores..."
+                  className="search-console__input"
+                  aria-label="Search queries"
+                />
+              </div>
+
+              <Link
+                to={
+                  selectedMall || searchQuery
+                    ? `${ROUTES.DEALS}?${selectedMall ? `mall=${encodeURIComponent(selectedMall)}` : ''}${selectedMall && searchQuery ? '&' : ''}${searchQuery ? `search=${encodeURIComponent(searchQuery)}` : ''}`
+                    : ROUTES.DEALS
+                }
+                className="search-console__button"
+              >
+                <Search size={16} />
+                <span>Search</span>
               </Link>
             </motion.div>
           </div>
 
-          {/* Middle Column (col-span-3): Hero Graphic (Community Circle) */}
+          {/* Middle Column (col-span-3): Vertical Timeline Stepper */}
           <div className="hero__middle">
-            <div className="hero__circle-container">
-              {/* Pulse rings */}
-              <div className="hero__pulse-ring hero__pulse-ring--1" />
-              <div className="hero__pulse-ring hero__pulse-ring--2" />
+            <motion.div 
+              className="hero__timeline-card bg-white/80 backdrop-blur-lg border border-slate-200/80 p-6 rounded-3xl shadow-md w-full flex flex-col gap-6"
+              variants={fadeUp}
+            >
+              <h3 className="text-md font-extrabold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+                ⚡ How It Works
+              </h3>
 
-              {/* Dashed Circle */}
-              <div className="hero__dashed-circle" />
+              <div className="flex flex-col gap-5 relative">
+                {/* Connecting Line */}
+                <div className="absolute left-[21px] top-6 bottom-6 w-0.5 border-l-2 border-dashed border-slate-200/80 z-0"></div>
 
-              {/* Central Shopping Bag Icon */}
-              <motion.div 
-                className="hero__central-bag shadow-xl"
-                variants={floatAnim}
-                animate="animate"
-              >
-                <div className="hero__central-bag-inner">
-                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-primary">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <path d="M16 10a4 4 0 0 1-8 0" />
-                  </svg>
-                </div>
-              </motion.div>
-
-              {/* Avatars arranged radially */}
-              {AVATAR_SEEDS.map((item, idx) => {
-                const angle = (idx * 360) / AVATAR_SEEDS.length;
-                const radius = 130; // increased for larger container
-                const x = radius * Math.cos((angle * Math.PI) / 180);
-                const y = radius * Math.sin((angle * Math.PI) / 180);
-
-                return (
-                  <div
-                    key={idx}
-                    className="hero__radial-avatar"
-                    style={{
-                      transform: `translate(${x}px, ${y}px)`
-                    }}
-                  >
-                    <ImageWithFallback
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.seed}`}
-                      alt={item.name}
-                      fallbackType="avatar"
-                      name={item.name}
-                      className="w-12 h-12 rounded-full border-2 border-white shadow-md"
-                    />
+                {/* Step 1 */}
+                <div className="flex gap-4 items-start relative z-10">
+                  <div className="w-11 h-11 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shadow-sm flex-shrink-0 relative">
+                    <Search size={18} />
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-purple-600 text-white rounded-full flex items-center justify-center text-[10px] font-extrabold border border-white">1</span>
                   </div>
-                );
-              })}
+                  <div className="text-left">
+                    <h4 className="text-xs font-bold text-slate-800">Discover Deals</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-normal">Choose a BOGO split or Group deal you love.</p>
+                  </div>
+                </div>
 
-              {/* Floating 40% OFF tag */}
-              <div className="hero__floating-tag shadow-sm">
-                <span className="text-[10px] font-extrabold uppercase flex items-center gap-1">
-                  🔥 40% OFF
-                </span>
+                {/* Step 2 */}
+                <div className="flex gap-4 items-start relative z-10">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm flex-shrink-0 relative">
+                    <Users size={18} />
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[10px] font-extrabold border border-white">2</span>
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-xs font-bold text-slate-800">Pair Up or Join</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-normal">Show interest and let Pairley match you instantly.</p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex gap-4 items-start relative z-10">
+                  <div className="w-11 h-11 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shadow-sm flex-shrink-0 relative">
+                    <Wallet size={18} />
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-600 text-white rounded-full flex items-center justify-center text-[10px] font-extrabold border border-white">3</span>
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-xs font-bold text-slate-800">Pay Less, Save Together!</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-normal">Split pricing unlocks. Verify and check out offline.</p>
+                  </div>
+                </div>
+
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Right Column (col-span-4): Category Quick Links */}
@@ -197,3 +204,4 @@ export default function HeroSection() {
     </section>
   );
 }
+

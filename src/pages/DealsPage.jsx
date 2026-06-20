@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, SlidersHorizontal, PackageSearch } from 'lucide-react';
 import DealCard from '../components/DealCard';
@@ -7,6 +8,7 @@ import CategorySection from '../components/CategorySection';
 import SearchOverlay from '../components/SearchOverlay';
 import { mockDeals } from '../data/mockDeals';
 import { api } from '../utils/api';
+import { MALLS } from '../utils/constants';
 import './DealsPage.css';
 
 /* Animation variants */
@@ -34,6 +36,19 @@ const DealsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [sortBy, setSortBy] = useState('newest');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const mallQuery = searchParams.get('mall') || '';
+  const searchQuery = searchParams.get('search') || '';
+
+  const handleMallChange = (mall) => {
+    if (mall) {
+      searchParams.set('mall', mall);
+    } else {
+      searchParams.delete('mall');
+    }
+    setSearchParams(searchParams);
+  };
 
   useEffect(() => {
     api.get('/offers/list?status=ACTIVE')
@@ -59,14 +74,19 @@ const DealsPage = () => {
           location: d.business?.city || 'Select Location',
           validUntil: d.end_date || '2026-12-31',
           status: d.status ? d.status.toLowerCase() : 'active',
-          createdAt: d.created_at || d.createdAt || '2026-06-01'
+          createdAt: d.created_at || d.createdAt || '2026-06-01',
+          mallName: d.business?.mall_name || null
         }));
         setDealsList(mapped);
         setLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load live deals from backend, falling back to mock:', err);
-        setDealsList(mockDeals);
+        const mappedMock = mockDeals.map((d, i) => ({
+          ...d,
+          mallName: d.mallName || (i % 2 === 0 ? 'Orion Mall, Rajajinagar' : 'Phoenix Marketcity, Whitefield')
+        }));
+        setDealsList(mappedMock);
         setLoading(false);
       });
   }, []);
@@ -85,6 +105,22 @@ const DealsPage = () => {
     /* Filter by category */
     if (selectedCategory) {
       deals = deals.filter((d) => d.category === selectedCategory);
+    }
+
+    /* Filter by mall */
+    if (mallQuery) {
+      deals = deals.filter((d) => d.mallName === mallQuery);
+    }
+
+    /* Filter by search query */
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      deals = deals.filter((d) => 
+        d.title?.toLowerCase().includes(q) || 
+        d.description?.toLowerCase().includes(q) ||
+        d.category?.toLowerCase().includes(q) ||
+        (d.businessOwner?.name && d.businessOwner.name.toLowerCase().includes(q))
+      );
     }
 
     /* Sort */
@@ -109,7 +145,7 @@ const DealsPage = () => {
     }
 
     return deals;
-  }, [dealType, selectedCategory, sortBy]);
+  }, [dealsList, dealType, selectedCategory, mallQuery, searchQuery, sortBy]);
 
   return (
     <div className="page-wrapper">
@@ -141,6 +177,20 @@ const DealsPage = () => {
               <DealTypeToggle activeType={dealType} onTypeChange={setDealType} />
             </div>
             <div className="deals-toolbar-right">
+              <select
+                className="deals-sort-select"
+                value={mallQuery}
+                onChange={(e) => handleMallChange(e.target.value)}
+                aria-label="Filter by Mall"
+              >
+                <option value="">All Malls (Bangalore)</option>
+                {MALLS.map((mall) => (
+                  <option key={mall} value={mall}>
+                    {mall}
+                  </option>
+                ))}
+              </select>
+
               <select
                 className="deals-sort-select"
                 value={sortBy}

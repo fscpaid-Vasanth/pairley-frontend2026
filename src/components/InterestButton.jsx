@@ -14,6 +14,15 @@ export default function InterestButton({ deal, onInterest }) {
   const [interestState, setInterestState] = useState('none'); // 'none', 'loading', 'interested', 'paired'
 
   const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+  const userHasJoinedInDb = deal?.interests?.some(i => 
+    i.customer_id === currentUser?.id || 
+    i.customer_id === currentUser?.sub || 
+    i.customer?.id === currentUser?.id || 
+    i.customer?.id === currentUser?.sub ||
+    (currentUser?.mobile && i.customer?.mobile === currentUser.mobile) ||
+    (currentUser?.email && i.customer?.email === currentUser.email)
+  );
+  const displayCount = (deal?.interestCount || 0) + (interestState === 'interested' && !userHasJoinedInDb ? 1 : 0);
   const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name || !!currentUser?.businessName;
 
   // Always call hooks before any conditional return (React rules of hooks)
@@ -64,7 +73,8 @@ export default function InterestButton({ deal, onInterest }) {
         setInterestState('interested');
         if (onInterest) onInterest();
         
-        if (deal.mode === 'pair' || deal.required_people <= (deal.interestCount || 0) + 1) {
+        const reqPeople = deal.maxParticipants || deal.required_people || 2;
+        if (deal.mode === 'pair' || reqPeople <= displayCount) {
           setTimeout(() => {
             setInterestState('paired');
             showToast('Pairley Match! A partner has been found for your deal.', 'success');
@@ -156,7 +166,7 @@ export default function InterestButton({ deal, onInterest }) {
             ) : (
               <>
                 <Users size={20} className="interest-btn__icon" />
-                Joined Group! ({deal.interestCount + 1}/{deal.maxParticipants} Joined)
+                Joined Group! ({displayCount}/{deal.maxParticipants || deal.required_people || 2} Joined)
               </>
             )}
           </motion.button>

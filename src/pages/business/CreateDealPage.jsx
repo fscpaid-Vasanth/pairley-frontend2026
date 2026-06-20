@@ -90,6 +90,43 @@ export default function CreateDealPage() {
   const [maxParticipants, setMaxParticipants] = useState('20');
   const [terms, setTerms] = useState('Valid only through the Pairley web/mobile app interface. Match must be achieved within deal timeframe.');
 
+  // Facility showcase and staff/trainers details state
+  const [facilityImages, setFacilityImages] = useState([]);
+  const [staffList, setStaffList] = useState([{ name: '', role: '' }]);
+
+  const addStaffRow = () => {
+    setStaffList([...staffList, { name: '', role: '' }]);
+  };
+
+  const removeStaffRow = (idx) => {
+    if (staffList.length > 1) {
+      setStaffList(staffList.filter((_, i) => i !== idx));
+    }
+  };
+
+  const handleStaffChange = (idx, field, value) => {
+    const updated = [...staffList];
+    updated[idx][field] = value;
+    setStaffList(updated);
+  };
+
+  const handleFacilityImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFacilityImages(prev => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeFacilityImage = (idx) => {
+    setFacilityImages(facilityImages.filter((_, i) => i !== idx));
+  };
+
   // Image uploader state
   const [uploaderTab, setUploaderTab] = useState('presets'); // 'presets' or 'url'
   const [customImageUrl, setCustomImageUrl] = useState('');
@@ -265,7 +302,9 @@ export default function CreateDealPage() {
       required_people: capacityVal,
       start_date: startDateIso,
       end_date: endDateIso,
-      offer_image: imagePlaceholder || null
+      offer_image: imagePlaceholder || null,
+      facility_images: facilityImages,
+      facility_details: JSON.stringify(staffList.filter(s => s.name.trim() || s.role.trim()))
     };
 
     api.post('/offers/create', payload)
@@ -660,6 +699,88 @@ export default function CreateDealPage() {
                         </motion.div>
                       )}
                     </AnimatePresence>
+                  </div>
+
+                  {/* ===== Facility Photos & Team Details ===== */}
+                  <div className="bg-slate-50/50 border border-slate-200/60 p-5 rounded-2xl flex flex-col gap-4 text-left">
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                      🏪 Shop Facilities & Team Details
+                    </h4>
+                    <p className="text-[11px] text-slate-500 leading-normal">Add pictures of your gym equipment / facilities and list your trainers or stylists.</p>
+
+                    {/* Facility Photos Uploader */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-xs font-bold text-slate-700">Facility Showcase Photos</label>
+                      <div className="flex flex-wrap gap-3 items-center">
+                        {facilityImages.map((img, idx) => (
+                          <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex-shrink-0 group">
+                            <img src={img} alt="facility" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => removeFacilityImage(idx)}
+                              className="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm hover:bg-red-600 transition-colors"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                        <label className="w-16 h-16 rounded-xl border-2 border-dashed border-slate-300 hover:border-primary flex flex-col items-center justify-center cursor-pointer text-slate-400 hover:text-primary transition-colors bg-white shadow-sm flex-shrink-0">
+                          <span className="text-lg font-bold">+</span>
+                          <span className="text-[8px] font-extrabold uppercase">Upload</span>
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleFacilityImageUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Team Members List */}
+                    <div className="flex flex-col gap-3 border-t border-slate-200/60 pt-4 mt-2">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-bold text-slate-700">Stylists / Trainers / Staff</label>
+                        <button
+                          type="button"
+                          onClick={addStaffRow}
+                          className="px-2.5 py-1.5 border border-slate-200 hover:border-primary text-slate-600 hover:text-primary rounded-lg text-[10px] font-bold bg-white transition-colors flex items-center gap-1 shadow-sm"
+                        >
+                          + Add Staff
+                        </button>
+                      </div>
+
+                      <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+                        {staffList.map((staff, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              placeholder="e.g. Coach Arjun / Stylist Priya"
+                              value={staff.name}
+                              onChange={(e) => handleStaffChange(idx, 'name', e.target.value)}
+                              className="flex-1 border border-slate-200 rounded-lg p-2 text-xs font-semibold outline-none focus:border-primary"
+                            />
+                            <input
+                              type="text"
+                              placeholder="e.g. Strength Specialist / Senior Stylist"
+                              value={staff.role}
+                              onChange={(e) => handleStaffChange(idx, 'role', e.target.value)}
+                              className="flex-1 border border-slate-200 rounded-lg p-2 text-xs font-semibold outline-none focus:border-primary"
+                            />
+                            {staffList.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeStaffRow(idx)}
+                                className="p-2 bg-slate-50 text-red-500 hover:bg-red-50 rounded-lg text-xs font-bold transition-colors"
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {dealType === 'pair' ? (

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
+import { MALLS } from '../../utils/constants';
 import './SignUpPage.css';
  
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -25,6 +26,7 @@ export default function SignUpPage() {
     password: '',
     confirmPassword: '',
     city: 'Mumbai',
+    mallName: '',
   });
   const [errors, setErrors] = useState({});
   // Google Onboarding States
@@ -37,6 +39,7 @@ export default function SignUpPage() {
     pincode: '',
     businessName: '',
     businessType: 'Shop',
+    mallName: '',
     address: '',
     aadhaar: '',
     gst: '',
@@ -101,6 +104,7 @@ export default function SignUpPage() {
       business_name: role === 'business' ? form.shopName : undefined,
       business_type: role === 'business' ? 'Shop' : undefined,
       category: role === 'business' ? 'shopping' : undefined,
+      mall_name: role === 'business' ? form.mallName : undefined,
       address: 'Select Address',
       city: form.city || 'Mumbai',
       state: 'Maharashtra',
@@ -240,6 +244,7 @@ export default function SignUpPage() {
       business_name: role === 'business' ? onboardingForm.businessName : undefined,
       business_type: role === 'business' ? onboardingForm.businessType : undefined,
       category: role === 'business' ? 'shopping' : undefined,
+      mall_name: role === 'business' ? onboardingForm.mallName : undefined,
       aadhaar_number: role === 'business' ? onboardingForm.aadhaar : undefined,
       gst_number: (role === 'business' && onboardingForm.gst.trim()) ? onboardingForm.gst : undefined,
       pan_number: (role === 'business' && onboardingForm.pan.trim()) ? onboardingForm.pan : undefined,
@@ -513,6 +518,25 @@ export default function SignUpPage() {
                             </div>
                           </div>
 
+                          {/* Associated Mall */}
+                          <div className="su-field">
+                            <label className="su-label">Associated Mall (Optional)</label>
+                            <div className="su-input-wrap">
+                              <span className="material-symbols-outlined su-input-icon">storefront</span>
+                              <select
+                                className="su-input"
+                                style={{ paddingLeft: '40px', background: 'white' }}
+                                value={onboardingForm.mallName}
+                                onChange={(e) => setOnboardingForm(prev => ({ ...prev, mallName: e.target.value }))}
+                              >
+                                <option value="">No Mall / Standalone Shop</option>
+                                {MALLS.map(mall => (
+                                  <option key={mall} value={mall}>{mall}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
                           {/* Aadhaar Card */}
                           <div className="su-field">
                             <label className="su-label">Aadhaar Card Number (Required)</label>
@@ -775,6 +799,28 @@ export default function SignUpPage() {
                         </select>
                       </div>
                     </div>
+
+                    {/* Associated Mall (Optional for Business) */}
+                    {role === 'business' && (
+                      <div className="su-field">
+                        <label className="su-label" htmlFor="su-mallName">Associated Mall (Optional)</label>
+                        <div className="su-input-wrap">
+                          <span className="material-symbols-outlined su-input-icon">storefront</span>
+                          <select
+                            id="su-mallName"
+                            className="su-input"
+                            style={{ paddingLeft: '40px', background: 'white' }}
+                            value={form.mallName}
+                            onChange={(e) => update('mallName', e.target.value)}
+                          >
+                            <option value="">No Mall / Standalone Shop</option>
+                            {MALLS.map(mall => (
+                              <option key={mall} value={mall}>{mall}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Password row */}
                     <div className="su-password-row">

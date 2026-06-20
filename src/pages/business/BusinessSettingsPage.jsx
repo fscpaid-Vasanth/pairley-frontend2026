@@ -16,6 +16,7 @@ import {
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import BusinessNav from '../../components/BusinessNav';
+import { MALLS } from '../../utils/constants';
 import './BusinessSettingsPage.css';
 
 export default function BusinessSettingsPage() {
@@ -29,6 +30,7 @@ export default function BusinessSettingsPage() {
     type: 'shopping',
     address: '',
     city: 'Mumbai',
+    mallName: '',
     openTime: '10:00 AM',
     closeTime: '09:00 PM',
     autoConfirm: true,
@@ -53,6 +55,7 @@ export default function BusinessSettingsPage() {
           type: data.category || 'shopping',
           address: data.address || '',
           city: data.city || 'Mumbai',
+          mallName: data.mall_name || '',
           openTime: '10:00 AM',
           closeTime: '09:00 PM',
           autoConfirm: true,
@@ -78,6 +81,7 @@ export default function BusinessSettingsPage() {
               type: u.category || 'shopping',
               address: u.address || '',
               city: u.city || 'Mumbai',
+              mallName: u.mall_name || '',
               openTime: '10:00 AM',
               closeTime: '09:00 PM',
               autoConfirm: true,
@@ -138,6 +142,7 @@ export default function BusinessSettingsPage() {
       category: store.type,
       address: store.address,
       city: store.city,
+      mall_name: store.mallName || null,
       gst_number: store.gstin,
       notification_mobiles: mobiles
     };
@@ -318,6 +323,21 @@ export default function BusinessSettingsPage() {
                   >
                     {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad'].map(c => (
                       <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="md:col-span-3 flex flex-col gap-1.5">
+                  <label className="text-slate-600">Associated Mall (Optional)</label>
+                  <select
+                    name="mallName"
+                    value={store.mallName}
+                    onChange={handleInputChange}
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4]"
+                  >
+                    <option value="">No Mall / Standalone Shop</option>
+                    {MALLS.map(mall => (
+                      <option key={mall} value={mall}>{mall}</option>
                     ))}
                   </select>
                 </div>

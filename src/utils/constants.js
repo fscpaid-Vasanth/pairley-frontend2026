@@ -114,3 +114,15 @@ export const getDaysRemaining = (dateString) => {
   const diff = target - now;
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
+
+export const MALLS = [
+  'Orion Mall, Rajajinagar',
+  'Phoenix Marketcity, Whitefield',
+  'Forum Koramangala Mall',
+  'UB City, Vittal Mallya Road',
+  'Mantri Square Mall, Malleshwaram',
+  'Nexus Shantiniketan, Whitefield',
+  'Royal Meenakshi Mall, Bannerghatta Road',
+  'Vega City Mall, Bannerghatta Road',
+  'Gopalan Signature Mall, Old Madras Road'
+];

@@ -13,9 +13,8 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { mockDeals } from '../../data/mockDeals';
-import { mockBusinessOwners } from '../../data/mockUsers';
+import { Link, useNavigate } from 'react-router-dom';
+// Removed mock imports to prevent dashboard fallbacks
 import { formatPrice } from '../../utils/constants';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import BusinessNav from '../../components/BusinessNav';
@@ -34,7 +33,15 @@ const itemVariants = {
 };
 
 export default function BusinessDashboard() {
-  const business = JSON.parse(localStorage.getItem('pairley_user') || 'null') || mockBusinessOwners[0];
+  const navigate = useNavigate();
+  const token = localStorage.getItem('pairley_token');
+  const business = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+
+  useEffect(() => {
+    if (!token || !business) {
+      navigate('/login');
+    }
+  }, [token, business, navigate]);
 
   const [metrics, setMetrics] = useState({
     activeOffers: 0,
@@ -64,6 +71,7 @@ export default function BusinessDashboard() {
   };
 
   useEffect(() => {
+    if (!token || !business) return;
     setLoading(true);
     // 1. Fetch dashboard metrics
     api.get('/business/dashboard')
@@ -72,7 +80,7 @@ export default function BusinessDashboard() {
       })
       .catch((err) => console.error('Failed to fetch business metrics:', err));
 
-    const bId = business.id || 'biz-001';
+    const bId = business.id;
     api.get(`/offers/list?businessId=${bId}&status=ALL`)
       .then((data) => {
         const mappedDeals = data.map((d) => ({
@@ -184,6 +192,10 @@ export default function BusinessDashboard() {
       gradient: 'from-amber-500 to-orange-500'
     },
   ];
+
+  if (!token || !business) {
+    return null;
+  }
 
   return (
     <div className="business-dashboard page-wrapper py-6">

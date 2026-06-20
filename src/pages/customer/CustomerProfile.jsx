@@ -16,7 +16,7 @@ import {
   ShieldAlert,
   Edit
 } from 'lucide-react';
-import { mockCustomers } from '../../data/mockUsers';
+import { useNavigate } from 'react-router-dom';
 import { categories } from '../../data/categories';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import CustomerNav from '../../components/CustomerNav';
@@ -25,6 +25,16 @@ import { api } from '../../utils/api';
 import './CustomerProfile.css';
 
 export default function CustomerProfile() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('pairley_token');
+  const localUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+
+  useEffect(() => {
+    if (!token || !localUser) {
+      navigate('/login');
+    }
+  }, [token, localUser, navigate]);
+
   const { showToast } = useToast();
   
   const [loading, setLoading] = useState(true);
@@ -103,10 +113,11 @@ export default function CustomerProfile() {
       })
       .catch((err) => {
         console.error('Failed to load customer profile, falling back:', err);
-        const localUser = JSON.parse(localStorage.getItem('pairley_user') || 'null') || mockCustomers[0];
+        const localUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+        if (!localUser) return;
         const prof = {
           id: localUser.id || 'demo-id',
-          name: localUser.name || localUser.owner_name || 'Demo User',
+          name: localUser.name || localUser.owner_name || 'User',
           email: localUser.email || '',
           phone: localUser.mobile || localUser.phone || '',
           city: localUser.city || 'Mumbai',
@@ -222,6 +233,10 @@ export default function CustomerProfile() {
     setEditMode(false);
   };
 
+  if (!token || !localUser) {
+    return null;
+  }
+
   return (
     <div className="customer-profile page-wrapper py-6">
       <div className="container max-w-5xl mx-auto px-4">
@@ -237,7 +252,7 @@ export default function CustomerProfile() {
             
             <div className="flex items-center gap-5">
               <div className="customer-profile__avatar-wrap relative">
-                <ImageWithFallback src={profile.profile_photo || mockCustomers[0].avatar} alt={profile.name} className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-purple-50" fallbackType="avatar" name={profile.name} />
+                <ImageWithFallback src={profile.profile_photo || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + (profile.name || 'User'))} alt={profile.name} className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-purple-50" fallbackType="avatar" name={profile.name} />
                 {editMode && (
                   <button className="absolute bottom-0 right-0 w-7 h-7 bg-[#4E2BC4] hover:bg-[#6D4EE3] text-white rounded-full flex items-center justify-center border-2 border-white shadow-md transition-colors duration-200" aria-label="Upload photo">
                     <Camera size={12} />

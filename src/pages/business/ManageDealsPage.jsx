@@ -18,10 +18,9 @@ import {
   MapPin,
   Tag
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { mockDeals } from '../../data/mockDeals';
-import { mockBusinessOwners } from '../../data/mockUsers';
+// Removed mock imports to prevent dashboard fallbacks
 import { formatPrice } from '../../utils/constants';
 import { api } from '../../utils/api';
 import { getCategoryById } from '../../data/categories';
@@ -30,13 +29,22 @@ import BusinessNav from '../../components/BusinessNav';
 import './ManageDealsPage.css';
 
 export default function ManageDealsPage() {
-  const business = JSON.parse(localStorage.getItem('pairley_user') || 'null') || mockBusinessOwners[0];
-  
+  const navigate = useNavigate();
+  const token = localStorage.getItem('pairley_token');
+  const business = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+
+  useEffect(() => {
+    if (!token || !business) {
+      navigate('/login');
+    }
+  }, [token, business, navigate]);
+
   const [dealsList, setDealsList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const bId = business.id || 'biz-001';
+    if (!token || !business) return;
+    const bId = business.id;
     api.get(`/offers/list?businessId=${bId}&status=ALL`)
       .then((data) => {
         const mapped = data.map((d) => ({
@@ -65,8 +73,8 @@ export default function ManageDealsPage() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Failed to load merchant deals, falling back to mock:', err);
-        setDealsList(mockDeals.filter((d) => d.businessOwner?.id === bId));
+        console.error('Failed to load merchant deals:', err);
+        setDealsList([]);
         setLoading(false);
       });
   }, [business.id]);
@@ -189,6 +197,10 @@ export default function ManageDealsPage() {
         );
     }
   };
+
+  if (!token || !business) {
+    return null;
+  }
 
   return (
     <div className="manage-deals-page page-wrapper py-6">
