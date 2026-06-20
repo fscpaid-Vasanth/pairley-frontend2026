@@ -11,15 +11,19 @@
 }
 
 .deal-card--pair {
-  border: 1.5px solid rgba(78, 43, 196, 0.28); /* Thin dark blue border */
-  background: linear-gradient(135deg, #ffffff 0%, #faf8ff 50%, #f1efff 100%);
-  box-shadow: 0 4px 15px rgba(78, 43, 196, 0.04);
+  border: 1.5px solid rgba(78, 43, 196, 0.22);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.4) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px 0 rgba(78, 43, 196, 0.03), 0 4px 15px rgba(78, 43, 196, 0.04);
 }
 
 .deal-card--group {
-  border: 1.5px solid rgba(16, 185, 129, 0.35); /* Thin green border */
-  background: linear-gradient(135deg, #ffffff 0%, #f9fefe 50%, #f0fdf7 100%);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.04);
+  border: 1.5px solid rgba(16, 185, 129, 0.28);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.4) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.03), 0 4px 15px rgba(16, 185, 129, 0.04);
 }
 
 .deal-card:hover {
@@ -28,18 +32,18 @@
 
 .deal-card--pair:hover {
   border-color: rgba(78, 43, 196, 0.65);
-  background: linear-gradient(135deg, #ffffff 0%, #f4f0ff 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.5) 100%);
   box-shadow:
-    0 12px 32px rgba(78, 43, 196, 0.13),
-    0 0 0 3px rgba(78, 43, 196, 0.06);
+    0 12px 32px rgba(78, 43, 196, 0.15),
+    0 0 0 3px rgba(78, 43, 196, 0.08);
 }
 
 .deal-card--group:hover {
   border-color: rgba(16, 185, 129, 0.70);
-  background: linear-gradient(135deg, #ffffff 0%, #e6fcf0 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.5) 100%);
   box-shadow:
-    0 12px 32px rgba(16, 185, 129, 0.13),
-    0 0 0 3px rgba(16, 185, 129, 0.06);
+    0 12px 32px rgba(16, 185, 129, 0.15),
+    0 0 0 3px rgba(16, 185, 129, 0.08);
 }
 
 /* ── Image wrapper ── */
