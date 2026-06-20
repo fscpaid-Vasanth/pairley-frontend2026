@@ -31,7 +31,7 @@ export default function DealCard({ deal, onClick }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Link to={`/deals/${deal.id}`} className="deal-card" onClick={onClick}>
+      <Link to={`/deals/${deal.id}`} className={`deal-card ${isPair ? 'deal-card--pair' : 'deal-card--group'}`} onClick={onClick}>
 
         {/* ── Image ── */}
         <div className="deal-card__image-wrap">

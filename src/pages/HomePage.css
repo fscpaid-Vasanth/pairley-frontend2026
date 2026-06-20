@@ -37,19 +37,20 @@
 }
 
 .popular-deal-card {
-  border: 1px solid var(--border);
+  border: 1.5px solid rgba(78, 43, 196, 0.25);
   border-radius: 12px;
   overflow: hidden;
   background: white;
   display: flex;
   flex-direction: column;
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   box-shadow: 0 2px 8px rgba(78, 43, 196, 0.05);
 }
 
 .popular-deal-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(78, 43, 196, 0.13);
+  border-color: rgba(78, 43, 196, 0.60);
 }
 
 .popular-deal-body {

@@ -295,24 +295,26 @@ export default function BusinessDashboard() {
                   return (
                     <div key={deal.id} className="bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all duration-300 group">
                       <div className="flex items-center gap-4">
-                        <ImageWithFallback
-                          src={deal.images?.[0]}
-                          alt={deal.title}
-                          className="w-14 h-14 rounded-xl object-cover border border-slate-100 flex-shrink-0 group-hover:scale-102 transition-transform duration-300"
-                          fallbackType="deal"
-                          category={deal.category}
-                        />
-                        <div>
-                          <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-[#4E2BC4] transition-colors duration-200 line-clamp-1">{deal.title}</h4>
-                          <div className="flex items-center gap-3 mt-1.5">
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                              isPair ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'
-                            }`}>
-                              {isPair ? '🤝 Pair BOGO' : '👥 Group Tiers'}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-medium">{deal.location}</span>
+                        <Link to={`/deals/${deal.id}`} className="flex items-center gap-4 hover:no-underline group/link">
+                          <ImageWithFallback
+                            src={deal.images?.[0]}
+                            alt={deal.title}
+                            className="w-14 h-14 rounded-xl object-cover border border-slate-100 flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
+                            fallbackType="deal"
+                            category={deal.category}
+                          />
+                          <div>
+                            <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-[#4E2BC4] group-hover/link:text-[#4E2BC4] transition-colors duration-200 line-clamp-1">{deal.title}</h4>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                isPair ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'
+                              }`}>
+                                {isPair ? '🤝 Pair BOGO' : '👥 Group Tiers'}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-medium">{deal.location}</span>
+                            </div>
                           </div>
-                        </div>
+                        </Link>
                       </div>
 
                       <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">

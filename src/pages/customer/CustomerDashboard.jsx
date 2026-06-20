@@ -295,7 +295,8 @@ export default function CustomerDashboard() {
                 return (
                   <Link to={`/deals/${deal.id}`} key={deal.id} className="block group">
                     <motion.div
-                      className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between h-full"
+                      className="bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between h-full"
+                      style={{ borderColor: 'rgba(78, 43, 196, 0.25)', borderWidth: '1.5px' }}
                       whileHover={{ y: -4 }}
                     >
                       <div>
@@ -368,7 +369,7 @@ export default function CustomerDashboard() {
                 pairedDeals.map((deal) => {
                   const cat = getCategoryById(deal.category);
                   return (
-                    <div key={deal.id} className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex">
+                    <div key={deal.id} className="bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex" style={{ borderColor: 'rgba(78, 43, 196, 0.25)', borderWidth: '1.5px' }}>
                       <div className="w-28 h-auto flex-shrink-0 bg-slate-50 relative">
                         <ImageWithFallback className="w-full h-full object-cover" src={deal.images?.[0]} alt={deal.title} fallbackType="deal" category={deal.category} />
                         <div className="absolute top-2 left-2">
@@ -490,10 +491,11 @@ export default function CustomerDashboard() {
                 return (
                   <motion.div
                     key={deal.id}
-                    className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group"
+                    className="bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group"
+                    style={{ borderColor: isGroup ? 'rgba(16, 185, 129, 0.35)' : 'rgba(78, 43, 196, 0.28)', borderWidth: '1.5px' }}
                     whileHover={{ y: -4 }}
                   >
-                    <div>
+                    <Link to={`/deals/${deal.id}`} className="block text-slate-800 flex-1 hover:no-underline group">
                       <div className="relative overflow-hidden h-40 bg-slate-100">
                         <ImageWithFallback className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
                         <div className="absolute top-3 left-3">
@@ -511,7 +513,7 @@ export default function CustomerDashboard() {
                       </div>
 
                       <div className="p-4">
-                        <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px]">{deal.title}</h4>
+                        <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-[#4E2BC4] transition-colors duration-200">{deal.title}</h4>
 
                         {isGroup && (
                           <div className="mt-3">
@@ -529,14 +531,14 @@ export default function CustomerDashboard() {
                         
                         {!isGroup && (
                           <div className="flex items-center gap-1.5 mt-3">
-                            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
                             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100/60">
                               🤝 Matching Pool Open
                             </span>
                           </div>
                         )}
                       </div>
-                    </div>
+                    </Link>
 
                     <div className="p-4 pt-0 border-t border-slate-100 mt-2 flex justify-between items-center">
                       <div>
