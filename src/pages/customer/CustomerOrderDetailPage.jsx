@@ -17,7 +17,8 @@ import {
   Calendar,
   Wallet,
   Share2,
-  Clipboard
+  Clipboard,
+  Users
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/constants';
