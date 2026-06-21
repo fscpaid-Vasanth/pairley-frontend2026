@@ -32,10 +32,10 @@ const SORT_OPTIONS = [
 const DealsPage = () => {
   const [dealsList, setDealsList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dealType, setDealType] = useState('all'); // 'all' | 'pair' | 'group'
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
   const [searchParams, setSearchParams] = useSearchParams();
+  const [dealType, setDealType] = useState('all'); // 'all' | 'pair' | 'group'
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [sortBy, setSortBy] = useState('newest');
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
     return localStorage.getItem('deals-theme') === 'dark';
   });
@@ -133,7 +133,7 @@ const DealsPage = () => {
     }
 
     /* Filter by category */
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== 'all') {
       deals = deals.filter((d) => d.category === selectedCategory);
     }
 
@@ -306,7 +306,7 @@ const DealsPage = () => {
                 className="btn btn-outline"
                 onClick={() => {
                   setDealType('all');
-                  setSelectedCategory(null);
+                  setSelectedCategory('all');
                 }}
               >
                 <SlidersHorizontal size={16} />
