@@ -15,6 +15,12 @@ export default function LoginPage() {
 
   const searchParams = new URLSearchParams(window.location.search);
   const isAdminLogin = searchParams.get('role') === 'admin';
+
+  useEffect(() => {
+    if (isAdminLogin) {
+      setLoginMethod('password');
+    }
+  }, [isAdminLogin]);
   
   // Credentials Login States
   const [showPassword, setShowPassword] = useState(false);
@@ -373,9 +379,18 @@ export default function LoginPage() {
         { title: 'Trusted Platform', desc: 'A secure ecosystem built specifically for premium retail shop owners.', icon: 'verified_user' },
       ],
     },
+    admin: {
+      title: 'Super Admin Gateway',
+      desc: 'Access the Super Admin Control Center to verify merchant accounts and moderate offers.',
+      benefits: [
+        { title: 'Verify Onboardings', desc: 'Audit and approve new shop registrations and uploaded verification files.', icon: 'admin_panel_settings' },
+        { title: 'Moderate Deals', desc: 'Track and update co-buy offer statuses across mall categories.', icon: 'gavel' },
+        { title: 'Operational Metrics', desc: 'Analyze real-time revenue collection, users growth, and active deals.', icon: 'monitoring' },
+      ],
+    },
   };
 
-  const c = leftContent[role];
+  const c = isAdminLogin ? leftContent.admin : leftContent[role];
 
   return (
     <div className="login-root">
@@ -416,19 +431,35 @@ export default function LoginPage() {
             </div>
 
             {/* Illustration — pure CSS, no broken image */}
-            <div className="login-illustration">
-              <div className="login-illustration-inner">
-                <span className="login-illustration-emoji">🛍️</span>
-                <div className="login-illustration-rings">
-                  <div className="login-illustration-ring login-illustration-ring--1" />
-                  <div className="login-illustration-ring login-illustration-ring--2" />
-                </div>
-                <div className="login-illustration-stat">
-                  <span className="login-illustration-stat-val">50K+</span>
-                  <span className="login-illustration-stat-lbl">Community Members</span>
+            {isAdminLogin ? (
+              <div className="login-illustration animate-fadeIn">
+                <div className="login-illustration-inner">
+                  <span className="login-illustration-emoji">🛡️</span>
+                  <div className="login-illustration-rings">
+                    <div className="login-illustration-ring login-illustration-ring--1" style={{ borderColor: 'rgba(78, 43, 196, 0.15)' }} />
+                    <div className="login-illustration-ring login-illustration-ring--2" style={{ borderColor: 'rgba(16, 185, 129, 0.15)' }} />
+                  </div>
+                  <div className="login-illustration-stat">
+                    <span className="login-illustration-stat-val" style={{ color: '#4E2BC4' }}>SECURED</span>
+                    <span className="login-illustration-stat-lbl">Authorized Session Only</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="login-illustration">
+                <div className="login-illustration-inner">
+                  <span className="login-illustration-emoji">🛍️</span>
+                  <div className="login-illustration-rings">
+                    <div className="login-illustration-ring login-illustration-ring--1" />
+                    <div className="login-illustration-ring login-illustration-ring--2" />
+                  </div>
+                  <div className="login-illustration-stat">
+                    <span className="login-illustration-stat-val">50K+</span>
+                    <span className="login-illustration-stat-lbl">Community Members</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── RIGHT: Form Card ── */}
@@ -436,7 +467,7 @@ export default function LoginPage() {
             <div className="login-card">
 
               {/* Role Switcher */}
-              {!showGoogleOnboarding && (
+              {!showGoogleOnboarding && !isAdminLogin && (
                 <div className="login-role-tabs">
                   <button
                     type="button"
@@ -840,28 +871,30 @@ export default function LoginPage() {
                   <p className="login-card-subtitle">{isAdminLogin ? 'Enter authorized admin credentials to continue' : 'Enter your credentials to access your account'}</p>
 
                   {/* Method Switcher */}
-                  <div className="login-method-tabs">
-                    <button
-                      type="button"
-                      className={`login-method-tab ${loginMethod === 'password' ? 'login-method-tab--active' : ''}`}
-                      onClick={() => {
-                        setLoginMethod('password');
-                        setErrors({});
-                      }}
-                    >
-                      🔑 Password Login
-                    </button>
-                    <button
-                      type="button"
-                      className={`login-method-tab ${loginMethod === 'otp' ? 'login-method-tab--active' : ''}`}
-                      onClick={() => {
-                        setLoginMethod('otp');
-                        setErrors({});
-                      }}
-                    >
-                      📱 Mobile OTP Login
-                    </button>
-                  </div>
+                  {!isAdminLogin && (
+                    <div className="login-method-tabs">
+                      <button
+                        type="button"
+                        className={`login-method-tab ${loginMethod === 'password' ? 'login-method-tab--active' : ''}`}
+                        onClick={() => {
+                          setLoginMethod('password');
+                          setErrors({});
+                        }}
+                      >
+                        🔑 Password Login
+                      </button>
+                      <button
+                        type="button"
+                        className={`login-method-tab ${loginMethod === 'otp' ? 'login-method-tab--active' : ''}`}
+                        onClick={() => {
+                          setLoginMethod('otp');
+                          setErrors({});
+                        }}
+                      >
+                        📱 Mobile OTP Login
+                      </button>
+                    </div>
+                  )}
 
                   {loginMethod === 'password' ? (
                     <form onSubmit={handleSubmit} noValidate className="login-form">
@@ -926,7 +959,7 @@ export default function LoginPage() {
 
                       {/* Submit */}
                       <button type="submit" className="login-submit-btn">
-                        {role === 'customer' ? 'Login' : 'Login to Dashboard'}
+                        {isAdminLogin ? 'Admin Secure Login' : role === 'customer' ? 'Login' : 'Login to Dashboard'}
                       </button>
                     </form>
                   ) : (
@@ -968,37 +1001,39 @@ export default function LoginPage() {
                     </form>
                   )}
 
-                  {/* Divider */}
-                  <div className="login-divider">
-                    <span className="login-divider-line" />
-                    <span className="login-divider-text">or continue with</span>
-                    <span className="login-divider-line" />
-                  </div>
+                  {/* Divider and Social Login options */}
+                  {!isAdminLogin && (
+                    <>
+                      <div className="login-divider">
+                        <span className="login-divider-line" />
+                        <span className="login-divider-text">or continue with</span>
+                        <span className="login-divider-line" />
+                      </div>
 
-                  {/* Social */}
-                  <div className="login-social-row">
-                    <button type="button" className="login-social-btn" onClick={handleGoogleSignIn}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                      </svg>
-                      Google
-                    </button>
-                    <button type="button" className="login-social-btn" onClick={() => alert('Facebook Login (demo only)')}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
-                        <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd"/>
-                      </svg>
-                      Facebook
-                    </button>
-                  </div>
+                      <div className="login-social-row">
+                        <button type="button" className="login-social-btn" onClick={handleGoogleSignIn}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                          </svg>
+                          Google
+                        </button>
+                        <button type="button" className="login-social-btn" onClick={() => alert('Facebook Login (demo only)')}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+                            <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd"/>
+                          </svg>
+                          Facebook
+                        </button>
+                      </div>
 
-                  {/* Signup link */}
-                  <p className="login-signup-link">
-                    Don't have an account?{' '}
-                    <Link to="/signup" className="login-signup-anchor">Sign Up</Link>
-                  </p>
+                      <p className="login-signup-link">
+                        Don't have an account?{' '}
+                        <Link to="/signup" className="login-signup-anchor">Sign Up</Link>
+                      </p>
+                    </>
+                  )}
                 </>
               )}
             </div>
