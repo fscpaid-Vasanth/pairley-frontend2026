@@ -6,6 +6,7 @@ import { api } from '../utils/api';
 import HeroSection from '../components/HeroSection';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { ROUTES, formatPrice } from '../utils/constants';
+import { categories } from '../data/categories';
 import './HomePage.css';
 
 const fadeInUp = {
@@ -65,6 +66,16 @@ const POPULAR_OFFERS = [
   }
 ];
 
+const getShortLabel = (cat) => {
+  if (cat.id === 'dining') return 'Food';
+  if (cat.id === 'beauty') return 'Salon';
+  if (cat.id === 'shopping') return 'Retail';
+  if (cat.id === 'tours') return 'Travel';
+  if (cat.id === 'home-services') return 'Home';
+  if (cat.id === 'subscriptions') return 'Electronics';
+  return cat.name.split(' & ')[0].split(' ')[0];
+};
+
 export default function HomePage() {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -117,6 +128,23 @@ export default function HomePage() {
     return deal;
   };
 
+  const filteredDeals = useMemo(() => {
+    let result = offers.map(getMappedDeal);
+    if (selectedMall) {
+      result = result.filter((d) => d.location === selectedMall || d.business?.mall_name === selectedMall);
+    }
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (d) =>
+          d.title.toLowerCase().includes(query) ||
+          d.merchant.toLowerCase().includes(query) ||
+          d.category.toLowerCase().includes(query)
+      );
+    }
+    return result;
+  }, [offers, selectedMall, searchQuery]);
+
   return (
     <div className="homepage page-wrapper">
       {/* Viewport 1: Hero Section */}
@@ -136,44 +164,18 @@ export default function HomePage() {
               <Link to={ROUTES.DEALS} className="categories-horizontal-view-all">View All →</Link>
             </div>
             <div className="categories-horizontal-grid">
-              <Link to={`${ROUTES.DEALS}?category=dining`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#FFF1F0' }}>🍕</span>
-                <span className="categories-horizontal-label">Food</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=fitness`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#F5F0FF' }}>💪</span>
-                <span className="categories-horizontal-label">Fitness</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=beauty`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#FFF0F7' }}>💆</span>
-                <span className="categories-horizontal-label">Salon</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=shopping`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#FFF7ED' }}>🛍️</span>
-                <span className="categories-horizontal-label">Retail</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=tours`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#EFF6FF' }}>✈️</span>
-                <span className="categories-horizontal-label">Travel</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=education`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#F0FDF4' }}>📚</span>
-                <span className="categories-horizontal-label">Education</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=healthcare`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#FFF1F0' }}>🏥</span>
-                <span className="categories-horizontal-label">Healthcare</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=home-services`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#EEF2FF' }}>🏠</span>
-                <span className="categories-horizontal-label">Home</span>
-              </Link>
-              <Link to={`${ROUTES.DEALS}?category=electronics`} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#F5F0FF' }}>📺</span>
-                <span className="categories-horizontal-label">Electronics</span>
-              </Link>
+              {categories.slice(0, 9).map((cat) => (
+                <Link to={`${ROUTES.DEALS}?category=${cat.id}`} className="categories-horizontal-item" key={cat.id}>
+                  <span className="categories-horizontal-icon">
+                    <img src={cat.imageUrl} alt={cat.name} className="categories-horizontal-icon-img" />
+                  </span>
+                  <span className="categories-horizontal-label">{getShortLabel(cat)}</span>
+                </Link>
+              ))}
               <Link to={ROUTES.DEALS} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: '#F9FAFB' }}>🔖</span>
+                <span className="categories-horizontal-icon">
+                  <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=80&auto=format&fit=crop&q=60" alt="More" className="categories-horizontal-icon-img" />
+                </span>
                 <span className="categories-horizontal-label">More</span>
               </Link>
             </div>

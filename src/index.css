@@ -765,98 +765,102 @@ ul { list-style: none; }
   box-shadow: 0 12px 30px -4px rgba(78, 43, 196, 0.12), var(--shadow-md) !important;
 }
 
-/* Override Tailwind font sizes inside all card elements to be 20% larger */
+/* Override Tailwind font sizes inside all card elements to be 10% larger */
 .page-wrapper :is(.bg-white, .bg-white\/80, .bg-white\/70, .bg-white\/90, .bg-white\/95, .card-glass, .deal-card, .category-card, .sim-card, .hero__timeline-card, .category-quick-card, .pricing-tier-card, .testimonial-card, .stats-counter__card, .how-it-works-steps__node, .popular-deal-card) :not(input):not(select):not(textarea).text-\[10px\],
 .page-wrapper :is(.bg-white, .bg-white\/80, .bg-white\/70, .bg-white\/90, .bg-white\/95, .card-glass, .deal-card, .category-card, .sim-card, .hero__timeline-card, .category-quick-card, .pricing-tier-card, .testimonial-card, .stats-counter__card, .how-it-works-steps__node, .popular-deal-card) :not(input):not(select):not(textarea).text-xs {
-  font-size: 14.5px !important;
+  font-size: 13.2px !important;
 }
 .page-wrapper :is(.bg-white, .bg-white\/80, .bg-white\/70, .bg-white\/90, .bg-white\/95, .card-glass, .deal-card, .category-card, .sim-card, .hero__timeline-card, .category-quick-card, .pricing-tier-card, .testimonial-card, .stats-counter__card, .how-it-works-steps__node, .popular-deal-card) :not(input):not(select):not(textarea).text-sm {
-  font-size: 17px !important;
+  font-size: 15.4px !important;
 }
 .page-wrapper :is(.bg-white, .bg-white\/80, .bg-white\/70, .bg-white\/90, .bg-white\/95, .card-glass, .deal-card, .category-card, .sim-card, .hero__timeline-card, .category-quick-card, .pricing-tier-card, .testimonial-card, .stats-counter__card, .how-it-works-steps__node, .popular-deal-card) :not(input):not(select):not(textarea).text-base {
-  font-size: 19px !important;
+  font-size: 17.6px !important;
 }
 .page-wrapper :is(.bg-white, .bg-white\/80, .bg-white\/70, .bg-white\/90, .bg-white\/95, .card-glass, .deal-card, .category-card, .sim-card, .hero__timeline-card, .category-quick-card, .pricing-tier-card, .testimonial-card, .stats-counter__card, .how-it-works-steps__node, .popular-deal-card) :not(input):not(select):not(textarea).text-lg {
-  font-size: 21.5px !important;
+  font-size: 19.8px !important;
 }
 .page-wrapper :is(.bg-white, .bg-white\/80, .bg-white\/70, .bg-white\/90, .bg-white\/95, .card-glass, .deal-card, .category-card, .sim-card, .hero__timeline-card, .category-quick-card, .pricing-tier-card, .testimonial-card, .stats-counter__card, .how-it-works-steps__node, .popular-deal-card) :not(input):not(select):not(textarea).text-xl {
-  font-size: 24px !important;
+  font-size: 22px !important;
 }
 .page-wrapper :is(.bg-white, .bg-white\/80, .bg-white\/70, .bg-white\/90, .bg-white\/95, .card-glass, .deal-card, .category-card, .sim-card, .hero__timeline-card, .category-quick-card, .pricing-tier-card, .testimonial-card, .stats-counter__card, .how-it-works-steps__node, .popular-deal-card) :not(input):not(select):not(textarea).text-2xl {
-  font-size: 28.5px !important;
+  font-size: 26.4px !important;
 }
 
-/* Custom CSS Card element absolute font-size scale-ups (20% larger) */
+/* Custom CSS Card element absolute font-size scale-ups (10% larger) */
 .deal-card__type-tag, 
 .deal-card__cat-tag, 
 .deal-card__location, 
 .deal-card__progress-label, 
 .deal-card__price-original, 
 .deal-card__savings-badge {
-  font-size: 14.5px !important;
+  font-size: 13.2px !important;
 }
 .deal-card__title {
-  font-size: 1.38rem !important;
+  font-size: 1.26rem !important;
 }
 .deal-card__merchant {
-  font-size: 16.2px !important;
+  font-size: 15px !important;
 }
 .deal-card__joined-text {
-  font-size: 15.6px !important;
+  font-size: 14.3px !important;
 }
 .deal-card__price-pairley {
-  font-size: 1.65rem !important;
+  font-size: 1.52rem !important;
 }
 .deal-card__join-cta {
-  font-size: 17.4px !important;
+  font-size: 16px !important;
 }
 
 /* Category card overrides */
 .category-card__name {
-  font-size: 18px !important;
+  font-size: 16.5px !important;
+}
+.categories-horizontal-label {
+  font-size: 12.1px !important;
 }
 
 /* Simulator card overrides */
 .sim-card__title {
-  font-size: 21.5px !important;
+  font-size: 19.8px !important;
 }
 .sim-card__subtitle {
-  font-size: 15.6px !important;
+  font-size: 14.3px !important;
 }
 .sim-mode-btn {
-  font-size: 13.2px !important;
+  font-size: 12.1px !important;
 }
 .sim-deal-tag, .sim-live-badge {
-  font-size: 11px !important;
-}
-.sim-joined-count {
-  font-size: 12px !important;
-}
-.bogo-name {
-  font-size: 12.6px !important;
-}
-.bogo-status {
-  font-size: 11px !important;
-}
-.sim-status-text {
-  font-size: 16.2px !important;
-}
-.group-price-label {
   font-size: 10px !important;
 }
+.sim-joined-count {
+  font-size: 11px !important;
+}
+.bogo-name {
+  font-size: 11.5px !important;
+}
+.bogo-status {
+  font-size: 10px !important;
+}
+.sim-status-text {
+  font-size: 15px !important;
+}
+.group-price-label {
+  font-size: 8.8px !important;
+}
 .group-price-value {
-  font-size: 21.5px !important;
+  font-size: 19.8px !important;
 }
 .group-price-discount {
-  font-size: 12.6px !important;
+  font-size: 11.5px !important;
 }
 .group-tiers {
-  font-size: 10.2px !important;
+  font-size: 9.3px !important;
 }
 .group-tier {
-  font-size: 13.2px !important;
+  font-size: 12.1px !important;
 }
 .group-avatar {
-  font-size: 13.2px !important;
+  font-size: 12.1px !important;
 }
+
 

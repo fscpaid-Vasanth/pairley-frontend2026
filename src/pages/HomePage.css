@@ -575,6 +575,13 @@
   font-size: 1.15rem;
   flex-shrink: 0;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+
+.categories-horizontal-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .categories-horizontal-label {

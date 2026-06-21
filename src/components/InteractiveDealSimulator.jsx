@@ -41,7 +41,7 @@ export default function InteractiveDealSimulator() {
       <div className="sim-card__header">
         <h3 className="sim-card__title">
           <Sparkles className="text-purple-600 animate-pulse" size={16} />
-          Power of the Pairley
+          Power of Pairley
         </h3>
         <p className="sim-card__subtitle">See how Pairley matches buyers and drops prices.</p>
       </div>

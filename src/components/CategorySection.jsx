@@ -45,7 +45,7 @@ export default function CategorySection({ selectedCategory, onSelect, onSelectCa
             style={{ '--cat-color': 'var(--primary)' }}
           >
             <div className="category-card__icon-circle">
-              <span className="category-card__emoji">🔥</span>
+              <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=80&auto=format&fit=crop&q=60" alt="All Deals" className="category-card__image-icon" />
             </div>
             <span className="category-card__name">All Deals</span>
           </motion.div>
@@ -59,7 +59,7 @@ export default function CategorySection({ selectedCategory, onSelect, onSelectCa
               style={{ '--cat-color': cat.color }}
             >
               <div className="category-card__icon-circle">
-                <span className="category-card__emoji">{cat.icon}</span>
+                <img src={cat.imageUrl} alt={cat.name} className="category-card__image-icon" />
               </div>
               <span className="category-card__name">{cat.name}</span>
             </motion.div>
