@@ -27,6 +27,7 @@ import CustomerProfile from './pages/customer/CustomerProfile';
 import CustomerOrdersPage from './pages/customer/CustomerOrdersPage';
 import CustomerOrderDetailPage from './pages/customer/CustomerOrderDetailPage';
 import CustomerChatPage from './pages/customer/CustomerChatPage';
+import CustomerDealChatPage from './pages/customer/CustomerDealChatPage';
 
 // Business Pages
 import BusinessDashboard from './pages/business/BusinessDashboard';
@@ -222,6 +223,14 @@ function AppContent() {
             element={
               <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
                 <CustomerChatPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path={ROUTES.CUSTOMER_DEAL_CHAT}
+            element={
+              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+                <CustomerDealChatPage />
               </AppLayout>
             }
           />

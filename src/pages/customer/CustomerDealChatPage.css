@@ -1,0 +1,58 @@
+.customer-deal-chat-page {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Custom scrollbars for chat container */
+.customer-deal-chat-page .overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.customer-deal-chat-page .overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customer-deal-chat-page .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 99px;
+}
+
+.customer-deal-chat-page .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(78, 43, 196, 0.4);
+}
+
+/* Smooth transitions */
+.customer-deal-chat-page a,
+.customer-deal-chat-page button,
+.customer-deal-chat-page select {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Coordination action hover effects */
+.customer-deal-chat-page .flex-col button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(78, 43, 196, 0.35);
+  background-color: rgba(78, 43, 196, 0.02);
+}
+
+/* Scheduler inputs styling */
+.customer-deal-chat-page select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Schedule proposal card styling */
+.customer-deal-chat-page .bg-indigo-50 {
+  background: linear-gradient(135deg, rgba(78, 43, 196, 0.05) 0%, rgba(78, 43, 196, 0.02) 100%);
+  border: 1px solid rgba(78, 43, 196, 0.15);
+}
+
+/* Statements pill button styles */
+.customer-deal-chat-page button:active {
+  transform: scale(0.98);
+}

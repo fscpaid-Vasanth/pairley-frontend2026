@@ -184,6 +184,14 @@ const DealDetailPage = () => {
   const { saved, percentage } = calculateSavings(deal.originalPrice, deal.pairleyPrice);
   const daysLeft = getDaysRemaining(deal.validUntil);
   const isPair = deal.mode === 'pair';
+  const userHasJoined = currentUser && deal?.interests?.some(
+    (i) => i.customer_id === currentUser.id || 
+           i.customer_id === currentUser.sub || 
+           i.customer?.id === currentUser.id || 
+           i.customer?.id === currentUser.sub ||
+           (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
+           (currentUser.email && i.customer?.email === currentUser.email)
+  );
 
   /* Similar deals: same category, exclude current, max 3 */
   const similarDeals = mockDeals
@@ -590,6 +598,24 @@ const DealDetailPage = () => {
                       <InterestButton deal={deal} onInterest={handleInterestExpressed} />
                     )}
                   </div>
+
+                  {userHasJoined && !isBusiness && (
+                    <div className="co-buy-chat-card p-4 rounded-2xl bg-indigo-50/50 border border-[#4E2BC4]/20 mt-4 text-left shadow-sm">
+                      <h4 className="text-xs font-extrabold text-[#4E2BC4] flex items-center gap-1.5 mb-1.5">
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chat_bubble</span>
+                        Anonymous Co-Buy Chat Room
+                      </h4>
+                      <p className="text-[10px] text-slate-500 leading-normal mb-3 font-semibold">
+                        Coordinate with other interested buyers for this deal. Message templates are predefined to protect your identity.
+                      </p>
+                      <Link
+                        to={`/customer/deal-chat/${id}`}
+                        className="w-full btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white py-2.5 rounded-xl text-[11px] font-bold text-center block transition shadow-sm"
+                      >
+                        Enter Anonymous Chat Room
+                      </Link>
+                    </div>
+                  )}
 
                   {/* Days remaining */}
                   {daysLeft > 0 && (

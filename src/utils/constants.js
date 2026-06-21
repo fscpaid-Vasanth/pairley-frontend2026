@@ -23,6 +23,7 @@ export const ROUTES = {
   CUSTOMER_ORDERS: '/customer/orders',
   CUSTOMER_ORDER_DETAIL: '/customer/orders/:id',
   CUSTOMER_CHAT: '/customer/chat/:id',
+  CUSTOMER_DEAL_CHAT: '/customer/deal-chat/:dealId',
 
   // Business
   BUSINESS_DASHBOARD: '/business/dashboard',
