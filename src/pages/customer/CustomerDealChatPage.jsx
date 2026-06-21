@@ -282,10 +282,10 @@ export default function CustomerDealChatPage() {
 
   return (
     <div className="customer-deal-chat-page page-wrapper py-6 text-left">
-      <div className="container max-w-6xl mx-auto px-4">
+      <div className="container max-w-6xl mx-auto px-4 chat-page-container">
         
         {/* Navigation header row */}
-        <div className="mb-4 flex items-center gap-3">
+        <div className="mb-4 flex items-center gap-3 flex-shrink-0">
           <Link to={`/deals/${dealId}`} className="p-2 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-slate-600 transition shadow-sm">
             <ArrowLeft size={16} />
           </Link>
@@ -299,10 +299,10 @@ export default function CustomerDealChatPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch chat-grid">
           
           {/* Left Column: Chat Container */}
-          <div className="lg:col-span-2 flex flex-col bg-white/70 backdrop-blur-md border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm h-[650px] relative">
+          <div className="lg:col-span-2 flex flex-col bg-white/70 backdrop-blur-md border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm h-full chat-box-column relative">
             
             {/* Anonymous Header */}
             <div className="bg-white/80 border-b border-slate-100 p-4 flex items-center justify-between">
@@ -458,7 +458,7 @@ export default function CustomerDealChatPage() {
           </div>
 
           {/* Right Column: Context & Actions Sidebar */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 sidebar-column">
             
             {/* Deal Summary */}
             <div className="bg-white/70 backdrop-blur-md border border-slate-200/80 p-5 rounded-3xl shadow-sm text-left">
