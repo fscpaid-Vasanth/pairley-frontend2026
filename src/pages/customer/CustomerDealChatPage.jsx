@@ -109,18 +109,18 @@ export default function CustomerDealChatPage() {
   // Load deal details
   useEffect(() => {
     setLoading(true);
-    api.get(`/offers/${dealId}`)
+    api.get(`/offers/details/${dealId}`)
       .then((data) => {
         const mapped = {
           id: data.id,
           title: data.title,
           originalPrice: data.original_price,
           pairleyPrice: data.offer_price,
-          category: data.category,
-          images: data.offer_image ? [data.offer_image] : [],
+          category: data.category ? data.category.toLowerCase() : 'shopping',
+          images: [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
           businessOwner: {
             name: data.business?.business_name || 'Local Seller',
-            location: data.business?.city || 'Bangalore'
+            location: data.business?.city || data.business?.address || 'Bangalore'
           },
           interestCount: data.joined_people || 0,
           interests: data.interests || []
