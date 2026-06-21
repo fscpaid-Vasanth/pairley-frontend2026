@@ -153,7 +153,10 @@ body {
   font-size: var(--text-base);
   line-height: 1.6;
   color: var(--text);
-  background: radial-gradient(circle at 10% 20%, rgba(224, 231, 255, 0.45) 0%, rgba(253, 242, 248, 0.35) 40%, rgba(236, 253, 245, 0.25) 70%, rgba(245, 243, 255, 0.55) 100%), #f8fafc;
+  background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, rgba(244, 246, 255, 0.1) 100%), url('/spatial_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   background-attachment: fixed;
   min-height: 100vh;
   overflow-x: hidden;
@@ -167,7 +170,7 @@ body::before, body::after {
   height: 600px;
   border-radius: 50%;
   filter: blur(140px);
-  opacity: 0.45;
+  opacity: 0.35;
   z-index: -1;
   pointer-events: none;
   animation: floatOrb 35s infinite alternate ease-in-out;
