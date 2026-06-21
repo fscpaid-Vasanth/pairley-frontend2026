@@ -27,7 +27,7 @@
 }
 
 .sim-card__title {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 850;
   color: #0f172a;
   display: flex;
@@ -38,7 +38,7 @@
 }
 
 .sim-card__subtitle {
-  font-size: 10.5px;
+  font-size: 13px;
   color: #64748b;
   margin: 4px 0 0;
   font-weight: 550;
@@ -264,10 +264,12 @@
 }
 
 .sim-status-text {
-  font-size: 11px;
+  font-size: 13.5px;
   line-height: 1.5;
   color: #475569;
   max-width: 480px;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .sim-dots {

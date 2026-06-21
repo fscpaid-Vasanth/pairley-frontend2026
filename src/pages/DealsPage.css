@@ -74,7 +74,7 @@
   background-repeat: no-repeat;
   background-position: right 12px center;
   transition: all 0.2s ease;
-  min-width: 160px;
+  min-width: 210px;
 }
 
 .deals-sort-select:focus {

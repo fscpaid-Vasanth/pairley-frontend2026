@@ -764,3 +764,24 @@ ul { list-style: none; }
   background: linear-gradient(135deg, #ffffff 0%, #f4f1ff 100%) !important;
   box-shadow: 0 12px 30px -4px rgba(78, 43, 196, 0.12), var(--shadow-md) !important;
 }
+
+/* Override Tailwind font sizes inside cards to be 20% larger */
+.page-wrapper :not(input):not(select):not(textarea).bg-white .text-\[10px\],
+.page-wrapper :not(input):not(select):not(textarea).bg-white .text-xs {
+  font-size: 14.5px !important;
+}
+.page-wrapper :not(input):not(select):not(textarea).bg-white .text-sm {
+  font-size: 17px !important;
+}
+.page-wrapper :not(input):not(select):not(textarea).bg-white .text-base {
+  font-size: 19px !important;
+}
+.page-wrapper :not(input):not(select):not(textarea).bg-white .text-lg {
+  font-size: 21.5px !important;
+}
+.page-wrapper :not(input):not(select):not(textarea).bg-white .text-xl {
+  font-size: 24px !important;
+}
+.page-wrapper :not(input):not(select):not(textarea).bg-white .text-2xl {
+  font-size: 28.5px !important;
+}

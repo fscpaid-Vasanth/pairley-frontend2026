@@ -86,7 +86,7 @@
   left: 12px;
   padding: 4px 11px;
   border-radius: 99px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
   z-index: 2;
@@ -115,7 +115,7 @@
   color: white;
   padding: 4px 10px;
   border-radius: 99px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   z-index: 2;
 }
@@ -158,7 +158,7 @@
 
 .deal-card__title {
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.35;
   margin-bottom: 6px;
@@ -167,14 +167,14 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 42px;
+  min-height: 48px;
 }
 
 .deal-card__merchant {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
+  font-size: 13.5px;
   color: var(--text-muted);
   margin-bottom: 10px;
   font-weight: 500;
@@ -189,7 +189,7 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 /* ── Joined badge ── */
@@ -205,7 +205,7 @@
 }
 
 .deal-card__joined-text {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: #4E2BC4;
 }
@@ -218,7 +218,7 @@
 .deal-card__progress-label {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-bottom: 4px;
   font-weight: 600;
@@ -249,14 +249,14 @@
 
 .deal-card__price-pairley {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.38rem;
   font-weight: 800;
   color: var(--text-dark);
   line-height: 1;
 }
 
 .deal-card__price-original {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-muted);
   text-decoration: line-through;
   margin-left: 6px;
@@ -271,7 +271,7 @@
   background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08));
   border: 1px solid rgba(16,185,129,0.2);
   color: #059669;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: -0.01em;
 }
@@ -285,7 +285,7 @@
   border-radius: 10px;
   background: linear-gradient(135deg, #7C3AED, #4a3ee6);
   color: white;
-  font-size: 12px;
+  font-size: 14.5px;
   font-weight: 700;
   margin-top: 10px;
   opacity: 0;

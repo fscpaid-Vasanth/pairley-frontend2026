@@ -252,7 +252,8 @@
 }
 
 .search-console__field--mall {
-  max-width: 280px;
+  max-width: 340px;
+  flex: 1.2;
 }
 
 .search-console__field--query {
@@ -272,6 +273,8 @@
   color: #1e293b;
   width: 100%;
   cursor: pointer;
+  padding: 4px 24px 4px 0 !important;
+  box-shadow: none !important;
 }
 
 .search-console__divider {
