@@ -63,8 +63,9 @@ export default function AdminDashboard() {
   const [dealSearch, setDealSearch] = useState('');
   const [loadingDeals, setLoadingDeals] = useState(false);
 
-  // Modal view states for documents
-  const [docModal, setDocModal] = useState(null); // { type: 'aadhaar'|'pan'|'shop', title: string, src: string } | null
+  // Onboarding review modal states
+  const [selectedShop, setSelectedShop] = useState(null);
+  const [activeDocPreview, setActiveDocPreview] = useState('shop');
 
   // Check auth roles
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function AdminDashboard() {
     const token = localStorage.getItem('pairley_token');
     if (!token || user?.role?.toLowerCase() !== 'admin') {
       showToast('Access denied: Admin credentials required.', 'error');
-      navigate('/login');
+      navigate('/login?role=admin');
     }
   }, [navigate]);
 
@@ -396,128 +397,66 @@ export default function AdminDashboard() {
             {loadingShops ? (
               <div className="text-center py-20 text-slate-400 font-bold text-sm">Loading onboarding stores...</div>
             ) : filteredBusinesses.length > 0 ? (
-              <div className="space-y-4">
-                {filteredBusinesses.map((b) => (
-                  <div key={b.id} className="bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-3xl p-5 md:p-6 shadow-md transition-all duration-300 hover:shadow-lg relative overflow-hidden flex flex-col xl:flex-row justify-between gap-6">
-                    {/* Basic info */}
-                    <div className="flex-1 space-y-4 text-left">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <h3 className="text-lg font-black text-slate-800">{b.business_name}</h3>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
-                          b.verification_status === 'APPROVED'
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                            : b.verification_status === 'REJECTED'
-                            ? 'bg-rose-50 border-rose-200 text-rose-700'
-                            : 'bg-orange-50 border-orange-200 text-orange-700 animate-pulse'
-                        }`}>
-                          {b.verification_status}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">{b.business_type}</span>
-                      </div>
-
-                      {/* Store detail fields */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 text-xs font-semibold text-slate-600">
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Shop Owner</p>
-                          <p className="text-slate-700 font-bold flex items-center gap-1">👤 {b.owner_name}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mobile Contact</p>
-                          <a href={`tel:${b.mobile}`} className="text-[#4E2BC4] hover:underline font-bold">📞 {b.mobile}</a>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Email Address</p>
-                          <a href={`mailto:${b.email}`} className="text-[#4E2BC4] hover:underline font-bold">✉️ {b.email || 'No email'}</a>
-                        </div>
-                        <div className="md:col-span-2 xl:col-span-3">
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Physical Store Address</p>
-                          <p className="text-slate-700 font-bold flex items-center gap-1">
-                            📍 {b.address}, {b.city}, {b.state} - {b.pincode}
-                            {b.mall_name && <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-100 text-[10px] ml-1">🏪 {b.mall_name}</span>}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Document numbers */}
-                      <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold">
-                        <div>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">Aadhaar Number</span>
-                          <span className="text-slate-700 font-bold">{b.aadhaar_number || 'Not Provided'}</span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">PAN Card Number</span>
-                          <span className="text-slate-700 font-bold">{b.pan_number || 'Not Provided'}</span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-slate-400 font-bold uppercase block mb-0.5">GSTIN Registration</span>
-                          <span className="text-slate-700 font-bold">{b.gst_number || 'Not Provided'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Documents attachment & action buttons */}
-                    <div className="flex flex-col justify-between gap-4 xl:w-64 flex-shrink-0">
-                      {/* Onboarding Documents previews */}
-                      <div className="space-y-2">
-                        <h4 className="text-[10px] text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100 pb-1 mb-2">Verification Documents</h4>
-                        <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-3xl shadow-md overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs font-semibold text-slate-600 min-w-[900px]">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="px-6 py-4">Shop Details</th>
+                      <th className="px-6 py-4">Shop Owner</th>
+                      <th className="px-6 py-4">Contact Info</th>
+                      <th className="px-6 py-4">Location</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredBusinesses.map((b) => (
+                      <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="text-slate-800 font-bold text-sm">{b.business_name}</div>
+                          <div className="flex gap-2.5 mt-1">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">{b.business_type}</span>
+                            {b.gst_number && <span className="text-[9px] text-slate-400 font-semibold">GST: {b.gst_number}</span>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 font-bold text-slate-700">
+                          👤 {b.owner_name}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>📞 {b.mobile}</div>
+                          {b.email && <div className="text-slate-400 mt-0.5">✉️ {b.email}</div>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>📍 {b.city}, {b.state}</div>
+                          {b.mall_name && <div className="text-purple-600 mt-0.5 font-bold">🏪 {b.mall_name}</div>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
+                            b.verification_status === 'APPROVED'
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                              : b.verification_status === 'REJECTED'
+                              ? 'bg-rose-50 border-rose-200 text-rose-700'
+                              : 'bg-orange-50 border-orange-200 text-orange-700 animate-pulse'
+                          }`}>
+                            {b.verification_status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
                           <button
-                            disabled={!b.shop_photo}
-                            onClick={() => setDocModal({ type: 'shop', title: 'Shop Photo', src: b.shop_photo })}
-                            className={`p-2 rounded-xl border text-[9px] font-extrabold flex flex-col items-center gap-1.5 transition-all ${
-                              b.shop_photo ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' : 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
-                            }`}
+                            onClick={() => {
+                              setSelectedShop(b);
+                              setActiveDocPreview(b.shop_photo ? 'shop' : b.aadhaar_photo ? 'aadhaar' : b.pan_photo ? 'pan' : '');
+                            }}
+                            className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FA3] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5"
                           >
-                            <span>🏪</span>
-                            <span>Shop Photo</span>
+                            <Eye size={12} />
+                            Review Details
                           </button>
-                          <button
-                            disabled={!b.aadhaar_photo}
-                            onClick={() => setDocModal({ type: 'aadhaar', title: 'Aadhaar Card Photo', src: b.aadhaar_photo })}
-                            className={`p-2 rounded-xl border text-[9px] font-extrabold flex flex-col items-center gap-1.5 transition-all ${
-                              b.aadhaar_photo ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' : 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
-                            }`}
-                          >
-                            <span>👤</span>
-                            <span>Aadhaar</span>
-                          </button>
-                          <button
-                            disabled={!b.pan_photo}
-                            onClick={() => setDocModal({ type: 'pan', title: 'PAN Card Photo', src: b.pan_photo })}
-                            className={`p-2 rounded-xl border text-[9px] font-extrabold flex flex-col items-center gap-1.5 transition-all ${
-                              b.pan_photo ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' : 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
-                            }`}
-                          >
-                            <span>📇</span>
-                            <span>PAN Card</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Onboarding approvals actions */}
-                      <div className="flex gap-2.5 mt-auto">
-                        {(b.verification_status === 'PENDING' || b.verification_status === 'REJECTED') && (
-                          <button
-                            onClick={() => handleVerifyBusiness(b.id, 'APPROVED', b.business_name)}
-                            className="flex-1 btn btn-primary bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1"
-                          >
-                            <Check size={14} />
-                            Approve
-                          </button>
-                        )}
-                        {(b.verification_status === 'PENDING' || b.verification_status === 'APPROVED') && (
-                          <button
-                            onClick={() => handleVerifyBusiness(b.id, 'REJECTED', b.business_name)}
-                            className="flex-1 btn border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1"
-                          >
-                            <X size={14} />
-                            Reject
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <div className="text-center py-20 bg-white/50 border border-slate-200/30 rounded-3xl text-slate-400 font-bold text-sm">
@@ -696,21 +635,181 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Expandable Documents Image Modal */}
-        {docModal && (
-          <div className="admin-doc-modal-overlay flex items-center justify-center p-4" onClick={() => setDocModal(null)}>
-            <div className="admin-doc-modal bg-white border border-slate-200 shadow-2xl rounded-3xl p-6 max-w-xl w-full relative overflow-hidden" onClick={(e) => e.stopPropagation()}>
-              <button className="admin-doc-modal-close absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition" onClick={() => setDocModal(null)}>
-                <X size={20} />
-              </button>
-              <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">{docModal.title}</h3>
-              <div className="rounded-2xl border border-slate-100 overflow-hidden bg-slate-50 flex items-center justify-center min-h-[300px]">
-                {docModal.src ? (
-                  <img src={docModal.src} alt={docModal.title} className="max-w-full max-h-[500px] object-contain" />
-                ) : (
-                  <span className="text-slate-400 font-bold text-xs">No attachment image uploaded</span>
+        {/* Onboarding Review Detail Modal */}
+        {selectedShop && (
+          <div className="review-modal-overlay flex items-center justify-center p-4 animate-modalFadeIn" onClick={() => setSelectedShop(null)}>
+            <div className="review-modal-container bg-white border border-slate-200 shadow-2xl rounded-3xl p-5 md:p-6 max-w-4xl w-full relative overflow-hidden flex flex-col animate-modalSlideUp" onClick={(e) => e.stopPropagation()}>
+              
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-black text-slate-800">{selectedShop.business_name}</h3>
+                    <span className="text-[9px] text-slate-400 font-bold uppercase bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">{selectedShop.business_type}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
+                      selectedShop.verification_status === 'APPROVED'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                        : selectedShop.verification_status === 'REJECTED'
+                        ? 'bg-rose-50 border-rose-200 text-rose-700'
+                        : 'bg-orange-50 border-orange-200 text-orange-700 animate-pulse'
+                    }`}>
+                      {selectedShop.verification_status}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-wider">Review onboarding application & verification documents</p>
+                </div>
+                <button className="text-slate-400 hover:text-slate-600 transition" onClick={() => setSelectedShop(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Grid content */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[60vh] pr-1">
+                {/* Left panel: Profile Info */}
+                <div className="space-y-4 text-left">
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-1.5">Business Information</h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-semibold text-slate-600">
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Shop Owner</p>
+                      <p className="text-slate-700 font-bold flex items-center gap-1">👤 {selectedShop.owner_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mobile Contact</p>
+                      <a href={`tel:${selectedShop.mobile}`} className="text-[#4E2BC4] hover:underline font-bold">📞 {selectedShop.mobile}</a>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Email Address</p>
+                      <a href={`mailto:${selectedShop.email}`} className="text-[#4E2BC4] hover:underline font-bold">✉️ {selectedShop.email || 'No email'}</a>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Physical Store Address</p>
+                      <p className="text-slate-700 font-bold leading-relaxed">
+                        📍 {selectedShop.address}, {selectedShop.city}, {selectedShop.state} - {selectedShop.pincode}
+                        {selectedShop.mall_name && <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-100 text-[10px] block mt-1.5 w-max">🏪 {selectedShop.mall_name}</span>}
+                      </p>
+                    </div>
+                  </div>
+
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-1.5 pt-2">Registration Documents</h4>
+                  <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 space-y-3 text-xs font-semibold">
+                    <div className="flex justify-between items-center border-b border-slate-100/50 pb-2">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">Aadhaar Number</span>
+                      <span className="text-slate-700 font-bold">{selectedShop.aadhaar_number || 'Not Provided'}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-slate-100/50 pb-2">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">PAN Card Number</span>
+                      <span className="text-slate-700 font-bold">{selectedShop.pan_number || 'Not Provided'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">GSTIN Registration</span>
+                      <span className="text-slate-700 font-bold">{selectedShop.gst_number || 'Not Provided'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right panel: Document Preview Viewport */}
+                <div className="flex flex-col h-full text-left">
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-1.5 mb-3">Verification Documents Viewport</h4>
+                  
+                  {/* Doc selector tabs */}
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <button
+                      disabled={!selectedShop.shop_photo}
+                      onClick={() => setActiveDocPreview('shop')}
+                      className={`py-2 px-1 rounded-xl border text-[9px] font-extrabold flex flex-col items-center gap-1 transition-all ${
+                        !selectedShop.shop_photo
+                          ? 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
+                          : activeDocPreview === 'shop'
+                          ? 'bg-[#4E2BC4] border-[#4E2BC4] text-white shadow-sm shadow-[#4E2BC4]/20'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>🏪</span>
+                      <span>Shop Photo</span>
+                    </button>
+                    <button
+                      disabled={!selectedShop.aadhaar_photo}
+                      onClick={() => setActiveDocPreview('aadhaar')}
+                      className={`py-2 px-1 rounded-xl border text-[9px] font-extrabold flex flex-col items-center gap-1 transition-all ${
+                        !selectedShop.aadhaar_photo
+                          ? 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
+                          : activeDocPreview === 'aadhaar'
+                          ? 'bg-[#4E2BC4] border-[#4E2BC4] text-white shadow-sm shadow-[#4E2BC4]/20'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>👤</span>
+                      <span>Aadhaar</span>
+                    </button>
+                    <button
+                      disabled={!selectedShop.pan_photo}
+                      onClick={() => setActiveDocPreview('pan')}
+                      className={`py-2 px-1 rounded-xl border text-[9px] font-extrabold flex flex-col items-center gap-1 transition-all ${
+                        !selectedShop.pan_photo
+                          ? 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
+                          : activeDocPreview === 'pan'
+                          ? 'bg-[#4E2BC4] border-[#4E2BC4] text-white shadow-sm shadow-[#4E2BC4]/20'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>📇</span>
+                      <span>PAN Card</span>
+                    </button>
+                  </div>
+
+                  {/* Preview box */}
+                  <div className="flex-1 rounded-2xl border border-slate-100 overflow-hidden bg-slate-50 flex items-center justify-center min-h-[220px] max-h-[300px] relative">
+                    {activeDocPreview === 'shop' && selectedShop.shop_photo ? (
+                      <img src={selectedShop.shop_photo} alt="Shop" className="w-full h-full object-contain" />
+                    ) : activeDocPreview === 'aadhaar' && selectedShop.aadhaar_photo ? (
+                      <img src={selectedShop.aadhaar_photo} alt="Aadhaar" className="w-full h-full object-contain" />
+                    ) : activeDocPreview === 'pan' && selectedShop.pan_photo ? (
+                      <img src={selectedShop.pan_photo} alt="PAN Card" className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="text-center p-4">
+                        <span className="text-slate-400 font-bold text-xs block mb-1">No Document Image Selected</span>
+                        <span className="text-[10px] text-slate-300">Click a valid tab button above to preview</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-4 mt-4">
+                <button
+                  onClick={() => setSelectedShop(null)}
+                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  Close Window
+                </button>
+                {(selectedShop.verification_status === 'PENDING' || selectedShop.verification_status === 'REJECTED') && (
+                  <button
+                    onClick={() => {
+                      handleVerifyBusiness(selectedShop.id, 'APPROVED', selectedShop.business_name);
+                      setSelectedShop(prev => ({ ...prev, verification_status: 'APPROVED' }));
+                    }}
+                    className="btn btn-primary bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <Check size={14} />
+                    Approve Onboarding
+                  </button>
+                )}
+                {(selectedShop.verification_status === 'PENDING' || selectedShop.verification_status === 'APPROVED') && (
+                  <button
+                    onClick={() => {
+                      handleVerifyBusiness(selectedShop.id, 'REJECTED', selectedShop.business_name);
+                      setSelectedShop(prev => ({ ...prev, verification_status: 'REJECTED' }));
+                    }}
+                    className="btn border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <X size={14} />
+                    Reject Onboarding
+                  </button>
                 )}
               </div>
+
             </div>
           </div>
         )}

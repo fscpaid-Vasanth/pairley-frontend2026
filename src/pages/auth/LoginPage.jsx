@@ -12,6 +12,9 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [role, setRole] = useState('customer');
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const isAdminLogin = searchParams.get('role') === 'admin';
   
   // Credentials Login States
   const [showPassword, setShowPassword] = useState(false);
@@ -92,9 +95,18 @@ export default function LoginPage() {
       showToast('Please correct the validation errors in the form.', 'error');
       return;
     }
-    
+
+    if (form.email.trim().toLowerCase() === 'admin@pairley.com' && !isAdminLogin) {
+      showToast('Access denied: Admin credentials must be used via the Admin Portal link.', 'error');
+      return;
+    }
+
     api.post('/auth/login', { email: form.email, password_hash: form.password })
       .then((res) => {
+        if (res.role === 'Admin' && !isAdminLogin) {
+          showToast('Access denied: Admin credentials must be used via the Admin Portal link.', 'error');
+          return;
+        }
         localStorage.setItem('pairley_token', res.access_token || res.token);
         localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
         showToast('Logged in successfully!', 'success');
@@ -147,6 +159,10 @@ export default function LoginPage() {
     api.post('/auth/verify-otp', { mobile: phone.trim(), code: enteredCode })
       .then((res) => {
         if (res.exists) {
+          if (res.role === 'Admin' && !isAdminLogin) {
+            showToast('Access denied: Admin credentials must be used via the Admin Portal link.', 'error');
+            return;
+          }
           localStorage.setItem('pairley_token', res.token);
           localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
           showToast('Logged in successfully!', 'success');
@@ -211,6 +227,10 @@ export default function LoginPage() {
       api.post('/auth/google', checkPayload)
         .then((res) => {
           if (res.exists) {
+            if (res.role === 'Admin' && !isAdminLogin) {
+              showToast('Access denied: Admin credentials must be used via the Admin Portal link.', 'error');
+              return;
+            }
             localStorage.setItem('pairley_token', res.access_token || res.token);
             localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
             showToast('Logged in with Google!', 'success');
@@ -809,8 +829,15 @@ export default function LoginPage() {
                 </div>
               ) : (
                 <>
-                  <h2 className="login-card-title">Login</h2>
-                  <p className="login-card-subtitle">Enter your credentials to access your account</p>
+                  {isAdminLogin ? (
+                    <div className="admin-login-indicator bg-indigo-50 border border-indigo-200 rounded-xl p-2.5 mb-4 text-center">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#4E2BC4] flex items-center justify-center gap-1">
+                        🛡️ Admin Login Console
+                      </span>
+                    </div>
+                  ) : null}
+                  <h2 className="login-card-title">{isAdminLogin ? 'Admin Portal Access' : 'Login'}</h2>
+                  <p className="login-card-subtitle">{isAdminLogin ? 'Enter authorized admin credentials to continue' : 'Enter your credentials to access your account'}</p>
 
                   {/* Method Switcher */}
                   <div className="login-method-tabs">

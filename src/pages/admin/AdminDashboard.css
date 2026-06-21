@@ -105,3 +105,31 @@ table td {
     padding-top: var(--space-2);
   }
 }
+
+/* ── Split Onboarding Review Modal ── */
+.review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 30, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999;
+}
+
+.review-modal-container {
+  box-shadow:
+    0 15px 50px rgba(10, 5, 30, 0.15),
+    0 2px 15px rgba(78, 43, 196, 0.08);
+  max-height: 90vh;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+}
+
+.animate-modalFadeIn {
+  animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+.animate-modalSlideUp {
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
