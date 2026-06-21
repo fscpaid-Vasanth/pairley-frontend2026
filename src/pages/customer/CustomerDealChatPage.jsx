@@ -102,6 +102,7 @@ export default function CustomerDealChatPage() {
   // Propose Time States
   const [proposeDay, setProposeDay] = useState('Today');
   const [proposeTime, setProposeTime] = useState('4:00 PM - 6:00 PM');
+  const [activeCategoryIdx, setActiveCategoryIdx] = useState(0);
 
   const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
   const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name;
@@ -299,7 +300,7 @@ export default function CustomerDealChatPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           
           {/* Left Column: Chat Container */}
-          <div className="lg:col-span-2 flex flex-col bg-white/70 backdrop-blur-md border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm h-[580px] relative">
+          <div className="lg:col-span-2 flex flex-col bg-white/70 backdrop-blur-md border border-slate-200/80 rounded-3xl overflow-hidden shadow-sm h-[650px] relative">
             
             {/* Anonymous Header */}
             <div className="bg-white/80 border-b border-slate-100 p-4 flex items-center justify-between">
@@ -326,7 +327,7 @@ export default function CustomerDealChatPage() {
             {/* Chat Messages */}
             <div className="flex-1 overflow-y-auto p-4 bg-slate-50/40 flex flex-col gap-4">
               <div className="flex justify-center my-1">
-                <span className="bg-slate-100 border border-slate-200 px-3.5 py-1 rounded-xl text-[9px] font-extrabold text-slate-500 shadow-sm flex items-center gap-1.5">
+                <span className="bg-slate-100 border border-slate-200 px-3.5 py-1.5 rounded-xl text-[9px] font-extrabold text-slate-500 shadow-sm flex items-center gap-1.5">
                   🔒 System: Free typing is locked to protect identity. Use predefined messages.
                 </span>
               </div>
@@ -398,6 +399,46 @@ export default function CustomerDealChatPage() {
               )}
 
               <div ref={messagesEndRef} />
+            </div>
+
+            {/* Tabbed Predefined Messages Grill */}
+            <div className="bg-slate-50/70 border-t border-slate-100 p-4">
+              <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+                <Sparkles size={12} className="text-[#4E2BC4]" /> Predefined Message Grill
+              </span>
+              
+              {/* Category Tabs */}
+              <div className="flex gap-1.5 overflow-x-auto pb-2 mb-2 no-scrollbar border-b border-slate-100">
+                {STATEMENT_CATEGORIES.map((cat, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveCategoryIdx(idx)}
+                    className={`px-3 py-1.5 rounded-xl text-[9px] font-extrabold whitespace-nowrap transition-all ${
+                      activeCategoryIdx === idx
+                        ? 'bg-[#4E2BC4] text-white shadow-sm scale-102'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    {cat.title}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Statements Grid */}
+              <div className="grid grid-cols-2 gap-1.5 max-h-[110px] overflow-y-auto pr-1">
+                {STATEMENT_CATEGORIES[activeCategoryIdx].statements.map((stmt, sIdx) => (
+                  <button
+                    key={sIdx}
+                    type="button"
+                    onClick={() => handleSendPredefined(stmt)}
+                    className="bg-white border border-slate-200/80 hover:border-[#4E2BC4] hover:bg-purple-50/20 text-slate-700 hover:text-[#4E2BC4] font-semibold text-[10px] px-3 py-2 rounded-xl text-left transition leading-normal shadow-sm truncate block"
+                    title={stmt}
+                  >
+                    {stmt}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Locked Input Bar */}
@@ -526,33 +567,7 @@ export default function CustomerDealChatPage() {
 
         </div>
 
-        {/* PREDEFINED STATEMENTS GRILL BAR (Floating style footer) */}
-        <div className="mt-8 bg-white/70 backdrop-blur-md border border-slate-200/80 p-6 rounded-3xl shadow-sm text-left">
-          <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
-            <Sparkles size={14} className="text-[#4E2BC4]" /> Predefined Message Grill
-          </h4>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {STATEMENT_CATEGORIES.map((cat, idx) => (
-              <div key={idx} className="bg-slate-50/50 border border-slate-100/80 rounded-2xl p-4 flex flex-col gap-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-200/40 pb-1.5 mb-1.5">
-                  {cat.title}
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {cat.statements.map((stmt, sIdx) => (
-                    <button
-                      key={sIdx}
-                      onClick={() => handleSendPredefined(stmt)}
-                      className="bg-white border border-slate-200 hover:border-[#4E2BC4] hover:bg-purple-50/30 text-slate-700 hover:text-[#4E2BC4] font-semibold text-[10px] px-3 py-2 rounded-xl text-left transition leading-normal w-full block shadow-sm"
-                    >
-                      {stmt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
       </div>
 
