@@ -15,7 +15,7 @@ const fadeInUp = {
 };
 
 // Popular Offers Mock Data matching original HTML
-const POPULAR_OFFERS = [
+const POPULAR_OFFERS = []; /*
   {
     id: 'deal-004',
     title: 'Pizza BOGO Offer',
@@ -64,7 +64,7 @@ const POPULAR_OFFERS = [
     joined: '1/3 Joined',
     image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=500&h=350&fit=crop'
   }
-];
+*/
 
 const getShortLabel = (cat) => {
   if (cat.id === 'dining') return 'Food';

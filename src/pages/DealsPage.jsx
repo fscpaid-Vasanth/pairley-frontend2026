@@ -1,11 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, PackageSearch } from 'lucide-react';
+import { Search, SlidersHorizontal, PackageSearch, Sun, Moon } from 'lucide-react';
 import DealCard from '../components/DealCard';
 import DealTypeToggle from '../components/DealTypeToggle';
 import CategorySection from '../components/CategorySection';
-import SearchOverlay from '../components/SearchOverlay';
 import CustomDropdown from '../components/CustomDropdown';
 import { mockDeals } from '../data/mockDeals';
 import { api } from '../utils/api';
@@ -36,11 +35,41 @@ const DealsPage = () => {
   const [dealType, setDealType] = useState('all'); // 'all' | 'pair' | 'group'
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    return localStorage.getItem('deals-theme') === 'dark';
+  });
+
+  const toggleTheme = () => {
+    setIsDarkTheme((prev) => {
+      const next = !prev;
+      localStorage.setItem('deals-theme', next ? 'dark' : 'light');
+      return next;
+    });
+  };
+  const searchInputRef = useRef(null);
 
   const mallQuery = searchParams.get('mall') || '';
   const searchQuery = searchParams.get('search') || '';
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    };
+    window.addEventListener('focus-deals-search', handleFocus);
+
+    if (searchParams.get('focusSearch') === 'true') {
+      handleFocus();
+      searchParams.delete('focusSearch');
+      setSearchParams(searchParams, { replace: true });
+    }
+
+    return () => {
+      window.removeEventListener('focus-deals-search', handleFocus);
+    };
+  }, [searchParams, setSearchParams]);
 
   const handleMallChange = (mall) => {
     if (mall) {
@@ -150,7 +179,7 @@ const DealsPage = () => {
 
   return (
     <div className="page-wrapper">
-      <div className="deals-page">
+      <div className={`deals-page ${isDarkTheme ? 'deals-page--dark' : ''}`}>
         <div className="deals-page-glow" />
 
         <div className="container">
@@ -195,13 +224,33 @@ const DealsPage = () => {
                 showClear={false}
               />
 
+              <div className="deals-search-wrapper">
+                <Search className="deals-search-icon" size={16} />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search deals..."
+                  className="deals-search-input"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val) {
+                      searchParams.set('search', val);
+                    } else {
+                      searchParams.delete('search');
+                    }
+                    setSearchParams(searchParams);
+                  }}
+                />
+              </div>
+
               <button
-                className="deals-search-btn"
-                onClick={() => setIsSearchOpen(true)}
-                aria-label="Search deals"
+                type="button"
+                className="deals-theme-toggle-btn"
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
               >
-                <Search size={16} />
-                Search
+                {isDarkTheme ? <Sun size={18} /> : <Moon size={18} />}
               </button>
             </div>
           </motion.div>
@@ -268,8 +317,6 @@ const DealsPage = () => {
         </div>
       </div>
 
-      {/* Search overlay */}
-      {isSearchOpen && <SearchOverlay onClose={() => setIsSearchOpen(false)} />}
     </div>
   );
 };

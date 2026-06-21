@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 // Layout & Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import SearchOverlay from './components/SearchOverlay';
 import PageTransition from './components/PageTransition';
 
 // Public Pages
@@ -51,12 +50,22 @@ import OrderSuccessPage from './pages/cart/OrderSuccessPage';
 // Routes constants
 import { ROUTES } from './utils/constants';
 
-function AppLayout({ children, onSearchClick }) {
+function AppLayout({ children }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const isChatPage = location.pathname.includes('/customer/deal-chat');
+
+  const handleSearchClick = () => {
+    if (location.pathname !== '/deals') {
+      navigate('/deals?focusSearch=true');
+    } else {
+      window.dispatchEvent(new CustomEvent('focus-deals-search'));
+    }
+  };
+
   return (
     <>
-      <Navbar onSearchClick={onSearchClick} />
+      <Navbar onSearchClick={handleSearchClick} />
       <main className="flex-1 flex flex-col">
         <PageTransition>
           {children}
@@ -78,7 +87,6 @@ function ScrollToTop() {
 }
 
 function AppContent() {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
 
   return (
@@ -308,8 +316,6 @@ function AppContent() {
         </Routes>
       </AnimatePresence>
 
-      {/* Global Search Overlay */}
-      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </div>
   );
 }

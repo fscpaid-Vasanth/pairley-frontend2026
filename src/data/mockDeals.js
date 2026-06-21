@@ -1,4 +1,4 @@
-export const mockDeals = [
+export const mockDeals = []; /*
   // ===== PAIR DEALS (BOGO) =====
   {
     id: 'deal-001',
@@ -454,7 +454,7 @@ export const mockDeals = [
     createdAt: '2026-06-11',
     tags: ['rafting', 'adventure', 'extreme'],
   },
-];
+*/
 
 export const getDealById = (id) => mockDeals.find((deal) => deal.id === id);
 
