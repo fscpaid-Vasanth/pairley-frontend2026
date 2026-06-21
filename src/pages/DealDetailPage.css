@@ -6,6 +6,10 @@
   padding-bottom: var(--space-20);
 }
 
+.deal-detail-page .container {
+  max-width: 1200px;
+}
+
 /* ── Breadcrumb ── */
 .deal-breadcrumb {
   display: flex;
@@ -134,7 +138,7 @@
 /* ── Main layout ── */
 .deal-detail-layout {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 420px;
   gap: var(--space-8);
   align-items: start;
 }
