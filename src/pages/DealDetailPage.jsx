@@ -19,6 +19,7 @@ import {
 import DealCard from '../components/DealCard';
 import InterestButton from '../components/InterestButton';
 import PricingTierCard from '../components/PricingTierCard';
+import { useToast } from '../context/ToastContext';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { getDealById, mockDeals } from '../data/mockDeals';
 import { api } from '../utils/api';
@@ -70,12 +71,42 @@ const fadeInUp = {
 
 const DealDetailPage = () => {
   const { id } = useParams();
+  const { showToast } = useToast();
   const [deal, setDeal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openTermIndex, setOpenTermIndex] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [conversionRatio, setConversionRatio] = useState(0);
+  const [storeTotalInterests, setStoreTotalInterests] = useState(0);
+  const [storeCompletedInterests, setStoreCompletedInterests] = useState(0);
 
-  useEffect(() => {
+  const fetchStoreConversionRatio = (businessId) => {
+    if (!businessId) return;
+    api.get('/offers/interested-customers')
+      .then((offers) => {
+        let total = 0;
+        let completed = 0;
+        offers.forEach((o) => {
+          if (o.interests) {
+            o.interests.forEach((interest) => {
+              total++;
+              if (interest.status === 'COMPLETED') {
+                completed++;
+              }
+            });
+          }
+        });
+        setStoreTotalInterests(total);
+        setStoreCompletedInterests(completed);
+        const ratio = total > 0 ? Math.round((completed / total) * 100) : 0;
+        setConversionRatio(ratio);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch store conversion ratio:', err);
+      });
+  };
+
+  const fetchDealDetails = () => {
     api.get(`/offers/details/${id}`)
       .then((data) => {
         const mapped = {
@@ -105,6 +136,11 @@ const DealDetailPage = () => {
         };
         setDeal(mapped);
         setLoading(false);
+
+        const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+        if (mapped.businessOwner.id === currentUser?.id) {
+          fetchStoreConversionRatio(mapped.businessOwner.id);
+        }
       })
       .catch((err) => {
         console.error('Failed to load deal details from backend, falling back to mock:', err);
@@ -112,7 +148,24 @@ const DealDetailPage = () => {
         setDeal(mock);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchDealDetails();
   }, [id]);
+
+  const handleStatusChange = (interestId, newStatus) => {
+    api.put(`/offers/interest/${interestId}/status`, { status: newStatus })
+      .then(() => {
+        showToast('Closure status updated successfully!', 'success');
+        fetchDealDetails();
+      })
+      .catch((err) => {
+        console.error('Failed to update interest status:', err);
+        showToast('Failed to update status: ' + (err.message || 'Request failed'), 'error');
+      });
+  };
 
   /* ---- Loading ---- */
   if (loading) {
@@ -557,6 +610,40 @@ const DealDetailPage = () => {
                           🏪 Merchant Account View
                         </div>
                         {deal.businessOwner.id === currentUser?.id && (
+                          <div className="bg-gradient-to-r from-violet-600/10 to-indigo-600/10 border border-violet-200/50 backdrop-blur-md rounded-2xl p-4 shadow-md text-left relative overflow-hidden">
+                            <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl"></div>
+                            <h4 className="text-xs font-extrabold text-[#4E2BC4] mb-2.5 flex items-center gap-1.5 uppercase tracking-wider">
+                              <span className="material-symbols-outlined text-[#4E2BC4] animate-pulse" style={{ fontSize: 18 }}>analytics</span>
+                              Store Performance
+                            </h4>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="text-2xl font-black text-slate-800 flex items-baseline gap-0.5">
+                                  {conversionRatio}
+                                  <span className="text-xs font-bold text-slate-500">%</span>
+                                </div>
+                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Conversion Ratio</p>
+                              </div>
+                              <div className="text-right text-[10px] text-slate-500 font-bold leading-normal">
+                                <div className="flex justify-between gap-3">
+                                  <span>Completed:</span>
+                                  <span className="text-emerald-600 font-extrabold">{storeCompletedInterests}</span>
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                  <span>Total Interests:</span>
+                                  <span className="text-indigo-600 font-extrabold">{storeTotalInterests}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="w-full h-2 bg-slate-100/80 rounded-full overflow-hidden mt-3 border border-slate-200/40">
+                              <div 
+                                className="h-full bg-gradient-to-r from-[#4E2BC4] to-[#10B981] rounded-full transition-all duration-700 ease-out" 
+                                style={{ width: `${conversionRatio}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        {deal.businessOwner.id === currentUser?.id && (
                           <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm text-left">
                             <h4 className="text-xs font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-1.5">
                               <span className="material-symbols-outlined text-[#4E2BC4]" style={{ fontSize: 16 }}>group</span>
@@ -574,11 +661,21 @@ const DealDetailPage = () => {
                                       <a href={`tel:${interest.customer?.mobile}`} className="hover:underline text-[#4E2BC4] flex items-center gap-0.5 font-bold">
                                         📞 {interest.customer?.mobile}
                                       </a>
-                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase ${
-                                        interest.status === 'READY_TO_BUY' || interest.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700' : 'bg-purple-50 text-purple-700'
-                                      }`}>
-                                        {interest.status}
-                                      </span>
+                                      <select
+                                        value={interest.status === 'COMPLETED' ? 'COMPLETED' : interest.status === 'CANCELLED' ? 'CANCELLED' : 'CONTACTED'}
+                                        onChange={(e) => handleStatusChange(interest.id, e.target.value)}
+                                        className={`text-[10px] font-extrabold rounded-lg px-2 py-1 border transition-all cursor-pointer focus:outline-none ${
+                                          interest.status === 'COMPLETED'
+                                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100/50'
+                                            : interest.status === 'CANCELLED'
+                                            ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100/50'
+                                            : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100/50'
+                                        }`}
+                                      >
+                                        <option value="CONTACTED">In Progress</option>
+                                        <option value="COMPLETED">Completed</option>
+                                        <option value="CANCELLED">Cancelled</option>
+                                      </select>
                                     </div>
                                     {interest.customer?.address && (
                                       <div className="text-[10px] text-slate-400 mt-1 bg-slate-50/50 p-2 rounded-lg border border-slate-100/60 leading-normal">
