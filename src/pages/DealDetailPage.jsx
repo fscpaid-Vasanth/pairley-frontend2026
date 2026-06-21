@@ -664,7 +664,8 @@ const DealDetailPage = () => {
                                       <select
                                         value={interest.status === 'COMPLETED' ? 'COMPLETED' : interest.status === 'CANCELLED' ? 'CANCELLED' : 'CONTACTED'}
                                         onChange={(e) => handleStatusChange(interest.id, e.target.value)}
-                                        className={`text-[10px] font-extrabold rounded-lg px-2 py-1 border transition-all cursor-pointer focus:outline-none ${
+                                        style={{ width: 'auto' }}
+                                        className={`text-[10px] font-extrabold rounded-lg px-2 py-1 border transition-all cursor-pointer focus:outline-none flex-shrink-0 ${
                                           interest.status === 'COMPLETED'
                                             ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100/50'
                                             : interest.status === 'CANCELLED'
