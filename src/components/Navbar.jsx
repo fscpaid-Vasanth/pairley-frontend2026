@@ -131,7 +131,13 @@ export default function Navbar({ onSearchClick }) {
             {token && user ? (
               <>
                 <Link
-                  to={user.role?.toLowerCase() === 'customer' ? ROUTES.CUSTOMER_DASHBOARD : ROUTES.BUSINESS_DASHBOARD}
+                  to={
+                    user.role?.toLowerCase() === 'admin'
+                      ? '/admin/dashboard'
+                      : user.role?.toLowerCase() === 'customer'
+                      ? ROUTES.CUSTOMER_DASHBOARD
+                      : ROUTES.BUSINESS_DASHBOARD
+                  }
                   className="navbar__dashboard-btn"
                   style={{
                     padding: '8px 16px',

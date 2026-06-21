@@ -98,7 +98,7 @@ export default function LoginPage() {
         localStorage.setItem('pairley_token', res.access_token || res.token);
         localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
         showToast('Logged in successfully!', 'success');
-        navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+        navigate(res.role === 'Admin' ? '/admin/dashboard' : res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
       })
       .catch((err) => {
         console.error('Login failed:', err);
@@ -150,7 +150,7 @@ export default function LoginPage() {
           localStorage.setItem('pairley_token', res.token);
           localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
           showToast('Logged in successfully!', 'success');
-          navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+          navigate(res.role === 'Admin' ? '/admin/dashboard' : res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
         } else {
           showToast('No profile found with this mobile number. Please register/signup first.', 'warning');
           navigate('/signup');
@@ -214,7 +214,7 @@ export default function LoginPage() {
             localStorage.setItem('pairley_token', res.access_token || res.token);
             localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
             showToast('Logged in with Google!', 'success');
-            navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+            navigate(res.role === 'Admin' ? '/admin/dashboard' : res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
           } else {
             // User does not exist, trigger onboarding step
             setGoogleUser(checkPayload);
@@ -323,7 +323,7 @@ export default function LoginPage() {
           localStorage.setItem('pairley_token', res.access_token || res.token);
           localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
           showToast('Profile completed and logged in!', 'success');
-          navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+          navigate(res.role === 'Admin' ? '/admin/dashboard' : res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
         } else {
           showToast(res.message || 'Profile completion failed.', 'error');
         }

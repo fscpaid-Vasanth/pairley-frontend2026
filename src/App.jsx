@@ -37,6 +37,7 @@ import BusinessOrdersPage from './pages/business/BusinessOrdersPage';
 import BusinessPayoutsPage from './pages/business/BusinessPayoutsPage';
 import BusinessSettingsPage from './pages/business/BusinessSettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 // Providers
 import { ToastProvider } from './context/ToastContext';
@@ -285,7 +286,15 @@ function AppContent() {
                 <BusinessSettingsPage />
               </AppLayout>
             }
+          />          <Route
+            path={ROUTES.ADMIN_DASHBOARD}
+            element={
+              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+                <AdminDashboard />
+              </AppLayout>
+            }
           />
+
 
           {/* Catch-all 404 Page */}
           <Route

@@ -32,6 +32,9 @@ export const ROUTES = {
   BUSINESS_ORDERS: '/business/orders',
   BUSINESS_PAYOUTS: '/business/payouts',
   BUSINESS_SETTINGS: '/business/settings',
+
+  // Admin
+  ADMIN_DASHBOARD: '/admin/dashboard',
 };
 
 // App info
