@@ -106,6 +106,41 @@ export default function CustomerDealChatPage() {
   const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
   const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name;
 
+  // Stable anonymization generator
+  const getAnonymousName = (senderId, senderName) => {
+    if (!senderId) return 'Buyer';
+    let hash = 0;
+    for (let i = 0; i < senderId.length; i++) {
+      hash = senderId.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const num = Math.abs(hash % 900) + 100; // stable 100-999
+    return `Buyer #${num}`;
+  };
+
+  const fetchMessages = () => {
+    if (!dealId) return;
+    api.get(`/offers/chat/${dealId}`)
+      .then((data) => {
+        const mapped = data.map((msg) => {
+          const isUser = msg.sender_id === currentUser?.id;
+          return {
+            id: msg.id,
+            sender: msg.is_system ? 'system' : (isUser ? 'user' : msg.sender_id),
+            senderName: isUser ? 'You' : getAnonymousName(msg.sender_id, msg.sender_name),
+            text: msg.text,
+            time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isScheduleCard: msg.is_schedule_card,
+            day: msg.day,
+            timeSlot: msg.time_slot
+          };
+        });
+        setMessages(mapped);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch messages:', err);
+      });
+  };
+
   // Load deal details
   useEffect(() => {
     setLoading(true);
@@ -126,7 +161,6 @@ export default function CustomerDealChatPage() {
           interests: data.interests || []
         };
         setDeal(mapped);
-        setMessages(getInitialMessages(mapped.title));
         setLoading(false);
       })
       .catch((err) => {
@@ -134,10 +168,16 @@ export default function CustomerDealChatPage() {
         const mock = getDealById(dealId);
         if (mock) {
           setDeal(mock);
-          setMessages(getInitialMessages(mock.title));
         }
         setLoading(false);
       });
+  }, [dealId]);
+
+  // Polling messages every 3 seconds
+  useEffect(() => {
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 3000);
+    return () => clearInterval(interval);
   }, [dealId]);
 
   // Scroll to bottom on new messages
@@ -146,94 +186,64 @@ export default function CustomerDealChatPage() {
   }, [messages, isTyping]);
 
   const handleSendPredefined = (text) => {
-    const userMessage = {
-      id: messages.length + 1,
-      sender: 'user',
-      senderName: 'You',
+    api.post(`/offers/chat/${dealId}`, {
       text: text,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-
-    // Simulated response from other buyer
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      
-      let reply = "That works for me! I'm ready to buy this deal today.";
-      if (text.includes("meet") || text.includes("available") || text.includes("weekend")) {
-        reply = "I agree with this meetup time slot. Let's meet at the store's billing counter.";
-      } else if (text.includes("split") || text.includes("50-50")) {
-        reply = "Yes, let's split the bill in half at the desk.";
-      } else if (text.includes("code") || text.includes("confirm")) {
-        reply = "I just confirmed the split in my app too! Let's show the code to the manager.";
-      }
-
-      const partnerMessage = {
-        id: messages.length + 2,
-        sender: 'partner_1',
-        senderName: 'Buyer #342',
-        text: reply,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages(prev => [...prev, partnerMessage]);
-      showToast(`New response from Buyer #342`, 'info');
-    }, 1500);
+      is_schedule_card: false,
+      is_system: false
+    })
+    .then(() => {
+      fetchMessages();
+    })
+    .catch((err) => {
+      console.error('Failed to send predefined message:', err);
+      showToast('Failed to send message: ' + (err.message || 'Request failed'), 'error');
+    });
   };
 
   const handleProposeTime = () => {
     const text = `📅 Proposed Meetup: ${proposeDay} between ${proposeTime}`;
-    const userMessage = {
-      id: messages.length + 1,
-      sender: 'user',
-      senderName: 'You',
+    api.post(`/offers/chat/${dealId}`, {
       text: text,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isScheduleCard: true,
+      is_schedule_card: true,
       day: proposeDay,
-      timeSlot: proposeTime
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-
-    // Auto partner reply
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      const partnerMessage = {
-        id: messages.length + 2,
-        sender: 'partner_2',
-        senderName: 'Buyer #108',
-        text: `I agree with this meetup time slot. Let's meet at the store's billing counter.`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages(prev => [...prev, partnerMessage]);
-      showToast(`Buyer #108 accepted the meetup slot!`, 'success');
-    }, 1600);
+      time_slot: proposeTime,
+      is_system: false
+    })
+    .then(() => {
+      fetchMessages();
+      showToast(`Meetup proposal shared!`, 'success');
+    })
+    .catch((err) => {
+      console.error('Failed to propose meetup time:', err);
+      showToast('Failed to propose meetup time: ' + (err.message || 'Request failed'), 'error');
+    });
   };
 
   const handleUtilityAction = (actionType) => {
     if (actionType === 'location') {
-      showToast('Mall meetup location shared in chat!', 'success');
-      const systemMsg = {
-        id: messages.length + 1,
-        sender: 'system',
+      api.post(`/offers/chat/${dealId}`, {
         text: `📍 Coordination point pinned: ${deal?.businessOwner?.location || 'Store Billing Desk'}`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, systemMsg]);
+        is_system: true
+      })
+      .then(() => {
+        fetchMessages();
+        showToast('Mall meetup location shared in chat!', 'success');
+      })
+      .catch((err) => {
+        console.error('Failed to share meetup location:', err);
+      });
     } else if (actionType === 'confirm') {
-      showToast('BOGO co-buying split locked!', 'success');
-      const systemMsg = {
-        id: messages.length + 1,
-        sender: 'system',
+      api.post(`/offers/chat/${dealId}`, {
         text: '✅ BOGO Split Confirmation locked by co-buyers.',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, systemMsg]);
+        is_system: true
+      })
+      .then(() => {
+        fetchMessages();
+        showToast('BOGO co-buying split locked!', 'success');
+      })
+      .catch((err) => {
+        console.error('Failed to lock BOGO split:', err);
+      });
     } else if (actionType === 'code') {
       const randomCode = Math.floor(100 + Math.random() * 900) + '-A' + Math.floor(10 + Math.random() * 90);
       setPickupCode(randomCode);
