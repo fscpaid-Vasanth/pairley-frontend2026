@@ -90,7 +90,7 @@ const STATEMENT_CATEGORIES = [
 export default function CustomerDealChatPage() {
   const { dealId } = useParams();
   const { showToast } = useToast();
-  const messagesEndRef = useRef(null);
+  const chatFeedRef = useRef(null);
 
   const [deal, setDeal] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -181,9 +181,11 @@ export default function CustomerDealChatPage() {
     return () => clearInterval(interval);
   }, [dealId]);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom on new messages inside the chat feed container only
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatFeedRef.current) {
+      chatFeedRef.current.scrollTop = chatFeedRef.current.scrollHeight;
+    }
   }, [messages, isTyping]);
 
   const handleSendPredefined = (text) => {
@@ -325,7 +327,7 @@ export default function CustomerDealChatPage() {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 bg-slate-50/40 flex flex-col gap-4">
+            <div ref={chatFeedRef} className="flex-1 overflow-y-auto p-4 bg-slate-50/40 flex flex-col gap-4">
               <div className="flex justify-center my-1">
                 <span className="bg-slate-100 border border-slate-200 px-3.5 py-1.5 rounded-xl text-[9px] font-extrabold text-slate-500 shadow-sm flex items-center gap-1.5">
                   🔒 System: Free typing is locked to protect identity. Use predefined messages.
@@ -398,7 +400,6 @@ export default function CustomerDealChatPage() {
                 </div>
               )}
 
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Tabbed Predefined Messages Grill */}

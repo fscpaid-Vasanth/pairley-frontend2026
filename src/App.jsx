@@ -51,6 +51,8 @@ import OrderSuccessPage from './pages/cart/OrderSuccessPage';
 import { ROUTES } from './utils/constants';
 
 function AppLayout({ children, onSearchClick }) {
+  const location = useLocation();
+  const isChatPage = location.pathname.includes('/customer/deal-chat');
   return (
     <>
       <Navbar onSearchClick={onSearchClick} />
@@ -59,7 +61,7 @@ function AppLayout({ children, onSearchClick }) {
           {children}
         </PageTransition>
       </main>
-      <Footer />
+      {!isChatPage && <Footer />}
     </>
   );
 }

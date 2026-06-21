@@ -1,5 +1,17 @@
+/* Deactivate page-level scrolling entirely on the chat page */
+html:has(.customer-deal-chat-page),
+body:has(.customer-deal-chat-page),
+body:has(.customer-deal-chat-page) #root {
+  overflow: hidden !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
 .customer-deal-chat-page {
   font-family: 'Outfit', 'Inter', sans-serif;
+  height: calc(100vh - 100px); /* Fit within viewport bounds, minus header/navbar spacing */
+  max-height: calc(100vh - 100px);
+  overflow: hidden;
 }
 
 /* Custom scrollbars for chat container */
