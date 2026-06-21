@@ -253,6 +253,7 @@
 
 .search-console__field--mall {
   max-width: 340px;
+  min-width: 200px;
   flex: 1.2;
 }
 

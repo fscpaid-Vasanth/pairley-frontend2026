@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Users, Wallet, MapPin } from 'lucide-react';
 import { ROUTES, MALLS } from '../utils/constants';
+import CustomDropdown from './CustomDropdown';
 import './HeroSection.css';
 import InteractiveDealSimulator from './InteractiveDealSimulator';
 
@@ -48,18 +49,13 @@ export default function HeroSection({ selectedMall, onMallChange, searchQuery, o
             {/* Unified Search & Mall Selector Console */}
             <motion.div className="hero__search-console" variants={fadeUp}>
               <div className="search-console__field search-console__field--mall">
-                <MapPin size={18} className="search-console__icon text-primary" />
-                <select
-                  value={selectedMall || ''}
-                  onChange={(e) => onMallChange?.(e.target.value || null)}
-                  className="search-console__select"
-                  aria-label="Select Mall"
-                >
-                  <option value="">All Malls (Bangalore)</option>
-                  {MALLS.map((mall) => (
-                    <option key={mall} value={mall}>{mall}</option>
-                  ))}
-                </select>
+                <CustomDropdown
+                  value={selectedMall}
+                  onChange={onMallChange}
+                  options={MALLS}
+                  placeholder="All Malls (Bangalore)"
+                  icon={MapPin}
+                />
               </div>
 
               <div className="search-console__divider" />

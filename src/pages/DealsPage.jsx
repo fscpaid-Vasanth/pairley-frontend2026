@@ -6,6 +6,7 @@ import DealCard from '../components/DealCard';
 import DealTypeToggle from '../components/DealTypeToggle';
 import CategorySection from '../components/CategorySection';
 import SearchOverlay from '../components/SearchOverlay';
+import CustomDropdown from '../components/CustomDropdown';
 import { mockDeals } from '../data/mockDeals';
 import { api } from '../utils/api';
 import { MALLS } from '../utils/constants';
@@ -33,7 +34,7 @@ const DealsPage = () => {
   const [dealsList, setDealsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dealType, setDealType] = useState('all'); // 'all' | 'pair' | 'group'
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -177,32 +178,22 @@ const DealsPage = () => {
               <DealTypeToggle activeType={dealType} onTypeChange={setDealType} />
             </div>
             <div className="deals-toolbar-right">
-              <select
-                className="deals-sort-select"
+              <CustomDropdown
                 value={mallQuery}
-                onChange={(e) => handleMallChange(e.target.value)}
-                aria-label="Filter by Mall"
-              >
-                <option value="">All Malls (Bangalore)</option>
-                {MALLS.map((mall) => (
-                  <option key={mall} value={mall}>
-                    {mall}
-                  </option>
-                ))}
-              </select>
+                onChange={handleMallChange}
+                options={MALLS}
+                placeholder="All Malls (Bangalore)"
+                bordered={true}
+              />
 
-              <select
-                className="deals-sort-select"
+              <CustomDropdown
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort deals"
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+                onChange={setSortBy}
+                options={SORT_OPTIONS}
+                placeholder="Sort by"
+                bordered={true}
+                showClear={false}
+              />
 
               <button
                 className="deals-search-btn"
