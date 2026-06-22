@@ -119,6 +119,21 @@ const formatTime12h = (time24) => {
   return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
 };
 
+const getTodayDateString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const formatDateNice = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
 const CATEGORY_THEMES = [
   {
     active: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100',
@@ -166,7 +181,7 @@ export default function CustomerDealChatPage() {
   const [pickupCode, setPickupCode] = useState('');
 
   // Propose Time States
-  const [proposeDay, setProposeDay] = useState('Today');
+  const [proposeDay, setProposeDay] = useState(getTodayDateString());
   const [proposeTime, setProposeTime] = useState('18:00');
   const [activeCategoryIdx, setActiveCategoryIdx] = useState(0);
 
@@ -278,12 +293,13 @@ export default function CustomerDealChatPage() {
   };
 
   const handleProposeTime = () => {
+    const formattedDate = formatDateNice(proposeDay);
     const formattedTime = formatTime12h(proposeTime);
-    const text = `📅 Proposed Meetup: ${proposeDay} at ${formattedTime}`;
+    const text = `📅 Proposed Meetup: ${formattedDate} at ${formattedTime}`;
     api.post(`/offers/chat/${dealId}`, {
       text: text,
       is_schedule_card: true,
-      day: proposeDay,
+      day: formattedDate,
       time_slot: formattedTime,
       is_system: false
     })
@@ -584,21 +600,16 @@ export default function CustomerDealChatPage() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Day</label>
-                  <select
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Date</label>
+                  <input
+                    type="date"
                     value={proposeDay}
                     disabled={isCompleted}
                     onChange={(e) => setProposeDay(e.target.value)}
                     className={`w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#4E2BC4] outline-none ${
                       isCompleted ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
-                  >
-                    <option value="Today">Today</option>
-                    <option value="Tomorrow">Tomorrow</option>
-                    <option value="This Saturday">This Saturday</option>
-                    <option value="This Sunday">This Sunday</option>
-                    <option value="Next Monday">Next Monday</option>
-                  </select>
+                  />
                 </div>
 
                 <div>
