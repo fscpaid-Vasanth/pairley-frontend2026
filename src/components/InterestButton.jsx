@@ -76,13 +76,13 @@ export default function InterestButton({ deal, onInterest }) {
         if (onInterest) onInterest();
 
         const { targetMobiles, offerName, shopName, customerName, customerMobile } = res;
-        const message = `🔥 New Customer Interest on Pairley
+        const message = `\u{1F525} New Customer Interest on Pairley
 
-📌 Offer: ${offerName}
-🏪 Shop: ${shopName}
+\u{1F4CC} Offer: ${offerName}
+\u{1F3EA} Shop: ${shopName}
 
-👤 Customer Name: ${customerName}
-📞 Mobile Number: ${customerMobile}
+\u{1F464} Customer Name: ${customerName}
+\u{1F4DE} Mobile Number: ${customerMobile}
 
 The customer has shown interest in this offer.
 
