@@ -89,6 +89,7 @@ export default function CreateDealPage() {
   const [minParticipants, setMinParticipants] = useState('3');
   const [maxParticipants, setMaxParticipants] = useState('20');
   const [terms, setTerms] = useState('Valid only through the Pairley web/mobile app interface. Match must be achieved within deal timeframe.');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
 
   // Facility showcase and staff/trainers details state
   const [facilityImages, setFacilityImages] = useState([]);
@@ -304,7 +305,8 @@ export default function CreateDealPage() {
       end_date: endDateIso,
       offer_image: imagePlaceholder || null,
       facility_images: facilityImages,
-      facility_details: JSON.stringify(staffList.filter(s => s.name.trim() || s.role.trim()))
+      facility_details: JSON.stringify(staffList.filter(s => s.name.trim() || s.role.trim())),
+      whatsapp_number: whatsappNumber || null
     };
 
     api.post('/offers/create', payload)
@@ -997,6 +999,17 @@ export default function CreateDealPage() {
                         <AlertCircle size={12} /> {errors.location}
                       </span>
                     )}
+                  </div>
+
+                  <div className="form-group flex flex-col gap-1.5">
+                    <label className="text-sm font-bold text-slate-700">WhatsApp Contact Number (Optional)</label>
+                    <input
+                      type="text"
+                      className="form-input border border-slate-200 rounded-xl p-3 text-slate-800 outline-none focus:border-[#4E2BC4]"
+                      placeholder="e.g. 9876543210 (Defaults to business owner mobile)"
+                      value={whatsappNumber}
+                      onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
+                    />
                   </div>
                 </motion.div>
               )}

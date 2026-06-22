@@ -69,20 +69,40 @@ export default function InterestButton({ deal, onInterest }) {
     if (interestState !== 'none') return;
     setInterestState('loading');
 
-    api.post('/offers/interest', { offerId: deal.id })
+    api.post('/offers/lead', { offerId: deal.id })
       .then((res) => {
-        showToast('Successfully expressed interest in this deal!', 'success');
+        showToast('Your interest has been shared with the merchant.', 'success');
         setInterestState('interested');
         if (onInterest) onInterest();
-        
-        const reqPeople = deal.maxParticipants || deal.required_people || 2;
-        if (deal.mode === 'pair' || reqPeople <= displayCount) {
-          setTimeout(() => {
-            setInterestState('paired');
-            showToast('Pairley Match! A partner has been found for your deal.', 'success');
-            refreshOrders();
-          }, 3000);
-        }
+
+        const { targetMobiles, offerName, shopName, customerName, customerMobile } = res;
+        const message = `🔥 New Customer Interest on Pairley
+
+📌 Offer: ${offerName}
+🏪 Shop: ${shopName}
+
+👤 Customer Name: ${customerName}
+📞 Mobile Number: ${customerMobile}
+
+The customer has shown interest in this offer.
+
+Please contact the customer to confirm availability and complete the booking.
+
+Thank you,
+*Pairley*`;
+
+        const mobiles = targetMobiles || [];
+        mobiles.forEach((mobile, index) => {
+          const clean = mobile.replace(/\D/g, '').slice(-10);
+          const url = `https://wa.me/91${clean}?text=${encodeURIComponent(message)}`;
+          if (index === 0) {
+            window.open(url, '_blank');
+          } else {
+            setTimeout(() => {
+              window.open(url, '_blank');
+            }, index * 1000);
+          }
+        });
       })
       .catch((err) => {
         console.error('Failed to express interest:', err);
