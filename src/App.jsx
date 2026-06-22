@@ -98,7 +98,7 @@ function AppContent() {
           <Route
             path={ROUTES.HOME}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <HomePage />
               </AppLayout>
             }
@@ -106,7 +106,7 @@ function AppContent() {
           <Route
             path={ROUTES.DEALS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <DealsPage />
               </AppLayout>
             }
@@ -114,7 +114,7 @@ function AppContent() {
           <Route
             path={ROUTES.DEAL_DETAIL}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <DealDetailPage />
               </AppLayout>
             }
@@ -122,7 +122,7 @@ function AppContent() {
           <Route
             path={ROUTES.HOW_IT_WORKS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <HowItWorksPage />
               </AppLayout>
             }
@@ -130,7 +130,7 @@ function AppContent() {
           <Route
             path={ROUTES.ABOUT}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <AboutPage />
               </AppLayout>
             }
@@ -138,7 +138,7 @@ function AppContent() {
           <Route
             path={ROUTES.SUPPORT}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <SupportPage />
               </AppLayout>
             }
@@ -146,7 +146,7 @@ function AppContent() {
           <Route
             path={ROUTES.REFUND_POLICY}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <RefundPolicyPage />
               </AppLayout>
             }
@@ -174,7 +174,7 @@ function AppContent() {
           <Route
             path={ROUTES.CART}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CartPage />
               </AppLayout>
             }
@@ -182,7 +182,7 @@ function AppContent() {
           <Route
             path={ROUTES.CHECKOUT}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CheckoutPage />
               </AppLayout>
             }
@@ -190,7 +190,7 @@ function AppContent() {
           <Route
             path={ROUTES.ORDER_SUCCESS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <OrderSuccessPage />
               </AppLayout>
             }
@@ -200,7 +200,7 @@ function AppContent() {
           <Route
             path={ROUTES.CUSTOMER_DASHBOARD}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CustomerDashboard />
               </AppLayout>
             }
@@ -208,7 +208,7 @@ function AppContent() {
           <Route
             path={ROUTES.CUSTOMER_PROFILE}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CustomerProfile />
               </AppLayout>
             }
@@ -216,7 +216,7 @@ function AppContent() {
           <Route
             path={ROUTES.CUSTOMER_ORDERS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CustomerOrdersPage />
               </AppLayout>
             }
@@ -224,7 +224,7 @@ function AppContent() {
           <Route
             path={ROUTES.CUSTOMER_ORDER_DETAIL}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CustomerOrderDetailPage />
               </AppLayout>
             }
@@ -232,7 +232,7 @@ function AppContent() {
           <Route
             path={ROUTES.CUSTOMER_CHAT}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CustomerChatPage />
               </AppLayout>
             }
@@ -240,7 +240,7 @@ function AppContent() {
           <Route
             path={ROUTES.CUSTOMER_DEAL_CHAT}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CustomerDealChatPage />
               </AppLayout>
             }
@@ -250,7 +250,7 @@ function AppContent() {
           <Route
             path={ROUTES.BUSINESS_DASHBOARD}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <BusinessDashboard />
               </AppLayout>
             }
@@ -258,7 +258,7 @@ function AppContent() {
           <Route
             path={ROUTES.CREATE_DEAL}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <CreateDealPage />
               </AppLayout>
             }
@@ -266,7 +266,7 @@ function AppContent() {
           <Route
             path={ROUTES.MANAGE_DEALS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <ManageDealsPage />
               </AppLayout>
             }
@@ -274,7 +274,7 @@ function AppContent() {
           <Route
             path={ROUTES.BUSINESS_ORDERS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <BusinessOrdersPage />
               </AppLayout>
             }
@@ -282,7 +282,7 @@ function AppContent() {
           <Route
             path={ROUTES.BUSINESS_PAYOUTS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <BusinessPayoutsPage />
               </AppLayout>
             }
@@ -290,14 +290,14 @@ function AppContent() {
           <Route
             path={ROUTES.BUSINESS_SETTINGS}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <BusinessSettingsPage />
               </AppLayout>
             }
           />          <Route
             path={ROUTES.ADMIN_DASHBOARD}
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <AdminDashboard />
               </AppLayout>
             }
@@ -308,7 +308,7 @@ function AppContent() {
           <Route
             path="*"
             element={
-              <AppLayout onSearchClick={() => setIsSearchOpen(true)}>
+              <AppLayout>
                 <NotFoundPage />
               </AppLayout>
             }
