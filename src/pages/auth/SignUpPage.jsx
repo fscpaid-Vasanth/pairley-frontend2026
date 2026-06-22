@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
@@ -50,6 +50,24 @@ export default function SignUpPage() {
   });
   const [onboardingErrors, setOnboardingErrors] = useState({});
 
+  // OTP signup states
+  const [otpStep, setOtpStep] = useState('form'); // 'form' or 'verify'
+  const [otpMode, setOtpMode] = useState(null); // 'register' or 'google'
+  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
+  const [resendSeconds, setResendSeconds] = useState(30);
+  const [otpSending, setOtpSending] = useState(false);
+  const [pendingPayload, setPendingPayload] = useState(null);
+  const otpRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+
+  // Resend Countdown Timer Effect
+  useEffect(() => {
+    if (otpStep !== 'verify' || resendSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setResendSeconds((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [otpStep, resendSeconds]);
+
   const handleFileChange = (field, file) => {
     if (!file) return;
     const reader = new FileReader();
@@ -86,14 +104,14 @@ export default function SignUpPage() {
     return Object.keys(errs).length === 0;
   };
 
-  // Direct registration — no OTP step required
+  // Onboarding OTP Flow - Standard Registration Submit
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) {
       showToast('Please correct the validation errors in the form.', 'error');
       return;
     }
-    setSubmitting(true);
+    setOtpSending(true);
 
     const payload = {
       name: form.fullName,
@@ -111,26 +129,22 @@ export default function SignUpPage() {
       pincode: '400001',
     };
 
-    api.post('/auth/register', payload)
-      .then((res) => {
-        const token = res.token || res.access_token;
-        const userObj = { ...(res.user || {}), role: res.role };
-        localStorage.setItem('pairley_token', token);
-        localStorage.setItem('pairley_user', JSON.stringify(userObj));
-        showToast('Account created successfully! Welcome to Pairley 🎉', 'success');
-        navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+    setPendingPayload(payload);
+    setOtpMode('register');
+
+    api.post('/auth/send-otp', { mobile: payload.mobile })
+      .then(() => {
+        setOtpStep('verify');
+        setOtpValues(['', '', '', '', '', '']);
+        setResendSeconds(30);
+        showToast(`Verification code sent to +91 ${payload.mobile}.`, 'success');
+        setTimeout(() => { otpRefs[0].current?.focus(); }, 100);
       })
       .catch((err) => {
-        console.error('Registration failed:', err);
-        const msg = err.message || '';
-        if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
-          showToast('This mobile number or email is already registered. Please log in instead.', 'warning');
-          navigate('/login');
-        } else {
-          showToast(msg || 'Registration failed. Please try again.', 'error');
-        }
+        console.error('Failed to send OTP:', err);
+        showToast(err.message || 'Failed to send verification code. Please check your mobile number and try again.', 'error');
       })
-      .finally(() => setSubmitting(false));
+      .finally(() => setOtpSending(false));
   };
 
   const handleGoogleSignIn = async () => {
@@ -233,6 +247,7 @@ export default function SignUpPage() {
       showToast('Please fix the validation errors.', 'error');
       return;
     }
+    setOtpSending(true);
 
     const payload = {
       ...googleUser,
@@ -253,20 +268,94 @@ export default function SignUpPage() {
       pan_photo: (role === 'business' && onboardingForm.panPhoto) ? onboardingForm.panPhoto : undefined
     };
 
-    api.post('/auth/google', payload)
-      .then((res) => {
-        if (res.exists) {
-          localStorage.setItem('pairley_token', res.access_token || res.token);
-          localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
-          showToast('Profile completed and logged in!', 'success');
-          navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
-        } else {
-          showToast(res.message || 'Profile completion failed.', 'error');
-        }
+    setPendingPayload(payload);
+    setOtpMode('google');
+
+    api.post('/auth/send-otp', { mobile: payload.mobile })
+      .then(() => {
+        setOtpStep('verify');
+        setOtpValues(['', '', '', '', '', '']);
+        setResendSeconds(30);
+        showToast(`Verification code sent to +91 ${payload.mobile}.`, 'success');
+        setTimeout(() => { otpRefs[0].current?.focus(); }, 100);
       })
       .catch((err) => {
-        console.error('Google registration failed:', err);
-        showToast(err.message || 'Registration failed. Please check your network and try again.', 'error');
+        console.error('Failed to send OTP:', err);
+        showToast(err.message || 'Failed to send verification code. Please check your mobile number and try again.', 'error');
+      })
+      .finally(() => setOtpSending(false));
+  };
+
+  const handleVerifyOtp = (e) => {
+    e.preventDefault();
+    const enteredCode = otpValues.join('');
+    if (enteredCode.length < 6) {
+      showToast('Please enter all 6 digits of the OTP.', 'error');
+      return;
+    }
+    setSubmitting(true);
+
+    api.post('/auth/verify-otp', { mobile: pendingPayload.mobile, code: enteredCode })
+      .then((res) => {
+        // Verification success! Now register/onboard
+        if (otpMode === 'register') {
+          return api.post('/auth/register', pendingPayload);
+        } else {
+          return api.post('/auth/google', pendingPayload);
+        }
+      })
+      .then((res) => {
+        const token = res.token || res.access_token;
+        const userObj = { ...(res.user || {}), role: res.role };
+        localStorage.setItem('pairley_token', token);
+        localStorage.setItem('pairley_user', JSON.stringify(userObj));
+        showToast('Account created successfully! Welcome to Pairley 🎉', 'success');
+        navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
+      })
+      .catch((err) => {
+        console.error('Registration/Verification failed:', err);
+        const msg = err.message || '';
+        if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
+          showToast('This mobile number or email is already registered. Please log in instead.', 'warning');
+          navigate('/login');
+        } else {
+          showToast(msg || 'Invalid verification code or registration failed. Please try again.', 'error');
+        }
+      })
+      .finally(() => setSubmitting(false));
+  };
+
+  const handleOtpChange = (index, value) => {
+    const cleanVal = value.replace(/\D/g, '').slice(0, 1);
+    const nextOtp = [...otpValues];
+    nextOtp[index] = cleanVal;
+    setOtpValues(nextOtp);
+
+    // Auto focus next input
+    if (cleanVal && index < 5) {
+      otpRefs[index + 1].current?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+      otpRefs[index - 1].current?.focus();
+    }
+  };
+
+  const handleResendOtp = () => {
+    setOtpValues(['', '', '', '', '', '']);
+    setResendSeconds(30);
+    api.post('/auth/send-otp', { mobile: pendingPayload.mobile })
+      .then(() => {
+        showToast(`Verification code resent to +91 ${pendingPayload.mobile}.`, 'success');
+        setTimeout(() => {
+          otpRefs[0].current?.focus();
+        }, 100);
+      })
+      .catch((err) => {
+        console.error('Failed to resend OTP:', err);
+        showToast(err.message || 'Failed to resend verification code. Please try again.', 'error');
       });
   };
 
@@ -347,7 +436,7 @@ export default function SignUpPage() {
             <div className="signup-card">
 
               {/* Role tabs */}
-              {!showGoogleOnboarding && (
+              {otpStep !== 'verify' && !showGoogleOnboarding && (
                 <div className="signup-role-tabs">
                   <button
                     type="button"
@@ -366,7 +455,61 @@ export default function SignUpPage() {
                 </div>
               )}
 
-              {showGoogleOnboarding ? (
+              {otpStep === 'verify' ? (
+                <div className="su-otp-wrap">
+                  <h2 className="signup-card-title">Verify Mobile Number</h2>
+                  <p className="signup-card-subtitle">
+                    Enter the 6-digit verification code sent to <br />
+                    <span style={{ fontWeight: 700, color: '#000f22' }}>+91 {pendingPayload?.mobile}</span>
+                  </p>
+
+                  <form onSubmit={handleVerifyOtp} className="signup-form w-full">
+                    <div className="su-otp-inputs">
+                      {otpValues.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          ref={otpRefs[idx]}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength="1"
+                          value={digit}
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                          className="su-otp-digit"
+                          autoFocus={idx === 0}
+                        />
+                      ))}
+                    </div>
+
+                    <button type="submit" className="su-submit-btn" disabled={submitting}>
+                      {submitting ? 'Verifying...' : 'Verify & Complete Onboarding'}
+                    </button>
+                  </form>
+
+                  <div className="su-otp-timer">
+                    {resendSeconds > 0 ? (
+                      <span>Resend OTP in <span style={{ fontWeight: 800, color: '#000f22' }}>{resendSeconds}s</span></span>
+                    ) : (
+                      <span>
+                        Didn't receive the code? 
+                        <button type="button" onClick={handleResendOtp} className="su-otp-resend">
+                          Resend Code
+                        </button>
+                      </span>
+                    )}
+                  </div>
+
+                  <button 
+                    type="button" 
+                    onClick={() => { setOtpStep('form'); setOtpValues(['', '', '', '', '', '']); }}
+                    className="su-terms-link"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginTop: '16px' }}
+                  >
+                    ← Back to edit details
+                  </button>
+                </div>
+              ) : showGoogleOnboarding ? (
                 <div className="su-otp-wrap">
                   <h2 className="signup-card-title">Complete Your Profile</h2>
                   <p className="signup-card-subtitle" style={{ marginBottom: '20px' }}>
