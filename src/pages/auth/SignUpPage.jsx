@@ -49,6 +49,11 @@ export default function SignUpPage() {
     panPhoto: ''
   });
   const [onboardingErrors, setOnboardingErrors] = useState({});
+  const [isScanningAadhaar, setIsScanningAadhaar] = useState(false);
+  const [aadhaarScanProgress, setAadhaarScanProgress] = useState(0);
+  const [aadhaarScanMessage, setAadhaarScanMessage] = useState('');
+  const [scannedAadhaarNumber, setScannedAadhaarNumber] = useState('');
+  const [aadhaarMatchError, setAadhaarMatchError] = useState('');
 
   // OTP signup states
   const [otpStep, setOtpStep] = useState('form'); // 'form' or 'verify'
@@ -68,6 +73,62 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, [otpStep, resendSeconds]);
 
+  const scanAadhaarCard = async (file) => {
+    setIsScanningAadhaar(true);
+    setAadhaarScanProgress(0);
+    setAadhaarScanMessage('Initializing OCR engine...');
+    setAadhaarMatchError('');
+
+    try {
+      const { recognize } = await import('tesseract.js');
+      setAadhaarScanMessage('Scanning image for 12-digit Aadhaar...');
+      const result = await recognize(
+        file,
+        'eng',
+        {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              setAadhaarScanProgress(Math.round(m.progress * 100));
+            }
+          }
+        }
+      );
+
+      const text = result.data.text;
+      console.log('Aadhaar Scanned Text:', text);
+
+      // Clean up text and find 12 digits
+      const cleanDigits = text.replace(/[^0-9\s]/g, '');
+      const regexPattern = /\d{4}\s+\d{4}\s+\d{4}/;
+      const spaceMatch = cleanDigits.match(regexPattern);
+      let extractedAadhaar = '';
+
+      if (spaceMatch) {
+        extractedAadhaar = spaceMatch[0].replace(/\s+/g, '');
+      } else {
+        const contiguousMatch = text.replace(/\s+/g, '').match(/\d{12}/);
+        if (contiguousMatch) {
+          extractedAadhaar = contiguousMatch[0];
+        }
+      }
+
+      if (extractedAadhaar) {
+        setScannedAadhaarNumber(extractedAadhaar);
+        setAadhaarScanMessage(`Success! Aadhaar number scanned: ${extractedAadhaar}`);
+        setOnboardingForm(prev => ({ ...prev, aadhaar: extractedAadhaar }));
+        if (onboardingErrors.aadhaar) setOnboardingErrors(prev => ({ ...prev, aadhaar: '' }));
+      } else {
+        setAadhaarScanMessage('Scan complete, but no clear 12-digit number was found. Please enter it manually.');
+        setScannedAadhaarNumber('');
+      }
+    } catch (error) {
+      console.error('Aadhaar scan failed:', error);
+      setAadhaarScanMessage('Scanning failed. Please enter the Aadhaar number manually.');
+    } finally {
+      setIsScanningAadhaar(false);
+    }
+  };
+
   const handleFileChange = (field, file) => {
     if (!file) return;
     const reader = new FileReader();
@@ -76,6 +137,9 @@ export default function SignUpPage() {
       setOnboardingForm(prev => ({ ...prev, [field]: reader.result }));
       if (onboardingErrors[field]) {
         setOnboardingErrors(prev => ({ ...prev, [field]: '' }));
+      }
+      if (field === 'aadhaarPhoto') {
+        scanAadhaarCard(file);
       }
     };
     reader.onerror = (error) => {
@@ -221,7 +285,11 @@ export default function SignUpPage() {
         errs.aadhaar = 'Aadhaar Card Number is required';
       } else if (!/^\d{12}$/.test(onboardingForm.aadhaar.replace(/\D/g, ''))) {
         errs.aadhaar = 'Aadhaar must be exactly 12 digits';
+      } else if (scannedAadhaarNumber && onboardingForm.aadhaar.replace(/\D/g, '') !== scannedAadhaarNumber) {
+        errs.aadhaar = 'Aadhaar number does not match the scanned Aadhaar Card image';
+        setAadhaarMatchError('Aadhaar number does not match the scanned Aadhaar Card image');
       }
+
       if (onboardingForm.gst.trim() && onboardingForm.gst.trim().length !== 15) {
         errs.gst = 'GST Number must be exactly 15 characters';
       }
@@ -235,9 +303,6 @@ export default function SignUpPage() {
       }
       if (!onboardingForm.aadhaarPhoto) {
         errs.aadhaarPhoto = 'Aadhaar Card Image is required';
-      }
-      if (onboardingForm.pan.trim() && !onboardingForm.panPhoto) {
-        errs.panPhoto = 'PAN Card Image is required when PAN Number is provided';
       }
     }
     
@@ -694,10 +759,34 @@ export default function SignUpPage() {
                                 onChange={(e) => {
                                   setOnboardingForm(prev => ({ ...prev, aadhaar: e.target.value.replace(/\D/g, '').slice(0, 12) }));
                                   if (onboardingErrors.aadhaar) setOnboardingErrors(prev => ({ ...prev, aadhaar: '' }));
+                                  setAadhaarMatchError('');
                                 }}
                               />
                             </div>
                             {onboardingErrors.aadhaar && <span className="su-error">{onboardingErrors.aadhaar}</span>}
+                            {scannedAadhaarNumber && (
+                              <div className={`aadhaar-match-indicator ${
+                                onboardingForm.aadhaar.replace(/\D/g, '') === scannedAadhaarNumber 
+                                  ? 'aadhaar-match-indicator--success' 
+                                  : 'aadhaar-match-indicator--error'
+                              }`}>
+                                {onboardingForm.aadhaar.replace(/\D/g, '') === scannedAadhaarNumber ? (
+                                  <>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span>
+                                    <span>Matches scanned card image</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>warning</span>
+                                    <span>Does not match scanned card number ({scannedAadhaarNumber})</span>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                            {aadhaarMatchError && <div className="aadhaar-match-indicator aadhaar-match-indicator--error">
+                              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>error</span>
+                              <span>{aadhaarMatchError}</span>
+                            </div>}
                           </div>
 
                           {/* PAN Card */}
@@ -786,8 +875,30 @@ export default function SignUpPage() {
                                 {onboardingForm.aadhaarPhoto ? 'Change Aadhaar Card Image' : 'Upload Aadhaar Card Image'}
                               </label>
                               {onboardingForm.aadhaarPhoto && (
-                                <div className="su-image-preview-container">
+                                <div className="su-image-preview-container aadhaar-scan-container">
                                   <img src={onboardingForm.aadhaarPhoto} alt="Aadhaar Preview" className="su-image-preview" />
+                                  {isScanningAadhaar && (
+                                    <div className="aadhaar-scan-overlay">
+                                      <div className="aadhaar-scan-laser" />
+                                      <span className="material-symbols-outlined animate-spin" style={{ fontSize: '28px' }}>sync</span>
+                                      <div style={{ marginTop: '8px', fontSize: '13px' }}>Scanning Aadhaar...</div>
+                                      <div className="aadhaar-scan-progress-bar">
+                                        <div className="aadhaar-scan-progress-fill" style={{ width: `${aadhaarScanProgress}%` }} />
+                                      </div>
+                                      <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.8 }}>{aadhaarScanProgress}% complete</div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {aadhaarScanMessage && (
+                                <div className={`aadhaar-scan-message-box ${
+                                  scannedAadhaarNumber 
+                                    ? 'aadhaar-scan-message-box--success' 
+                                    : isScanningAadhaar 
+                                      ? 'aadhaar-scan-message-box--info' 
+                                      : 'aadhaar-scan-message-box--warning'
+                                }`}>
+                                  {aadhaarScanMessage}
                                 </div>
                               )}
                             </div>

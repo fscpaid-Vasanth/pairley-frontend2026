@@ -760,3 +760,106 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* Aadhaar Scan Animation Overlay */
+.aadhaar-scan-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.aadhaar-scan-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 15, 34, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+
+.aadhaar-scan-laser {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(180deg, rgba(78, 43, 196, 0) 0%, #4E2BC4 50%, rgba(78, 43, 196, 0) 100%);
+  box-shadow: 0 0 15px #4E2BC4, 0 0 30px #4E2BC4;
+  animation: scanLaserAnim 2s infinite linear;
+}
+
+@keyframes scanLaserAnim {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+
+.aadhaar-scan-progress-bar {
+  width: 150px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.aadhaar-scan-progress-fill {
+  height: 100%;
+  background: #4E2BC4;
+  box-shadow: 0 0 8px #4E2BC4;
+  transition: width 0.2s ease-out;
+}
+
+.aadhaar-scan-message-box {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.aadhaar-scan-message-box--success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10B981;
+}
+
+.aadhaar-scan-message-box--warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #D97706;
+}
+
+.aadhaar-scan-message-box--info {
+  background: rgba(78, 43, 196, 0.08);
+  border: 1px solid rgba(78, 43, 196, 0.15);
+  color: #4E2BC4;
+}
+
+.aadhaar-match-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.aadhaar-match-indicator--success {
+  color: #10B981;
+}
+
+.aadhaar-match-indicator--error {
+  color: #EF4444;
+}
+
