@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Clock, Users, PartyPopper } from 'lucide-react';
+import { Sparkles, Clock, Users, PartyPopper, Lock } from 'lucide-react';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
@@ -36,7 +36,9 @@ export default function InterestButton({ deal, onInterest }) {
           if (match) {
             if (match.status === 'INTERESTED') {
               setInterestState('interested');
-            } else if (['READY_TO_BUY', 'CONTACTED', 'COMPLETED'].includes(match.status)) {
+            } else if (match.status === 'COMPLETED') {
+              setInterestState('completed');
+            } else if (['READY_TO_BUY', 'CONTACTED'].includes(match.status)) {
               setInterestState('paired');
             }
           }
@@ -185,6 +187,20 @@ export default function InterestButton({ deal, onInterest }) {
           >
             <PartyPopper size={20} className="interest-btn__icon" />
             You're Paired! Check Chat 🎉
+          </motion.button>
+        )}
+
+        {interestState === 'completed' && (
+          <motion.button
+            key="completed"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            disabled
+            className="btn btn-lg w-full interest-btn cursor-not-allowed opacity-75 bg-slate-100 border-slate-200 text-slate-400 flex items-center justify-center gap-1.5"
+          >
+            <Lock size={20} className="interest-btn__icon" />
+            Deal Completed 🎉
           </motion.button>
         )}
       </AnimatePresence>

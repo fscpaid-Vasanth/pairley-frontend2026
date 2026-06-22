@@ -84,8 +84,74 @@ const STATEMENT_CATEGORIES = [
       'Let\'s confirm the split in our apps.',
       'Heading to the merchant counter now!'
     ]
+  },
+  {
+    title: '❓ Yes or No',
+    statements: [
+      'Yes, that works for me.',
+      'No, that won\'t work.',
+      'Yes, I agree.',
+      'No, let\'s find another option.'
+    ]
   }
 ];
+
+export const getStaticCode = (dealId) => {
+  if (!dealId) return '000-A00';
+  let hash = 0;
+  for (let i = 0; i < dealId.length; i++) {
+    hash = dealId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  hash = Math.abs(hash);
+  const part1 = 100 + (hash % 900); // 3 digits
+  const part2 = 10 + ((hash >> 3) % 90); // 2 digits
+  return `${part1}-A${part2}`;
+};
+
+const formatTime12h = (time24) => {
+  if (!time24) return '';
+  const [hoursStr, minutesStr] = time24.split(':');
+  let hours = parseInt(hoursStr);
+  const minutes = minutesStr;
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+};
+
+const CATEGORY_THEMES = [
+  {
+    active: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100',
+    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50/10',
+    stmtBg: 'hover:border-indigo-500 hover:bg-indigo-50/20 hover:text-indigo-700'
+  },
+  {
+    active: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100',
+    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/10',
+    stmtBg: 'hover:border-emerald-500 hover:bg-emerald-50/20 hover:text-emerald-700'
+  },
+  {
+    active: 'bg-amber-600 text-white hover:bg-amber-700 shadow-amber-100',
+    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-amber-300 hover:bg-amber-50/10',
+    stmtBg: 'hover:border-amber-500 hover:bg-amber-50/20 hover:text-amber-700'
+  },
+  {
+    active: 'bg-cyan-600 text-white hover:bg-cyan-700 shadow-cyan-100',
+    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-cyan-300 hover:bg-cyan-50/10',
+    stmtBg: 'hover:border-cyan-500 hover:bg-cyan-50/20 hover:text-cyan-700'
+  },
+  {
+    active: 'bg-purple-600 text-white hover:bg-purple-700 shadow-purple-100',
+    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-purple-300 hover:bg-purple-50/10',
+    stmtBg: 'hover:border-purple-500 hover:bg-purple-50/20 hover:text-purple-700'
+  },
+  {
+    active: 'bg-rose-600 text-white hover:bg-rose-700 shadow-rose-100',
+    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-rose-300 hover:bg-rose-50/10',
+    stmtBg: 'hover:border-rose-500 hover:bg-rose-50/20 hover:text-rose-700'
+  }
+];
+
 
 export default function CustomerDealChatPage() {
   const { dealId } = useParams();
@@ -101,11 +167,19 @@ export default function CustomerDealChatPage() {
 
   // Propose Time States
   const [proposeDay, setProposeDay] = useState('Today');
-  const [proposeTime, setProposeTime] = useState('4:00 PM - 6:00 PM');
+  const [proposeTime, setProposeTime] = useState('18:00');
   const [activeCategoryIdx, setActiveCategoryIdx] = useState(0);
 
   const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
   const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name;
+
+  const userInterest = deal?.interests?.find(
+    (i) => i.customer_id === currentUser?.id || 
+           i.customer_id === currentUser?.sub || 
+           i.customer?.id === currentUser?.id || 
+           i.customer?.id === currentUser?.sub
+  );
+  const isCompleted = userInterest?.status === 'COMPLETED';
 
   // Stable anonymization generator
   const getAnonymousName = (senderId, senderName) => {
@@ -204,12 +278,13 @@ export default function CustomerDealChatPage() {
   };
 
   const handleProposeTime = () => {
-    const text = `📅 Proposed Meetup: ${proposeDay} between ${proposeTime}`;
+    const formattedTime = formatTime12h(proposeTime);
+    const text = `📅 Proposed Meetup: ${proposeDay} at ${formattedTime}`;
     api.post(`/offers/chat/${dealId}`, {
       text: text,
       is_schedule_card: true,
       day: proposeDay,
-      time_slot: proposeTime,
+      time_slot: formattedTime,
       is_system: false
     })
     .then(() => {
@@ -248,10 +323,10 @@ export default function CustomerDealChatPage() {
         console.error('Failed to lock BOGO split:', err);
       });
     } else if (actionType === 'code') {
-      const randomCode = Math.floor(100 + Math.random() * 900) + '-A' + Math.floor(10 + Math.random() * 90);
-      setPickupCode(randomCode);
+      const code = getStaticCode(dealId);
+      setPickupCode(code);
       setShowCodeModal(true);
-      showToast('Merchant verification code generated!', 'success');
+      showToast('Merchant verification code retrieved!', 'success');
     }
   };
 
@@ -402,11 +477,18 @@ export default function CustomerDealChatPage() {
 
             </div>
 
-            {/* Tabbed Predefined Messages Grill */}
+            {/* Tabbed Predefined Messages Grill (CHAT BOX) */}
             <div className="bg-slate-50/70 border-t border-slate-100 p-4">
               <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                <Sparkles size={12} className="text-[#4E2BC4]" /> Predefined Message Grill
+                <Sparkles size={12} className="text-[#4E2BC4]" /> CHAT BOX
               </span>
+
+              {isCompleted && (
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-2.5 rounded-2xl text-[10px] font-extrabold mb-3 flex items-center gap-2 shadow-sm">
+                  <Lock size={12} className="text-rose-500 flex-shrink-0" />
+                  <span>This deal has been completed in the merchant portal. Chat room is now archived and read-only.</span>
+                </div>
+              )}
               
               {/* Category Tabs */}
               <div className="flex gap-1.5 overflow-x-auto pb-2 mb-2 no-scrollbar border-b border-slate-100">
@@ -414,12 +496,13 @@ export default function CustomerDealChatPage() {
                   <button
                     key={idx}
                     type="button"
+                    disabled={isCompleted}
                     onClick={() => setActiveCategoryIdx(idx)}
                     className={`px-3 py-1.5 rounded-xl text-[9px] font-extrabold whitespace-nowrap transition-all ${
                       activeCategoryIdx === idx
-                        ? 'bg-[#4E2BC4] text-white shadow-sm scale-102'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
+                        ? CATEGORY_THEMES[idx].active
+                        : CATEGORY_THEMES[idx].inactive
+                    } ${isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {cat.title}
                   </button>
@@ -432,8 +515,11 @@ export default function CustomerDealChatPage() {
                   <button
                     key={sIdx}
                     type="button"
+                    disabled={isCompleted}
                     onClick={() => handleSendPredefined(stmt)}
-                    className="bg-white border border-slate-200/80 hover:border-[#4E2BC4] hover:bg-purple-50/20 text-slate-700 hover:text-[#4E2BC4] font-semibold text-[10px] px-3 py-2 rounded-xl text-left transition leading-normal shadow-sm truncate block"
+                    className={`bg-white border border-slate-200/80 text-slate-700 font-semibold text-[10px] px-3 py-2.5 rounded-xl text-left transition leading-normal shadow-sm whitespace-normal break-words h-auto flex items-center min-h-[44px] ${
+                      isCompleted ? 'opacity-50 cursor-not-allowed' : CATEGORY_THEMES[activeCategoryIdx].stmtBg
+                    }`}
                     title={stmt}
                   >
                     {stmt}
@@ -501,8 +587,11 @@ export default function CustomerDealChatPage() {
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Day</label>
                   <select
                     value={proposeDay}
+                    disabled={isCompleted}
                     onChange={(e) => setProposeDay(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#4E2BC4] outline-none"
+                    className={`w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#4E2BC4] outline-none ${
+                      isCompleted ? 'opacity-60 cursor-not-allowed' : ''
+                    }`}
                   >
                     <option value="Today">Today</option>
                     <option value="Tomorrow">Tomorrow</option>
@@ -513,23 +602,26 @@ export default function CustomerDealChatPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Time Window</label>
-                  <select
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Select Time</label>
+                  <input
+                    type="time"
                     value={proposeTime}
+                    disabled={isCompleted}
                     onChange={(e) => setProposeTime(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#4E2BC4] outline-none"
-                  >
-                    <option value="10:00 AM - 12:00 PM">Morning (10:00 AM - 12:00 PM)</option>
-                    <option value="12:00 PM - 2:00 PM">Noon (12:00 PM - 2:00 PM)</option>
-                    <option value="2:00 PM - 4:00 PM">Afternoon (2:00 PM - 4:00 PM)</option>
-                    <option value="4:00 PM - 6:00 PM">Late Afternoon (4:00 PM - 6:00 PM)</option>
-                    <option value="6:00 PM - 8:00 PM">Evening (6:00 PM - 8:00 PM)</option>
-                  </select>
+                    className={`w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#4E2BC4] outline-none ${
+                      isCompleted ? 'opacity-60 cursor-not-allowed' : ''
+                    }`}
+                  />
                 </div>
 
                 <button
                   onClick={handleProposeTime}
-                  className="w-full bg-indigo-50 border border-indigo-200 hover:bg-[#4E2BC4] hover:text-white hover:border-[#4E2BC4] text-[#4E2BC4] font-extrabold text-[11px] py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm mt-1"
+                  disabled={isCompleted}
+                  className={`w-full font-extrabold text-[11px] py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm mt-1 ${
+                    isCompleted
+                      ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                      : 'bg-indigo-50 border-indigo-200 hover:bg-[#4E2BC4] hover:text-white hover:border-[#4E2BC4] text-[#4E2BC4]'
+                  }`}
                 >
                   <CalendarDays size={14} /> Share Meetup Proposal
                 </button>
@@ -544,21 +636,36 @@ export default function CustomerDealChatPage() {
 
               <button
                 onClick={() => handleUtilityAction('location')}
-                className="w-full bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-bold text-xs py-3 rounded-xl flex items-center justify-start px-4 gap-2.5 transition shadow-sm"
+                disabled={isCompleted}
+                className={`w-full border font-bold text-xs py-3 rounded-xl flex items-center justify-start px-4 gap-2.5 transition shadow-sm ${
+                  isCompleted
+                    ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60'
+                    : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                }`}
               >
                 📍 Share Mall Meetup Location
               </button>
 
               <button
                 onClick={() => handleUtilityAction('confirm')}
-                className="w-full bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-bold text-xs py-3 rounded-xl flex items-center justify-start px-4 gap-2.5 transition shadow-sm"
+                disabled={isCompleted}
+                className={`w-full border font-bold text-xs py-3 rounded-xl flex items-center justify-start px-4 gap-2.5 transition shadow-sm ${
+                  isCompleted
+                    ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60'
+                    : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                }`}
               >
                 ✅ Confirm BOGO Split Complete
               </button>
 
               <button
                 onClick={() => handleUtilityAction('code')}
-                className="w-full bg-slate-50 border border-slate-200/80 hover:bg-slate-100/85 text-slate-700 font-bold text-xs py-3 rounded-xl flex items-center justify-start px-4 gap-2.5 transition shadow-sm"
+                disabled={isCompleted}
+                className={`w-full border font-bold text-xs py-3 rounded-xl flex items-center justify-start px-4 gap-2.5 transition shadow-sm ${
+                  isCompleted
+                    ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60'
+                    : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/85 text-slate-700'
+                }`}
               >
                 🔑 Get Merchant Verification Code
               </button>

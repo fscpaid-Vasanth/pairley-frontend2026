@@ -29,6 +29,7 @@ import {
   getDaysRemaining,
 } from '../utils/constants';
 import { getCategoryById } from '../data/categories';
+import { getStaticCode } from './customer/CustomerDealChatPage';
 import './DealDetailPage.css';
 
 /* Mock terms for the accordion */
@@ -79,6 +80,7 @@ const DealDetailPage = () => {
   const [conversionRatio, setConversionRatio] = useState(0);
   const [storeTotalInterests, setStoreTotalInterests] = useState(0);
   const [storeCompletedInterests, setStoreCompletedInterests] = useState(0);
+  const [verifyCodes, setVerifyCodes] = useState({});
 
   const fetchStoreConversionRatio = (businessId) => {
     if (!businessId) return;
@@ -245,6 +247,13 @@ const DealDetailPage = () => {
            (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
            (currentUser.email && i.customer?.email === currentUser.email)
   );
+  const userInterest = currentUser && deal?.interests?.find(
+    (i) => i.customer_id === currentUser.id || 
+           i.customer_id === currentUser.sub || 
+           i.customer?.id === currentUser.id || 
+           i.customer?.id === currentUser.sub
+  );
+  const isCompleted = userInterest?.status === 'COMPLETED';
 
   /* Similar deals: same category, exclude current, max 3 */
   const similarDeals = mockDeals
@@ -661,22 +670,49 @@ const DealDetailPage = () => {
                                       <a href={`tel:${interest.customer?.mobile}`} className="hover:underline text-[#4E2BC4] flex items-center gap-0.5 font-bold">
                                         📞 {interest.customer?.mobile}
                                       </a>
-                                      <select
-                                        value={interest.status === 'COMPLETED' ? 'COMPLETED' : interest.status === 'CANCELLED' ? 'CANCELLED' : 'CONTACTED'}
-                                        onChange={(e) => handleStatusChange(interest.id, e.target.value)}
-                                        style={{ width: 'auto' }}
-                                        className={`text-[10px] font-extrabold rounded-lg px-2 py-1 border transition-all cursor-pointer focus:outline-none flex-shrink-0 ${
-                                          interest.status === 'COMPLETED'
-                                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100/50'
-                                            : interest.status === 'CANCELLED'
-                                            ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100/50'
-                                            : 'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100/50'
-                                        }`}
-                                      >
-                                        <option value="CONTACTED">In Progress</option>
-                                        <option value="COMPLETED">Completed</option>
-                                        <option value="CANCELLED">Cancelled</option>
-                                      </select>
+                                      {interest.status === 'COMPLETED' ? (
+                                        <span className="text-[9px] font-extrabold rounded-lg px-2.5 py-1 border bg-emerald-50 border-emerald-200 text-emerald-700">
+                                          Completed ✓
+                                        </span>
+                                      ) : interest.status === 'CANCELLED' ? (
+                                        <span className="text-[9px] font-extrabold rounded-lg px-2.5 py-1 border bg-rose-50 border-rose-200 text-rose-700">
+                                          Cancelled ✗
+                                        </span>
+                                      ) : (
+                                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                                          <input
+                                            type="text"
+                                            placeholder="Enter Code (e.g. 711-A84)"
+                                            value={verifyCodes[interest.id] || ''}
+                                            onChange={(e) => setVerifyCodes({ ...verifyCodes, [interest.id]: e.target.value })}
+                                            className="text-[10px] bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-[#4E2BC4] font-bold text-slate-800 w-28"
+                                          />
+                                          <button
+                                            onClick={() => {
+                                              const typed = (verifyCodes[interest.id] || '').trim();
+                                              const correct = getStaticCode(deal.id);
+                                              if (typed === correct) {
+                                                handleStatusChange(interest.id, 'COMPLETED');
+                                              } else {
+                                                showToast('Invalid verification code!', 'error');
+                                              }
+                                            }}
+                                            className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white text-[10px] font-bold rounded-lg px-2.5 py-1 transition flex-shrink-0"
+                                          >
+                                            Verify & Close
+                                          </button>
+                                          <button
+                                            onClick={() => {
+                                              if (window.confirm('Are you sure you want to cancel this deal for this customer?')) {
+                                                handleStatusChange(interest.id, 'CANCELLED');
+                                              }
+                                            }}
+                                            className="border border-rose-200 hover:bg-rose-50 text-rose-600 text-[10px] font-bold rounded-lg px-2 py-1 transition flex-shrink-0"
+                                          >
+                                            Cancel
+                                          </button>
+                                        </div>
+                                      )}
                                     </div>
                                     {interest.customer?.address && (
                                       <div className="text-[10px] text-slate-400 mt-1 bg-slate-50/50 p-2 rounded-lg border border-slate-100/60 leading-normal">
@@ -706,12 +742,18 @@ const DealDetailPage = () => {
                       <p className="text-[10px] text-slate-500 leading-normal mb-3 font-semibold">
                         Coordinate with other interested buyers for this deal. Message templates are predefined to protect your identity.
                       </p>
-                      <Link
-                        to={`/customer/deal-chat/${id}`}
-                        className="w-full btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white py-2.5 rounded-xl text-[11px] font-bold text-center block transition shadow-sm"
-                      >
-                        Enter Anonymous Chat Room
-                      </Link>
+                      {isCompleted ? (
+                        <div className="text-[10px] text-rose-600 font-extrabold bg-rose-50 border border-rose-100 p-2.5 rounded-xl text-center leading-normal">
+                          🔒 This deal has been completed. Chat is closed.
+                        </div>
+                      ) : (
+                        <Link
+                          to={`/customer/deal-chat/${id}`}
+                          className="w-full btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white py-2.5 rounded-xl text-[11px] font-bold text-center block transition shadow-sm"
+                        >
+                          Enter Anonymous Chat Room
+                        </Link>
+                      )}
                     </div>
                   )}
 

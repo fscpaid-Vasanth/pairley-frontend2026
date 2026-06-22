@@ -11,7 +11,8 @@ import {
   MessageSquare,
   Sparkles,
   ArrowUpRight,
-  Zap
+  Zap,
+  Lock
 } from 'lucide-react';
 // Removed mock imports to prevent dashboard fallbacks
 import { getTimeGreeting, formatPrice, ROUTES } from '../../utils/constants';
@@ -54,6 +55,7 @@ export default function CustomerDashboard() {
     groupsJoinedCount: 0,
     totalSaved: 0
   });
+  const [completedDealIds, setCompletedDealIds] = useState(new Set());
 
   const formatTimeAgo = (dateStr) => {
     const date = new Date(dateStr);
@@ -92,6 +94,11 @@ export default function CustomerDashboard() {
           groupsJoinedCount: groups.length,
           totalSaved: saved
         });
+
+        const completedIds = new Set(
+          history.filter(h => h.status === 'COMPLETED').map(h => h.offer.id)
+        );
+        setCompletedDealIds(completedIds);
 
         // Map active interests
         setActiveInterests(
@@ -396,13 +403,23 @@ export default function CustomerDashboard() {
                             <span className="text-[9px] text-slate-400">Each paid</span>
                             <div className="text-xs font-bold text-emerald-600">{formatPrice(deal.pairleyPrice)}</div>
                           </div>
-                          <Link 
-                            to={`/customer/chat/${deal.id}`}
-                            className="flex items-center gap-1 px-2.5 py-1.5 bg-purple-50 text-[#4E2BC4] hover:bg-[#4E2BC4] hover:text-white rounded-lg text-[10px] font-bold transition-all duration-200"
-                          >
-                            <MessageSquare size={10} />
-                            Open Chat
-                          </Link>
+                          {deal.status === 'COMPLETED' ? (
+                            <button 
+                              disabled
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-[10px] font-bold cursor-not-allowed border border-slate-200/50"
+                            >
+                              <Lock size={10} />
+                              Chat Closed
+                            </button>
+                          ) : (
+                            <Link 
+                              to={`/customer/deal-chat/${deal.id}`}
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-purple-50 text-[#4E2BC4] hover:bg-[#4E2BC4] hover:text-white rounded-lg text-[10px] font-bold transition-all duration-200"
+                            >
+                              <MessageSquare size={10} />
+                              Open Chat
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -487,67 +504,106 @@ export default function CustomerDashboard() {
                   ? Math.round((deal.joined_people / deal.required_people) * 100)
                   : null;
                 const isGroup = deal.offer_type?.toLowerCase() === 'group_discount';
+                const isCompleted = completedDealIds.has(deal.id);
 
                 return (
                   <motion.div
                     key={deal.id}
-                    className="bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group"
-                    style={{ borderColor: isGroup ? 'rgba(16, 185, 129, 0.35)' : 'rgba(78, 43, 196, 0.28)', borderWidth: '1.5px' }}
-                    whileHover={{ y: -4 }}
+                    className={`bg-white border rounded-2xl overflow-hidden shadow-sm transition-all duration-300 flex flex-col justify-between group ${
+                      isCompleted ? 'opacity-75' : 'hover:-translate-y-1 hover:shadow-md'
+                    }`}
+                    style={{ borderColor: isCompleted ? '#cbd5e1' : isGroup ? 'rgba(16, 185, 129, 0.35)' : 'rgba(78, 43, 196, 0.28)', borderWidth: '1.5px' }}
+                    whileHover={isCompleted ? {} : { y: -4 }}
                   >
-                    <Link to={`/deals/${deal.id}`} className="block text-slate-800 flex-1 hover:no-underline group">
-                      <div className="relative overflow-hidden h-40 bg-slate-100">
-                        <ImageWithFallback className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
-                        <div className="absolute top-3 left-3">
-                          <span className="px-2.5 py-1 bg-white/95 backdrop-blur-sm shadow-sm rounded-full text-[10px] font-bold text-slate-700 flex items-center gap-1">
-                            {cat?.icon || '🛍️'} {cat?.name || 'General'}
-                          </span>
-                        </div>
-                        <div className="absolute bottom-3 left-3">
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm text-white ${
-                            isGroup ? 'bg-indigo-600' : 'bg-emerald-600'
-                          }`}>
-                            {isGroup ? 'Group Deal' : 'Pair BOGO'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="p-4">
-                        <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-[#4E2BC4] transition-colors duration-200">{deal.title}</h4>
-
-                        {isGroup && (
-                          <div className="mt-3">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100/60 flex items-center gap-1">
-                                👥 {deal.joined_people}/{deal.required_people} Joined
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-semibold">{progress}%</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                              <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style={{ width: `${progress}%` }}></div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {!isGroup && (
-                          <div className="flex items-center gap-1.5 mt-3">
-                            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100/60">
-                              🤝 Matching Pool Open
+                    {isCompleted ? (
+                      <div className="block text-slate-800 flex-1 cursor-default">
+                        <div className="relative overflow-hidden h-40 bg-slate-100">
+                          <ImageWithFallback className="w-full h-full object-cover" src={deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
+                          <div className="absolute top-3 left-3">
+                            <span className="px-2.5 py-1 bg-white/95 backdrop-blur-sm shadow-sm rounded-full text-[10px] font-bold text-slate-700 flex items-center gap-1">
+                              {cat?.icon || '🛍️'} {cat?.name || 'General'}
                             </span>
                           </div>
-                        )}
+                          <div className="absolute bottom-3 left-3">
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm text-white ${
+                              isGroup ? 'bg-indigo-600' : 'bg-emerald-600'
+                            }`}>
+                              {isGroup ? 'Group Deal' : 'Pair BOGO'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-4">
+                          <h4 className="font-bold text-slate-400 text-sm leading-snug line-clamp-2 min-h-[40px]">{deal.title}</h4>
+                          <div className="flex items-center gap-1.5 mt-3">
+                            <span className="w-2.5 h-2.5 bg-slate-400 rounded-full"></span>
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                              Completed ✓
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </Link>
+                    ) : (
+                      <Link to={`/deals/${deal.id}`} className="block text-slate-800 flex-1 hover:no-underline group">
+                        <div className="relative overflow-hidden h-40 bg-slate-100">
+                          <ImageWithFallback className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
+                          <div className="absolute top-3 left-3">
+                            <span className="px-2.5 py-1 bg-white/95 backdrop-blur-sm shadow-sm rounded-full text-[10px] font-bold text-slate-700 flex items-center gap-1">
+                              {cat?.icon || '🛍️'} {cat?.name || 'General'}
+                            </span>
+                          </div>
+                          <div className="absolute bottom-3 left-3">
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm text-white ${
+                              isGroup ? 'bg-indigo-600' : 'bg-emerald-600'
+                            }`}>
+                              {isGroup ? 'Group Deal' : 'Pair BOGO'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-4">
+                          <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-[#4E2BC4] transition-colors duration-200">{deal.title}</h4>
+
+                          {isGroup && (
+                            <div className="mt-3">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100/60 flex items-center gap-1">
+                                  👥 {deal.joined_people}/{deal.required_people} Joined
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-semibold">{progress}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style={{ width: `${progress}%` }}></div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {!isGroup && (
+                            <div className="flex items-center gap-1.5 mt-3">
+                              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100/60">
+                                🤝 Matching Pool Open
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    )}
 
                     <div className="p-4 pt-0 border-t border-slate-100 mt-2 flex justify-between items-center">
                       <div>
                         <span className="text-xs text-slate-400">Starting Price</span>
                         <div className="text-sm font-bold text-emerald-600 mt-0.5">{formatPrice(deal.offer_price)}</div>
                       </div>
-                      <Link to={`/deals/${deal.id}`} className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:text-[#4E2BC4] hover:bg-purple-50 transition-colors duration-200">
-                        <ArrowUpRight size={16} />
-                      </Link>
+                      {isCompleted ? (
+                        <button disabled className="p-1.5 rounded-lg bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/50">
+                          <Lock size={14} />
+                        </button>
+                      ) : (
+                        <Link to={`/deals/${deal.id}`} className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:text-[#4E2BC4] hover:bg-purple-50 transition-colors duration-200">
+                          <ArrowUpRight size={16} />
+                        </Link>
+                      )}
                     </div>
                   </motion.div>
                 );
