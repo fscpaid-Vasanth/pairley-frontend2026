@@ -197,6 +197,48 @@ export default function BusinessDashboard() {
     return null;
   }
 
+  // Block PENDING / REJECTED merchants from accessing the dashboard
+  if (business.role === 'Business' && business.verification_status !== 'APPROVED') {
+    const isRejected = business.verification_status === 'REJECTED';
+    return (
+      <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ maxWidth: 520, width: '100%', background: 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 24, padding: '48px 40px', textAlign: 'center', boxShadow: '0 20px 60px rgba(78,43,196,0.1)' }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>{isRejected ? '❌' : '⏳'}</div>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: '0 0 12px' }}>
+            {isRejected ? 'Account Not Approved' : 'Awaiting Admin Approval'}
+          </h2>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.6, margin: '0 0 24px' }}>
+            {isRejected
+              ? 'Your merchant account application has been rejected. Please contact support at support@pairley.com for more details.'
+              : 'Your shop registration is under review. Our team typically reviews applications within 24–48 hours. You will be notified once approved.'}
+          </p>
+          <div style={{ background: isRejected ? 'rgba(239,68,68,0.08)' : 'rgba(78,43,196,0.08)', border: `1px solid ${isRejected ? 'rgba(239,68,68,0.2)' : 'rgba(78,43,196,0.2)'}`, borderRadius: 12, padding: '16px 20px', marginBottom: 28, textAlign: 'left' }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: isRejected ? '#ef4444' : '#4E2BC4', margin: '0 0 6px' }}>📋 What happens next?</p>
+            {isRejected ? (
+              <ul style={{ fontSize: 13, color: '#64748b', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+                <li>Contact support to understand the rejection reason</li>
+                <li>Address any compliance or documentation issues</li>
+                <li>Re-apply after resolving the issues</li>
+              </ul>
+            ) : (
+              <ul style={{ fontSize: 13, color: '#64748b', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+                <li>Admin will review your shop details &amp; documents</li>
+                <li>You'll receive a notification once approved</li>
+                <li>Only then can you create deals and accept customers</li>
+              </ul>
+            )}
+          </div>
+          <button
+            onClick={() => { localStorage.removeItem('pairley_token'); localStorage.removeItem('pairley_user'); navigate('/login'); }}
+            style={{ padding: '12px 32px', borderRadius: 99, background: '#4E2BC4', color: 'white', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer' }}
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="business-dashboard page-wrapper py-6">
       <div className="container max-w-6xl mx-auto px-4">

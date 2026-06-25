@@ -76,7 +76,42 @@ export default function CreateDealPage() {
   const [step, setStep] = useState(1);
   const { showToast } = useToast();
 
-  // Form states
+  const token = localStorage.getItem('pairley_token');
+  const business = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+
+  // Redirect if not logged in
+  if (!token || !business) {
+    navigate('/login');
+    return null;
+  }
+
+  // Block PENDING / REJECTED merchants from creating deals
+  if (business.role === 'Business' && business.verification_status !== 'APPROVED') {
+    const isRejected = business.verification_status === 'REJECTED';
+    return (
+      <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ maxWidth: 520, width: '100%', background: 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 24, padding: '48px 40px', textAlign: 'center', boxShadow: '0 20px 60px rgba(78,43,196,0.1)' }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>{isRejected ? '❌' : '⏳'}</div>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: '0 0 12px' }}>
+            {isRejected ? 'Account Not Approved' : 'Awaiting Admin Approval'}
+          </h2>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.6, margin: '0 0 24px' }}>
+            {isRejected
+              ? 'Your merchant account has been rejected. You cannot create deals. Please contact support@pairley.com.'
+              : 'You cannot create deals until your shop is approved by the Pairley admin team. Approval typically takes 24–48 hours.'}
+          </p>
+          <button
+            onClick={() => navigate('/business/dashboard')}
+            style={{ padding: '12px 32px', borderRadius: 99, background: '#4E2BC4', color: 'white', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer' }}
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
   const [dealType, setDealType] = useState('pair'); // 'pair' or 'group'
   const [category, setCategory] = useState('shopping');
   const [title, setTitle] = useState('');

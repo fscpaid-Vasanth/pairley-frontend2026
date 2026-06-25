@@ -374,7 +374,11 @@ export default function SignUpPage() {
         const userObj = { ...(res.user || {}), role: res.role };
         localStorage.setItem('pairley_token', token);
         localStorage.setItem('pairley_user', JSON.stringify(userObj));
-        showToast('Account created successfully! Welcome to Pairley 🎉', 'success');
+        if (res.role === 'Business') {
+          showToast('Shop registered! Your account is pending admin approval (24–48 hrs). You\'ll be notified once approved. 🎉', 'info');
+        } else {
+          showToast('Account created successfully! Welcome to Pairley 🎉', 'success');
+        }
         navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
       })
       .catch((err) => {
