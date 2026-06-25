@@ -72,7 +72,13 @@ const getShortLabel = (cat) => {
   if (cat.id === 'shopping') return 'Retail';
   if (cat.id === 'tours') return 'Travel';
   if (cat.id === 'home-services') return 'Home';
-  if (cat.id === 'subscriptions') return 'Electronics';
+  if (cat.id === 'subscriptions') return 'OTT';
+  if (cat.id === 'adventure') return 'Adventure';
+  if (cat.id === 'fitness') return 'Fitness';
+  if (cat.id === 'entertainment') return 'Events';
+  if (cat.id === 'education') return 'Courses';
+  if (cat.id === 'healthcare') return 'Health';
+  if (cat.id === 'coworking') return 'Co-Work';
   return cat.name.split(' & ')[0].split(' ')[0];
 };
 
@@ -166,15 +172,15 @@ export default function HomePage() {
             <div className="categories-horizontal-grid">
               {categories.slice(0, 9).map((cat) => (
                 <Link to={`${ROUTES.DEALS}?category=${cat.id}`} className="categories-horizontal-item" key={cat.id}>
-                  <span className="categories-horizontal-icon">
-                    <img src={cat.imageUrl} alt={cat.name} className="categories-horizontal-icon-img" />
+                  <span className="categories-horizontal-icon" style={{ background: cat.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', width: '44px', height: '44px', flexShrink: 0 }}>
+                    <span style={{ fontSize: '22px', lineHeight: 1 }}>{cat.icon}</span>
                   </span>
                   <span className="categories-horizontal-label">{getShortLabel(cat)}</span>
                 </Link>
               ))}
               <Link to={ROUTES.DEALS} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon">
-                  <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=80&auto=format&fit=crop&q=60" alt="More" className="categories-horizontal-icon-img" />
+                <span className="categories-horizontal-icon" style={{ background: 'linear-gradient(135deg, #64748b, #475569)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', width: '44px', height: '44px', flexShrink: 0 }}>
+                  <span style={{ fontSize: '22px', lineHeight: 1 }}>➕</span>
                 </span>
                 <span className="categories-horizontal-label">More</span>
               </Link>

@@ -53,7 +53,7 @@ function CountdownTimer({ initialMinutes }) {
 }
 
 export default function CustomerOrdersPage() {
-  const { orders } = useCart();
+  const { orders, ordersLoading } = useCart();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('active'); // 'active' (searching), 'completed' (matched/shipped), 'past' (delivered)
   const [searchQuery, setSearchQuery] = useState('');
@@ -163,7 +163,25 @@ export default function CustomerOrdersPage() {
 
         {/* Orders List Grid */}
         <AnimatePresence mode="wait">
-          {filteredOrders.length > 0 ? (
+          {ordersLoading ? (
+            <motion.div
+              className="flex flex-col gap-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-white border border-slate-200 p-5 rounded-3xl flex gap-5 items-center shadow-sm animate-pulse">
+                  <div className="w-20 h-20 bg-slate-100 rounded-2xl flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-slate-100 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    <div className="h-3 bg-slate-100 rounded w-1/4" />
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          ) : filteredOrders.length > 0 ? (
             <motion.div 
               className="flex flex-col gap-4"
               initial={{ opacity: 0, y: 10 }}

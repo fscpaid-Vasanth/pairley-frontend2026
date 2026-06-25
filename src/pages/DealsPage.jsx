@@ -6,7 +6,6 @@ import DealCard from '../components/DealCard';
 import DealTypeToggle from '../components/DealTypeToggle';
 import CategorySection from '../components/CategorySection';
 import CustomDropdown from '../components/CustomDropdown';
-import { mockDeals } from '../data/mockDeals';
 import { api } from '../utils/api';
 import { MALLS } from '../utils/constants';
 import './DealsPage.css';
@@ -111,12 +110,8 @@ const DealsPage = () => {
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Failed to load live deals from backend, falling back to mock:', err);
-        const mappedMock = mockDeals.map((d, i) => ({
-          ...d,
-          mallName: d.mallName || (i % 2 === 0 ? 'Orion Mall, Rajajinagar' : 'Phoenix Marketcity, Whitefield')
-        }));
-        setDealsList(mappedMock);
+        console.error('Failed to load live deals from backend:', err);
+        setDealsList([]);
         setLoading(false);
       });
   }, []);

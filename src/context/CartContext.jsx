@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { mockDeals } from '../data/mockDeals';
 import { api } from '../utils/api';
 
 const CartContext = createContext(null);
@@ -12,95 +11,15 @@ export const useCart = () => {
   return context;
 };
 
-const defaultOrders = [
-  {
-    id: 'ORD-A39B22',
-    dealId: 'deal-001',
-    dealTitle: 'Samsung Galaxy Buds FE — Buy 1 Get 1',
-    dealImage: 'https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=600&h=400&fit=crop',
-    quantity: 1,
-    originalPrice: 6999,
-    pairleyPrice: 3499,
-    totalPaid: 3499,
-    status: 'searching',
-    date: '2026-06-16',
-    matchPartner: null,
-    countdownMinutes: 45,
-    progressPercent: 50,
-    deliveryDetails: {
-      name: 'Arjun Mehta',
-      email: 'arjun.mehta@email.com',
-      phone: '+91 98765 43210',
-      address: 'Apt 402, Sea Breeze, Marine Drive',
-      city: 'Mumbai',
-      zipCode: '400002'
-    }
-  },
-  {
-    id: 'ORD-B92F11',
-    dealId: 'deal-003',
-    dealTitle: 'Luxury Spa Day — Couples BOGO Package',
-    dealImage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&h=400&fit=crop',
-    quantity: 1,
-    originalPrice: 4500,
-    pairleyPrice: 2250,
-    totalPaid: 2250,
-    status: 'matched',
-    date: '2026-06-15',
-    matchPartner: {
-      name: 'Priya Sharma',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Priya',
-      city: 'Delhi',
-      matchDate: '2026-06-15'
-    },
-    countdownMinutes: 0,
-    progressPercent: 100,
-    deliveryDetails: {
-      name: 'Arjun Mehta',
-      email: 'arjun.mehta@email.com',
-      phone: '+91 98765 43210',
-      address: 'Apt 402, Sea Breeze, Marine Drive',
-      city: 'Mumbai',
-      zipCode: '400002'
-    }
-  },
-  {
-    id: 'ORD-C88D44',
-    dealId: 'deal-002',
-    dealTitle: 'Nike Air Max 270 — BOGO Pair Deal',
-    dealImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop',
-    quantity: 1,
-    originalPrice: 12995,
-    pairleyPrice: 6497,
-    totalPaid: 6497,
-    status: 'delivered',
-    date: '2026-05-10',
-    matchPartner: {
-      name: 'Rahul Krishnan',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul',
-      city: 'Bangalore',
-      matchDate: '2026-05-10'
-    },
-    countdownMinutes: 0,
-    progressPercent: 100,
-    deliveryDetails: {
-      name: 'Arjun Mehta',
-      email: 'arjun.mehta@email.com',
-      phone: '+91 98765 43210',
-      address: 'Apt 402, Sea Breeze, Marine Drive',
-      city: 'Mumbai',
-      zipCode: '400002'
-    }
-  }
-];
-
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   const refreshOrders = () => {
     const token = localStorage.getItem('pairley_token');
     if (token) {
+      setOrdersLoading(true);
       return api.get('/customers/history')
         .then((history) => {
           const statusMapping = {
@@ -149,15 +68,18 @@ export function CartProvider({ children }) {
           }));
 
           setOrders(mappedOrders);
+          setOrdersLoading(false);
           sessionStorage.setItem('pairley_orders', JSON.stringify(mappedOrders));
           return mappedOrders;
         })
         .catch((err) => {
           console.error('Failed to load user order history:', err);
           setOrders([]);
+          setOrdersLoading(false);
           return [];
         });
     } else {
+      setOrdersLoading(false);
       try {
         const storedOrders = sessionStorage.getItem('pairley_orders');
         const parsed = storedOrders ? JSON.parse(storedOrders) : [];
@@ -272,6 +194,7 @@ export function CartProvider({ children }) {
       cartSavings,
       cartSavingsPercentage,
       orders,
+      ordersLoading,
       createOrder,
       refreshOrders
     }}>

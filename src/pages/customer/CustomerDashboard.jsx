@@ -89,7 +89,7 @@ export default function CustomerDashboard() {
           .reduce((acc, h) => acc + (h.offer.original_price - h.offer.offer_price), 0);
 
         setStats({
-          activeInterestsCount: history.filter(h => h.status === 'INTERESTED').length,
+          activeInterestsCount: activeInts.length,
           pairedDealsCount: pairs.length,
           groupsJoinedCount: groups.length,
           totalSaved: saved
