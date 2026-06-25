@@ -172,15 +172,15 @@ export default function HomePage() {
             <div className="categories-horizontal-grid">
               {categories.slice(0, 9).map((cat) => (
                 <Link to={`${ROUTES.DEALS}?category=${cat.id}`} className="categories-horizontal-item" key={cat.id}>
-                  <span className="categories-horizontal-icon" style={{ background: cat.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', width: '44px', height: '44px', flexShrink: 0 }}>
-                    <span style={{ fontSize: '22px', lineHeight: 1 }}>{cat.icon}</span>
+                  <span className="categories-horizontal-icon">
+                    <img src={cat.imageUrl} alt={cat.name} className="categories-horizontal-icon-img" />
                   </span>
                   <span className="categories-horizontal-label">{getShortLabel(cat)}</span>
                 </Link>
               ))}
               <Link to={ROUTES.DEALS} className="categories-horizontal-item">
-                <span className="categories-horizontal-icon" style={{ background: 'linear-gradient(135deg, #64748b, #475569)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', width: '44px', height: '44px', flexShrink: 0 }}>
-                  <span style={{ fontSize: '22px', lineHeight: 1 }}>➕</span>
+                <span className="categories-horizontal-icon">
+                  <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=80&auto=format&fit=crop&q=60" alt="More" className="categories-horizontal-icon-img" />
                 </span>
                 <span className="categories-horizontal-label">More</span>
               </Link>
