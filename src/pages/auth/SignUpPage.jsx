@@ -4,7 +4,9 @@ import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import { MALLS } from '../../utils/constants';
+import SEO from '../../components/SEO';
 import './SignUpPage.css';
+
  
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));

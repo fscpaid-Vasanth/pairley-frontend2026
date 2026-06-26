@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/SEO';
 import { 
+
   ShieldCheck, 
   HelpCircle, 
   ChevronDown, 

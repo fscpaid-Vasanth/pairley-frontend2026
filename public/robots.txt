@@ -1,0 +1,36 @@
+# =========================================================
+# Pairley — robots.txt
+# Generated for: https://www.pairley.com
+# =========================================================
+
+User-agent: *
+Allow: /
+
+# Allow all important public pages
+Allow: /deals
+Allow: /deals/
+Allow: /about
+Allow: /how-it-works
+Allow: /support
+Allow: /refund-policy
+Allow: /login
+Allow: /signup
+
+# Block private/authenticated routes
+Disallow: /admin/
+Disallow: /business/
+Disallow: /customer/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /order-success/
+Disallow: /callback
+Disallow: /api/
+
+# Block query-string duplicates that could cause thin content
+Disallow: /*?*focusSearch=*
+
+# Sitemaps
+Sitemap: https://www.pairley.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

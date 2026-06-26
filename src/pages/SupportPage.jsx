@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/SEO';
+
 import { 
   Search, 
   HelpCircle, 
@@ -164,7 +166,14 @@ export default function SupportPage() {
 
   return (
     <div className="support-page page-wrapper py-8 text-left relative">
+      <SEO
+        title="Help & Support — Pairley"
+        description="Get help with Pairley group deals. Find answers to FAQs, contact our support team, or report issues. We're here to help you buy together and save together."
+        keywords="Pairley support, Pairley help, contact Pairley, group buying FAQ, Pairley customer service"
+        canonical="https://www.pairley.com/support"
+      />
       <div className="container max-w-5xl mx-auto px-4">
+
         
         {/* Header Breadcrumbs */}
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mb-4 uppercase tracking-wider">

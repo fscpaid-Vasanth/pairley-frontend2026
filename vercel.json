@@ -1,8 +1,15 @@
 {
-  "rewrites": [
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "comment": "Step 1 — Serve any real file that exists in /dist directly (sitemap.xml, robots.txt, favicons, CSS, JS, etc.)",
+      "handle": "filesystem"
+    },
+    {
+      "comment": "Step 2 — Everything else is a React Router path; serve the SPA shell",
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

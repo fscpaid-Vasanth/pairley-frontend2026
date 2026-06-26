@@ -39,9 +39,11 @@ export const ROUTES = {
 
 // App info
 export const APP_NAME = 'Pairley';
-export const APP_TAGLINE = 'Pair Up. Pay Less. Get More.';
+export const APP_TAGLINE = 'Buy Together. Save Together.';
 export const APP_DESCRIPTION =
-  'Pairley connects people with common buying interests to unlock better prices together. Split BOGO deals with a partner or join groups to bring down per-head costs.';
+  "Pairley is India's smart local group-buying marketplace where customers discover exclusive offers from restaurants, gyms, salons, retail stores and local businesses. Join deals together and save more.";
+export const APP_URL = 'https://www.pairley.com';
+export const APP_OG_IMAGE = 'https://www.pairley.com/og-image.png';
 
 // Deal modes
 export const DEAL_MODES = {

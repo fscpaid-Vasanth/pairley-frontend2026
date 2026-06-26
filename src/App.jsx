@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { getGoogleRedirectResult } from './firebase';
+import { api } from './utils/api';
+
 
 // Layout & Components
 import Navbar from './components/Navbar';
@@ -88,6 +91,45 @@ function ScrollToTop() {
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  /**
+   * Android Google Sign-In: Capture redirect result on app mount.
+   * signInWithRedirect() sends the user to a Chrome Custom Tab;
+   * when they return, getRedirectResult() resolves the credential.
+   * This runs on every mount but is a no-op when no redirect is pending.
+   */
+  useEffect(() => {
+    getGoogleRedirectResult()
+      .then(async (firebaseUser) => {
+        if (!firebaseUser) return; // no pending redirect
+        try {
+          // Register / log in user with Pairley backend
+          const payload = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: firebaseUser.displayName,
+            phone: firebaseUser.phoneNumber || '',
+            profilePicture: firebaseUser.photoURL,
+            authProvider: 'google',
+          };
+          const data = await api.post('/users/register', payload);
+          if (data?.token) {
+            localStorage.setItem('pairley_token', data.token);
+            localStorage.setItem('pairley_user', JSON.stringify(data.user));
+          }
+          // Redirect based on role
+          const role = data?.user?.role;
+          if (role === 'business') navigate('/business/dashboard', { replace: true });
+          else if (role === 'admin') navigate('/admin/dashboard', { replace: true });
+          else navigate('/customer/dashboard', { replace: true });
+        } catch (err) {
+          console.error('Post-redirect auth error:', err);
+        }
+      })
+      .catch((err) => console.error('Redirect result error:', err));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="app-root flex flex-col min-h-screen">

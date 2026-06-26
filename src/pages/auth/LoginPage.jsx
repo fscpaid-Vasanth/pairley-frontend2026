@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
+import SEO from '../../components/SEO';
 import './LoginPage.css';
+
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/SEO';
+
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -101,7 +103,14 @@ export default function HowItWorksPage() {
 
   return (
     <div className="how-it-works-page page-wrapper py-8">
+      <SEO
+        title="How It Works — Group Buying with Pairley"
+        description="Learn how Pairley's group buying works. Customers join local deals from restaurants, gyms, salons and retailers. Reach the group target together and unlock exclusive savings."
+        keywords="how group buying works, how Pairley works, group deal explained, pair up deals India"
+        canonical="https://www.pairley.com/how-it-works"
+      />
       {/* Hero Header */}
+
       <section className="how-it-works-page__hero relative overflow-hidden mb-12 py-16 text-center">
         <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none opacity-20">
           <div className="w-[500px] h-[500px] bg-purple-500 rounded-full blur-3xl filter animate-pulse"></div>

@@ -1,12 +1,20 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Tag } from 'lucide-react';
+import SEO from '../components/SEO';
 import './NotFoundPage.css';
+
 
 export default function NotFoundPage() {
   return (
     <div className="not-found-page page-wrapper py-16 flex items-center justify-center min-h-[75vh]">
+      <SEO
+        title="404 — Page Not Found"
+        description="The page you are looking for does not exist on Pairley. Go back to browse group deals from local restaurants, gyms, salons and retailers."
+        noIndex
+      />
       <div className="container max-w-2xl mx-auto px-4">
+
         <motion.div
           className="bg-white/80 backdrop-blur-lg border border-slate-200/80 p-8 md:p-12 rounded-3xl shadow-xl text-center flex flex-col items-center gap-6"
           initial={{ opacity: 0, y: 30 }}

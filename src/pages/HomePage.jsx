@@ -7,7 +7,9 @@ import HeroSection from '../components/HeroSection';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { ROUTES, formatPrice } from '../utils/constants';
 import { categories } from '../data/categories';
+import SEO from '../components/SEO';
 import './HomePage.css';
+
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -153,7 +155,15 @@ export default function HomePage() {
 
   return (
     <div className="homepage page-wrapper">
+      <SEO
+        title="Pairley | Buy Together. Save Together."
+        standalone
+        description="Pairley is India's smart local group-buying marketplace. Discover exclusive offers from restaurants, gyms, salons, retail stores and local businesses. Join deals together and save more."
+        keywords="group buying marketplace India, local deals, restaurant group offers, gym membership deals, salon group discounts"
+        canonical="https://www.pairley.com/"
+      />
       {/* Viewport 1: Hero Section */}
+
       <HeroSection 
         selectedMall={selectedMall} 
         onMallChange={setSelectedMall} 

@@ -8,7 +8,9 @@ import CategorySection from '../components/CategorySection';
 import CustomDropdown from '../components/CustomDropdown';
 import { api } from '../utils/api';
 import { MALLS } from '../utils/constants';
+import SEO from '../components/SEO';
 import './DealsPage.css';
+
 
 /* Animation variants */
 const containerVariants = {
@@ -174,7 +176,14 @@ const DealsPage = () => {
 
   return (
     <div className="page-wrapper">
+      <SEO
+        title="Local Deals & Group Offers"
+        description="Discover exclusive group deals near you on Pairley. Browse restaurant offers, gym memberships, salon discounts, retail shopping deals and more. Join deals together and save big."
+        keywords="local deals, group offers, restaurant discounts, gym deals, salon offers, retail deals India"
+        canonical="https://www.pairley.com/deals"
+      />
       <div className={`deals-page ${isDarkTheme ? 'deals-page--dark' : ''}`}>
+
         <div className="deals-page-glow" />
 
         <div className="container">

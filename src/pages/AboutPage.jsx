@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import SEO from '../components/SEO';
+
 import { 
   Wallet, 
   ShieldCheck, 
@@ -93,7 +95,14 @@ export default function AboutPage() {
 
   return (
     <div className="about-page page-wrapper py-8">
+      <SEO
+        title="About Pairley — India's Group Buying Marketplace"
+        description="Pairley is India's smart local group-buying platform connecting customers with the best deals from restaurants, gyms, salons and retailers. Learn our mission and story."
+        keywords="about Pairley, Pairley India, group buying platform, Pairley story, local marketplace India"
+        canonical="https://www.pairley.com/about"
+      />
       {/* Hero Header */}
+
       <section className="about-page__hero relative overflow-hidden mb-12 py-16 text-center">
         <div className="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none opacity-20">
           <div className="w-[500px] h-[500px] bg-purple-500 rounded-full blur-3xl filter animate-pulse"></div>
