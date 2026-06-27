@@ -73,6 +73,13 @@ export default function AdminDashboard() {
   const [selectedShop, setSelectedShop] = useState(null);
   const [activeDocPreview, setActiveDocPreview] = useState('shop');
 
+  // Support Helpdesk States
+  const [tickets, setTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [replying, setReplying] = useState(false);
+
   // Check auth roles
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('pairley_user') || 'null');
@@ -112,7 +119,60 @@ export default function AdminDashboard() {
     if (tab === 'shops') fetchBusinesses();
     else if (tab === 'customers') fetchCustomers();
     else if (tab === 'deals') fetchDeals();
+    else if (tab === 'tickets') fetchTickets();
   };
+
+  const fetchTickets = () => {
+    setLoadingTickets(true);
+    api.get('/support/tickets')
+      .then((data) => {
+        setTickets(data);
+        setLoadingTickets(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch support tickets:', err);
+        showToast('Error loading support tickets.', 'error');
+        setLoadingTickets(false);
+      });
+  };
+
+  const handleReplyTicket = (ticketId, status) => {
+    if (!replyMessage.trim() && status === 'CLOSED') {
+      // Allow closing without message
+    } else if (!replyMessage.trim()) {
+      showToast('Please enter a reply message.', 'error');
+      return;
+    }
+    setReplying(true);
+    api.put('/support/reply', { ticketId, status, replyMessage })
+      .then((updatedTicket) => {
+        showToast(`Ticket status updated to ${status}!`, 'success');
+        setReplyMessage('');
+        setReplying(false);
+        fetchTickets();
+        setSelectedTicket(updatedTicket);
+      })
+      .catch((err) => {
+        console.error('Failed to reply to ticket:', err);
+        showToast('Failed to send reply: ' + (err.message || 'Request failed'), 'error');
+        setReplying(false);
+      });
+  };
+
+  // Poll active support chat ticket for Admin in real-time
+  useEffect(() => {
+    if (!selectedTicket || !selectedTicket.subject.startsWith('[CHAT]') || selectedTicket.status === 'CLOSED') return;
+
+    const interval = setInterval(() => {
+      api.get(`/support/ticket/${selectedTicket.id}`)
+        .then((res) => {
+          setSelectedTicket(res);
+        })
+        .catch((err) => console.error('Failed to poll admin support chat:', err));
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [selectedTicket?.id, selectedTicket?.status]);
 
   // Fetch Businesses/Shop Owners
   const fetchBusinesses = () => {
@@ -302,6 +362,17 @@ export default function AdminDashboard() {
           >
             <Tag size={14} />
             Deals Moderation
+          </button>
+          <button
+            onClick={() => handleTabChange('tickets')}
+            className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'tickets'
+                ? 'active-tab bg-[#4E2BC4] text-white shadow-md shadow-[#4E2BC4]/20'
+                : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
+            }`}
+          >
+            <Headphones size={14} />
+            Support Helpdesk
           </button>
         </div>
 
@@ -642,6 +713,197 @@ export default function AdminDashboard() {
                 No active store deal listings found.
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'tickets' && (
+          <div className="space-y-6 animate-fadeIn text-left">
+            <h3 className="text-lg font-black text-slate-800">Help Desk Support Tickets</h3>
+            
+            {loadingTickets ? (
+              <div className="text-center py-20 text-slate-400 font-bold text-sm">Loading support tickets...</div>
+            ) : tickets.length > 0 ? (
+              <div className="bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-3xl shadow-md overflow-x-auto">
+                <table className="w-full border-collapse text-left text-xs font-semibold text-slate-600 min-w-[900px]">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="px-6 py-4">Ticket Type</th>
+                      <th className="px-6 py-4">Subject / Ref ID</th>
+                      <th className="px-6 py-4">Created Date</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {tickets.map((t) => {
+                      const isChat = t.subject.startsWith('[CHAT]');
+                      return (
+                        <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            {isChat ? (
+                              <span className="bg-indigo-50 border border-indigo-150 text-[#4E2BC4] text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">💬 Live Chat</span>
+                            ) : (
+                              <span className="bg-amber-50 border border-amber-150 text-amber-700 text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">🎫 Help Ticket</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-slate-800 font-bold text-sm">{t.subject}</div>
+                            <div className="text-[10px] text-slate-400 font-semibold mt-0.5 truncate max-w-[400px]">
+                              {t.description.split('\n')[0]}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-slate-500 font-medium">
+                            {new Date(t.created_at).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
+                              t.status === 'OPEN'
+                                ? 'bg-emerald-50 border-emerald-250 text-emerald-700 animate-pulse'
+                                : 'bg-slate-100 border-slate-200 text-slate-500'
+                            }`}>
+                              {t.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              onClick={() => {
+                                setSelectedTicket(t);
+                                setReplyMessage('');
+                              }}
+                              className="px-3.5 py-1.5 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white text-[10px] font-extrabold rounded-xl shadow-sm transition-all"
+                            >
+                              Open console
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-20 bg-white/50 border border-slate-200 rounded-3xl text-slate-400 font-bold text-sm">
+                🎉 No support tickets in queue!
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Support Ticket Detail Overlay Modal */}
+        {selectedTicket && (
+          <div className="review-modal-overlay flex items-center justify-center p-4 animate-modalFadeIn" onClick={() => setSelectedTicket(null)}>
+            <div className="review-modal-container bg-white border border-slate-200 shadow-2xl rounded-3xl p-5 md:p-6 max-w-2xl w-full relative overflow-hidden flex flex-col animate-modalSlideUp" onClick={(e) => e.stopPropagation()}>
+              
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-black text-slate-800">
+                      {selectedTicket.subject.startsWith('[CHAT]') ? '💬 Live Support Chat' : '🎫 Support Helpdesk'}
+                    </h3>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
+                      selectedTicket.status === 'OPEN'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                        : 'bg-slate-100 border-slate-200 text-slate-500'
+                    }`}>
+                      {selectedTicket.status}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-wider">
+                    Created: {new Date(selectedTicket.created_at).toLocaleString()}
+                  </p>
+                </div>
+                <button className="text-slate-400 hover:text-slate-600 transition" onClick={() => setSelectedTicket(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Content Panel */}
+              <div className="overflow-y-auto max-h-[50vh] pr-1 mb-4 text-left font-semibold text-xs text-slate-600">
+                {selectedTicket.subject.startsWith('[CHAT]') ? (
+                  // Conversational bubbles view
+                  <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 min-h-[180px] max-h-[300px] overflow-y-auto flex flex-col">
+                    {selectedTicket.description.split('\n').filter(line => line.includes(' [') && line.includes(']: ')).map((line, idx) => {
+                      const match = line.match(/^(User|Support|Bot)\s+\[([^\]]+)\]:\s+(.*)$/);
+                      if (match) {
+                        const sender = match[1].toLowerCase();
+                        const time = match[2];
+                        const text = match[3];
+                        const isSupport = sender === 'support';
+                        return (
+                          <div key={idx} className={`flex ${isSupport ? 'justify-end' : 'justify-start'} w-full`}>
+                            <div className={`p-2.5 rounded-xl text-[11px] leading-relaxed max-w-[80%] ${
+                              isSupport ? 'bg-[#4E2BC4] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
+                            }`}>
+                              <div className="text-[8px] opacity-75 font-bold mb-0.5">{match[1]} • {time}</div>
+                              {text}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return <div key={idx} className="text-center text-[10px] text-slate-400">{line}</div>;
+                    })}
+                  </div>
+                ) : (
+                  // Regular email/ticket description
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 whitespace-pre-wrap leading-relaxed text-slate-700">
+                    {selectedTicket.description}
+                  </div>
+                )}
+
+                {/* Reply Form */}
+                {selectedTicket.status === 'OPEN' && (
+                  <div className="mt-4 space-y-2">
+                    <label className="text-[10px] uppercase text-slate-400 font-bold block">
+                      {selectedTicket.subject.startsWith('[CHAT]') ? 'Type Live Chat Reply' : 'Type Ticket Email Reply'}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder={selectedTicket.subject.startsWith('[CHAT]') ? "Type message..." : "Type reply details..."}
+                        value={replyMessage}
+                        onChange={(e) => setReplyMessage(e.target.value)}
+                        className="flex-1 border border-slate-200 focus:border-[#4E2BC4] rounded-xl px-3.5 py-2.5 text-xs outline-none bg-white"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleReplyTicket(selectedTicket.id, 'OPEN');
+                          }
+                        }}
+                      />
+                      <button
+                        disabled={replying}
+                        onClick={() => handleReplyTicket(selectedTicket.id, 'OPEN')}
+                        className="px-4 py-2.5 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-xl text-xs font-bold transition shadow-sm"
+                      >
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex justify-between items-center border-t border-slate-150 pt-4">
+                {selectedTicket.status === 'OPEN' ? (
+                  <button
+                    disabled={replying}
+                    onClick={() => handleReplyTicket(selectedTicket.id, 'CLOSED')}
+                    className="px-4 py-2 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Close Help Ticket
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-slate-400 uppercase font-bold">🔒 Session Completed</span>
+                )}
+                <button
+                  onClick={() => setSelectedTicket(null)}
+                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  Close Window
+                </button>
+              </div>
+
+            </div>
           </div>
         )}
 

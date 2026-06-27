@@ -20,6 +20,7 @@ import {
   Headphones
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { api } from '../utils/api';
 import { ROUTES } from '../utils/constants';
 import './SupportPage.css';
 
@@ -83,6 +84,8 @@ export default function SupportPage() {
 
   // Chat Widget State
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatSessionId, setChatSessionId] = useState(null);
+  const [chatUserForm, setChatUserForm] = useState({ name: '', email: '' });
   const [chatMessages, setChatMessages] = useState([
     { id: 1, sender: 'bot', text: 'Hello! I am Pairley Bot. 🤖 How can I assist you with your co-buying matches today?', time: '12:00 PM' }
   ]);
@@ -122,47 +125,110 @@ export default function SupportPage() {
       return;
     }
 
-    const tktRef = `TKT-${Math.random().toString(16).substring(2, 6).toUpperCase()}`;
-    showToast(`Support ticket submitted! Reference: ${tktRef}`, 'success');
-    setTicketForm({ name: '', email: '', orderId: '', category: 'matching', description: '' });
+    api.post('/support/public-ticket', ticketForm)
+      .then((res) => {
+        showToast(`Support ticket submitted! Reference: ${res.ref}`, 'success');
+        setTicketForm({ name: '', email: '', orderId: '', category: 'matching', description: '' });
+      })
+      .catch((err) => {
+        console.error('Failed to submit ticket:', err);
+        showToast('Failed to submit support ticket. Please try again.', 'error');
+      });
   };
 
-  // Chat Widget message send
+  // Open Chat and Auto-initialize if logged in
+  const handleOpenChat = () => {
+    setIsChatOpen(true);
+    const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+    if (currentUser && !chatSessionId) {
+      api.post('/support/chat-session', { name: currentUser.name || 'User', email: currentUser.email || '' })
+        .then((res) => {
+          setChatSessionId(res.ticketId);
+        })
+        .catch((err) => console.error('Failed to auto-init chat:', err));
+    }
+  };
+
+  // Submit start chat form for guest users
+  const handleStartChatSubmit = (e) => {
+    e.preventDefault();
+    if (!chatUserForm.name.trim() || !chatUserForm.email.trim()) {
+      showToast('Please enter both your name and email to start.', 'error');
+      return;
+    }
+    api.post('/support/chat-session', chatUserForm)
+      .then((res) => {
+        setChatSessionId(res.ticketId);
+      })
+      .catch((err) => {
+        console.error('Failed to start guest chat:', err);
+        showToast('Error starting chat session.', 'error');
+      });
+  };
+
+  // Send a message to active session
   const handleSendChatMessage = (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || !chatSessionId) return;
 
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const userMsg = {
       id: chatMessages.length + 1,
       sender: 'user',
       text: chatInput.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: timeStr
     };
 
     setChatMessages(prev => [...prev, userMsg]);
+    const textToSend = chatInput.trim();
     setChatInput('');
 
-    // Trigger Bot Automated Response
-    setIsBotTyping(true);
-    setTimeout(() => {
-      setIsBotTyping(false);
-      const botReplies = [
-        "Thanks for letting me know! A support agent is currently being assigned to review your match details.",
-        "Got it! For card pre-authorization holds, funds are captured only when matched. If the pool expires, the hold is released immediately.",
-        "To check active matching timers, please visit your Orders list in the Customer Dashboard.",
-        "You can read our full legal terms under the Refunds & Matching Policy page."
-      ];
-      const botResponse = botReplies[Math.floor(Math.random() * botReplies.length)];
-
-      const botMsg = {
-        id: chatMessages.length + 2,
-        sender: 'bot',
-        text: botResponse,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setChatMessages(prev => [...prev, botMsg]);
-    }, 1500);
+    api.post('/support/chat-send', { ticketId: chatSessionId, sender: 'user', text: textToSend })
+      .catch((err) => console.error('Failed to send chat message:', err));
   };
+
+  // Poll chat messages from server
+  useEffect(() => {
+    if (!chatSessionId) return;
+
+    const parseChatMessages = (description) => {
+      const lines = description.split('\n');
+      const parsed = [];
+      let isMsg = false;
+      let msgId = 1;
+      lines.forEach((line) => {
+        if (line.startsWith('[Messages]')) {
+          isMsg = true;
+          return;
+        }
+        if (isMsg && line.trim()) {
+          const match = line.match(/^(User|Support|Bot)\s+\[([^\]]+)\]:\s+(.*)$/);
+          if (match) {
+            parsed.push({
+              id: msgId++,
+              sender: match[1].toLowerCase(),
+              time: match[2],
+              text: match[3]
+            });
+          }
+        }
+      });
+      return parsed;
+    };
+
+    const interval = setInterval(() => {
+      api.get(`/support/ticket/${chatSessionId}`)
+        .then((res) => {
+          const messages = parseChatMessages(res.description);
+          if (messages.length > 0) {
+            setChatMessages(messages);
+          }
+        })
+        .catch((err) => console.error('Failed to poll chat messages:', err));
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [chatSessionId]);
 
   return (
     <div className="support-page page-wrapper py-8 text-left relative">
@@ -193,7 +259,7 @@ export default function SupportPage() {
 
           <div className="flex gap-2">
             <button 
-              onClick={() => setIsChatOpen(true)}
+              onClick={handleOpenChat}
               className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
             >
               <MessageSquare size={14} /> Live Support Chat
@@ -378,56 +444,94 @@ export default function SupportPage() {
                 </button>
               </div>
 
-              {/* Messages feed */}
-              <div className="flex-1 overflow-y-auto p-4 bg-slate-50 flex flex-col gap-3">
-                {chatMessages.map(msg => {
-                  const isUser = msg.sender === 'user';
-                  return (
-                    <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`p-2.5 rounded-xl text-[11px] font-semibold leading-relaxed max-w-[80%] ${
-                        isUser ? 'bg-[#4E2BC4] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
-                      }`}>
-                        {msg.text}
+              {/* Messages feed or Registration form */}
+              {chatSessionId ? (
+                <div className="flex-1 overflow-y-auto p-4 bg-slate-50 flex flex-col gap-3">
+                  {chatMessages.map(msg => {
+                    const isUser = msg.sender === 'user';
+                    return (
+                      <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`p-2.5 rounded-xl text-[11px] font-semibold leading-relaxed max-w-[80%] ${
+                          isUser ? 'bg-[#4E2BC4] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
+                        }`}>
+                          {msg.text}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {isBotTyping && (
+                    <div className="flex justify-start">
+                      <div className="p-2.5 bg-white border border-slate-200 rounded-xl rounded-tl-none flex gap-1 items-center">
+                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                       </div>
                     </div>
-                  );
-                })}
-
-                {isBotTyping && (
-                  <div className="flex justify-start">
-                    <div className="p-2.5 bg-white border border-slate-200 rounded-xl rounded-tl-none flex gap-1 items-center">
-                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  )}
+                  
+                  <div ref={chatEndRef} />
+                </div>
+              ) : (
+                <div className="flex-1 p-4 bg-slate-50 flex flex-col justify-center text-xs font-semibold text-left">
+                  <form onSubmit={handleStartChatSubmit} className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <h5 className="font-bold text-[#4E2BC4] text-center text-[13px] mb-1">Start Live Support Chat</h5>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-slate-500 text-[10px] uppercase">Your Name</label>
+                      <input 
+                        type="text"
+                        placeholder="Name"
+                        value={chatUserForm.name}
+                        onChange={(e) => setChatUserForm(prev => ({ ...prev, name: e.target.value }))}
+                        className="border border-slate-200 focus:border-[#4E2BC4] rounded-lg p-2 outline-none text-xs"
+                        required
+                      />
                     </div>
-                  </div>
-                )}
-                
-                <div ref={chatEndRef} />
-              </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-slate-500 text-[10px] uppercase">Email Address</label>
+                      <input 
+                        type="email"
+                        placeholder="your@email.com"
+                        value={chatUserForm.email}
+                        onChange={(e) => setChatUserForm(prev => ({ ...prev, email: e.target.value }))}
+                        className="border border-slate-200 focus:border-[#4E2BC4] rounded-lg p-2 outline-none text-xs"
+                        required
+                      />
+                    </div>
+                    <button 
+                      type="submit"
+                      className="w-full bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white py-2 rounded-lg text-xs font-bold text-center mt-2 shadow-sm transition"
+                    >
+                      Start Conversation
+                    </button>
+                  </form>
+                </div>
+              )}
 
               {/* Input Footer */}
-              <form onSubmit={handleSendChatMessage} className="border-t border-slate-100 p-3 bg-white flex gap-2">
-                <input 
-                  type="text" 
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Ask a support question..." 
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-[11px] outline-none focus:border-[#4E2BC4]"
-                />
-                <button 
-                  type="submit"
-                  className="w-8 h-8 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-xl flex items-center justify-center transition"
-                >
-                  <Send size={12} />
-                </button>
-              </form>
+              {chatSessionId && (
+                <form onSubmit={handleSendChatMessage} className="border-t border-slate-100 p-3 bg-white flex gap-2">
+                  <input 
+                    type="text" 
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask a support question..." 
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-[11px] outline-none focus:border-[#4E2BC4]"
+                  />
+                  <button 
+                    type="submit"
+                    className="w-8 h-8 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-xl flex items-center justify-center transition"
+                  >
+                    <Send size={12} />
+                  </button>
+                </form>
+              )}
 
             </motion.div>
           ) : (
             /* Support widget bubble button */
             <motion.button
-              onClick={() => setIsChatOpen(true)}
+              onClick={handleOpenChat}
               className="w-12 h-12 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/20 transition hover:scale-105"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
