@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X, LogIn, UserPlus, ShoppingBag, Tag } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, Menu, X, LogIn, UserPlus, ShoppingBag, Tag, Bell } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROUTES } from '../utils/constants';
+import { api } from '../utils/api';
 import './Navbar.css';
 
 const NAV_LINKS = [
@@ -38,8 +39,97 @@ const itemVariants = {
 
 export default function Navbar({ onSearchClick }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const notifRef = useRef(null);
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+
+  const fetchNotifications = async () => {
+    const tokenVal = localStorage.getItem('pairley_token');
+    const userVal = localStorage.getItem('pairley_user');
+    if (!tokenVal || !userVal) return;
+    try {
+      const data = await api.get('/notifications', tokenVal);
+      setNotifications(data);
+      setUnreadCount(data.filter(n => !n.is_read).length);
+    } catch (err) {
+      console.warn('Failed to fetch notifications:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000); // Poll every 10 seconds
+    return () => clearInterval(interval);
+  }, [authToken, authUser]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleMarkAllAsRead = async () => {
+    const tokenVal = localStorage.getItem('pairley_token');
+    try {
+      await api.put('/notifications/read', {}, tokenVal);
+      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.warn('Failed to mark all as read:', err);
+    }
+  };
+
+  const handleNotificationClick = async (n) => {
+    const tokenVal = localStorage.getItem('pairley_token');
+    try {
+      await api.put('/notifications/read', { id: n.id }, tokenVal);
+      setNotifications(notifications.map(item => item.id === n.id ? { ...item, is_read: true } : item));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+      setShowNotifDropdown(false);
+      
+      // Redirect based on type
+      if (n.notification_type === 'NEW_DEAL') {
+        navigate(ROUTES.DEALS);
+      } else if (n.notification_type === 'PARTNER_JOINED') {
+        if (authUser?.role?.toLowerCase() === 'business') {
+          navigate(ROUTES.BUSINESS_DASHBOARD);
+        } else {
+          navigate(ROUTES.CUSTOMER_ORDERS);
+        }
+      } else if (n.notification_type === 'MERCHANT_ONBOARDING') {
+        navigate('/admin/dashboard');
+      } else if (n.notification_type === 'ONBOARDING_STATUS') {
+        navigate(ROUTES.BUSINESS_DASHBOARD);
+      }
+    } catch (err) {
+      console.warn('Failed to click notification:', err);
+    }
+  };
+
+  const formatRelativeTime = (dateStr) => {
+    try {
+      const diffMs = new Date() - new Date(dateStr);
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays}d ago`;
+    } catch {
+      return '';
+    }
+  };
 
   // Reactive auth state — re-read on every route change so Login/Signup
   // buttons disappear immediately after login without a full page reload.
@@ -130,6 +220,64 @@ export default function Navbar({ onSearchClick }) {
 
             {token && user ? (
               <>
+                {/* ── Notifications Dropdown ── */}
+                <div className="navbar__notification-container" ref={notifRef}>
+                  <button
+                    className={`navbar__notification-bell ${showNotifDropdown ? 'navbar__notification-bell--active' : ''}`}
+                    onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+                    aria-label="Notifications"
+                  >
+                    <Bell size={19} />
+                    {unreadCount > 0 && (
+                      <span className="navbar__notification-badge">{unreadCount}</span>
+                    )}
+                  </button>
+
+                  <AnimatePresence>
+                    {showNotifDropdown && (
+                      <motion.div
+                        className="navbar__notif-dropdown"
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <div className="navbar__notif-header">
+                          <h3>Notifications</h3>
+                          {unreadCount > 0 && (
+                            <button onClick={handleMarkAllAsRead}>Mark all read</button>
+                          )}
+                        </div>
+
+                        <div className="navbar__notif-list">
+                          {notifications.length === 0 ? (
+                            <div className="navbar__notif-empty">No notifications yet</div>
+                          ) : (
+                            notifications.map((n) => (
+                              <div
+                                key={n.id}
+                                className={`navbar__notif-item ${!n.is_read ? 'navbar__notif-item--unread' : ''}`}
+                                onClick={() => handleNotificationClick(n)}
+                              >
+                                <div className="navbar__notif-icon">
+                                  {n.notification_type === 'NEW_DEAL' ? '⚡' :
+                                   n.notification_type === 'PARTNER_JOINED' ? '🤝' :
+                                   n.notification_type === 'MERCHANT_ONBOARDING' ? '🏪' : '💡'}
+                                </div>
+                                <div className="navbar__notif-content">
+                                  <h4>{n.title}</h4>
+                                  <p>{n.message}</p>
+                                  <span>{formatRelativeTime(n.created_at)}</span>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
                 <Link
                   to={
                     user.role?.toLowerCase() === 'admin'

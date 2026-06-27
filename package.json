@@ -11,6 +11,8 @@
     "gen:favicons": "node generate-favicons.mjs"
   },
   "dependencies": {
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/push-notifications": "^8.1.1",
     "firebase": "^12.14.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.20.0",

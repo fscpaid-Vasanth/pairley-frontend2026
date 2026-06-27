@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
 import { AnimatePresence } from 'framer-motion';
 import { getGoogleRedirectResult } from './firebase';
 import { api } from './utils/api';
@@ -131,6 +133,85 @@ function AppContent() {
       .catch((err) => console.error('Redirect result error:', err));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Handle native push notifications registration
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const setupPush = async () => {
+      try {
+        let permStatus = await PushNotifications.checkPermissions();
+        
+        if (permStatus.receive === 'prompt') {
+          permStatus = await PushNotifications.requestPermissions();
+        }
+
+        if (permStatus.receive !== 'granted') {
+          console.warn('User denied push notification permissions.');
+          return;
+        }
+
+        await PushNotifications.register();
+
+        // On success, save token and register on backend if logged in
+        await PushNotifications.addListener('registration', async (token) => {
+          console.log('Push registration success, token:', token.value);
+          localStorage.setItem('pairley_push_token', token.value);
+          
+          const activeToken = localStorage.getItem('pairley_token');
+          if (activeToken) {
+            try {
+              await api.post('/notifications/register-token', {
+                token: token.value,
+                platform: Capacitor.getPlatform()
+              }, activeToken);
+              console.log('Successfully registered push token with backend');
+            } catch (err) {
+              console.error('Failed to register push token with backend:', err);
+            }
+          }
+        });
+
+        await PushNotifications.addListener('registrationError', (error) => {
+          console.error('Error on push registration:', error);
+        });
+
+        await PushNotifications.addListener('pushNotificationReceived', (notification) => {
+          console.log('Push notification received:', notification);
+          window.dispatchEvent(new CustomEvent('pairley-notification-received', { detail: notification }));
+        });
+
+        await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+          console.log('Push notification action performed:', action);
+        });
+      } catch (err) {
+        console.error('Push notifications setup error:', err);
+      }
+    };
+
+    setupPush();
+    
+    return () => {
+      try {
+        PushNotifications.removeAllListeners();
+      } catch (err) {}
+    };
+  }, []);
+
+  // Register push token whenever user sessions are updated/initialized
+  useEffect(() => {
+    const activeToken = localStorage.getItem('pairley_token');
+    const pushToken = localStorage.getItem('pairley_push_token');
+    
+    if (activeToken && pushToken && Capacitor.isNativePlatform()) {
+      api.post('/notifications/register-token', {
+        token: pushToken,
+        platform: Capacitor.getPlatform()
+      }, activeToken)
+        .then(() => console.log('Associated push token with logged-in user'))
+        .catch(err => console.error('Failed to associate push token:', err));
+    }
+  }, [location.pathname]);
 
   return (
     <div className="app-root flex flex-col min-h-screen">
