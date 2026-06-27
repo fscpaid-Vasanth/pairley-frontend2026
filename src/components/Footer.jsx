@@ -127,7 +127,7 @@ export default function Footer() {
             <Link to={ROUTES.SUPPORT} className="footer__legal-link">Help & Support</Link>
             <Link to={ROUTES.REFUND_POLICY} className="footer__legal-link">Refund Policy</Link>
             <Link to="/terms" className="footer__legal-link">Terms of Service</Link>
-            <Link to="/privacy" className="footer__legal-link">Privacy Policy</Link>
+            <Link to={ROUTES.PRIVACY_POLICY} className="footer__legal-link">Privacy Policy</Link>
             <Link to={ROUTES.ADMIN_DASHBOARD} className="footer__legal-link">Admin Portal</Link>
           </div>
         </div>

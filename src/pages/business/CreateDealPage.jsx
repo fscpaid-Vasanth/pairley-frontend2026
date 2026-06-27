@@ -351,8 +351,7 @@ export default function CreateDealPage() {
       })
       .catch((err) => {
         console.error('Failed to publish live deal:', err);
-        showToast('Live publish failed. Registered locally (Demo Mode)', 'info');
-        navigate('/business/dashboard');
+        showToast(err.message || 'Failed to publish deal. Please check your connection and try again.', 'error');
       });
   };
 

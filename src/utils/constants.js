@@ -7,6 +7,7 @@ export const ROUTES = {
   ABOUT: '/about',
   SUPPORT: '/support',
   REFUND_POLICY: '/refund-policy',
+  PRIVACY_POLICY: '/privacy-policy',
 
   // Cart & Checkout
   CART: '/cart',

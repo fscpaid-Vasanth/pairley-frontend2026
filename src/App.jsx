@@ -18,6 +18,7 @@ import HowItWorksPage from './pages/HowItWorksPage';
 import AboutPage from './pages/AboutPage';
 import SupportPage from './pages/SupportPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 // Auth Pages
 import SignUpPage from './pages/auth/SignUpPage';
@@ -190,6 +191,14 @@ function AppContent() {
             element={
               <AppLayout>
                 <RefundPolicyPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path={ROUTES.PRIVACY_POLICY}
+            element={
+              <AppLayout>
+                <PrivacyPolicyPage />
               </AppLayout>
             }
           />
