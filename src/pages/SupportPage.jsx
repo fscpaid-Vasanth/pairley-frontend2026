@@ -51,12 +51,6 @@ const MOCK_FAQS = [
     answer: 'If a BOGO match fails to align or the merchant removes the listing, your interest registration is simply cancelled. There are no charges or payment releases required.'
   },
   {
-    id: 5,
-    category: 'shipping',
-    question: 'Who pays for BOGO split shipping charges?',
-    answer: 'Pairley matches include standard shipping free of charge. Merchants package and dispatch bulk BOGO bundles directly to the designated target split addresses, or prepare them for store pickups.'
-  },
-  {
     id: 6,
     category: 'merchant',
     question: 'How do I list my shop deals on Pairley?',
