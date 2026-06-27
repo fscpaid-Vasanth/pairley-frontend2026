@@ -183,14 +183,36 @@ export default function HomePage() {
               {categories.slice(0, 9).map((cat) => (
                 <Link to={`${ROUTES.DEALS}?category=${cat.id}`} className="categories-horizontal-item" key={cat.id}>
                   <span className="categories-horizontal-icon">
-                    <img src={cat.imageUrl} alt={cat.name} className="categories-horizontal-icon-img" />
+                    <img 
+                      src={cat.imageUrl} 
+                      alt={cat.name} 
+                      className="categories-horizontal-icon-img" 
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                    <span className="categories-horizontal-emoji-fallback" style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '18px' }}>
+                      {cat.icon}
+                    </span>
                   </span>
                   <span className="categories-horizontal-label">{getShortLabel(cat)}</span>
                 </Link>
               ))}
               <Link to={ROUTES.DEALS} className="categories-horizontal-item">
                 <span className="categories-horizontal-icon">
-                  <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=80&auto=format&fit=crop&q=60" alt="More" className="categories-horizontal-icon-img" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=80&auto=format&fit=crop&q=60" 
+                    alt="More" 
+                    className="categories-horizontal-icon-img" 
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                  <span className="categories-horizontal-emoji-fallback" style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '18px' }}>
+                    ✨
+                  </span>
                 </span>
                 <span className="categories-horizontal-label">More</span>
               </Link>

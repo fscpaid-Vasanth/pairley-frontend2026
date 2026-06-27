@@ -863,3 +863,50 @@
   color: #EF4444;
 }
 
+/* ── Desktop full screen without scroll ── */
+@media (min-width: 1025px) {
+  .login-root {
+    height: 100vh;
+    overflow: hidden;
+  }
+  .login-main {
+    padding: 1.5vh 64px;
+    justify-content: center;
+  }
+  .login-split {
+    margin: 1vh 0;
+    gap: 40px;
+    align-items: center;
+  }
+  .login-left {
+    gap: 2vh;
+  }
+  .login-left-title {
+    font-size: 32px;
+  }
+  .login-benefits {
+    gap: 1.5vh;
+  }
+  .login-benefit-icon-wrap {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  .login-card {
+    padding: 24px 32px;
+  }
+  .login-role-tabs {
+    margin-bottom: 16px;
+  }
+  .login-form-group {
+    margin-bottom: 12px;
+  }
+  .login-btn {
+    margin-top: 16px;
+  }
+  .login-footer {
+    padding: 12px 64px;
+  }
+}
+
+

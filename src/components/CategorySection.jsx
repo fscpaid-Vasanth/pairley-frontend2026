@@ -45,7 +45,18 @@ export default function CategorySection({ selectedCategory, onSelect, onSelectCa
             style={{ '--cat-color': 'var(--primary)' }}
           >
             <div className="category-card__icon-circle">
-              <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=80&auto=format&fit=crop&q=60" alt="All Deals" className="category-card__image-icon" />
+              <img 
+                src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=80&auto=format&fit=crop&q=60" 
+                alt="All Deals" 
+                className="category-card__image-icon" 
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <span className="category-card__emoji-fallback" style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '20px' }}>
+                🏷️
+              </span>
             </div>
             <span className="category-card__name">All Deals</span>
           </motion.div>
@@ -59,7 +70,18 @@ export default function CategorySection({ selectedCategory, onSelect, onSelectCa
               style={{ '--cat-color': cat.color }}
             >
               <div className="category-card__icon-circle">
-                <img src={cat.imageUrl} alt={cat.name} className="category-card__image-icon" />
+                <img 
+                  src={cat.imageUrl} 
+                  alt={cat.name} 
+                  className="category-card__image-icon" 
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <span className="category-card__emoji-fallback" style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', fontSize: '20px' }}>
+                  {cat.icon}
+                </span>
               </div>
               <span className="category-card__name">{cat.name}</span>
             </motion.div>

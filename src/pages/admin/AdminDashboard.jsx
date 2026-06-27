@@ -27,6 +27,12 @@ import { api } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
 import './AdminDashboard.css';
 
+const isValidImageSrc = (src) => {
+  if (!src) return false;
+  const lower = src.toLowerCase();
+  return lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('data:image/');
+};
+
 export default function AdminDashboard() {
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -93,7 +99,11 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchMetrics();
+    const user = JSON.parse(localStorage.getItem('pairley_user') || 'null');
+    const token = localStorage.getItem('pairley_token');
+    if (token && user?.role?.toLowerCase() === 'admin') {
+      fetchMetrics();
+    }
   }, []);
 
   // Tab change handler
@@ -760,16 +770,16 @@ export default function AdminDashboard() {
 
                   {/* Preview box */}
                   <div className="flex-1 rounded-2xl border border-slate-100 overflow-hidden bg-slate-50 flex items-center justify-center min-h-[220px] max-h-[300px] relative">
-                    {activeDocPreview === 'shop' && selectedShop.shop_photo ? (
+                    {activeDocPreview === 'shop' && isValidImageSrc(selectedShop.shop_photo) ? (
                       <img src={selectedShop.shop_photo} alt="Shop" className="w-full h-full object-contain" />
-                    ) : activeDocPreview === 'aadhaar' && selectedShop.aadhaar_photo ? (
+                    ) : activeDocPreview === 'aadhaar' && isValidImageSrc(selectedShop.aadhaar_photo) ? (
                       <img src={selectedShop.aadhaar_photo} alt="Aadhaar" className="w-full h-full object-contain" />
-                    ) : activeDocPreview === 'pan' && selectedShop.pan_photo ? (
+                    ) : activeDocPreview === 'pan' && isValidImageSrc(selectedShop.pan_photo) ? (
                       <img src={selectedShop.pan_photo} alt="PAN Card" className="w-full h-full object-contain" />
                     ) : (
                       <div className="text-center p-4">
-                        <span className="text-slate-400 font-bold text-xs block mb-1">No Document Image Selected</span>
-                        <span className="text-[10px] text-slate-300">Click a valid tab button above to preview</span>
+                        <span className="text-slate-400 font-bold text-xs block mb-1">Document Image Pending</span>
+                        <span className="text-[10px] text-slate-300">This document has not been uploaded yet or is pending verification.</span>
                       </div>
                     )}
                   </div>

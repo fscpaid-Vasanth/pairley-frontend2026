@@ -784,7 +784,7 @@ const DealDetailPage = () => {
                     )}
                   </div>
                   <span className="deal-interested-text">
-                    <strong>{deal.interestCount}</strong> people interested
+                    <strong>{deal.interestCount}/{deal.maxParticipants} Joined</strong>
                   </span>
                 </div>
               )}

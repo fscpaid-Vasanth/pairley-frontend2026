@@ -805,3 +805,51 @@
   color: #EF4444;
 }
 
+/* ── Desktop full screen without scroll ── */
+@media (min-width: 1025px) {
+  .signup-root {
+    height: 100vh;
+    overflow: hidden;
+  }
+  .signup-main {
+    padding: 1.5vh 64px;
+    justify-content: center;
+  }
+  .signup-split {
+    margin: 1vh 0;
+    gap: 40px;
+    align-items: center;
+  }
+  .signup-left {
+    gap: 2vh;
+    padding-top: 0;
+  }
+  .signup-left-title {
+    font-size: 32px;
+  }
+  .signup-benefits {
+    gap: 1.5vh;
+  }
+  .signup-benefit-icon-wrap {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  .signup-card {
+    padding: 24px 32px;
+  }
+  .signup-role-tabs {
+    margin-bottom: 16px;
+  }
+  .signup-form-group {
+    margin-bottom: 12px;
+  }
+  .signup-btn {
+    margin-top: 16px;
+  }
+  .signup-footer {
+    padding: 12px 64px;
+  }
+}
+
+
