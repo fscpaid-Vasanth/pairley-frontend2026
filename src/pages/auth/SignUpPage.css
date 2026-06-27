@@ -836,16 +836,47 @@
     font-size: 18px;
   }
   .signup-card {
-    padding: 24px 32px;
+    padding: 20px 28px;
   }
   .signup-role-tabs {
-    margin-bottom: 16px;
-  }
-  .signup-form-group {
     margin-bottom: 12px;
   }
-  .signup-btn {
-    margin-top: 16px;
+  .signup-card-subtitle {
+    margin-bottom: 12px;
+  }
+
+  /* 2-column form grid */
+  .signup-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 8px;
+  }
+  .su-field {
+    margin-bottom: 0;
+  }
+  .su-password-row {
+    grid-column: span 2;
+  }
+  .su-terms-wrap {
+    grid-column: span 2;
+    margin: 4px 0 0 0;
+  }
+  .su-submit-btn {
+    grid-column: span 2;
+    margin-top: 4px;
+    padding: 10px !important;
+  }
+  .su-divider {
+    grid-column: span 2;
+    margin: 8px 0;
+  }
+  .su-social-row {
+    grid-column: span 2;
+    margin-bottom: 8px;
+  }
+  .su-login-link {
+    grid-column: span 2;
   }
   .signup-footer {
     padding: 12px 64px;
