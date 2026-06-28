@@ -6,6 +6,7 @@ if (!baseUrl.endsWith('/api')) {
   baseUrl = `${baseUrl}/api`;
 }
 const API_URL = baseUrl;
+export { API_URL };
 
 
 const getHeaders = (token) => {

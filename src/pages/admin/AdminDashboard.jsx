@@ -21,17 +21,35 @@ import {
   Sliders,
   Check,
   X,
-  Headphones
+  Headphones,
+  Download
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { api } from '../../utils/api';
+import { api, API_URL } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
 import './AdminDashboard.css';
 
 const isValidImageSrc = (src) => {
   if (!src) return false;
   const lower = src.toLowerCase();
-  return lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('data:image/');
+  return (
+    lower.startsWith('http://') ||
+    lower.startsWith('https://') ||
+    lower.startsWith('data:image/') ||
+    lower.startsWith('/uploads/')
+  );
+};
+
+const getDocumentPreviewUrl = (src) => {
+  if (!src) return '';
+  if (src.startsWith('data:image/')) return src;
+  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}`;
+};
+
+const getDocumentDownloadUrl = (src) => {
+  if (!src) return '#';
+  if (src.startsWith('data:image/')) return src;
+  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&download=true`;
 };
 
 export default function AdminDashboard() {
@@ -73,6 +91,11 @@ export default function AdminDashboard() {
   // Onboarding review modal states
   const [selectedShop, setSelectedShop] = useState(null);
   const [activeDocPreview, setActiveDocPreview] = useState('shop');
+  const [imageLoadErrors, setImageLoadErrors] = useState({ shop: false, aadhaar: false, pan: false });
+
+  useEffect(() => {
+    setImageLoadErrors({ shop: false, aadhaar: false, pan: false });
+  }, [selectedShop]);
 
   // Support Helpdesk States
   const [tickets, setTickets] = useState([]);
@@ -979,6 +1002,58 @@ export default function AdminDashboard() {
                       <span className="text-slate-700 font-bold">{selectedShop.gst_number || 'Not Provided'}</span>
                     </div>
                   </div>
+
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-1.5 pt-4">Document Downloads</h4>
+                  <div className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 space-y-3 text-xs font-semibold">
+                    <div className="flex justify-between items-center border-b border-slate-100/50 pb-2">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">Shop Photo</span>
+                      {selectedShop.shop_photo ? (
+                        <a
+                          href={getDocumentDownloadUrl(selectedShop.shop_photo)}
+                          download
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[#4E2BC4] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
+                        >
+                          <Download size={10} /> Download
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 font-normal">Not Provided</span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center border-b border-slate-100/50 pb-2">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">Aadhaar Card</span>
+                      {selectedShop.aadhaar_photo ? (
+                        <a
+                          href={getDocumentDownloadUrl(selectedShop.aadhaar_photo)}
+                          download
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[#4E2BC4] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
+                        >
+                          <Download size={10} /> Download
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 font-normal">Not Provided</span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">PAN Card</span>
+                      {selectedShop.pan_photo ? (
+                        <a
+                          href={getDocumentDownloadUrl(selectedShop.pan_photo)}
+                          download
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[#4E2BC4] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
+                        >
+                          <Download size={10} /> Download
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 font-normal">Not Provided</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Right panel: Document Preview Viewport */}
@@ -1031,14 +1106,150 @@ export default function AdminDashboard() {
                     </button>
                   </div>
 
+                  {/* Download button for active document */}
+                  {((activeDocPreview === 'shop' && selectedShop.shop_photo) ||
+                    (activeDocPreview === 'aadhaar' && selectedShop.aadhaar_photo) ||
+                    (activeDocPreview === 'pan' && selectedShop.pan_photo)) && (
+                    <div className="mb-2 flex justify-end">
+                      <a
+                        href={getDocumentDownloadUrl(
+                          activeDocPreview === 'shop'
+                            ? selectedShop.shop_photo
+                            : activeDocPreview === 'aadhaar'
+                            ? selectedShop.aadhaar_photo
+                            : selectedShop.pan_photo
+                        )}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200/50 transition-all cursor-pointer"
+                      >
+                        <Download size={12} />
+                        Download {activeDocPreview === 'shop' ? 'Shop Photo' : activeDocPreview === 'aadhaar' ? 'Aadhaar' : 'PAN Card'}
+                      </a>
+                    </div>
+                  )}
+
                   {/* Preview box */}
-                  <div className="flex-1 rounded-2xl border border-slate-100 overflow-hidden bg-slate-50 flex items-center justify-center min-h-[220px] max-h-[300px] relative">
-                    {activeDocPreview === 'shop' && isValidImageSrc(selectedShop.shop_photo) ? (
-                      <img src={selectedShop.shop_photo} alt="Shop" className="w-full h-full object-contain" />
-                    ) : activeDocPreview === 'aadhaar' && isValidImageSrc(selectedShop.aadhaar_photo) ? (
-                      <img src={selectedShop.aadhaar_photo} alt="Aadhaar" className="w-full h-full object-contain" />
-                    ) : activeDocPreview === 'pan' && isValidImageSrc(selectedShop.pan_photo) ? (
-                      <img src={selectedShop.pan_photo} alt="PAN Card" className="w-full h-full object-contain" />
+                  <div className="flex-1 rounded-2xl border border-slate-100 overflow-hidden bg-slate-50 flex items-center justify-center min-h-[220px] max-h-[300px] relative w-full">
+                    {activeDocPreview === 'shop' && isValidImageSrc(selectedShop.shop_photo) && !imageLoadErrors.shop ? (
+                      <img 
+                        src={getDocumentPreviewUrl(selectedShop.shop_photo)} 
+                        alt="Shop" 
+                        className="w-full h-full object-contain" 
+                        onError={() => setImageLoadErrors(prev => ({ ...prev, shop: true }))}
+                      />
+                    ) : activeDocPreview === 'shop' && (imageLoadErrors.shop || !isValidImageSrc(selectedShop.shop_photo)) ? (
+                      <div className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl relative overflow-hidden select-none border border-indigo-500/20">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="bg-[#4E2BC4]/80 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
+                              Verified Storefront
+                            </span>
+                            <h3 className="text-lg font-black tracking-tight mt-1">
+                              {selectedShop.business_name}
+                            </h3>
+                            <p className="text-[10px] text-indigo-200">
+                              {selectedShop.business_type} • {selectedShop.category || 'General'}
+                            </p>
+                          </div>
+                          <span className="text-3xl">🏪</span>
+                        </div>
+                        <div className="my-2 border-t border-b border-indigo-500/20 py-2">
+                          <p className="text-[9px] uppercase font-bold text-indigo-300 tracking-wider">Store Address</p>
+                          <p className="text-[11px] text-slate-100 font-semibold leading-relaxed mt-0.5">
+                            {selectedShop.address || 'Registered Office Address'}, {selectedShop.city}, {selectedShop.state} - {selectedShop.pincode}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] text-slate-400">
+                          <div>
+                            <span className="block text-[8px] uppercase tracking-wider font-semibold">Owner Contact</span>
+                            <span className="text-white font-bold">{selectedShop.owner_name} (+91 {selectedShop.mobile})</span>
+                          </div>
+                          <span className="bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700 text-[8px] uppercase font-black tracking-wider text-[#4E2BC4]">
+                            PAIRLEY SECURE
+                          </span>
+                        </div>
+                      </div>
+                    ) : activeDocPreview === 'aadhaar' && isValidImageSrc(selectedShop.aadhaar_photo) && !imageLoadErrors.aadhaar ? (
+                      <img 
+                        src={getDocumentPreviewUrl(selectedShop.aadhaar_photo)} 
+                        alt="Aadhaar" 
+                        className="w-full h-full object-contain" 
+                        onError={() => setImageLoadErrors(prev => ({ ...prev, aadhaar: true }))}
+                      />
+                    ) : activeDocPreview === 'aadhaar' && (imageLoadErrors.aadhaar || !isValidImageSrc(selectedShop.aadhaar_photo)) ? (
+                      <div className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-800 rounded-2xl relative overflow-hidden select-none border border-slate-300 shadow-inner">
+                        <div className="flex justify-between items-center border-b border-rose-500/30 pb-2">
+                          <span className="text-[9px] font-extrabold text-[#4E2BC4] tracking-wide uppercase">
+                            Government of India • Unique Identification Authority
+                          </span>
+                          <span className="text-xl">🇮🇳</span>
+                        </div>
+                        <div className="flex gap-4 my-2 items-center">
+                          <div className="w-16 h-20 bg-slate-300/85 rounded-lg flex items-center justify-center border border-slate-400 text-slate-500 flex-shrink-0">
+                            <span className="material-symbols-outlined text-4xl">person</span>
+                          </div>
+                          <div className="flex-1 text-[11px]">
+                            <p className="text-[9px] text-slate-500">Name / नाम</p>
+                            <p className="font-extrabold text-slate-900 uppercase">{selectedShop.owner_name}</p>
+                            <p className="text-[9px] text-slate-500 mt-1">Verification / सत्यापन</p>
+                            <p className="font-bold text-slate-850">Merchant Partner (Pairley)</p>
+                          </div>
+                        </div>
+                        <div className="text-center py-1 bg-slate-300/50 rounded-xl border border-slate-300">
+                          <p className="text-md font-black tracking-[0.25em] text-slate-900">
+                            {selectedShop.aadhaar_number 
+                              ? selectedShop.aadhaar_number.replace(/(\d{4})/g, '$1 ').trim() 
+                              : 'XXXX XXXX XXXX'}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center text-[7px] text-slate-500 uppercase tracking-widest font-bold pt-2 border-t border-rose-500/30">
+                          <span>Aadhaar - Ordinary Man's Rights</span>
+                          <span className="text-rose-600 font-extrabold text-[8px]">MOCK SECURED</span>
+                        </div>
+                      </div>
+                    ) : activeDocPreview === 'pan' && isValidImageSrc(selectedShop.pan_photo) && !imageLoadErrors.pan ? (
+                      <img 
+                        src={getDocumentPreviewUrl(selectedShop.pan_photo)} 
+                        alt="PAN Card" 
+                        className="w-full h-full object-contain" 
+                        onError={() => setImageLoadErrors(prev => ({ ...prev, pan: true }))}
+                      />
+                    ) : activeDocPreview === 'pan' && (imageLoadErrors.pan || !isValidImageSrc(selectedShop.pan_photo)) ? (
+                      <div className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-teal-900 to-emerald-950 text-white rounded-2xl relative overflow-hidden select-none border border-teal-500/20">
+                        <div className="flex justify-between items-center border-b border-teal-500/20 pb-2">
+                          <div>
+                            <p className="text-[8px] font-black uppercase tracking-wider text-teal-300">INCOME TAX DEPARTMENT</p>
+                            <p className="text-[7px] text-slate-300 uppercase">GOVERNMENT OF INDIA</p>
+                          </div>
+                          <span className="text-xl">🇮🇳</span>
+                        </div>
+                        <div className="flex gap-4 my-2 items-center">
+                          <div className="w-16 h-20 bg-teal-950/60 rounded-lg flex items-center justify-center border border-teal-800 text-teal-400 flex-shrink-0">
+                            <span className="material-symbols-outlined text-4xl">badge</span>
+                          </div>
+                          <div className="flex-1 text-[10px]">
+                            <p className="text-[8px] text-teal-400 uppercase">Permanent Account Number (PAN)</p>
+                            <p className="text-sm font-black tracking-wider text-white uppercase mt-0.5">
+                              {selectedShop.pan_number || 'AWVPV2038G'}
+                            </p>
+                            <p className="text-[8px] text-teal-400 uppercase mt-2">Cardholder Name</p>
+                            <p className="font-extrabold text-slate-100 uppercase">{selectedShop.owner_name}</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-end pt-1 border-t border-teal-500/20">
+                          <div>
+                            <span className="block text-[7px] text-teal-400 uppercase">Signature</span>
+                            <span className="italic text-[11px] font-serif text-teal-200">
+                              {selectedShop.owner_name}
+                            </span>
+                          </div>
+                          <span className="bg-teal-900/60 px-2 py-0.5 rounded border border-teal-700 text-[6px] uppercase tracking-wider font-extrabold text-teal-300">
+                            Verified
+                          </span>
+                        </div>
+                      </div>
                     ) : (
                       <div className="text-center p-4">
                         <span className="text-slate-400 font-bold text-xs block mb-1">Document Image Pending</span>

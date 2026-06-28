@@ -250,11 +250,33 @@
 }
 
 .how-works-box {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(244, 247, 255, 0.95) 100%);
-  border: 1.5px solid rgba(78, 43, 196, 0.12);
+  background: linear-gradient(135deg, #0b0f19 0%, #161e31 100%);
+  border: 1.5px solid rgba(139, 92, 246, 0.25);
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
   flex: 0 0 auto;
+}
+
+.how-works-box .how-works-title {
+  color: #f8fafc;
+}
+
+.how-works-box .how-works-view-all {
+  color: #c084fc;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.how-works-box .how-works-view-all:hover {
+  color: #e9d5ff;
+  opacity: 1;
+}
+
+.how-works-box .step-label {
+  color: #cbd5e1;
+}
+
+.how-works-box .how-works-line {
+  opacity: 0.55;
 }
 
 .how-works-horizontal {

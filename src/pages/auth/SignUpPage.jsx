@@ -177,6 +177,35 @@ export default function SignUpPage() {
       showToast('Please correct the validation errors in the form.', 'error');
       return;
     }
+
+    if (role === 'business') {
+      setOnboardingForm({
+        mobile: form.phone.replace(/\D/g, ''),
+        city: form.city,
+        state: '',
+        pincode: '',
+        address: '',
+        businessName: form.shopName,
+        businessType: 'Shop',
+        mallName: form.mallName,
+        aadhaar: '',
+        gst: '',
+        pan: '',
+        shopPhoto: null,
+        aadhaarPhoto: null,
+        panPhoto: null,
+      });
+      setGoogleUser({
+        name: form.fullName,
+        email: form.email,
+        password: form.password,
+      });
+      setOtpMode('register');
+      setShowGoogleOnboarding(true);
+      showToast('Please upload your business documents to complete registration.', 'info');
+      return;
+    }
+
     setOtpSending(true);
 
     const payload = {
@@ -308,9 +337,12 @@ export default function SignUpPage() {
         errs.aadhaar = 'Aadhaar Card Number is required';
       } else if (!/^\d{12}$/.test(onboardingForm.aadhaar.replace(/\D/g, ''))) {
         errs.aadhaar = 'Aadhaar must be exactly 12 digits';
-      } else if (scannedAadhaarNumber && onboardingForm.aadhaar.replace(/\D/g, '') !== scannedAadhaarNumber) {
+      } else if (!scannedAadhaarNumber) {
+        errs.aadhaar = 'Please upload a clear Aadhaar card image and wait for the scan to complete';
+      } else if (onboardingForm.aadhaar.replace(/\D/g, '') !== scannedAadhaarNumber) {
         errs.aadhaar = 'Aadhaar number does not match the scanned Aadhaar Card image';
         setAadhaarMatchError('Aadhaar number does not match the scanned Aadhaar Card image');
+        alert(`Aadhaar Verification Failure:\n\nThe entered Aadhaar Number (${onboardingForm.aadhaar}) does not match the scanned Aadhaar Card image (${scannedAadhaarNumber}).\n\nPlease ensure both match before submitting.`);
       }
 
       if (onboardingForm.gst.trim() && onboardingForm.gst.trim().length !== 15) {
@@ -338,7 +370,11 @@ export default function SignUpPage() {
     setOtpSending(true);
 
     const payload = {
-      ...googleUser,
+      name: googleUser?.name || form.fullName,
+      email: googleUser?.email || form.email,
+      password: googleUser?.password || undefined,
+      google_uid: googleUser?.google_uid || undefined,
+      role: role === 'customer' ? 'Customer' : 'Business',
       mobile: onboardingForm.mobile,
       city: onboardingForm.city,
       state: onboardingForm.state,
@@ -357,7 +393,7 @@ export default function SignUpPage() {
     };
 
     setPendingPayload(payload);
-    setOtpMode('google');
+    setOtpMode(googleUser?.google_uid ? 'google' : 'register');
 
     const isTestNumber = payload.mobile === '9962045143' || 
                          payload.mobile.startsWith('99999') || 

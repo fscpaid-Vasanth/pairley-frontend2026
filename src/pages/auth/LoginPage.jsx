@@ -386,9 +386,12 @@ export default function LoginPage() {
         errs.aadhaar = 'Aadhaar Card Number is required';
       } else if (!/^\d{12}$/.test(onboardingForm.aadhaar.replace(/\D/g, ''))) {
         errs.aadhaar = 'Aadhaar must be exactly 12 digits';
-      } else if (scannedAadhaarNumber && onboardingForm.aadhaar.replace(/\D/g, '') !== scannedAadhaarNumber) {
+      } else if (!scannedAadhaarNumber) {
+        errs.aadhaar = 'Please upload a clear Aadhaar card image and wait for the scan to complete';
+      } else if (onboardingForm.aadhaar.replace(/\D/g, '') !== scannedAadhaarNumber) {
         errs.aadhaar = 'Aadhaar number does not match the scanned Aadhaar Card image';
         setAadhaarMatchError('Aadhaar number does not match the scanned Aadhaar Card image');
+        alert(`Aadhaar Verification Failure:\n\nThe entered Aadhaar Number (${onboardingForm.aadhaar}) does not match the scanned Aadhaar Card image (${scannedAadhaarNumber}).\n\nPlease ensure both match before submitting.`);
       }
 
       if (onboardingForm.gst.trim() && onboardingForm.gst.trim().length !== 15) {

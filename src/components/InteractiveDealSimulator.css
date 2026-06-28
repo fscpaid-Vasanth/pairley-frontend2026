@@ -1,16 +1,16 @@
 /* ===== INTERACTIVE DEAL SIMULATOR ===== */
 
 .sim-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: linear-gradient(135deg, #0b0f19 0%, #161e31 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(196, 198, 220, 0.35);
+  border: 1.5px solid rgba(139, 92, 246, 0.25);
   border-radius: 24px;
   padding: 20px;
   width: 100%;
   box-shadow:
-    0 10px 15px -3px rgba(78, 43, 196, 0.05),
-    0 20px 30px -4px rgba(78, 43, 196, 0.12);
+    0 10px 25px -5px rgba(0, 0, 0, 0.4),
+    0 8px 10px -6px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
   text-align: center;
 }
@@ -18,8 +18,9 @@
 .sim-card:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 12px 20px -3px rgba(78, 43, 196, 0.08),
-    0 24px 36px -4px rgba(78, 43, 196, 0.15);
+    0 12px 30px -5px rgba(0, 0, 0, 0.5),
+    0 10px 15px -6px rgba(0, 0, 0, 0.5);
+  border-color: rgba(139, 92, 246, 0.4);
 }
 
 .sim-card__header {
@@ -29,7 +30,7 @@
 .sim-card__title {
   font-size: 18px;
   font-weight: 850;
-  color: #0f172a;
+  color: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,15 +40,15 @@
 
 .sim-card__subtitle {
   font-size: 13px;
-  color: #64748b;
+  color: #94a3b8;
   margin: 4px 0 0;
   font-weight: 550;
 }
 
 /* Switcher */
 .sim-mode-switcher {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: #090d16;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 4px;
   border-radius: 16px;
   display: inline-flex;
@@ -57,7 +58,7 @@
 
 .sim-mode-btn {
   background: transparent;
-  color: #475569;
+  color: #94a3b8;
   border: none;
   padding: 8px 16px;
   border-radius: 12px;
@@ -70,23 +71,27 @@
   transition: all 0.2s ease;
 }
 
+.sim-mode-btn:hover {
+  color: #cbd5e1;
+}
+
 .sim-mode-btn--active {
   background: #4E2BC4;
   color: white;
-  box-shadow: 0 4px 10px rgba(78, 43, 196, 0.2);
+  box-shadow: 0 4px 10px rgba(78, 43, 196, 0.4);
 }
 
 /* Viewport */
 .sim-viewport {
-  background: #f8fafc;
-  border: 1px solid rgba(226, 232, 240, 0.7);
+  background: #090d16;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 20px;
   padding: 16px;
   min-height: 250px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 /* Meta */
@@ -101,15 +106,15 @@
 .sim-deal-tag {
   font-size: 9px;
   font-weight: 850;
-  color: #94a3b8;
+  color: #64748b;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: left;
 }
 
 .sim-live-badge {
-  background: #f3e8ff;
-  color: #7e22ce;
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
   font-size: 9px;
   font-weight: 800;
   padding: 3px 8px;
@@ -122,7 +127,7 @@
 .sim-live-dot {
   width: 5px;
   height: 5px;
-  background: #a855f7;
+  background: #c084fc;
   border-radius: 559px;
   animation: pulse 1.5s infinite;
 }
@@ -130,8 +135,8 @@
 .sim-joined-count {
   font-size: 10px;
   font-weight: 800;
-  color: #4E2BC4;
-  background: rgba(78, 43, 196, 0.08);
+  color: #a78bfa;
+  background: rgba(78, 43, 196, 0.2);
   padding: 3px 8px;
   border-radius: 8px;
 }
@@ -161,7 +166,7 @@
   left: 45px;
   right: 45px;
   height: 3px;
-  background: #e2e8f0;
+  background: #1e293b;
   z-index: 0;
   border-radius: 999px;
 }
@@ -184,8 +189,8 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  border: 3px solid #161e31;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,7 +200,7 @@
 }
 
 .bogo-avatar--user {
-  background: #f5f3ff;
+  background: #2e1065;
 }
 
 .bogo-avatar--partner {
@@ -203,13 +208,13 @@
 }
 
 .bogo-avatar--matched {
-  background: #ecfdf5;
+  background: #064e3b;
   opacity: 1;
   transform: scale(1);
 }
 
 .bogo-avatar--waiting {
-  background: #e2e8f0;
+  background: #1e293b;
   opacity: 0.4;
   transform: scale(0.9);
 }
@@ -230,13 +235,13 @@
 .bogo-name {
   font-size: 10.5px;
   font-weight: 700;
-  color: #334155;
+  color: #cbd5e1;
   margin-top: 6px;
 }
 
 .bogo-status {
   font-size: 9px;
-  color: #94a3b8;
+  color: #64748b;
   font-weight: 550;
 }
 
@@ -245,12 +250,12 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #1e293b;
+  border: 1px solid #334155;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Status message */
@@ -266,10 +271,18 @@
 .sim-status-text {
   font-size: 13.5px;
   line-height: 1.5;
-  color: #475569;
+  color: #94a3b8;
   max-width: 480px;
   white-space: normal;
   word-wrap: break-word;
+}
+
+.sim-status-text strong {
+  color: #f1f5f9;
+}
+
+.sim-card .text-slate-800 {
+  color: #e2e8f0 !important;
 }
 
 .sim-dots {
@@ -283,7 +296,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #cbd5e1;
+  background: #475569;
   border: none;
   cursor: pointer;
   padding: 0;
@@ -319,7 +332,7 @@
 .group-price-label {
   font-size: 8px;
   font-weight: 750;
-  color: #94a3b8;
+  color: #64748b;
   text-transform: uppercase;
   display: block;
 }
@@ -339,7 +352,7 @@
 .group-progress-bar {
   width: 100%;
   height: 10px;
-  background: #e2e8f0;
+  background: #1e293b;
   border-radius: 999px;
   position: relative;
   overflow: hidden;
@@ -357,7 +370,7 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .group-tiers {
@@ -367,7 +380,7 @@
   text-align: center;
   font-size: 8.5px;
   font-weight: 700;
-  color: #64748b;
+  color: #94a3b8;
   gap: 4px;
   margin-bottom: 15px;
 }
@@ -380,8 +393,8 @@
 }
 
 .group-tier--active {
-  background: #f1f5f9;
-  color: #4E2BC4;
+  background: #1e293b;
+  color: #a78bfa;
   font-weight: 850;
 }
 
@@ -399,9 +412,9 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #f8fafc;
-  border: 1.5px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: #1e293b;
+  border: 1.5px solid #0b0f19;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -416,8 +429,8 @@
 }
 
 .group-avatar--add {
-  background: rgba(78, 43, 196, 0.08);
-  color: #4E2BC4;
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
   font-weight: 850;
   font-size: 11px;
 }
