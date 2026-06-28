@@ -994,8 +994,7 @@
 /* ── Desktop full screen without scroll ── */
 @media (min-width: 1025px) {
   .login-root {
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
   }
   .login-main {
     padding: 1.5vh 64px;

@@ -936,8 +936,7 @@
 /* ── Desktop full screen without scroll ── */
 @media (min-width: 1025px) {
   .signup-root {
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
   }
   .signup-main {
     padding: 1.5vh 64px;
