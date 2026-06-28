@@ -393,9 +393,9 @@
 }
 
 .group-tier--active {
-  background: #1e293b;
-  color: #a78bfa;
-  font-weight: 850;
+  background: #1e293b !important;
+  color: #a78bfa !important;
+  font-weight: 850 !important;
 }
 
 .group-avatars {
@@ -433,4 +433,21 @@
   color: #c084fc;
   font-weight: 850;
   font-size: 11px;
+}
+
+/* Dark Mode Utility Class Overrides inside the Simulator Card */
+.sim-card .text-primary {
+  color: #a78bfa !important;
+}
+.sim-card .text-purple-600 {
+  color: #c084fc !important;
+}
+.sim-card .text-emerald-600 {
+  color: #34d399 !important;
+}
+.sim-card .text-slate-300 {
+  color: #64748b !important;
+}
+.sim-card .text-slate-800 {
+  color: #e2e8f0 !important;
 }
