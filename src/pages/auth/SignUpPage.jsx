@@ -584,23 +584,55 @@ export default function SignUpPage() {
           <div className="signup-right">
             <div className="signup-card">
 
-              {/* Role tabs */}
+              {/* Role Switcher */}
               {otpStep !== 'verify' && !showGoogleOnboarding && (
-                <div className="signup-role-tabs">
-                  <button
-                    type="button"
-                    className={`signup-role-tab ${role === 'customer' ? 'signup-role-tab--active' : ''}`}
-                    onClick={() => setRole('customer')}
-                  >
-                    👤 Customer
-                  </button>
-                  <button
-                    type="button"
-                    className={`signup-role-tab ${role === 'business' ? 'signup-role-tab--active' : ''}`}
-                    onClick={() => setRole('business')}
-                  >
-                    🏪 Shop Owner
-                  </button>
+                <div className="signup-role-selection-wrapper">
+                  <span className="signup-role-selection-title">Choose Portal</span>
+                  <div className="signup-role-cards">
+                    <button
+                      type="button"
+                      className={`signup-role-card-btn ${role === 'customer' ? 'active' : ''}`}
+                      onClick={() => setRole('customer')}
+                    >
+                      <div className="role-card-badge badge-customer">Shopping</div>
+                      <div className="role-card-body">
+                        <div className="role-card-icon-wrap">
+                          <span className="material-symbols-outlined">shopping_bag</span>
+                        </div>
+                        <div className="role-card-info">
+                          <div className="role-card-name">Customer Portal</div>
+                          <div className="role-card-desc">Pair up with buyers to split prices 50/50.</div>
+                        </div>
+                        <div className="role-card-arrow">
+                          <span className="material-symbols-outlined">
+                            {role === 'customer' ? 'check_circle' : 'arrow_forward'}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`signup-role-card-btn ${role === 'business' ? 'active' : ''}`}
+                      onClick={() => setRole('business')}
+                    >
+                      <div className="role-card-badge badge-merchant">Selling</div>
+                      <div className="role-card-body">
+                        <div className="role-card-icon-wrap">
+                          <span className="material-symbols-outlined">storefront</span>
+                        </div>
+                        <div className="role-card-info">
+                          <div className="role-card-name">Shop Owner Portal</div>
+                          <div className="role-card-desc">List your store & publish BOGO deals.</div>
+                        </div>
+                        <div className="role-card-arrow">
+                          <span className="material-symbols-outlined">
+                            {role === 'business' ? 'check_circle' : 'arrow_forward'}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               )}
 
