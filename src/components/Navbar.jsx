@@ -470,6 +470,27 @@ export default function Navbar({ onSearchClick }) {
                     <Tag size={17} /> Explore Deals
                   </Link>
                 </motion.div>
+                {token && user && (
+                  <motion.div variants={itemVariants}>
+                    <button
+                      className="navbar__drawer-link w-full text-left flex items-center justify-between"
+                      onClick={() => {
+                        setDrawerOpen(false);
+                        setShowNotifDropdown(true);
+                      }}
+                      style={{ border: 'none', borderLeft: '3px solid transparent', cursor: 'pointer' }}
+                    >
+                      <span className="flex items-center gap-3">
+                        <Bell size={17} /> Notifications
+                      </span>
+                      {unreadCount > 0 && (
+                        <span className="bg-rose-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full mr-4">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  </motion.div>
+                )}
                 {NAV_LINKS.map((link) => (
                   <motion.div variants={itemVariants} key={link.path}>
                     <Link

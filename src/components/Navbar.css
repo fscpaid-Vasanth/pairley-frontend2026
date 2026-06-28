@@ -350,9 +350,23 @@
 }
 
 @media (max-width: 768px) {
-  .navbar__links,
-  .navbar__actions {
+  .navbar__links {
     display: none;
+  }
+
+  .navbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .navbar__actions .navbar__search-btn,
+  .navbar__actions .navbar__dashboard-btn,
+  .navbar__actions .navbar__logout-btn,
+  .navbar__actions .navbar__login-btn,
+  .navbar__actions .navbar__signup-btn {
+    display: none !important;
   }
 
   .navbar__hamburger {

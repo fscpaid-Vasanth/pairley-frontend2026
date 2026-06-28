@@ -20,7 +20,8 @@ import {
   Briefcase,
   Sliders,
   Check,
-  X
+  X,
+  Headphones
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
