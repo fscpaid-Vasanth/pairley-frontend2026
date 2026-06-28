@@ -113,6 +113,7 @@ export default function CreateDealPage() {
 
   const [dealType, setDealType] = useState('pair'); // 'pair' or 'group'
   const [category, setCategory] = useState('shopping');
+  const [activeSection, setActiveSection] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imagePlaceholder, setImagePlaceholder] = useState('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop');
@@ -302,6 +303,107 @@ export default function CreateDealPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleNextToSection3 = () => {
+    const sec2Errors = {};
+    if (!title || title.trim().length < 5) sec2Errors.title = 'Title must be at least 5 characters.';
+    if (!description || description.trim().length < 15) sec2Errors.description = 'Description must be at least 15 characters.';
+    if (!location || location.trim().length < 2) sec2Errors.location = 'Please enter a valid location/city.';
+    if (!imagePlaceholder) sec2Errors.image = 'Please select a cover image.';
+    
+    const orig = parseFloat(originalPrice);
+    if (dealType === 'pair') {
+      const pairley = parseFloat(pairleyPrice);
+      if (!originalPrice || isNaN(orig) || orig <= 0) {
+        sec2Errors.originalPrice = 'Please enter a valid original price.';
+      }
+      if (!pairleyPrice || isNaN(pairley) || pairley <= 0) {
+        sec2Errors.pairleyPrice = 'Please enter a valid split price.';
+      } else if (orig && pairley >= orig) {
+        sec2Errors.pairleyPrice = 'Split price must be less than the original price.';
+      }
+    } else {
+      if (!originalPrice || isNaN(orig) || orig <= 0) {
+        sec2Errors.originalPrice = 'Please enter a baseline original price.';
+      }
+      if (tiers.length === 0) {
+        sec2Errors.tiers = 'Please add at least one group pricing tier.';
+      } else {
+        const tierErrors = [];
+        let lastMinPeople = 0;
+        let lastPrice = orig || Infinity;
+        
+        tiers.forEach((t, idx) => {
+          const rowError = {};
+          if (!t.minPeople || t.minPeople <= 0) {
+            rowError.minPeople = 'Required';
+          } else if (t.minPeople <= lastMinPeople) {
+            rowError.minPeople = `Must be > ${lastMinPeople}`;
+          }
+          
+          if (!t.pricePerHead || t.pricePerHead <= 0) {
+            rowError.pricePerHead = 'Required';
+          } else if (orig && t.pricePerHead >= orig) {
+            rowError.pricePerHead = 'Must be < original price';
+          } else if (t.pricePerHead >= lastPrice) {
+            rowError.pricePerHead = `Must be < ${lastPrice}`;
+          }
+
+          if (Object.keys(rowError).length > 0) {
+            tierErrors[idx] = rowError;
+          }
+          
+          if (t.minPeople) lastMinPeople = t.minPeople;
+          if (t.pricePerHead) lastPrice = t.pricePerHead;
+        });
+        
+        if (tierErrors.some(Boolean)) {
+          sec2Errors.tierErrors = tierErrors;
+        }
+      }
+    }
+
+    if (Object.keys(sec2Errors).length > 0) {
+      setErrors({ ...errors, ...sec2Errors });
+      showToast('Please fill all mandatory fields in Section 2 correctly.', 'error');
+      return;
+    }
+
+    const updatedErrors = { ...errors };
+    delete updatedErrors.title;
+    delete updatedErrors.description;
+    delete updatedErrors.location;
+    delete updatedErrors.image;
+    delete updatedErrors.originalPrice;
+    delete updatedErrors.pairleyPrice;
+    delete updatedErrors.tiers;
+    delete updatedErrors.tierErrors;
+    setErrors(updatedErrors);
+
+    setActiveSection(3);
+    setTimeout(() => {
+      const el = document.getElementById('deal-section-3');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  const handleNextToSection4 = () => {
+    if (!validDays || parseInt(validDays) <= 0) {
+      setErrors({ ...errors, validDays: 'Please enter a valid duration (minimum 1 day).' });
+      showToast('Please enter a valid duration for the deal.', 'error');
+      return;
+    }
+    
+    const updatedErrors = { ...errors };
+    delete updatedErrors.validDays;
+    setErrors(updatedErrors);
+
+    setActiveSection(4);
+    setTimeout(() => {
+      const el = document.getElementById('deal-section-4');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   const handlePublish = (e) => {
     if (e) e.preventDefault();
     if (!validateForm()) {
@@ -400,7 +502,7 @@ export default function CreateDealPage() {
           <form onSubmit={handlePublish} className="flex flex-col gap-8 py-4">
             
             {/* Section 1: Type & Category */}
-            <div className="bg-slate-50/30 border border-slate-200/40 p-6 md:p-8 rounded-3xl flex flex-col gap-6 text-left">
+            <div className="bg-white border border-slate-200/80 p-6 md:p-8 rounded-3xl flex flex-col gap-6 text-left shadow-sm">
               <div className="border-b border-slate-200/60 pb-3">
                 <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 1
@@ -412,38 +514,48 @@ export default function CreateDealPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   type="button"
-                  className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-2 transition-all ${
+                  className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
                     dealType === 'pair' 
-                      ? 'border-[#4E2BC4] bg-[#4E2BC4]/5 shadow-sm shadow-[#4E2BC4]/10' 
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      ? 'border-[#4E2BC4] bg-[#4E2BC4]/10 shadow-lg shadow-[#4E2BC4]/10 scale-[1.01]' 
+                      : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
                   }`}
                   onClick={() => setDealType('pair')}
                 >
                   <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl mb-4">
                     🤝
                   </div>
-                  <h4 className="font-bold text-slate-800 text-lg">Pair Deal (BOGO Split)</h4>
+                  <h4 className="font-extrabold text-slate-800 text-lg">Pair Deal (BOGO Split)</h4>
                   <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                     Two customers match to unlock a BOGO deal. They split the cost 50/50 and each gets their item. Great for restaurants, spa services, and retail.
                   </p>
+                  {dealType === 'pair' && (
+                    <span className="absolute top-4 right-4 bg-[#4E2BC4] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
+                      <Check size={14} strokeWidth={3} />
+                    </span>
+                  )}
                 </button>
 
                 <button
                   type="button"
-                  className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-2 transition-all ${
+                  className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
                     dealType === 'group' 
-                      ? 'border-[#4E2BC4] bg-[#4E2BC4]/5 shadow-sm shadow-[#4E2BC4]/10' 
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      ? 'border-[#4E2BC4] bg-[#4E2BC4]/10 shadow-lg shadow-[#4E2BC4]/10 scale-[1.01]' 
+                      : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
                   }`}
                   onClick={() => setDealType('group')}
                 >
                   <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl mb-4">
                     👥
                   </div>
-                  <h4 className="font-bold text-slate-800 text-lg">Group Deal (Tiered Pricing)</h4>
+                  <h4 className="font-extrabold text-slate-800 text-lg">Group Deal (Tiered Pricing)</h4>
                   <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                     Multiple participants pool interest. As the size of the group reaches set milestones, the cost per person decreases. Ideal for travel tours, experiences, and subscriptions.
                   </p>
+                  {dealType === 'group' && (
+                    <span className="absolute top-4 right-4 bg-[#4E2BC4] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
+                      <Check size={14} strokeWidth={3} />
+                    </span>
+                  )}
                 </button>
               </div>
 
@@ -454,23 +566,56 @@ export default function CreateDealPage() {
                     <button
                       key={cat.id}
                       type="button"
-                      className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-left ${
+                      className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left relative ${
                         category === cat.id 
-                          ? 'border-[#4E2BC4] bg-[#4E2BC4]/5 text-[#4E2BC4] font-bold' 
+                          ? 'border-[#4E2BC4] bg-[#4E2BC4]/15 text-[#4E2BC4] font-black shadow-sm scale-[1.02]' 
                           : 'border-slate-200 bg-white/50 text-slate-600 hover:border-slate-300'
                       }`}
                       onClick={() => setCategory(cat.id)}
                     >
                       <span className="text-lg">{cat.icon}</span>
                       <span className="text-xs font-semibold">{cat.name}</span>
+                      {category === cat.id && (
+                        <span className="absolute right-2 top-2 bg-[#4E2BC4] text-white w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold">
+                          ✓
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
               </div>
+
+              <div className="flex justify-end mt-4 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(2);
+                    setTimeout(() => {
+                      const el = document.getElementById('deal-section-2');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
+                >
+                  Continue to Section 2 <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
 
             {/* Section 2: Details & Pricing */}
-            <div className="bg-slate-50/30 border border-slate-200/40 p-6 md:p-8 rounded-3xl flex flex-col gap-5 text-left">
+            <div 
+              id="deal-section-2"
+              className={`bg-white border border-slate-200 p-6 md:p-8 rounded-3xl flex flex-col gap-5 text-left shadow-sm relative transition-all duration-300 ${
+                activeSection < 2 ? 'opacity-40 pointer-events-none select-none' : ''
+              }`}
+            >
+              {activeSection < 2 && (
+                <div className="absolute inset-0 bg-white/45 backdrop-blur-[0.5px] flex items-center justify-center rounded-3xl z-10">
+                  <div className="bg-slate-800/90 text-white text-[11px] font-extrabold uppercase tracking-wider px-4 py-2 rounded-full flex items-center gap-1.5 shadow-md">
+                    🔒 Complete Section 1 to Unlock
+                  </div>
+                </div>
+              )}
               <div className="border-b border-slate-200/60 pb-3 mb-2">
                 <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 2
@@ -963,10 +1108,44 @@ export default function CreateDealPage() {
                   onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
                 />
               </div>
+
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(1);
+                    setTimeout(() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 100);
+                  }}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all"
+                >
+                  <ArrowLeft size={14} /> Back to Section 1
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextToSection3}
+                  className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
+                >
+                  Continue to Section 3 <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
 
             {/* Section 3: Duration & Rules */}
-            <div className="bg-slate-50/30 border border-slate-200/40 p-6 md:p-8 rounded-3xl flex flex-col gap-5 text-left">
+            <div 
+              id="deal-section-3"
+              className={`bg-white border border-slate-200 p-6 md:p-8 rounded-3xl flex flex-col gap-5 text-left shadow-sm relative transition-all duration-300 ${
+                activeSection < 3 ? 'opacity-40 pointer-events-none select-none' : ''
+              }`}
+            >
+              {activeSection < 3 && (
+                <div className="absolute inset-0 bg-white/45 backdrop-blur-[0.5px] flex items-center justify-center rounded-3xl z-10">
+                  <div className="bg-slate-800/90 text-white text-[11px] font-extrabold uppercase tracking-wider px-4 py-2 rounded-full flex items-center gap-1.5 shadow-md">
+                    🔒 Complete Section 2 to Unlock
+                  </div>
+                </div>
+              )}
               <div className="border-b border-slate-200/60 pb-3 mb-2">
                 <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 3
@@ -1029,10 +1208,45 @@ export default function CreateDealPage() {
                   onChange={(e) => setTerms(e.target.value)}
                 />
               </div>
+
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(2);
+                    setTimeout(() => {
+                      const el = document.getElementById('deal-section-2');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all"
+                >
+                  <ArrowLeft size={14} /> Back to Section 2
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextToSection4}
+                  className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
+                >
+                  Continue to Section 4 <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
 
             {/* Section 4: Live Preview & Submission */}
-            <div className="bg-slate-50/30 border border-slate-200/40 p-6 md:p-8 rounded-3xl flex flex-col gap-6 text-left">
+            <div 
+              id="deal-section-4"
+              className={`bg-white border border-slate-200 p-6 md:p-8 rounded-3xl flex flex-col gap-6 text-left shadow-sm relative transition-all duration-300 ${
+                activeSection < 4 ? 'opacity-40 pointer-events-none select-none' : ''
+              }`}
+            >
+              {activeSection < 4 && (
+                <div className="absolute inset-0 bg-white/45 backdrop-blur-[0.5px] flex items-center justify-center rounded-3xl z-10">
+                  <div className="bg-slate-800/90 text-white text-[11px] font-extrabold uppercase tracking-wider px-4 py-2 rounded-full flex items-center gap-1.5 shadow-md">
+                    🔒 Complete Section 3 to Unlock
+                  </div>
+                </div>
+              )}
               <div className="border-b border-slate-200/60 pb-3 mb-2">
                 <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 4
@@ -1119,10 +1333,23 @@ export default function CreateDealPage() {
               </div>
 
               {/* Submit Controls */}
-              <div className="border-t border-slate-100 pt-6 flex justify-end">
+              <div className="border-t border-slate-100 pt-6 flex justify-between items-center mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(3);
+                    setTimeout(() => {
+                      const el = document.getElementById('deal-section-3');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all"
+                >
+                  <ArrowLeft size={14} /> Back to Section 3
+                </button>
                 <button
                   type="submit"
-                  className="btn btn-secondary bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-8 py-3.5 rounded-2xl flex items-center gap-2 shadow-lg shadow-emerald-600/10 transition-all hover:scale-[1.01]"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-8 py-3.5 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/10 transition-all hover:scale-[1.01]"
                 >
                   Publish Deal <Check size={16} />
                 </button>

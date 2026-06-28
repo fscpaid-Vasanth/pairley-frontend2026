@@ -70,14 +70,69 @@ export default function Navbar({ onSearchClick }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
+  const prevUnreadRef = useRef(0);
+  const isFirstFetchRef = useRef(true);
+
+  const playPairleySound = () => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
+      
+      // Tone 1: Soft warm sine sweep (D5 to A5)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now);
+      osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+      
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      
+      // Tone 2: Clean sparkly triangle sweep (D6 to A6) with slight delay
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1174.66, now + 0.06);
+      osc2.frequency.exponentialRampToValueAtTime(1760, now + 0.18);
+      
+      gain2.gain.setValueAtTime(0.06, now + 0.06);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      
+      osc1.start(now);
+      osc1.stop(now + 0.35);
+      
+      osc2.start(now + 0.06);
+      osc2.stop(now + 0.45);
+    } catch (err) {
+      console.warn('Failed to play brand sound:', err);
+    }
+  };
+
   const fetchNotifications = async () => {
     const tokenVal = localStorage.getItem('pairley_token');
     const userVal = localStorage.getItem('pairley_user');
     if (!tokenVal || !userVal) return;
     try {
       const data = await api.get('/notifications', tokenVal);
+      const unread = data.filter(n => !n.is_read).length;
+      
+      if (isFirstFetchRef.current) {
+        isFirstFetchRef.current = false;
+      } else if (unread > prevUnreadRef.current) {
+        playPairleySound();
+      }
+      
+      prevUnreadRef.current = unread;
       setNotifications(data);
-      setUnreadCount(data.filter(n => !n.is_read).length);
+      setUnreadCount(unread);
     } catch (err) {
       console.warn('Failed to fetch notifications:', err);
     }
@@ -85,7 +140,7 @@ export default function Navbar({ onSearchClick }) {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000); // Poll every 10 seconds
+    const interval = setInterval(fetchNotifications, 3000); // Fast poll every 3 seconds for instant response
     return () => clearInterval(interval);
   }, [authToken, authUser]);
 
