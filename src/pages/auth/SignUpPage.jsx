@@ -591,7 +591,7 @@ export default function SignUpPage() {
                   <div className="signup-role-cards">
                     <button
                       type="button"
-                      className={`signup-role-card-btn ${role === 'customer' ? 'active' : ''}`}
+                      className={`signup-role-card-btn customer-card ${role === 'customer' ? 'active' : ''}`}
                       onClick={() => setRole('customer')}
                     >
                       <div className="role-card-badge badge-customer">Shopping</div>
@@ -613,7 +613,7 @@ export default function SignUpPage() {
 
                     <button
                       type="button"
-                      className={`signup-role-card-btn ${role === 'business' ? 'active' : ''}`}
+                      className={`signup-role-card-btn business-card ${role === 'business' ? 'active' : ''}`}
                       onClick={() => setRole('business')}
                     >
                       <div className="role-card-badge badge-merchant">Selling</div>

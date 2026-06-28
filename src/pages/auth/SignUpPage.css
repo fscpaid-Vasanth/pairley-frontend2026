@@ -276,10 +276,16 @@
   box-shadow: 0 4px 12px rgba(10, 37, 64, 0.04);
 }
 
-.signup-role-card-btn.active {
+.signup-role-card-btn.active.customer-card {
   border-color: #4E2BC4;
   background: rgba(78, 43, 196, 0.03);
   box-shadow: 0 6px 18px -4px rgba(78, 43, 196, 0.12), inset 0 0 0 0.5px rgba(78, 43, 196, 0.1);
+}
+
+.signup-role-card-btn.active.business-card {
+  border-color: #d97706;
+  background: rgba(217, 119, 6, 0.03);
+  box-shadow: 0 6px 18px -4px rgba(217, 119, 6, 0.15), inset 0 0 0 0.5px rgba(217, 119, 6, 0.1);
 }
 
 .role-card-badge {
@@ -334,8 +340,13 @@
   flex-shrink: 0;
 }
 
-.signup-role-card-btn.active .role-card-icon-wrap {
+.signup-role-card-btn.active.customer-card .role-card-icon-wrap {
   background: #4E2BC4;
+  color: #ffffff;
+}
+
+.signup-role-card-btn.active.business-card .role-card-icon-wrap {
+  background: #d97706;
   color: #ffffff;
 }
 
@@ -370,8 +381,13 @@
   justify-content: center;
 }
 
-.signup-role-card-btn.active .role-card-arrow {
+.signup-role-card-btn.active.customer-card .role-card-arrow {
   color: #4E2BC4;
+  transform: scale(1.1);
+}
+
+.signup-role-card-btn.active.business-card .role-card-arrow {
+  color: #d97706;
   transform: scale(1.1);
 }
 
