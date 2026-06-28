@@ -44,6 +44,28 @@ export default function Navbar({ onSearchClick }) {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Reactive auth state — re-read on every route change so Login/Signup
+  // buttons disappear immediately after login without a full page reload.
+  const [authUser, setAuthUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pairley_user') || 'null'); } catch { return null; }
+  });
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem('pairley_token'));
+
+  // Re-sync auth state whenever the URL changes (after navigate()) or another
+  // tab writes to storage.
+  useEffect(() => {
+    const sync = () => {
+      try { setAuthUser(JSON.parse(localStorage.getItem('pairley_user') || 'null')); } catch { setAuthUser(null); }
+      setAuthToken(localStorage.getItem('pairley_token'));
+    };
+    sync(); // run immediately on mount / location change
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, [location.pathname]); // re-run whenever the route changes
+
+  const user = authUser;
+  const token = authToken;
+
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -131,27 +153,7 @@ export default function Navbar({ onSearchClick }) {
     }
   };
 
-  // Reactive auth state — re-read on every route change so Login/Signup
-  // buttons disappear immediately after login without a full page reload.
-  const [authUser, setAuthUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('pairley_user') || 'null'); } catch { return null; }
-  });
-  const [authToken, setAuthToken] = useState(() => localStorage.getItem('pairley_token'));
 
-  // Re-sync auth state whenever the URL changes (after navigate()) or another
-  // tab writes to storage.
-  useEffect(() => {
-    const sync = () => {
-      try { setAuthUser(JSON.parse(localStorage.getItem('pairley_user') || 'null')); } catch { setAuthUser(null); }
-      setAuthToken(localStorage.getItem('pairley_token'));
-    };
-    sync(); // run immediately on mount / location change
-    window.addEventListener('storage', sync);
-    return () => window.removeEventListener('storage', sync);
-  }, [location.pathname]); // re-run whenever the route changes
-
-  const user = authUser;
-  const token = authToken;
 
   const handleLogout = () => {
     localStorage.removeItem('pairley_token');
