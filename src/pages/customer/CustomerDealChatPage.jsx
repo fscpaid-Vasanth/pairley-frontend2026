@@ -136,33 +136,51 @@ const formatDateNice = (dateStr) => {
 
 const CATEGORY_THEMES = [
   {
-    active: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100',
-    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50/10',
+    activeBg: '#4E2BC4',
+    activeText: '#ffffff',
+    inactiveBg: '#ffffff',
+    inactiveText: '#475569',
+    inactiveBorder: '#cbd5e1',
     stmtBg: 'hover:border-indigo-500 hover:bg-indigo-50/20 hover:text-indigo-700'
   },
   {
-    active: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-100',
-    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-emerald-50/10',
+    activeBg: '#10B981',
+    activeText: '#ffffff',
+    inactiveBg: '#ffffff',
+    inactiveText: '#475569',
+    inactiveBorder: '#cbd5e1',
     stmtBg: 'hover:border-emerald-500 hover:bg-emerald-50/20 hover:text-emerald-700'
   },
   {
-    active: 'bg-amber-600 text-white hover:bg-amber-700 shadow-amber-100',
-    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-amber-300 hover:bg-amber-50/10',
+    activeBg: '#D97706',
+    activeText: '#ffffff',
+    inactiveBg: '#ffffff',
+    inactiveText: '#475569',
+    inactiveBorder: '#cbd5e1',
     stmtBg: 'hover:border-amber-500 hover:bg-amber-50/20 hover:text-amber-700'
   },
   {
-    active: 'bg-cyan-600 text-white hover:bg-cyan-700 shadow-cyan-100',
-    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-cyan-300 hover:bg-cyan-50/10',
+    activeBg: '#0891B2',
+    activeText: '#ffffff',
+    inactiveBg: '#ffffff',
+    inactiveText: '#475569',
+    inactiveBorder: '#cbd5e1',
     stmtBg: 'hover:border-cyan-500 hover:bg-cyan-50/20 hover:text-cyan-700'
   },
   {
-    active: 'bg-purple-600 text-white hover:bg-purple-700 shadow-purple-100',
-    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-purple-300 hover:bg-purple-50/10',
+    activeBg: '#7C3AED',
+    activeText: '#ffffff',
+    inactiveBg: '#ffffff',
+    inactiveText: '#475569',
+    inactiveBorder: '#cbd5e1',
     stmtBg: 'hover:border-purple-500 hover:bg-purple-50/20 hover:text-purple-700'
   },
   {
-    active: 'bg-rose-600 text-white hover:bg-rose-700 shadow-rose-100',
-    inactive: 'bg-white border border-slate-200 text-slate-600 hover:border-rose-300 hover:bg-rose-50/10',
+    activeBg: '#E11D48',
+    activeText: '#ffffff',
+    inactiveBg: '#ffffff',
+    inactiveText: '#475569',
+    inactiveBorder: '#cbd5e1',
     stmtBg: 'hover:border-rose-500 hover:bg-rose-50/20 hover:text-rose-700'
   }
 ];
@@ -514,11 +532,16 @@ export default function CustomerDealChatPage() {
                     type="button"
                     disabled={isCompleted}
                     onClick={() => setActiveCategoryIdx(idx)}
-                    className={`px-3 py-1.5 rounded-xl text-[9px] font-extrabold whitespace-nowrap transition-all ${
-                      activeCategoryIdx === idx
-                        ? CATEGORY_THEMES[idx].active
-                        : CATEGORY_THEMES[idx].inactive
-                    } ${isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    style={{
+                      backgroundColor: activeCategoryIdx === idx ? CATEGORY_THEMES[idx].activeBg : CATEGORY_THEMES[idx].inactiveBg,
+                      color: activeCategoryIdx === idx ? CATEGORY_THEMES[idx].activeText : CATEGORY_THEMES[idx].inactiveText,
+                      borderColor: activeCategoryIdx === idx ? CATEGORY_THEMES[idx].activeBg : CATEGORY_THEMES[idx].inactiveBorder,
+                      borderWidth: '1px',
+                      borderStyle: 'solid'
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-[9px] font-extrabold whitespace-nowrap transition-all shadow-sm ${
+                      isCompleted ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
+                    }`}
                   >
                     {cat.title}
                   </button>

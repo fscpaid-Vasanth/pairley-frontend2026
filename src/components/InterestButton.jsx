@@ -49,6 +49,13 @@ export default function InterestButton({ deal, onInterest }) {
     }
   }, [deal?.id, isBusiness]);
 
+  useEffect(() => {
+    if (isBusiness) return;
+    if (userHasJoinedInDb && interestState === 'none') {
+      setInterestState('interested');
+    }
+  }, [userHasJoinedInDb, isBusiness, interestState]);
+
   // Show merchant view AFTER hooks
   if (isBusiness) {
     return (
@@ -61,7 +68,7 @@ export default function InterestButton({ deal, onInterest }) {
   const handleShowInterest = () => {
     const token = localStorage.getItem('pairley_token');
     if (!token) {
-      showToast('Please sign up or log in to express interest in this deal!', 'error');
+      showToast('Please sign up or log in to join this deal!', 'error');
       navigate('/login');
       return;
     }
@@ -71,7 +78,7 @@ export default function InterestButton({ deal, onInterest }) {
 
     api.post('/offers/lead', { offerId: deal.id })
       .then((res) => {
-        showToast('Your interest has been shared with the merchant.', 'success');
+        showToast('You have successfully joined the deal!', 'success');
         setInterestState('interested');
         if (onInterest) onInterest();
 
@@ -106,8 +113,18 @@ Thank you,
       })
       .catch((err) => {
         console.error('Failed to express interest:', err);
-        showToast(err.message || 'Failed to register interest. Please try again.', 'error');
-        setInterestState('none');
+        let errorMsg = err.message || 'Failed to join deal. Please try again.';
+        if (
+          errorMsg.toLowerCase().includes('expressed interest') || 
+          errorMsg.toLowerCase().includes('already joined') || 
+          errorMsg.toLowerCase().includes('already registered')
+        ) {
+          errorMsg = 'You have already joined this deal.';
+          setInterestState('interested');
+        } else {
+          setInterestState('none');
+        }
+        showToast(errorMsg, 'error');
       });
   };
 
