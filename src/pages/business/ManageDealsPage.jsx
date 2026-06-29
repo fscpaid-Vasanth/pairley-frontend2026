@@ -426,13 +426,6 @@ export default function ManageDealsPage() {
                                     {deal.status === 'active' ? <Pause size={14} /> : <Play size={14} />}
                                   </button>
                                 )}
-                                <button
-                                  className="p-2 bg-rose-50 border border-rose-200/50 hover:bg-rose-100 text-rose-600 rounded-xl transition"
-                                  onClick={() => handleDelete(deal.id)}
-                                  title="Delete Listing"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
                               </div>
                             </td>
                           </tr>
@@ -537,12 +530,6 @@ export default function ManageDealsPage() {
                                 {deal.status === 'active' ? <Pause size={13} /> : <Play size={13} />}
                               </button>
                             )}
-                            <button
-                              className="p-2 text-rose-500 hover:text-rose-700 bg-white border border-slate-200 rounded-xl transition-all"
-                              onClick={() => handleDelete(deal.id)}
-                            >
-                              <Trash2 size={13} />
-                            </button>
                           </div>
                         </div>
                       </div>

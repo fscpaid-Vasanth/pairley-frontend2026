@@ -68,10 +68,15 @@
 }
 
 .category-card--active {
-  background: var(--cat-color, #4E2BC4);
-  border-color: var(--cat-color, #4E2BC4);
-  box-shadow: 0 6px 18px rgba(78,43,196,0.25);
+  background: var(--cat-color, #4E2BC4) !important;
+  border-color: var(--cat-color, #4E2BC4) !important;
+  box-shadow: 0 6px 18px rgba(78,43,196,0.25) !important;
   transform: translateY(-2px);
+}
+
+.category-card--active:hover {
+  background: var(--cat-color, #4E2BC4) !important;
+  opacity: 0.95;
 }
 
 .category-card__icon-circle {
@@ -108,7 +113,7 @@
 }
 
 .category-card--active .category-card__name {
-  color: white;
+  color: white !important;
 }
 
 .category-card:hover:not(.category-card--active) .category-card__name {
