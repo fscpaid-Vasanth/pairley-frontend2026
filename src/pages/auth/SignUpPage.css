@@ -703,7 +703,12 @@
 
 @media (max-width: 600px) {
   .signup-main { padding: 28px 16px; }
-  .signup-header { padding: 0 20px; }
+  .signup-header {
+    padding-top: env(safe-area-inset-top);
+    height: calc(56px + env(safe-area-inset-top));
+    padding-left: calc(16px + env(safe-area-inset-left));
+    padding-right: calc(16px + env(safe-area-inset-right));
+  }
   .signup-card { padding: 24px 20px; }
   .signup-footer { padding: 16px 20px; gap: 16px; }
   .su-password-row { flex-direction: column; }

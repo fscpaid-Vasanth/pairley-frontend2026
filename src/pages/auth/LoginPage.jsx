@@ -387,7 +387,15 @@ export default function LoginPage() {
       } else if (error?.code === 'auth/popup-closed-by-user') {
         showToast('Google Sign-in cancelled (popup closed).', 'warning');
       } else {
-        showToast(`Google Sign-in failed: ${error?.message || 'Unknown error'}`, 'error');
+        let errDetails = 'Unknown error';
+        if (error) {
+          if (typeof error === 'string') {
+            errDetails = error;
+          } else {
+            errDetails = error.message || error.code || error.error || JSON.stringify(error);
+          }
+        }
+        showToast(`Google Sign-in failed: ${errDetails}`, 'error');
       }
     }
   };
