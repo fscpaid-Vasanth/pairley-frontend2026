@@ -371,8 +371,12 @@
     display: flex;
   }
 
+  .navbar__logo-img {
+    height: 38px;
+  }
+
   .navbar__spacer {
-    height: 60px;
+    height: 54px;
   }
 
   .navbar {

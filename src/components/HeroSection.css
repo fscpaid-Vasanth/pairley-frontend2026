@@ -378,3 +378,10 @@
     height: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto !important;
+    padding: var(--space-6) 0 !important;
+  }
+}

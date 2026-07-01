@@ -34,8 +34,10 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  signInWithCredential,
   signOut,
 } from 'firebase/auth';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC_x8crWxMXiaPI-I96tpvurzrX37g2FV8',
@@ -67,22 +69,34 @@ const isCapacitor = () =>
   window.Capacitor !== undefined &&
   window.Capacitor.isNativePlatform?.();
 
+// Initialize GoogleAuth for Capacitor
+if (isCapacitor()) {
+  try {
+    GoogleAuth.initialize({
+      clientId: '75280626707-7p2l9hdgbo4nokqfjrbsh17lkq6u0087.apps.googleusercontent.com',
+      scopes: ['profile', 'email'],
+      grantOfflineAccess: true,
+    });
+  } catch (e) {
+    console.error('GoogleAuth initialization error:', e);
+  }
+}
+
 /**
  * signInWithGoogle
  * ----------------
  * - On Web browser:  uses signInWithPopup (best UX, no page reload)
- * - On Capacitor Android/iOS: uses signInWithRedirect (required for WebViews)
- *
- * For redirect flow, call getGoogleRedirectResult() on your app's
- * root mount (e.g. in App.jsx useEffect) to capture the result.
+ * - On Capacitor Android/iOS: uses native GoogleAuth plugin and signInWithCredential
  */
 export const signInWithGoogle = async () => {
   try {
     if (isCapacitor()) {
-      // Android/iOS: use redirect flow — popup is blocked in WebViews
-      await signInWithRedirect(auth, googleProvider);
-      // After redirect returns, getGoogleRedirectResult() will resolve the user
-      return null;
+      // Android/iOS native: use @codetrix-studio/capacitor-google-auth
+      const googleUser = await GoogleAuth.signIn();
+      const idToken = googleUser.authentication.idToken;
+      const credential = GoogleAuthProvider.credential(idToken);
+      const result = await signInWithCredential(auth, credential);
+      return result.user;
     } else {
       // Web browser: use popup flow
       const result = await signInWithPopup(auth, googleProvider);

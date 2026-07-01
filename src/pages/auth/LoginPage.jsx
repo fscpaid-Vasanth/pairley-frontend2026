@@ -347,6 +347,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       const firebaseUser = await signInWithGoogle();
+      if (!firebaseUser) return;
       const checkPayload = {
         name: firebaseUser.displayName || 'Google User',
         email: firebaseUser.email,
