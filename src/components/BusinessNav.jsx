@@ -46,7 +46,7 @@ export default function BusinessNav() {
 
   return (
     <div className="business-nav container max-w-6xl mx-auto px-4 mb-6 print:hidden">
-      <div className="business-nav__inner bg-white border border-slate-200 p-2.5 rounded-2xl shadow-sm flex gap-1.5 overflow-x-auto scrollbar-none">
+      <div className="business-nav__inner bg-white border border-slate-200 p-2.5 rounded-2xl shadow-sm flex gap-1.5 overflow-x-auto">
         {navItems.map((item) => {
           const IconComponent = item.icon;
           const active = isActive(item.path);

@@ -17,6 +17,26 @@
 .business-nav__inner {
   backdrop-filter: blur(12px);
   background-color: rgba(255, 255, 255, 0.9);
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px !important;
+}
+
+.business-nav__inner::-webkit-scrollbar {
+  height: 4px;
+}
+
+.business-nav__inner::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 99px;
+}
+
+.business-nav__inner::-webkit-scrollbar-thumb {
+  background: rgba(78, 43, 196, 0.15);
+  border-radius: 99px;
+}
+
+.business-nav__inner::-webkit-scrollbar-thumb:hover {
+  background: rgba(78, 43, 196, 0.35);
 }
 
 /* Transition for active tabs */

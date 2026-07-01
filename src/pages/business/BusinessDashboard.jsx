@@ -250,9 +250,9 @@ export default function BusinessDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 flex items-center gap-2">
-              Welcome back, {business.business_name || business.businessName || 'Merchant'}! 📊
+          <div className="w-full md:w-auto">
+            <h2 className="text-xl md:text-3xl font-extrabold text-slate-800 break-words leading-tight">
+              Welcome back, <span className="text-[#4E2BC4]">{business.business_name || business.businessName || 'Merchant'}</span>! 📊
             </h2>
             <p className="text-sm text-slate-500 mt-1">Manage your storefront BOGO deals and tiered group discounts.</p>
           </div>
