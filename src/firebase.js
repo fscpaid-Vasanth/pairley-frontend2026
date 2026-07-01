@@ -38,6 +38,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC_x8crWxMXiaPI-I96tpvurzrX37g2FV8',
@@ -64,10 +65,7 @@ googleProvider.addScope('email');
  * Detect if running inside a Capacitor Android/iOS native wrapper.
  * window.Capacitor is injected by the Capacitor runtime.
  */
-const isCapacitor = () =>
-  typeof window !== 'undefined' &&
-  window.Capacitor !== undefined &&
-  window.Capacitor.isNativePlatform?.();
+const isCapacitor = () => Capacitor.isNativePlatform();
 
 // Initialize GoogleAuth for Capacitor
 if (isCapacitor()) {

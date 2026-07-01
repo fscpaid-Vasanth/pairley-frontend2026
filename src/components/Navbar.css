@@ -376,11 +376,16 @@
   }
 
   .navbar__spacer {
-    height: 54px;
+    height: calc(54px + env(safe-area-inset-top));
   }
 
   .navbar {
-    padding: var(--space-2) 0;
+    padding-top: calc(var(--space-2) + env(safe-area-inset-top));
+    padding-bottom: var(--space-2);
+  }
+
+  .navbar__inner {
+    padding: 0 calc(var(--space-4) + env(safe-area-inset-right)) 0 calc(var(--space-4) + env(safe-area-inset-left));
   }
 }
 

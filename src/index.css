@@ -161,6 +161,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 body::before, body::after {
