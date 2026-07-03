@@ -47,6 +47,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 // Providers
 import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
+import { LocationProvider } from './context/LocationContext';
 
 // Cart & Checkout Pages
 import CartPage from './pages/cart/CartPage';
@@ -216,6 +217,7 @@ function AppContent() {
   return (
     <div className="app-root flex flex-col min-h-screen">
       <ScrollToTop />
+      {/* LocationProvider is initialised inside AppContent so it can use navigate */}
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
           {/* Public Routes */}
@@ -456,9 +458,11 @@ export default function App() {
   return (
     <ToastProvider>
       <CartProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+        <LocationProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </LocationProvider>
       </CartProvider>
     </ToastProvider>
   );

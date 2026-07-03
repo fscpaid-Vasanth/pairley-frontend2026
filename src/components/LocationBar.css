@@ -1,0 +1,430 @@
+/* =========================================
+   LocationBar.css — Pairley V2.0 Premium
+   ========================================= */
+
+/* ── Keyframe Animations ── */
+@keyframes lb-pin-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.35); opacity: 0.7; }
+}
+
+@keyframes lb-shimmer {
+  0%   { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+@keyframes lb-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes lb-fadein {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Location Bar Container ── */
+.location-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(78, 43, 196, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(78, 43, 196, 0.12);
+  box-shadow: 0 2px 12px rgba(78, 43, 196, 0.06), 0 1px 3px rgba(0,0,0,0.04);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  user-select: none;
+}
+
+.location-bar:hover {
+  border-color: rgba(78, 43, 196, 0.22);
+  box-shadow: 0 4px 18px rgba(78, 43, 196, 0.1), 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* ── Left Section ── */
+.location-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Map Pin ── */
+.location-bar__pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4E2BC4;
+  flex-shrink: 0;
+  animation: lb-pin-pulse 2.8s ease-in-out infinite;
+}
+
+/* ── Location Text ── */
+.location-bar__text {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 0;
+  animation: lb-fadein 0.35s ease both;
+}
+
+.location-bar__area {
+  color: #4E2BC4;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.location-bar__separator {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.location-bar__city {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* ── Loading State ── */
+.location-bar__loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.location-bar__spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(78, 43, 196, 0.18);
+  border-top-color: #4E2BC4;
+  border-radius: 50%;
+  animation: lb-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.location-bar__loading-text {
+  background: linear-gradient(90deg, #d1d5db 25%, #e5e7eb 50%, #d1d5db 75%);
+  background-size: 400px 100%;
+  animation: lb-shimmer 1.4s infinite linear;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Enable Location Button ── */
+.location-bar__enable-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4E2BC4;
+  background: rgba(78, 43, 196, 0.1);
+  border: 1.5px solid rgba(78, 43, 196, 0.22);
+  border-radius: 99px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+}
+
+.location-bar__enable-btn:hover {
+  background: rgba(78, 43, 196, 0.16);
+  border-color: #4E2BC4;
+}
+
+/* ── Change Button ── */
+.location-bar__change {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4E2BC4;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+  flex-shrink: 0;
+  text-decoration: none;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color 0.18s, color 0.18s;
+  line-height: 1.2;
+}
+
+.location-bar__change:hover {
+  border-bottom-color: #4E2BC4;
+  color: #3b1fa8;
+}
+
+.location-bar__chevron {
+  transition: transform 0.2s;
+}
+
+.location-bar__change:hover .location-bar__chevron {
+  transform: rotate(180deg);
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+.location-bar__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 7, 30, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  /* Safe area for iOS */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (min-width: 480px) {
+  .location-bar__modal-overlay {
+    align-items: center;
+  }
+}
+
+.location-bar__modal {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px 32px;
+  box-shadow: 0 -8px 48px rgba(78, 43, 196, 0.14), 0 -2px 12px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Safe area bottom */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  max-height: 80vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 480px) {
+  .location-bar__modal {
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 420px;
+  }
+}
+
+/* Drag handle */
+.location-bar__modal::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 99px;
+  margin: 0 auto -8px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 480px) {
+  .location-bar__modal::before {
+    display: none;
+  }
+}
+
+/* Modal Header */
+.location-bar__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.location-bar__modal-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e1b4b;
+  margin: 0;
+}
+
+.location-bar__modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.location-bar__modal-close:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* Modal Form */
+.location-bar__modal-form {
+  width: 100%;
+}
+
+.location-bar__modal-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.location-bar__modal-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #9ca3af;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.location-bar__modal-input {
+  width: 100%;
+  padding: 11px 38px 11px 36px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(78, 43, 196, 0.2);
+  background: rgba(78, 43, 196, 0.03);
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e1b4b;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  font-family: inherit;
+}
+
+.location-bar__modal-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.location-bar__modal-input:focus {
+  border-color: #4E2BC4;
+  box-shadow: 0 0 0 3px rgba(78, 43, 196, 0.1);
+  background: #ffffff;
+}
+
+.location-bar__modal-clear {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.location-bar__modal-clear:hover {
+  background: #d1d5db;
+}
+
+/* GPS Button */
+.location-bar__modal-gps-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(78, 43, 196, 0.3);
+  background: rgba(78, 43, 196, 0.04);
+  color: #4E2BC4;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+  font-family: inherit;
+}
+
+.location-bar__modal-gps-btn:hover {
+  background: rgba(78, 43, 196, 0.09);
+  border-color: #4E2BC4;
+}
+
+/* Suggestions */
+.location-bar__modal-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.location-bar__modal-suggestions-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.location-bar__modal-city-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.location-bar__modal-city-btn {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(78, 43, 196, 0.15);
+  background: rgba(78, 43, 196, 0.03);
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.18s, background 0.18s, color 0.18s;
+  font-family: inherit;
+}
+
+.location-bar__modal-city-btn:hover {
+  border-color: #4E2BC4;
+  background: rgba(78, 43, 196, 0.08);
+  color: #4E2BC4;
+}
+
+.location-bar__modal-city-btn--active {
+  border-color: #4E2BC4;
+  background: rgba(78, 43, 196, 0.12);
+  color: #4E2BC4;
+  font-weight: 700;
+}

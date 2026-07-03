@@ -25,6 +25,7 @@ import { formatPrice } from '../../utils/constants';
 import DealCard from '../../components/DealCard';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
+import { getUserLocation, reverseGeocode } from '../../utils/geo';
 import './CreateDealPage.css';
 
 // Preset stock images for the merchant to choose from
@@ -120,6 +121,9 @@ export default function CreateDealPage() {
   const [originalPrice, setOriginalPrice] = useState('');
   const [pairleyPrice, setPairleyPrice] = useState('');
   const [location, setLocation] = useState('');
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [isDetectingLoc, setIsDetectingLoc] = useState(false);
   const [validDays, setValidDays] = useState('30');
   const [minParticipants, setMinParticipants] = useState('3');
   const [maxParticipants, setMaxParticipants] = useState('20');
@@ -435,7 +439,9 @@ export default function CreateDealPage() {
       offer_image: imagePlaceholder || null,
       facility_images: facilityImages,
       facility_details: JSON.stringify(staffList.filter(s => s.name.trim() || s.role.trim())),
-      whatsapp_number: whatsappNumber || null
+      whatsapp_number: whatsappNumber || null,
+      latitude: latitude,
+      longitude: longitude
     };
 
     api.post('/offers/create', payload)
@@ -1074,7 +1080,39 @@ export default function CreateDealPage() {
               )}
 
               <div className="form-group flex flex-col gap-1.5">
-                <label className="text-sm font-bold text-slate-700">Location / City</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-bold text-slate-700">Location / City</label>
+                  <button
+                    type="button"
+                    className="text-xs font-bold text-[#4E2BC4] hover:underline flex items-center gap-1 bg-none border-none p-0 cursor-pointer"
+                    disabled={isDetectingLoc}
+                    onClick={async () => {
+                      setIsDetectingLoc(true);
+                      try {
+                        const coords = await getUserLocation();
+                        if (coords?.lat) {
+                          setLatitude(coords.lat);
+                          setLongitude(coords.lng);
+                          const address = await reverseGeocode(coords.lat, coords.lng);
+                          if (address?.city) {
+                            setLocation(`${address.locality || address.area || address.city}, ${address.city}`);
+                          } else {
+                            setLocation(`${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
+                          }
+                          showToast('Shop location coordinates detected!', 'success');
+                        } else {
+                          showToast('Could not retrieve GPS coordinates.', 'error');
+                        }
+                      } catch (err) {
+                        showToast('Failed to detect location.', 'error');
+                      } finally {
+                        setIsDetectingLoc(false);
+                      }
+                    }}
+                  >
+                    📍 {isDetectingLoc ? 'Detecting...' : 'Detect Shop Location'}
+                  </button>
+                </div>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3.5 text-slate-400" size={16} />
                   <input
@@ -1091,6 +1129,11 @@ export default function CreateDealPage() {
                     required
                   />
                 </div>
+                {latitude && longitude && (
+                  <span className="text-[10px] text-emerald-600 font-bold mt-1">
+                    ✓ Coordinates Saved: {latitude.toFixed(5)}, {longitude.toFixed(5)}
+                  </span>
+                )}
                 {errors.location && (
                   <span className="error-text text-red-500 flex items-center gap-1 mt-1 text-xs font-medium">
                     <AlertCircle size={12} /> {errors.location}

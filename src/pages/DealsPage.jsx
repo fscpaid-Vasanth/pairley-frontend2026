@@ -1,11 +1,15 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, PackageSearch, Sun, Moon } from 'lucide-react';
+import { Search, SlidersHorizontal, PackageSearch, Sun, Moon, MapPin } from 'lucide-react';
 import DealCard from '../components/DealCard';
 import DealTypeToggle from '../components/DealTypeToggle';
 import CategorySection from '../components/CategorySection';
 import CustomDropdown from '../components/CustomDropdown';
+import LocationBar from '../components/LocationBar';
+import RadiusSelector from '../components/RadiusSelector';
+import { useLocationContext } from '../context/LocationContext';
+import { haversineDistance } from '../utils/geo';
 import { api } from '../utils/api';
 import { MALLS } from '../utils/constants';
 import SEO from '../components/SEO';
@@ -28,6 +32,7 @@ const SORT_OPTIONS = [
   { value: 'popular', label: 'Most Popular' },
   { value: 'savings', label: 'Biggest Savings' },
   { value: 'ending', label: 'Ending Soon' },
+  { value: 'nearby', label: '📍 Nearest First' },
 ];
 
 const DealsPage = () => {
@@ -37,6 +42,8 @@ const DealsPage = () => {
   const [dealType, setDealType] = useState('all'); // 'all' | 'pair' | 'group'
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [sortBy, setSortBy] = useState('newest');
+  const [radiusKm, setRadiusKm] = useState(5);
+  const { location: userLocation } = useLocationContext();
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
     return localStorage.getItem('deals-theme') === 'dark';
   });
@@ -167,12 +174,21 @@ const DealsPage = () => {
       case 'ending':
         deals.sort((a, b) => new Date(a.validUntil) - new Date(b.validUntil));
         break;
+      case 'nearby':
+        if (userLocation?.lat && userLocation?.lng) {
+          deals.sort((a, b) => {
+            const distA = a.latitude ? haversineDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude) : 999;
+            const distB = b.latitude ? haversineDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude) : 999;
+            return distA - distB;
+          });
+        }
+        break;
       default:
         break;
     }
 
     return deals;
-  }, [dealsList, dealType, selectedCategory, mallQuery, searchQuery, sortBy]);
+  }, [dealsList, dealType, selectedCategory, mallQuery, searchQuery, sortBy, userLocation, radiusKm]);
 
   return (
     <div className="page-wrapper">
@@ -187,6 +203,11 @@ const DealsPage = () => {
         <div className="deals-page-glow" />
 
         <div className="container">
+          {/* Location Bar */}
+          <div style={{ marginBottom: 16 }}>
+            <LocationBar />
+          </div>
+
           {/* Page heading */}
           <motion.div
             className="deals-page-header"
@@ -269,10 +290,18 @@ const DealsPage = () => {
             />
           </div>
 
+          {/* Radius Selector (shown when location is available) */}
+          {userLocation?.lat && (
+            <div style={{ marginBottom: 16 }}>
+              <RadiusSelector value={radiusKm} onChange={setRadiusKm} />
+            </div>
+          )}
+
           {/* Deal count */}
           <div className="deals-count">
             Showing <strong>{filteredDeals.length}</strong> deal
             {filteredDeals.length !== 1 ? 's' : ''}
+            {userLocation?.area && <span style={{ color: '#4E2BC4', fontWeight: 600, marginLeft: 6 }}>near {userLocation.area}</span>}
           </div>
 
           {/* Deals grid — or empty state */}
@@ -288,11 +317,16 @@ const DealsPage = () => {
               animate="visible"
               key={`${dealType}-${selectedCategory}-${sortBy}`}
             >
-              {filteredDeals.map((deal) => (
-                <motion.div key={deal.id} variants={cardVariants}>
-                  <DealCard deal={deal} />
-                </motion.div>
-              ))}
+              {filteredDeals.map((deal) => {
+                const distKm = (userLocation?.lat && deal.latitude)
+                  ? haversineDistance(userLocation.lat, userLocation.lng, deal.latitude, deal.longitude)
+                  : null;
+                return (
+                  <motion.div key={deal.id} variants={cardVariants}>
+                    <DealCard deal={deal} distance={distKm} />
+                  </motion.div>
+                );
+              })}
             </motion.div>
           ) : (
             <motion.div

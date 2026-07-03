@@ -19,6 +19,7 @@ import { formatPrice } from '../../utils/constants';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import BusinessNav from '../../components/BusinessNav';
 import { api } from '../../utils/api';
+import CustomerProximityCard from '../../components/CustomerProximityCard';
 import './BusinessDashboard.css';
 
 /* Stagger animation container */
@@ -388,6 +389,34 @@ export default function BusinessDashboard() {
           {/* Right Column: Live Feed & Merchant tips */}
           <div className="space-y-6">
             
+            {/* Customers Nearby (Hyperlocal Demand) */}
+            <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm">
+              <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                <Sparkles size={18} className="text-[#4E2BC4] animate-pulse" />
+                Customers Nearby (Within 5 KM)
+              </h3>
+              <div className="space-y-3">
+                <CustomerProximityCard 
+                  distance="450m" 
+                  interestedIn="Buy 1 Get 1 Pizza Offer" 
+                  joinedCount={1} 
+                  category="dining"
+                />
+                <CustomerProximityCard 
+                  distance="1.2 KM" 
+                  interestedIn="Gym 3-Month Gold Membership" 
+                  joinedCount={4} 
+                  category="fitness"
+                />
+                <CustomerProximityCard 
+                  distance="3.8 KM" 
+                  interestedIn="Hair Spa Premium Package" 
+                  joinedCount={2} 
+                  category="beauty"
+                />
+              </div>
+            </div>
+
             {/* Live activity log */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm">
               <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">

@@ -40,6 +40,8 @@ import {
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 
+import { getFirestore } from 'firebase/firestore';
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC_x8crWxMXiaPI-I96tpvurzrX37g2FV8',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'pairley2026-4706e.firebaseapp.com',
@@ -53,8 +55,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth
+// Initialize Auth & Firestore
 export const auth = getAuth(app);
+export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Add required OAuth scopes

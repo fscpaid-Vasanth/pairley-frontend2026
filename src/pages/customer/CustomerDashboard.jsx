@@ -19,6 +19,11 @@ import { getTimeGreeting, formatPrice, ROUTES } from '../../utils/constants';
 import { getCategoryById } from '../../data/categories';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import CustomerNav from '../../components/CustomerNav';
+import LocationBar from '../../components/LocationBar';
+import NearbyDealsSection from '../../components/NearbyDealsSection';
+import RadiusSelector from '../../components/RadiusSelector';
+import GroupSuggestionBanner from '../../components/GroupSuggestionBanner';
+import { useLocationContext } from '../../context/LocationContext';
 import { api } from '../../utils/api';
 import './CustomerDashboard.css';
 
@@ -48,7 +53,10 @@ export default function CustomerDashboard() {
   const [activeInterests, setActiveInterests] = useState([]);
   const [pairedDeals, setPairedDeals] = useState([]);
   const [recommended, setRecommended] = useState([]);
+  const [allDeals, setAllDeals] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [radiusKm, setRadiusKm] = useState(5);
+  const { location: userLocation } = useLocationContext();
   const [stats, setStats] = useState({
     activeInterestsCount: 0,
     pairedDealsCount: 0,
@@ -163,11 +171,13 @@ export default function CustomerDashboard() {
     api.get('/offers/list?status=ACTIVE')
       .then((data) => {
         setRecommended(data.slice(0, 3));
+        setAllDeals(data); // store all for nearby section
         setLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load recommended deals:', err);
         setRecommended([]);
+        setAllDeals([]);
         setLoading(false);
       });
   }, []);
@@ -179,6 +189,11 @@ export default function CustomerDashboard() {
   return (
     <div className="customer-dashboard page-wrapper py-6">
       <div className="container max-w-6xl mx-auto px-4">
+
+        {/* ===== Location Bar ===== */}
+        <div style={{ marginBottom: 16 }}>
+          <LocationBar />
+        </div>
         
         {/* ===== Header Block ===== */}
         <motion.div
@@ -470,6 +485,39 @@ export default function CustomerDashboard() {
           </motion.div>
 
         </div>
+
+        {/* ===== Nearby Deals Section ===== */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.25 }}
+        >
+          <div style={{ marginBottom: 16 }}>
+            <RadiusSelector value={radiusKm} onChange={setRadiusKm} />
+          </div>
+
+          <NearbyDealsSection
+            deals={allDeals.map(d => ({
+              ...d,
+              id: d.id || d._id,
+              pairleyPrice: d.offer_price || d.pairleyPrice,
+              originalPrice: d.original_price || d.originalPrice,
+              images: d.offer_image ? [d.offer_image] : d.images,
+              interestCount: d.joined_people || d.interestCount || 0,
+              maxParticipants: d.required_people || d.maxParticipants || 10,
+              latitude: d.latitude,
+              longitude: d.longitude,
+              city: d.city || d.location,
+            }))}
+            userLat={userLocation?.lat}
+            userLng={userLocation?.lng}
+            userCity={userLocation?.city}
+            radiusKm={radiusKm}
+            title="Deals Near You"
+            emoji="🔥"
+          />
+        </motion.div>
 
         {/* ===== Recommended For You ===== */}
         <motion.div

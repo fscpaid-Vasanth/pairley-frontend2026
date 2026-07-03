@@ -151,7 +151,89 @@
   background: #FFF5F5;
 }
 
-/* ── Card body ── */
+/* ── Share button ── */
+.deal-card__actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 3;
+}
+
+.deal-card__share {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(6px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deal-card__share:hover {
+  background: white;
+  transform: scale(1.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  color: #4E2BC4;
+}
+
+/* ── Distance Badge ── */
+.deal-card__distance-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(78,43,196,0.15);
+  color: #4E2BC4;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* ── Timer overlay ── */
+.deal-card__timer-wrap {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
+.deal-card__timer {
+  display: inline-block;
+  background: rgba(30,27,75,0.82);
+  backdrop-filter: blur(8px);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.01em;
+}
+
+.deal-card__timer--urgent {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  animation: timerPulse 1.2s ease-in-out infinite;
+}
+
+.deal-card__timer--expired {
+  background: rgba(100,100,100,0.75);
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
 .deal-card__content {
   padding: 14px 16px 16px;
 }
@@ -192,7 +274,6 @@
   font-size: 12px;
 }
 
-/* ── Joined badge ── */
 .deal-card__joined-badge {
   display: inline-flex;
   align-items: center;
@@ -202,6 +283,17 @@
   padding: 4px 10px;
   border-radius: 99px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.deal-card__urgency {
+  background: #FEF3C7;
+  color: #D97706;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 99px;
+  border: 1px solid #FDE68A;
 }
 
 .deal-card__joined-text {
@@ -274,6 +366,16 @@
   font-size: 13px;
   font-weight: 800;
   letter-spacing: -0.01em;
+}
+
+.deal-card__save-amount {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7C3AED;
+  background: rgba(124,58,237,0.07);
+  border-radius: 99px;
+  padding: 2px 8px;
+  border: 1px solid rgba(124,58,237,0.12);
 }
 
 /* ── Join CTA button shown on hover ── */
