@@ -82,30 +82,14 @@ const DealDetailPage = () => {
   const [storeCompletedInterests, setStoreCompletedInterests] = useState(0);
   const [verifyCodes, setVerifyCodes] = useState({});
 
-  const fetchStoreConversionRatio = (businessId) => {
-    if (!businessId) return;
-    api.get('/offers/interested-customers')
-      .then((offers) => {
-        let total = 0;
-        let completed = 0;
-        offers.forEach((o) => {
-          if (o.interests) {
-            o.interests.forEach((interest) => {
-              total++;
-              if (interest.status === 'COMPLETED') {
-                completed++;
-              }
-            });
-          }
-        });
-        setStoreTotalInterests(total);
-        setStoreCompletedInterests(completed);
-        const ratio = total > 0 ? Math.round((completed / total) * 100) : 0;
-        setConversionRatio(ratio);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch store conversion ratio:', err);
-      });
+  const fetchStoreConversionRatio = (interestsList) => {
+    const list = interestsList || [];
+    const total = list.length;
+    const completed = list.filter(i => i.status === 'COMPLETED').length;
+    setStoreTotalInterests(total);
+    setStoreCompletedInterests(completed);
+    const ratio = total > 0 ? Math.round((completed / total) * 100) : 0;
+    setConversionRatio(ratio);
   };
 
   const fetchDealDetails = () => {
@@ -141,7 +125,7 @@ const DealDetailPage = () => {
 
         const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
         if (mapped.businessOwner.id === currentUser?.id) {
-          fetchStoreConversionRatio(mapped.businessOwner.id);
+          fetchStoreConversionRatio(mapped.interests);
         }
       })
       .catch((err) => {
@@ -623,7 +607,7 @@ const DealDetailPage = () => {
                             <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl"></div>
                             <h4 className="text-xs font-extrabold text-[#4E2BC4] mb-2.5 flex items-center gap-1.5 uppercase tracking-wider">
                               <span className="material-symbols-outlined text-[#4E2BC4] animate-pulse" style={{ fontSize: 18 }}>analytics</span>
-                              Store Performance
+                              Deal Performance
                             </h4>
                             <div className="flex items-center justify-between">
                               <div>
