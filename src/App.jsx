@@ -22,6 +22,11 @@ import SupportPage from './pages/SupportPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
+// Marketing Pages (investor-ready, own layout)
+import LandingPage from './pages/marketing/LandingPage';
+import MerchantPage from './pages/marketing/MerchantPage';
+import CustomerMarketingPage from './pages/marketing/CustomerMarketingPage';
+
 // Auth Pages
 import SignUpPage from './pages/auth/SignUpPage';
 import LoginPage from './pages/auth/LoginPage';
@@ -220,9 +225,14 @@ function AppContent() {
       {/* LocationProvider is initialised inside AppContent so it can use navigate */}
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
-          {/* Public Routes */}
+          {/* Marketing Routes — own layout, no AppLayout wrapper */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/customer" element={<CustomerMarketingPage />} />
+          <Route path="/merchant" element={<MerchantPage />} />
+
+          {/* Legacy home fallback */}
           <Route
-            path={ROUTES.HOME}
+            path="/home"
             element={
               <AppLayout>
                 <HomePage />
