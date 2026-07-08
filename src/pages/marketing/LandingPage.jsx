@@ -80,6 +80,13 @@ const LandingPage = () => {
   const [selectedMall, setSelectedMall] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  const [stats, setStats] = useState([
+    { label: 'Active Deals', value: '124', suffix: '+', icon: Store, color: 'text-brand-purple-light' },
+    { label: 'Smart Shoppers', value: '5,200', suffix: '+', icon: Users, color: 'text-brand-green' },
+    { label: 'Money Saved', value: '₹2.4L', suffix: '+', icon: Star, color: 'text-yellow-400' },
+    { label: 'Match Rate', value: '95', suffix: '%', icon: MapPin, color: 'text-rose-400' },
+  ]);
+
   // Dynamic user session check
   const [authUser, setAuthUser] = useState(() => {
     try {
@@ -114,6 +121,28 @@ const LandingPage = () => {
       .catch((err) => {
         console.error('Failed to load live deals:', err);
         setLoadingDeals(false);
+      });
+
+    // Fetch public stats
+    api.get('/public/stats')
+      .then((data) => {
+        let moneyStr = '₹0';
+        if (data.moneySaved >= 10000000) {
+          moneyStr = `₹${(data.moneySaved / 10000000).toFixed(1)}Cr`;
+        } else if (data.moneySaved >= 100000) {
+          moneyStr = `₹${(data.moneySaved / 100000).toFixed(1)}L`;
+        } else {
+          moneyStr = `₹${data.moneySaved.toLocaleString('en-IN')}`;
+        }
+        setStats([
+          { label: 'Active Deals', value: data.dealsListed.toString(), suffix: '+', icon: Store, color: 'text-brand-purple-light' },
+          { label: 'Smart Shoppers', value: data.usersPaired.toLocaleString('en-IN'), suffix: '+', icon: Users, color: 'text-brand-green' },
+          { label: 'Money Saved', value: moneyStr, suffix: '', icon: Star, color: 'text-yellow-400' },
+          { label: 'Match Rate', value: data.matchRate.toString(), suffix: '%', icon: MapPin, color: 'text-rose-400' },
+        ]);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch public stats:', err);
       });
 
     // Inject Google Font Inter dynamically
@@ -804,18 +833,13 @@ const LandingPage = () => {
       <section className="py-20 bg-gray-950 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
-            {[
-              { label: 'Merchants', value: 500, suffix: '+', icon: Store, color: 'text-brand-purple-light' },
-              { label: 'Customers', value: 10000, suffix: '+', icon: Users, color: 'text-brand-green' },
-              { label: 'Rating', value: 4, suffix: '.8 Stars', icon: Star, color: 'text-yellow-400' },
-              { label: 'Cities', value: 25, suffix: '+', icon: MapPin, color: 'text-rose-400' },
-            ].map((stat, i) => (
+            {stats.map((stat, i) => (
               <div key={stat.label} className="flex flex-col items-center gap-3 text-center">
                 <div className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center ${stat.color}`}>
                   <stat.icon size={22} />
                 </div>
                 <div className={`text-4xl sm:text-5xl font-black ${stat.color}`}>
-                  {stat.value.toLocaleString('en-IN')}{stat.suffix}
+                  {stat.value}{stat.suffix}
                 </div>
                 <div className="text-white/40 text-sm font-semibold uppercase tracking-widest">
                   {stat.label}
