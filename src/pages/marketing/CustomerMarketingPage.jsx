@@ -492,7 +492,7 @@ function HeroSection() {
         className="absolute inset-0 opacity-40"
         style={{
           backgroundImage: `radial-gradient(circle at 20% 50%, #6D28D9 0%, transparent 50%),
-                            radial-gradient(circle at 80% 20%, #10B981 0%, transparent 50%),
+                            radial-gradient(circle at 80% 20%, #22C55E 0%, transparent 50%),
                             radial-gradient(circle at 50% 80%, #4338CA 0%, transparent 50%)`,
         }}
         animate={{ opacity: [0.3, 0.5, 0.3] }}
@@ -959,9 +959,9 @@ function PhoneMockupSVG() {
       <text x="50" y="140" textAnchor="middle" fontSize="14">🍕</text>
       <rect x="74" y="122" width="80" height="7" rx="3.5" fill="#e0e7ff" opacity="0.8" />
       <rect x="74" y="134" width="110" height="6" rx="3" fill="#a5b4fc" opacity="0.5" />
-      <rect x="74" y="148" width="50" height="7" rx="3.5" fill="#10B981" opacity="0.7" />
-      <rect x="24" y="167" width="232" height="14" rx="7" fill="#10B981" opacity="0.25" />
-      <rect x="90" y="169" width="100" height="10" rx="5" fill="#10B981" opacity="0.6" />
+      <rect x="74" y="148" width="50" height="7" rx="3.5" fill="#22C55E" opacity="0.7" />
+      <rect x="24" y="167" width="232" height="14" rx="7" fill="#22C55E" opacity="0.25" />
+      <rect x="90" y="169" width="100" height="10" rx="5" fill="#22C55E" opacity="0.6" />
       {/* Card 2 */}
       <rect x="24" y="197" width="232" height="80" rx="16" fill="#0f172a" />
       <rect x="24" y="197" width="232" height="4" rx="2" fill="url(#g2)" />
@@ -969,9 +969,9 @@ function PhoneMockupSVG() {
       <text x="50" y="232" textAnchor="middle" fontSize="14">🏋️</text>
       <rect x="74" y="214" width="70" height="7" rx="3.5" fill="#e0e7ff" opacity="0.8" />
       <rect x="74" y="226" width="100" height="6" rx="3" fill="#93c5fd" opacity="0.5" />
-      <rect x="74" y="240" width="50" height="7" rx="3.5" fill="#10B981" opacity="0.7" />
-      <rect x="24" y="259" width="232" height="14" rx="7" fill="#10B981" opacity="0.25" />
-      <rect x="90" y="261" width="100" height="10" rx="5" fill="#10B981" opacity="0.6" />
+      <rect x="74" y="240" width="50" height="7" rx="3.5" fill="#22C55E" opacity="0.7" />
+      <rect x="24" y="259" width="232" height="14" rx="7" fill="#22C55E" opacity="0.25" />
+      <rect x="90" y="261" width="100" height="10" rx="5" fill="#22C55E" opacity="0.6" />
       {/* Card 3 */}
       <rect x="24" y="289" width="232" height="80" rx="16" fill="#1a0f2e" />
       <rect x="24" y="289" width="232" height="4" rx="2" fill="url(#g3)" />
@@ -979,15 +979,15 @@ function PhoneMockupSVG() {
       <text x="50" y="324" textAnchor="middle" fontSize="14">💇</text>
       <rect x="74" y="306" width="90" height="7" rx="3.5" fill="#f0abfc" opacity="0.8" />
       <rect x="74" y="318" width="80" height="6" rx="3" fill="#e879f9" opacity="0.5" />
-      <rect x="74" y="332" width="50" height="7" rx="3.5" fill="#10B981" opacity="0.7" />
-      <rect x="24" y="351" width="232" height="14" rx="7" fill="#10B981" opacity="0.25" />
-      <rect x="90" y="353" width="100" height="10" rx="5" fill="#10B981" opacity="0.6" />
+      <rect x="74" y="332" width="50" height="7" rx="3.5" fill="#22C55E" opacity="0.7" />
+      <rect x="24" y="351" width="232" height="14" rx="7" fill="#22C55E" opacity="0.25" />
+      <rect x="90" y="353" width="100" height="10" rx="5" fill="#22C55E" opacity="0.6" />
       {/* Bottom bar */}
       <rect x="24" y="385" width="232" height="142" rx="20" fill="#111827" opacity="0.9" />
       <text x="140" y="415" textAnchor="middle" fontSize="13" fill="#6D28D9" fontWeight="bold">Pairley</text>
       <rect x="60" y="426" width="160" height="5" rx="2.5" fill="#374151" opacity="0.4" />
       <rect x="80" y="436" width="120" height="5" rx="2.5" fill="#374151" opacity="0.3" />
-      <rect x="50" y="452" width="50" height="26" rx="8" fill="#10B981" opacity="0.3" />
+      <rect x="50" y="452" width="50" height="26" rx="8" fill="#22C55E" opacity="0.3" />
       <rect x="115" y="452" width="50" height="26" rx="8" fill="#6D28D9" opacity="0.3" />
       <rect x="180" y="452" width="50" height="26" rx="8" fill="#1e40af" opacity="0.3" />
       <rect x="44" y="500" width="36" height="6" rx="3" fill="#6D28D9" opacity="0.8" />
@@ -1255,3 +1255,4 @@ export default function CustomerMarketingPage() {
     </div>
   );
 }
+

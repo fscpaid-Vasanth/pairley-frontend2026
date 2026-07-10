@@ -169,7 +169,7 @@ export default function DealCard({ deal, onClick, distance }) {
 
           {/* Joined badge */}
           <div className="deal-card__joined-badge">
-            <Users size={12} color="#4E2BC4" />
+            <Users size={12} color="#5B12D6" />
             <span className="deal-card__joined-text">{joinedText}</span>
             {remaining > 0 && remaining <= 5 && (
               <span className="deal-card__urgency">Only {remaining} left!</span>
@@ -180,7 +180,7 @@ export default function DealCard({ deal, onClick, distance }) {
           <div className="deal-card__progress-wrap">
             <div className="deal-card__progress-label">
               <span>Group filling up</span>
-              <span style={{ color: '#4E2BC4', fontWeight: 800 }}>{progressPct}%</span>
+              <span style={{ color: '#5B12D6', fontWeight: 800 }}>{progressPct}%</span>
             </div>
             <div className="deal-card__progress-bar">
               <motion.div
@@ -216,3 +216,4 @@ export default function DealCard({ deal, onClick, distance }) {
     </motion.div>
   );
 }
+

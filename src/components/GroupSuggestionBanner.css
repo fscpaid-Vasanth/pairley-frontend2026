@@ -4,7 +4,7 @@
 
 /* ── Keyframes ── */
 @keyframes gsb-border-glow {
-  0%, 100% { border-left-color: #4E2BC4; }
+  0%, 100% { border-left-color: #5B12D6; }
   50%       { border-left-color: #7C3AED; }
 }
 
@@ -18,7 +18,7 @@
   position: relative;
   background: rgba(78, 43, 196, 0.04);
   border: 1px solid rgba(78, 43, 196, 0.14);
-  border-left: 4px solid #4E2BC4;
+  border-left: 4px solid #5B12D6;
   border-radius: 16px;
   padding: 16px 20px;
   margin-bottom: 16px;
@@ -78,7 +78,7 @@
   height: 24px;
   background: rgba(78, 43, 196, 0.12);
   border-radius: 6px;
-  color: #4E2BC4;
+  color: #5B12D6;
   flex-shrink: 0;
 }
 
@@ -109,7 +109,7 @@
 .group-banner__deal-title {
   font-size: 12px;
   font-weight: 600;
-  color: #4E2BC4;
+  color: #5B12D6;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -128,7 +128,7 @@
 
 .group-banner__sub strong {
   font-weight: 800;
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 /* ── CTA Button ── */
@@ -139,7 +139,7 @@
   flex-shrink: 0;
   padding: 8px 20px;
   border-radius: 99px;
-  background: linear-gradient(135deg, #4E2BC4 0%, #6D28D9 100%);
+  background: linear-gradient(135deg, #5B12D6 0%, #6D28D9 100%);
   color: #ffffff;
   font-size: 13px;
   font-weight: 800;
@@ -170,7 +170,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #10b981;
+  background: #22C55E;
   animation: gsb-pulse-dot 1.8s ease-in-out infinite;
 }
 
@@ -190,3 +190,4 @@
     font-size: 12px;
   }
 }
+

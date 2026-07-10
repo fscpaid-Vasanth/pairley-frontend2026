@@ -22,7 +22,7 @@
 
 .create-deal-page__progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4E2BC4 0%, #7C3AED 100%);
+  background: linear-gradient(90deg, #5B12D6 0%, #7C3AED 100%);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 10px rgba(78, 43, 196, 0.4);
 }
@@ -59,8 +59,8 @@
 }
 
 .create-deal-page__step-num:hover:not(:disabled) {
-  border-color: #4E2BC4;
-  color: #4E2BC4;
+  border-color: #5B12D6;
+  color: #5B12D6;
   transform: translateY(-1px);
 }
 
@@ -70,22 +70,22 @@
 
 /* Active State */
 .create-deal-page__step--active .create-deal-page__step-num {
-  background: #4E2BC4;
-  border-color: #4E2BC4;
+  background: #5B12D6;
+  border-color: #5B12D6;
   color: white;
   box-shadow: 0 0 15px rgba(78, 43, 196, 0.35);
   transform: scale(1.08);
 }
 
 .create-deal-page__step--active .create-deal-page__step-label {
-  color: #4E2BC4;
+  color: #5B12D6;
   font-weight: 700;
 }
 
 /* Done State */
 .create-deal-page__step--done .create-deal-page__step-num {
-  background: var(--success, #10B981);
-  border-color: var(--success, #10B981);
+  background: var(--success, #22C55E);
+  border-color: var(--success, #22C55E);
   color: white;
 }
 
@@ -124,8 +124,8 @@
 }
 
 .create-deal-page__preset-card--active {
-  border-color: #4E2BC4;
-  box-shadow: 0 0 0 1px #4E2BC4, 0 4px 12px rgba(78, 43, 196, 0.2);
+  border-color: #5B12D6;
+  box-shadow: 0 0 0 1px #5B12D6, 0 4px 12px rgba(78, 43, 196, 0.2);
 }
 
 .create-deal-page__preset-img {
@@ -160,7 +160,7 @@
 .form-input:focus,
 .form-textarea:focus {
   box-shadow: 0 0 0 3px rgba(78, 43, 196, 0.12);
-  border-color: #4E2BC4;
+  border-color: #5B12D6;
 }
 
 /* Custom transitions and animation timings */
@@ -184,3 +184,4 @@
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   }
 }
+

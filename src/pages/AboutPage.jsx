@@ -142,7 +142,7 @@ export default function AboutPage() {
         
         <div className="container max-w-4xl mx-auto px-4">
           <motion.span 
-            className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#4E2BC4] bg-[#4E2BC4]/10 border border-[#4E2BC4]/20 inline-block mb-4"
+            className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#5B12D6] bg-[#5B12D6]/10 border border-[#5B12D6]/20 inline-block mb-4"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
@@ -155,7 +155,7 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            We are Redefining <span className="bg-gradient-to-r from-[#4E2BC4] to-[#6D4EE3] bg-clip-text text-transparent">Collaborative Commerce</span>
+            We are Redefining <span className="bg-gradient-to-r from-[#5B12D6] to-[#7C3AED] bg-clip-text text-transparent">Collaborative Commerce</span>
           </motion.h1>
           <motion.p 
             className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed"
@@ -173,7 +173,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white/70 backdrop-blur-md border border-slate-200/60 p-6 md:p-8 rounded-3xl shadow-lg">
           {stats.map((stat, idx) => (
             <div key={idx} className="text-center p-3 border-r last:border-0 border-slate-200/60 last:border-r-0">
-              <div className="text-2xl md:text-3xl font-extrabold text-[#4E2BC4]">{stat.value}</div>
+              <div className="text-2xl md:text-3xl font-extrabold text-[#5B12D6]">{stat.value}</div>
               <div className="text-xs font-semibold text-slate-700 mt-1">{stat.label}</div>
               <div className="text-[10px] text-slate-400 mt-0.5">{stat.desc}</div>
             </div>
@@ -190,7 +190,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex items-center gap-2.5 mb-4 text-[#4E2BC4]">
+            <div className="flex items-center gap-2.5 mb-4 text-[#5B12D6]">
               <Sparkles size={20} className="text-purple-600" />
               <span className="text-xs font-bold uppercase tracking-wider">How we started</span>
             </div>
@@ -264,7 +264,7 @@ export default function AboutPage() {
                   <div className={`p-3.5 rounded-xl mb-4 border flex items-center justify-center transition-all duration-300 ${adv.colorClass}`}>
                     <Icon size={22} />
                   </div>
-                  <h3 className="font-bold text-slate-800 text-sm mb-2 group-hover:text-[#4E2BC4] transition-colors duration-200">{adv.title}</h3>
+                  <h3 className="font-bold text-slate-800 text-sm mb-2 group-hover:text-[#5B12D6] transition-colors duration-200">{adv.title}</h3>
                   <p className="text-[11px] text-slate-500 leading-relaxed">{adv.description}</p>
                 </motion.div>
               );
@@ -290,7 +290,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
             >
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#4E2BC4] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#5B12D6] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               
               <ImageWithFallback
                 src={member.avatar}
@@ -302,13 +302,13 @@ export default function AboutPage() {
               
               <h3 className="font-bold text-slate-800 text-base flex justify-center items-center gap-1.5">
                 {member.name}
-                <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-[#4E2BC4] hover:text-[#6D4EE3] inline-flex items-center">
+                <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-[#5B12D6] hover:text-[#7C3AED] inline-flex items-center">
                   <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                   </svg>
                 </a>
               </h3>
-              <p className="text-xs font-semibold text-[#4E2BC4] uppercase tracking-wider mt-1 mb-3">{member.role}</p>
+              <p className="text-xs font-semibold text-[#5B12D6] uppercase tracking-wider mt-1 mb-3">{member.role}</p>
               <p className="text-xs text-slate-500 italic leading-relaxed">"{member.bio}"</p>
             </motion.div>
           ))}
@@ -419,7 +419,7 @@ export default function AboutPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#4E2BC4] hover:bg-[#6D4EE3] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                  className="w-full py-3 bg-[#5B12D6] hover:bg-[#7C3AED] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
                   disabled={submitted}
                 >
                   Submit Inquiry
@@ -432,4 +432,5 @@ export default function AboutPage() {
     </div>
   );
 }
+
 

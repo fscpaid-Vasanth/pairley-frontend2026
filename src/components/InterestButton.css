@@ -66,7 +66,7 @@
 }
 
 .interest-btn--paired {
-  background: linear-gradient(135deg, var(--success), #059669);
+  background: linear-gradient(135deg, var(--success), #16a34a);
   color: white;
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
@@ -83,3 +83,4 @@
   color: var(--success-light);
   font-weight: 500;
 }
+

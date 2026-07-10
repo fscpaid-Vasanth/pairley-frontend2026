@@ -82,3 +82,4 @@ export default function PricingTierCard({ tiers, currentCount, maxParticipants }
     </div>
   );
 }
+

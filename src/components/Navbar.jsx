@@ -351,7 +351,7 @@ export default function Navbar({ onSearchClick }) {
                     fontWeight: 700,
                     background: '#FFF',
                     border: '1px solid #E2E8F0',
-                    color: '#4E2BC4',
+                    color: '#5B12D6',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
@@ -369,7 +369,7 @@ export default function Navbar({ onSearchClick }) {
                     borderRadius: '12px',
                     fontSize: '13px',
                     fontWeight: 700,
-                    background: '#4E2BC4',
+                    background: '#5B12D6',
                     color: '#FFF',
                     display: 'flex',
                     alignItems: 'center',
@@ -570,3 +570,4 @@ export default function Navbar({ onSearchClick }) {
     </>
   );
 }
+

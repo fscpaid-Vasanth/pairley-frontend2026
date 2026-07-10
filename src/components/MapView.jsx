@@ -50,7 +50,7 @@ const DARK_MAP_STYLES = [
   {
     featureType: 'road.highway',
     elementType: 'geometry',
-    stylers: [{ color: '#4e2bc4' }],
+    stylers: [{ color: '#5B12D6' }],
   },
   {
     featureType: 'road.highway',
@@ -80,7 +80,7 @@ const DARK_MAP_STYLES = [
   {
     featureType: 'water',
     elementType: 'labels.text.fill',
-    stylers: [{ color: '#4e2bc4' }],
+    stylers: [{ color: '#5B12D6' }],
   },
   {
     featureType: 'water',
@@ -162,7 +162,7 @@ function InnerMap({ deals, userLat, userLng, onDealClick }) {
   const dealIcon = useMemo(
     () => ({
       path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
-      fillColor: '#4e2bc4',
+      fillColor: '#5B12D6',
       fillOpacity: 1,
       strokeColor: '#ffffff',
       strokeWeight: 1.5,
@@ -303,7 +303,7 @@ function InnerMap({ deals, userLat, userLng, onDealClick }) {
                   style={{
                     fontWeight: 800,
                     fontSize: 14,
-                    color: '#4e2bc4',
+                    color: '#5B12D6',
                   }}
                 >
                   ₹{pairleyPrice.toLocaleString('en-IN')}
@@ -336,7 +336,7 @@ function InnerMap({ deals, userLat, userLng, onDealClick }) {
                 style={{
                   marginTop: 6,
                   fontSize: 11,
-                  color: '#4e2bc4',
+                  color: '#5B12D6',
                   fontWeight: 600,
                   textDecoration: 'underline',
                 }}
@@ -407,3 +407,4 @@ export default function MapView({ deals = [], userLat, userLng, onDealClick }) {
     </div>
   );
 }
+

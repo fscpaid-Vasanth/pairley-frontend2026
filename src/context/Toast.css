@@ -38,11 +38,11 @@
 
 /* Success Toast */
 .toast-item--success::before {
-  background: #10b981; /* Emerald 500 */
+  background: #22C55E; /* Emerald 500 */
 }
 
 .toast-item--success .toast-item__icon {
-  color: #10b981;
+  color: #22C55E;
 }
 
 /* Error Toast */
@@ -111,3 +111,4 @@
     border-radius: 12px;
   }
 }
+

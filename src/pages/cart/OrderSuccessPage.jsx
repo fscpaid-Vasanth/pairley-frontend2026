@@ -73,9 +73,9 @@ export default function OrderSuccessPage() {
         </div>
 
         {/* Sharing boost card */}
-        <div className="bg-[#4E2BC4]/5 border border-[#4E2BC4]/10 p-5 rounded-3xl w-full text-left flex flex-col gap-4">
+        <div className="bg-[#5B12D6]/5 border border-[#5B12D6]/10 p-5 rounded-3xl w-full text-left flex flex-col gap-4">
           <div>
-            <h4 className="text-sm font-bold text-[#4E2BC4] flex items-center gap-1.5">
+            <h4 className="text-sm font-bold text-[#5B12D6] flex items-center gap-1.5">
               <Share2 size={16} />
               Boost Your Match Speed!
             </h4>
@@ -114,7 +114,7 @@ export default function OrderSuccessPage() {
 
         {/* Page redirects */}
         <div className="flex flex-col sm:flex-row gap-3 w-full justify-center mt-2">
-          <Link to="/deals" className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition">
+          <Link to="/deals" className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition">
             <Tag size={16} /> Continue Browsing
           </Link>
           <Link to="/customer/dashboard" className="btn btn-outline border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all">
@@ -126,3 +126,4 @@ export default function OrderSuccessPage() {
     </div>
   );
 }
+

@@ -24,7 +24,7 @@ export default function CartPage() {
         
         {/* Page Title */}
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-          <ShoppingBag className="text-[#4E2BC4]" size={28} />
+          <ShoppingBag className="text-[#5B12D6]" size={28} />
           <div>
             <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Shopping Cart</h2>
             <p className="text-sm text-slate-500 mt-0.5">Review your matching purchases and unlock split pricing.</p>
@@ -56,7 +56,7 @@ export default function CartPage() {
                           <ImageWithFallback src={item.images?.[0]} alt={item.title} fallbackType="deal" category={item.category} className="w-full h-full object-cover" />
                         </div>
                         <div className="text-left">
-                          <span className="text-[10px] text-[#4E2BC4] font-extrabold uppercase tracking-wider">
+                          <span className="text-[10px] text-[#5B12D6] font-extrabold uppercase tracking-wider">
                             {cat?.icon} {cat?.name}
                           </span>
                           <h4 className="font-bold text-slate-800 text-sm md:text-base line-clamp-1">
@@ -95,7 +95,7 @@ export default function CartPage() {
 
                         {/* Price tags */}
                         <div className="text-right">
-                          <span className="block font-extrabold text-[#4E2BC4] text-base">
+                          <span className="block font-extrabold text-[#5B12D6] text-base">
                             {formatPrice(item.pairleyPrice * item.quantity)}
                           </span>
                           <span className="block text-xs text-slate-400 line-through">
@@ -150,9 +150,9 @@ export default function CartPage() {
               </div>
 
               {/* Matchmaking alert banner */}
-              <div className="bg-[#4E2BC4]/5 border border-[#4E2BC4]/10 p-4 rounded-2xl flex gap-2 text-left">
-                <AlertCircle className="text-[#4E2BC4] flex-shrink-0 mt-0.5" size={16} />
-                <div className="text-[11px] text-[#4E2BC4] font-semibold leading-relaxed">
+              <div className="bg-[#5B12D6]/5 border border-[#5B12D6]/10 p-4 rounded-2xl flex gap-2 text-left">
+                <AlertCircle className="text-[#5B12D6] flex-shrink-0 mt-0.5" size={16} />
+                <div className="text-[11px] text-[#5B12D6] font-semibold leading-relaxed">
                   <p className="font-bold">Direct Contact BOGO Policy</p>
                   <p className="text-indigo-950/80 mt-1 font-medium">
                     No payment is collected within this app. Once you submit interest, your details are shared with the merchant, who will call or WhatsApp you directly to complete the BOGO match and final sale.
@@ -162,7 +162,7 @@ export default function CartPage() {
 
               {/* Buttons */}
               <div className="flex flex-col gap-2">
-                <Link to="/checkout" className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-indigo-600/10 transition">
+                <Link to="/checkout" className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-md shadow-indigo-600/10 transition">
                   Proceed to Checkout <ArrowRight size={16} />
                 </Link>
                 <Link to="/deals" className="btn btn-outline border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center gap-1.5 transition">
@@ -184,7 +184,7 @@ export default function CartPage() {
             <p className="text-sm text-slate-400 max-w-xs leading-relaxed">
               Unlock better pricing by pairing up with others. Discover trending gadgets, spa services, or dining deals.
             </p>
-            <Link to="/deals" className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold px-6 py-2.5 rounded-xl mt-2 flex items-center gap-1.5 shadow-md shadow-indigo-600/10">
+            <Link to="/deals" className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold px-6 py-2.5 rounded-xl mt-2 flex items-center gap-1.5 shadow-md shadow-indigo-600/10">
               <Tag size={16} /> Find Deals Now
             </Link>
           </motion.div>
@@ -193,3 +193,4 @@ export default function CartPage() {
     </div>
   );
 }
+

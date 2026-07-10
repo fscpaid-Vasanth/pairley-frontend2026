@@ -95,7 +95,7 @@ export default function CheckoutPage() {
         <AlertCircle className="text-slate-400 mb-3" size={48} />
         <h3 className="text-xl font-bold text-slate-800">Your cart is empty</h3>
         <p className="text-sm text-slate-500 mt-1">Add items to your cart before checking out.</p>
-        <Link to="/deals" className="btn btn-primary bg-[#4E2BC4] text-white px-5 py-2 mt-4 rounded-xl font-bold">
+        <Link to="/deals" className="btn btn-primary bg-[#5B12D6] text-white px-5 py-2 mt-4 rounded-xl font-bold">
           View Active Offers
         </Link>
       </div>
@@ -124,7 +124,7 @@ export default function CheckoutPage() {
             {/* Delivery address Card */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-3">
-                <MapPin size={18} className="text-[#4E2BC4]" />
+                <MapPin size={18} className="text-[#5B12D6]" />
                 Delivery Details
               </h3>
               
@@ -136,7 +136,7 @@ export default function CheckoutPage() {
                     name="name"
                     value={form.name}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     placeholder="e.g. Arjun Mehta"
                   />
                   {errors.name && <span className="text-[10px] text-red-500 font-bold">{errors.name}</span>}
@@ -149,7 +149,7 @@ export default function CheckoutPage() {
                     name="email"
                     value={form.email}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     placeholder="arjun@example.com"
                   />
                   {errors.email && <span className="text-[10px] text-red-500 font-bold">{errors.email}</span>}
@@ -162,7 +162,7 @@ export default function CheckoutPage() {
                     name="phone"
                     value={form.phone}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.phone ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.phone ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     placeholder="9876543210"
                   />
                   {errors.phone && <span className="text-[10px] text-red-500 font-bold">{errors.phone}</span>}
@@ -175,7 +175,7 @@ export default function CheckoutPage() {
                     name="address"
                     value={form.address}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.address ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.address ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     placeholder="Apt, Suite, Street name"
                   />
                   {errors.address && <span className="text-[10px] text-red-500 font-bold">{errors.address}</span>}
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
                     name="city"
                     value={form.city}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.city ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.city ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     placeholder="e.g. Bangalore"
                   />
                   {errors.city && <span className="text-[10px] text-red-500 font-bold">{errors.city}</span>}
@@ -201,7 +201,7 @@ export default function CheckoutPage() {
                     name="zipCode"
                     value={form.zipCode}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.zipCode ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 text-xs outline-none transition ${errors.zipCode ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     placeholder="560001"
                   />
                   {errors.zipCode && <span className="text-[10px] text-red-500 font-bold">{errors.zipCode}</span>}
@@ -212,12 +212,12 @@ export default function CheckoutPage() {
             {/* Direct Contact Matching Card */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-3">
-                <ShieldCheck size={18} className="text-[#4E2BC4]" />
+                <ShieldCheck size={18} className="text-[#5B12D6]" />
                 Direct Merchant Match Fulfillment
               </h3>
 
-              <div className="bg-[#4E2BC4]/5 border border-[#4E2BC4]/10 p-4.5 rounded-2xl text-[11px] text-slate-600 font-semibold leading-relaxed text-left flex gap-2.5">
-                <AlertCircle className="text-[#4E2BC4] flex-shrink-0 mt-0.5" size={16} />
+              <div className="bg-[#5B12D6]/5 border border-[#5B12D6]/10 p-4.5 rounded-2xl text-[11px] text-slate-600 font-semibold leading-relaxed text-left flex gap-2.5">
+                <AlertCircle className="text-[#5B12D6] flex-shrink-0 mt-0.5" size={16} />
                 <div>
                   <p className="font-extrabold text-slate-800 text-xs">Direct Offline Contact Model</p>
                   <p className="mt-1 leading-relaxed text-slate-500">
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                       setAgreedToHold(e.target.checked);
                       if (errors.agreement) setErrors({ ...errors, agreement: null });
                     }}
-                    className="mt-1 flex-shrink-0 accent-[#4E2BC4]"
+                    className="mt-1 flex-shrink-0 accent-[#5B12D6]"
                   />
                   <span className="text-xs text-slate-500 leading-relaxed font-semibold">
                     I agree to share my contact information (Name, Phone Number, Email) with the shop owner to coordinate the BOGO match and final offline sale.
@@ -278,7 +278,7 @@ export default function CheckoutPage() {
               
               <div className="flex justify-between text-slate-800 font-bold">
                 <span>Matcher Total Price:</span>
-                <span className="text-[#4E2BC4] font-extrabold text-sm">{formatPrice(cartSubtotalPairley)}</span>
+                <span className="text-[#5B12D6] font-extrabold text-sm">{formatPrice(cartSubtotalPairley)}</span>
               </div>
 
               <div className="flex justify-between text-slate-400">
@@ -290,7 +290,7 @@ export default function CheckoutPage() {
             <div className="border-t border-slate-100 pt-4 flex flex-col gap-3">
               <button
                 type="submit"
-                className="btn btn-primary w-full bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
+                className="btn btn-primary w-full bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
               >
                 <ShieldCheck size={18} /> Confirm Interest & Connect 🤝
               </button>
@@ -306,3 +306,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

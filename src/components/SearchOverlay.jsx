@@ -307,7 +307,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                       <button
                         key={idx}
                         onClick={() => handleKeywordClick(keyword)}
-                        className="px-3.5 py-2 rounded-xl bg-[#4E2BC4]/10 border border-[#4E2BC4]/20 hover:bg-[#4E2BC4]/20 hover:border-[#4E2BC4]/30 text-xs font-bold text-[#A78BFA] transition"
+                        className="px-3.5 py-2 rounded-xl bg-[#5B12D6]/10 border border-[#5B12D6]/20 hover:bg-[#5B12D6]/20 hover:border-[#5B12D6]/30 text-xs font-bold text-[#A78BFA] transition"
                       >
                         ⚡ {keyword}
                       </button>
@@ -326,7 +326,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                       <button
                         key={cat.id}
                         onClick={() => handleCategoryClick(cat.id)}
-                        className="group flex flex-col text-left p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-[#4E2BC4]/50 hover:bg-white/10 transition-all duration-200"
+                        className="group flex flex-col text-left p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-[#5B12D6]/50 hover:bg-white/10 transition-all duration-200"
                       >
                         <span className="text-2xl mb-2 group-hover:scale-110 transition-transform origin-left">
                           {cat.icon}
@@ -349,3 +349,4 @@ export default function SearchOverlay({ isOpen, onClose }) {
     </AnimatePresence>
   );
 }
+

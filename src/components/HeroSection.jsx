@@ -96,3 +96,4 @@ export default function HeroSection({ selectedMall, onMallChange, searchQuery, o
   );
 }
 
+

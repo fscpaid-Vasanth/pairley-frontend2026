@@ -214,7 +214,7 @@ export default function BusinessDashboard() {
               : 'Your shop registration is under review. Our team typically reviews applications within 24–48 hours. You will be notified once approved.'}
           </p>
           <div style={{ background: isRejected ? 'rgba(239,68,68,0.08)' : 'rgba(78,43,196,0.08)', border: `1px solid ${isRejected ? 'rgba(239,68,68,0.2)' : 'rgba(78,43,196,0.2)'}`, borderRadius: 12, padding: '16px 20px', marginBottom: 28, textAlign: 'left' }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: isRejected ? '#ef4444' : '#4E2BC4', margin: '0 0 6px' }}>📋 What happens next?</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: isRejected ? '#ef4444' : '#5B12D6', margin: '0 0 6px' }}>📋 What happens next?</p>
             {isRejected ? (
               <ul style={{ fontSize: 13, color: '#64748b', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
                 <li>Contact support to understand the rejection reason</li>
@@ -231,7 +231,7 @@ export default function BusinessDashboard() {
           </div>
           <button
             onClick={() => { localStorage.removeItem('pairley_token'); localStorage.removeItem('pairley_user'); navigate('/login'); }}
-            style={{ padding: '12px 32px', borderRadius: 99, background: '#4E2BC4', color: 'white', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer' }}
+            style={{ padding: '12px 32px', borderRadius: 99, background: '#5B12D6', color: 'white', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer' }}
           >
             Back to Login
           </button>
@@ -253,11 +253,11 @@ export default function BusinessDashboard() {
         >
           <div className="w-full md:w-auto">
             <h2 className="text-xl md:text-3xl font-extrabold text-slate-800 break-words leading-tight">
-              Welcome back, <span className="text-[#4E2BC4]">{business.business_name || business.businessName || 'Merchant'}</span>! 📊
+              Welcome back, <span className="text-[#5B12D6]">{business.business_name || business.businessName || 'Merchant'}</span>! 📊
             </h2>
             <p className="text-sm text-slate-500 mt-1">Manage your storefront BOGO deals and tiered group discounts.</p>
           </div>
-          <Link to="/business/create-deal" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#4E2BC4] hover:bg-[#6D4EE3] text-white font-bold rounded-xl text-xs shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-100">
+          <Link to="/business/create-deal" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5B12D6] hover:bg-[#7C3AED] text-white font-bold rounded-xl text-xs shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-100">
             <Plus size={14} />
             Create New Deal
           </Link>
@@ -314,7 +314,7 @@ export default function BusinessDashboard() {
                 <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
                 Storefront Listings
               </h3>
-              <Link to="/business/manage-deals" className="inline-flex items-center gap-1 text-xs font-bold text-[#4E2BC4] hover:underline">
+              <Link to="/business/manage-deals" className="inline-flex items-center gap-1 text-xs font-bold text-[#5B12D6] hover:underline">
                 Manage All <ArrowUpRight size={14} />
               </Link>
             </div>
@@ -347,7 +347,7 @@ export default function BusinessDashboard() {
                             category={deal.category}
                           />
                           <div>
-                            <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-[#4E2BC4] group-hover/link:text-[#4E2BC4] transition-colors duration-200 line-clamp-1">{deal.title}</h4>
+                            <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-[#5B12D6] group-hover/link:text-[#5B12D6] transition-colors duration-200 line-clamp-1">{deal.title}</h4>
                             <div className="flex items-center gap-3 mt-1.5">
                               <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
                                 isPair ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'
@@ -375,7 +375,7 @@ export default function BusinessDashboard() {
                           </div>
                         </div>
 
-                        <Link to={`/deals/${deal.id}`} className="p-2 bg-slate-50 text-slate-400 hover:text-[#4E2BC4] hover:bg-purple-50 rounded-xl transition-colors duration-200">
+                        <Link to={`/deals/${deal.id}`} className="p-2 bg-slate-50 text-slate-400 hover:text-[#5B12D6] hover:bg-purple-50 rounded-xl transition-colors duration-200">
                           <ChevronRight size={16} />
                         </Link>
                       </div>
@@ -392,7 +392,7 @@ export default function BusinessDashboard() {
             {/* Customers Nearby (Hyperlocal Demand) */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm">
               <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
-                <Sparkles size={18} className="text-[#4E2BC4] animate-pulse" />
+                <Sparkles size={18} className="text-[#5B12D6] animate-pulse" />
                 Customers Nearby (Within 5 KM)
               </h3>
               <div className="space-y-3">
@@ -420,7 +420,7 @@ export default function BusinessDashboard() {
             {/* Live activity log */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm">
               <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
-                <Activity size={18} className="text-[#4E2BC4]" />
+                <Activity size={18} className="text-[#5B12D6]" />
                 Live Store Activity
               </h3>
 
@@ -457,7 +457,7 @@ export default function BusinessDashboard() {
             {/* Performance Tips */}
             <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm">
               <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
-                <Lightbulb size={18} className="text-[#4E2BC4]" />
+                <Lightbulb size={18} className="text-[#5B12D6]" />
                 Store Performance Tips
               </h3>
               
@@ -491,3 +491,4 @@ export default function BusinessDashboard() {
     </div>
   );
 }
+

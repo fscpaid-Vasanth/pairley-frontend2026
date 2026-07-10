@@ -237,3 +237,4 @@ export function useLocationContext() {
 // ─── Default export (the raw context, for advanced use-cases) ─────────────────
 
 export default LocationContext;
+

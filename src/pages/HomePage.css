@@ -218,7 +218,7 @@
 .how-works-view-all {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #4E2BC4;
+  color: #5B12D6;
   text-decoration: none;
   transition: opacity 0.2s;
 }
@@ -293,7 +293,7 @@
   left: 28px;
   right: 28px;
   height: 2px;
-  background: linear-gradient(90deg, #10B981, #F97316, #3B82F6, #EC4899, #8B5CF6);
+  background: linear-gradient(90deg, #22C55E, #F97316, #3B82F6, #EC4899, #8B5CF6);
   opacity: 0.3;
   z-index: 0;
   border-radius: 99px;
@@ -548,7 +548,7 @@
 .categories-horizontal-view-all {
   font-size: 11px;
   font-weight: 750;
-  color: #4E2BC4;
+  color: #5B12D6;
   text-decoration: none;
   transition: opacity 0.2s ease;
 }
@@ -624,3 +624,4 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+

@@ -81,7 +81,7 @@
 .notif-drawer__mark-all {
   background: none;
   border: none;
-  color: #4E2BC4;
+  color: #5B12D6;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -135,12 +135,12 @@
 }
 
 .notif-tab:hover {
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 .notif-tab--active {
-  color: #4E2BC4;
-  border-bottom-color: #4E2BC4;
+  color: #5B12D6;
+  border-bottom-color: #5B12D6;
   font-weight: 700;
 }
 
@@ -215,7 +215,7 @@
 .notif-item__dot {
   width: 8px;
   height: 8px;
-  background: #4E2BC4;
+  background: #5B12D6;
   border-radius: 50%;
   flex-shrink: 0;
   align-self: center;
@@ -228,3 +228,4 @@
   font-size: 14px;
   font-weight: 600;
 }
+

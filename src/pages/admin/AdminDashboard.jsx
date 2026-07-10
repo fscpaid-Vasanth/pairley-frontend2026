@@ -336,7 +336,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2 bg-white/60 border border-slate-200/50 backdrop-blur-md rounded-2xl p-2 shadow-sm">
-            <span className="material-symbols-outlined text-[#4E2BC4] text-lg">admin_panel_settings</span>
+            <span className="material-symbols-outlined text-[#5B12D6] text-lg">admin_panel_settings</span>
             <span className="text-xs font-bold text-slate-700">Super Admin Mode</span>
           </div>
         </div>
@@ -347,7 +347,7 @@ export default function AdminDashboard() {
             onClick={() => handleTabChange('overview')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'overview'
-                ? 'active-tab bg-[#4E2BC4] text-white shadow-md shadow-[#4E2BC4]/20'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
@@ -358,7 +358,7 @@ export default function AdminDashboard() {
             onClick={() => handleTabChange('shops')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'shops'
-                ? 'active-tab bg-[#4E2BC4] text-white shadow-md shadow-[#4E2BC4]/20'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
             onClick={() => handleTabChange('customers')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'customers'
-                ? 'active-tab bg-[#4E2BC4] text-white shadow-md shadow-[#4E2BC4]/20'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
@@ -380,7 +380,7 @@ export default function AdminDashboard() {
             onClick={() => handleTabChange('deals')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'deals'
-                ? 'active-tab bg-[#4E2BC4] text-white shadow-md shadow-[#4E2BC4]/20'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
@@ -391,7 +391,7 @@ export default function AdminDashboard() {
             onClick={() => handleTabChange('tickets')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'tickets'
-                ? 'active-tab bg-[#4E2BC4] text-white shadow-md shadow-[#4E2BC4]/20'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
@@ -405,16 +405,16 @@ export default function AdminDashboard() {
           <div className="space-y-8 animate-fadeIn">
             {/* Stats Cards Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-[#4E2BC4]/10 to-[#10B981]/5 border border-[#4E2BC4]/20 backdrop-blur-md rounded-3xl p-5 shadow-sm text-left relative overflow-hidden">
-                <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-[#4E2BC4]/5 rounded-full blur-xl"></div>
-                <Users className="text-[#4E2BC4] mb-4" size={24} />
+              <div className="bg-gradient-to-br from-[#5B12D6]/10 to-[#22C55E]/5 border border-[#5B12D6]/20 backdrop-blur-md rounded-3xl p-5 shadow-sm text-left relative overflow-hidden">
+                <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-[#5B12D6]/5 rounded-full blur-xl"></div>
+                <Users className="text-[#5B12D6] mb-4" size={24} />
                 <div className="text-3xl font-black text-slate-800">{metrics.totalCustomers}</div>
                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Total Customers</div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#4E2BC4]/10 to-[#10B981]/5 border border-[#4E2BC4]/20 backdrop-blur-md rounded-3xl p-5 shadow-sm text-left relative overflow-hidden">
-                <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-[#10B981]/5 rounded-full blur-xl"></div>
-                <Store className="text-[#10B981] mb-4" size={24} />
+              <div className="bg-gradient-to-br from-[#5B12D6]/10 to-[#22C55E]/5 border border-[#5B12D6]/20 backdrop-blur-md rounded-3xl p-5 shadow-sm text-left relative overflow-hidden">
+                <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-[#22C55E]/5 rounded-full blur-xl"></div>
+                <Store className="text-[#22C55E] mb-4" size={24} />
                 <div className="text-3xl font-black text-slate-800">{metrics.totalBusinesses}</div>
                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Total Shops ({metrics.verifiedBusinesses} Verified)</div>
               </div>
@@ -426,7 +426,7 @@ export default function AdminDashboard() {
                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Pending Approvals</div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#4E2BC4]/10 to-[#10B981]/5 border border-[#4E2BC4]/20 backdrop-blur-md rounded-3xl p-5 shadow-sm text-left relative overflow-hidden">
+              <div className="bg-gradient-to-br from-[#5B12D6]/10 to-[#22C55E]/5 border border-[#5B12D6]/20 backdrop-blur-md rounded-3xl p-5 shadow-sm text-left relative overflow-hidden">
                 <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl"></div>
                 <Tag className="text-indigo-600 mb-4" size={24} />
                 <div className="text-3xl font-black text-slate-800">{metrics.activeOffers}</div>
@@ -440,7 +440,7 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Subscription Revenue</h3>
                   <div className="text-3xl font-black text-slate-800 flex items-center gap-1">
-                    <IndianRupee size={22} className="text-[#10B981]" />
+                    <IndianRupee size={22} className="text-[#22C55E]" />
                     {formatPrice(metrics.subscriptionRevenue).replace('₹', '')}
                   </div>
                   <p className="text-[10px] text-slate-400 font-semibold mt-2">Active business sub collections</p>
@@ -454,7 +454,7 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">This Month Revenue Collection</h3>
                   <div className="text-3xl font-black text-slate-800 flex items-center gap-1">
-                    <IndianRupee size={22} className="text-[#4E2BC4]" />
+                    <IndianRupee size={22} className="text-[#5B12D6]" />
                     {formatPrice(metrics.monthlyRevenue).replace('₹', '')}
                   </div>
                   <p className="text-[10px] text-slate-400 font-semibold mt-2">Collected since 1st of this month</p>
@@ -493,7 +493,7 @@ export default function AdminDashboard() {
                   placeholder="Search stores or owners..."
                   value={shopSearch}
                   onChange={(e) => setShopSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 focus:outline-none focus:border-[#4E2BC4] text-xs font-semibold"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 focus:outline-none focus:border-[#5B12D6] text-xs font-semibold"
                 />
               </div>
             </div>
@@ -552,7 +552,7 @@ export default function AdminDashboard() {
                               setSelectedShop(b);
                               setActiveDocPreview(b.shop_photo ? 'shop' : b.aadhaar_photo ? 'aadhaar' : b.pan_photo ? 'pan' : '');
                             }}
-                            className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FA3] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5"
+                            className="btn btn-primary bg-[#5B12D6] hover:bg-[#3D1FA3] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5"
                           >
                             <Eye size={12} />
                             Review Details
@@ -583,7 +583,7 @@ export default function AdminDashboard() {
                   placeholder="Search customers..."
                   value={customerSearch}
                   onChange={(e) => setCustomerSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 focus:outline-none focus:border-[#4E2BC4] text-xs font-semibold"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 focus:outline-none focus:border-[#5B12D6] text-xs font-semibold"
                 />
               </div>
             </div>
@@ -662,7 +662,7 @@ export default function AdminDashboard() {
                   placeholder="Search deals or stores..."
                   value={dealSearch}
                   onChange={(e) => setDealSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 focus:outline-none focus:border-[#4E2BC4] text-xs font-semibold"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 focus:outline-none focus:border-[#5B12D6] text-xs font-semibold"
                 />
               </div>
             </div>
@@ -687,7 +687,7 @@ export default function AdminDashboard() {
                           }`}>
                             {d.status}
                           </span>
-                          <span className="text-[9px] text-[#4E2BC4] font-bold bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md uppercase tracking-wider">{d.category}</span>
+                          <span className="text-[9px] text-[#5B12D6] font-bold bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md uppercase tracking-wider">{d.category}</span>
                         </div>
                         <h4 className="font-extrabold text-slate-800 text-sm leading-snug line-clamp-2">{d.title}</h4>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1.5">🏪 {d.businessName} • {d.city}</p>
@@ -702,7 +702,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Group Co-buy progress</p>
-                          <span className="text-[#4E2BC4] font-extrabold">{d.joinedPeople}</span>
+                          <span className="text-[#5B12D6] font-extrabold">{d.joinedPeople}</span>
                           <span className="text-slate-400 font-bold"> / {d.requiredPeople} Joined</span>
                         </div>
                       </div>
@@ -765,7 +765,7 @@ export default function AdminDashboard() {
                         <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="px-6 py-4">
                             {isChat ? (
-                              <span className="bg-indigo-50 border border-indigo-150 text-[#4E2BC4] text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">💬 Live Chat</span>
+                              <span className="bg-indigo-50 border border-indigo-150 text-[#5B12D6] text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">💬 Live Chat</span>
                             ) : (
                               <span className="bg-amber-50 border border-amber-150 text-amber-700 text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">🎫 Help Ticket</span>
                             )}
@@ -794,7 +794,7 @@ export default function AdminDashboard() {
                                 setSelectedTicket(t);
                                 setReplyMessage('');
                               }}
-                              className="px-3.5 py-1.5 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white text-[10px] font-extrabold rounded-xl shadow-sm transition-all"
+                              className="px-3.5 py-1.5 bg-[#5B12D6] hover:bg-[#430bb0] text-white text-[10px] font-extrabold rounded-xl shadow-sm transition-all"
                             >
                               Open console
                             </button>
@@ -857,7 +857,7 @@ export default function AdminDashboard() {
                         return (
                           <div key={idx} className={`flex ${isSupport ? 'justify-end' : 'justify-start'} w-full`}>
                             <div className={`p-2.5 rounded-xl text-[11px] leading-relaxed max-w-[80%] ${
-                              isSupport ? 'bg-[#4E2BC4] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
+                              isSupport ? 'bg-[#5B12D6] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
                             }`}>
                               <div className="text-[8px] opacity-75 font-bold mb-0.5">{match[1]} • {time}</div>
                               {text}
@@ -887,7 +887,7 @@ export default function AdminDashboard() {
                         placeholder={selectedTicket.subject.startsWith('[CHAT]') ? "Type message..." : "Type reply details..."}
                         value={replyMessage}
                         onChange={(e) => setReplyMessage(e.target.value)}
-                        className="flex-1 border border-slate-200 focus:border-[#4E2BC4] rounded-xl px-3.5 py-2.5 text-xs outline-none bg-white"
+                        className="flex-1 border border-slate-200 focus:border-[#5B12D6] rounded-xl px-3.5 py-2.5 text-xs outline-none bg-white"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             handleReplyTicket(selectedTicket.id, 'OPEN');
@@ -897,7 +897,7 @@ export default function AdminDashboard() {
                       <button
                         disabled={replying}
                         onClick={() => handleReplyTicket(selectedTicket.id, 'OPEN')}
-                        className="px-4 py-2.5 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-xl text-xs font-bold transition shadow-sm"
+                        className="px-4 py-2.5 bg-[#5B12D6] hover:bg-[#430bb0] text-white rounded-xl text-xs font-bold transition shadow-sm"
                       >
                         Reply
                       </button>
@@ -972,11 +972,11 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mobile Contact</p>
-                      <a href={`tel:${selectedShop.mobile}`} className="text-[#4E2BC4] hover:underline font-bold">📞 {selectedShop.mobile}</a>
+                      <a href={`tel:${selectedShop.mobile}`} className="text-[#5B12D6] hover:underline font-bold">📞 {selectedShop.mobile}</a>
                     </div>
                     <div className="sm:col-span-2">
                       <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Email Address</p>
-                      <a href={`mailto:${selectedShop.email}`} className="text-[#4E2BC4] hover:underline font-bold">✉️ {selectedShop.email || 'No email'}</a>
+                      <a href={`mailto:${selectedShop.email}`} className="text-[#5B12D6] hover:underline font-bold">✉️ {selectedShop.email || 'No email'}</a>
                     </div>
                     <div className="sm:col-span-2">
                       <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Physical Store Address</p>
@@ -1013,7 +1013,7 @@ export default function AdminDashboard() {
                           download
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[#4E2BC4] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
+                          className="text-[#5B12D6] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
                         >
                           <Download size={10} /> Download
                         </a>
@@ -1029,7 +1029,7 @@ export default function AdminDashboard() {
                           download
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[#4E2BC4] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
+                          className="text-[#5B12D6] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
                         >
                           <Download size={10} /> Download
                         </a>
@@ -1045,7 +1045,7 @@ export default function AdminDashboard() {
                           download
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[#4E2BC4] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
+                          className="text-[#5B12D6] hover:text-[#3D1FA3] font-black flex items-center gap-1.5 bg-white hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all cursor-pointer"
                         >
                           <Download size={10} /> Download
                         </a>
@@ -1069,7 +1069,7 @@ export default function AdminDashboard() {
                         !selectedShop.shop_photo
                           ? 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
                           : activeDocPreview === 'shop'
-                          ? 'bg-[#4E2BC4] border-[#4E2BC4] text-white shadow-sm shadow-[#4E2BC4]/20'
+                          ? 'bg-[#5B12D6] border-[#5B12D6] text-white shadow-sm shadow-[#5B12D6]/20'
                           : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
@@ -1083,7 +1083,7 @@ export default function AdminDashboard() {
                         !selectedShop.aadhaar_photo
                           ? 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
                           : activeDocPreview === 'aadhaar'
-                          ? 'bg-[#4E2BC4] border-[#4E2BC4] text-white shadow-sm shadow-[#4E2BC4]/20'
+                          ? 'bg-[#5B12D6] border-[#5B12D6] text-white shadow-sm shadow-[#5B12D6]/20'
                           : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
@@ -1097,7 +1097,7 @@ export default function AdminDashboard() {
                         !selectedShop.pan_photo
                           ? 'bg-slate-100 border-slate-200/50 text-slate-400 cursor-not-allowed'
                           : activeDocPreview === 'pan'
-                          ? 'bg-[#4E2BC4] border-[#4E2BC4] text-white shadow-sm shadow-[#4E2BC4]/20'
+                          ? 'bg-[#5B12D6] border-[#5B12D6] text-white shadow-sm shadow-[#5B12D6]/20'
                           : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
@@ -1143,7 +1143,7 @@ export default function AdminDashboard() {
                       <div className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl relative overflow-hidden select-none border border-indigo-500/20">
                         <div className="flex justify-between items-start">
                           <div>
-                            <span className="bg-[#4E2BC4]/80 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
+                            <span className="bg-[#5B12D6]/80 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
                               Verified Storefront
                             </span>
                             <h3 className="text-lg font-black tracking-tight mt-1">
@@ -1166,7 +1166,7 @@ export default function AdminDashboard() {
                             <span className="block text-[8px] uppercase tracking-wider font-semibold">Owner Contact</span>
                             <span className="text-white font-bold">{selectedShop.owner_name} (+91 {selectedShop.mobile})</span>
                           </div>
-                          <span className="bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700 text-[8px] uppercase font-black tracking-wider text-[#4E2BC4]">
+                          <span className="bg-slate-800/80 px-2 py-1 rounded-lg border border-slate-700 text-[8px] uppercase font-black tracking-wider text-[#5B12D6]">
                             PAIRLEY SECURE
                           </span>
                         </div>
@@ -1181,7 +1181,7 @@ export default function AdminDashboard() {
                     ) : activeDocPreview === 'aadhaar' && (imageLoadErrors.aadhaar || !isValidImageSrc(selectedShop.aadhaar_photo)) ? (
                       <div className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-800 rounded-2xl relative overflow-hidden select-none border border-slate-300 shadow-inner">
                         <div className="flex justify-between items-center border-b border-rose-500/30 pb-2">
-                          <span className="text-[9px] font-extrabold text-[#4E2BC4] tracking-wide uppercase">
+                          <span className="text-[9px] font-extrabold text-[#5B12D6] tracking-wide uppercase">
                             Government of India • Unique Identification Authority
                           </span>
                           <span className="text-xl">🇮🇳</span>
@@ -1301,3 +1301,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

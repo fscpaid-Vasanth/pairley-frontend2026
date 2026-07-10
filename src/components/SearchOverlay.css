@@ -81,7 +81,7 @@
 }
 
 .search-overlay__input:focus {
-  border-color: #4E2BC4;
+  border-color: #5B12D6;
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0 0 4px rgba(78, 43, 196, 0.25), 0 8px 32px rgba(0, 0, 0, 0.4);
 }
@@ -124,7 +124,7 @@
 
 .search-overlay__pill--active {
   background: rgba(78, 43, 196, 0.2) !important;
-  border-color: #4E2BC4 !important;
+  border-color: #5B12D6 !important;
   color: #a78bfa !important;
   box-shadow: 0 0 10px rgba(78, 43, 196, 0.15);
 }
@@ -200,7 +200,7 @@
 .search-overlay__result-price {
   font-weight: 800;
   font-size: 15px;
-  color: #10B981;
+  color: #22C55E;
   flex-shrink: 0;
 }
 
@@ -253,3 +253,4 @@
     left: 16px;
   }
 }
+

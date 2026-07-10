@@ -16,7 +16,7 @@
 
 .business-settings-page form input:focus,
 .business-settings-page form select:focus {
-  border-color: #4E2BC4;
+  border-color: #5B12D6;
   box-shadow: 0 0 0 3px rgba(78, 43, 196, 0.12);
 }
 
@@ -28,3 +28,4 @@
 .business-settings-page button[type="submit"]:hover {
   box-shadow: 0 6px 18px rgba(78, 43, 196, 0.2);
 }
+

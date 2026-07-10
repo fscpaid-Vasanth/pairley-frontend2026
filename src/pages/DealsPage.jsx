@@ -301,7 +301,7 @@ const DealsPage = () => {
           <div className="deals-count">
             Showing <strong>{filteredDeals.length}</strong> deal
             {filteredDeals.length !== 1 ? 's' : ''}
-            {userLocation?.area && <span style={{ color: '#4E2BC4', fontWeight: 600, marginLeft: 6 }}>near {userLocation.area}</span>}
+            {userLocation?.area && <span style={{ color: '#5B12D6', fontWeight: 600, marginLeft: 6 }}>near {userLocation.area}</span>}
           </div>
 
           {/* Deals grid — or empty state */}
@@ -360,3 +360,4 @@ const DealsPage = () => {
 };
 
 export default DealsPage;
+

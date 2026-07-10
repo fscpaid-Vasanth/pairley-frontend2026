@@ -237,7 +237,7 @@ export default function SupportPage() {
         
         {/* Header Breadcrumbs */}
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mb-4 uppercase tracking-wider">
-          <Link to="/" className="hover:text-[#4E2BC4] transition">Home</Link>
+          <Link to="/" className="hover:text-[#5B12D6] transition">Home</Link>
           <span>/</span>
           <span className="text-slate-600">Help & Support</span>
         </div>
@@ -254,7 +254,7 @@ export default function SupportPage() {
           <div className="flex gap-2">
             <button 
               onClick={handleOpenChat}
-              className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
+              className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
             >
               <MessageSquare size={14} /> Live Support Chat
             </button>
@@ -278,7 +278,7 @@ export default function SupportPage() {
                   onClick={() => setActiveCategory(cat.id)}
                   className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg transition ${
                     activeCategory === cat.id 
-                      ? 'bg-[#4E2BC4]/5 text-[#4E2BC4] border border-[#4E2BC4]/10' 
+                      ? 'bg-[#5B12D6]/5 text-[#5B12D6] border border-[#5B12D6]/10' 
                       : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-transparent'
                   }`}
                 >
@@ -295,7 +295,7 @@ export default function SupportPage() {
               placeholder="Search help articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#4E2BC4] focus:bg-white transition"
+              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#5B12D6] focus:bg-white transition"
             />
           </div>
         </div>
@@ -305,7 +305,7 @@ export default function SupportPage() {
           {filteredFaqs.length > 0 ? (
             filteredFaqs.map(faq => (
               <div key={faq.id} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow transition duration-200 flex gap-3.5 items-start">
-                <div className="w-8 h-8 rounded-lg bg-[#4E2BC4]/5 text-[#4E2BC4] flex items-center justify-center flex-shrink-0 border border-[#4E2BC4]/10">
+                <div className="w-8 h-8 rounded-lg bg-[#5B12D6]/5 text-[#5B12D6] flex items-center justify-center flex-shrink-0 border border-[#5B12D6]/10">
                   <HelpCircle size={16} />
                 </div>
                 <div>
@@ -324,7 +324,7 @@ export default function SupportPage() {
         {/* Support Ticket Submission Form */}
         <div className="bg-white border border-slate-200 p-6 md:p-8 rounded-3xl shadow-sm max-w-2xl mx-auto text-left">
           <h3 className="text-md font-bold text-slate-800 border-b border-slate-100 pb-3 mb-6 flex items-center gap-1.5">
-            <Headphones size={18} className="text-[#4E2BC4]" />
+            <Headphones size={18} className="text-[#5B12D6]" />
             Submit a Help Desk Ticket
           </h3>
 
@@ -337,7 +337,7 @@ export default function SupportPage() {
                 placeholder="Arjun Mehta"
                 value={ticketForm.name}
                 onChange={handleTicketChange}
-                className={`border rounded-xl p-2.5 outline-none transition ${formErrors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                className={`border rounded-xl p-2.5 outline-none transition ${formErrors.name ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
               />
               {formErrors.name && <span className="text-[10px] text-red-500 font-bold">{formErrors.name}</span>}
             </div>
@@ -350,7 +350,7 @@ export default function SupportPage() {
                 placeholder="arjun@example.com"
                 value={ticketForm.email}
                 onChange={handleTicketChange}
-                className={`border rounded-xl p-2.5 outline-none transition ${formErrors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                className={`border rounded-xl p-2.5 outline-none transition ${formErrors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
               />
               {formErrors.email && <span className="text-[10px] text-red-500 font-bold">{formErrors.email}</span>}
             </div>
@@ -363,7 +363,7 @@ export default function SupportPage() {
                 placeholder="e.g. ORD-A39B22"
                 value={ticketForm.orderId}
                 onChange={handleTicketChange}
-                className="border border-slate-200 focus:border-[#4E2BC4] rounded-xl p-2.5 outline-none"
+                className="border border-slate-200 focus:border-[#5B12D6] rounded-xl p-2.5 outline-none"
               />
             </div>
 
@@ -373,7 +373,7 @@ export default function SupportPage() {
                 name="category"
                 value={ticketForm.category}
                 onChange={handleTicketChange}
-                className="border border-slate-200 focus:border-[#4E2BC4] rounded-xl p-2.5 outline-none"
+                className="border border-slate-200 focus:border-[#5B12D6] rounded-xl p-2.5 outline-none"
               >
                 <option value="matching">Matchmaking Pool Issue</option>
                 <option value="payments">Offline Matching & Contact</option>
@@ -390,7 +390,7 @@ export default function SupportPage() {
                 placeholder="Describe your issue in detail. If relating to a match, explain split options..."
                 value={ticketForm.description}
                 onChange={handleTicketChange}
-                className={`border rounded-xl p-2.5 outline-none transition ${formErrors.description ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                className={`border rounded-xl p-2.5 outline-none transition ${formErrors.description ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
               ></textarea>
               {formErrors.description && <span className="text-[10px] text-red-500 font-bold">{formErrors.description}</span>}
             </div>
@@ -398,7 +398,7 @@ export default function SupportPage() {
             <div className="md:col-span-2 mt-3 flex justify-end">
               <button
                 type="submit"
-                className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold px-6 py-2.5 rounded-xl shadow-md shadow-indigo-600/10 transition"
+                className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold px-6 py-2.5 rounded-xl shadow-md shadow-indigo-600/10 transition"
               >
                 Submit Ticket
               </button>
@@ -420,7 +420,7 @@ export default function SupportPage() {
               exit={{ opacity: 0, y: 30, scale: 0.95 }}
             >
               {/* Header */}
-              <div className="bg-[#4E2BC4] p-4 text-white flex justify-between items-center">
+              <div className="bg-[#5B12D6] p-4 text-white flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                     <Headphones size={16} />
@@ -446,7 +446,7 @@ export default function SupportPage() {
                     return (
                       <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                         <div className={`p-2.5 rounded-xl text-[11px] font-semibold leading-relaxed max-w-[80%] ${
-                          isUser ? 'bg-[#4E2BC4] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
+                          isUser ? 'bg-[#5B12D6] text-white rounded-tr-none' : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
                         }`}>
                           {msg.text}
                         </div>
@@ -469,7 +469,7 @@ export default function SupportPage() {
               ) : (
                 <div className="flex-1 p-4 bg-slate-50 flex flex-col justify-center text-xs font-semibold text-left">
                   <form onSubmit={handleStartChatSubmit} className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <h5 className="font-bold text-[#4E2BC4] text-center text-[13px] mb-1">Start Live Support Chat</h5>
+                    <h5 className="font-bold text-[#5B12D6] text-center text-[13px] mb-1">Start Live Support Chat</h5>
                     <div className="flex flex-col gap-1">
                       <label className="text-slate-500 text-[10px] uppercase">Your Name</label>
                       <input 
@@ -477,7 +477,7 @@ export default function SupportPage() {
                         placeholder="Name"
                         value={chatUserForm.name}
                         onChange={(e) => setChatUserForm(prev => ({ ...prev, name: e.target.value }))}
-                        className="border border-slate-200 focus:border-[#4E2BC4] rounded-lg p-2 outline-none text-xs"
+                        className="border border-slate-200 focus:border-[#5B12D6] rounded-lg p-2 outline-none text-xs"
                         required
                       />
                     </div>
@@ -488,13 +488,13 @@ export default function SupportPage() {
                         placeholder="your@email.com"
                         value={chatUserForm.email}
                         onChange={(e) => setChatUserForm(prev => ({ ...prev, email: e.target.value }))}
-                        className="border border-slate-200 focus:border-[#4E2BC4] rounded-lg p-2 outline-none text-xs"
+                        className="border border-slate-200 focus:border-[#5B12D6] rounded-lg p-2 outline-none text-xs"
                         required
                       />
                     </div>
                     <button 
                       type="submit"
-                      className="w-full bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white py-2 rounded-lg text-xs font-bold text-center mt-2 shadow-sm transition"
+                      className="w-full bg-[#5B12D6] hover:bg-[#430bb0] text-white py-2 rounded-lg text-xs font-bold text-center mt-2 shadow-sm transition"
                     >
                       Start Conversation
                     </button>
@@ -510,11 +510,11 @@ export default function SupportPage() {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder="Ask a support question..." 
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-[11px] outline-none focus:border-[#4E2BC4]"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-[11px] outline-none focus:border-[#5B12D6]"
                   />
                   <button 
                     type="submit"
-                    className="w-8 h-8 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-xl flex items-center justify-center transition"
+                    className="w-8 h-8 bg-[#5B12D6] hover:bg-[#430bb0] text-white rounded-xl flex items-center justify-center transition"
                   >
                     <Send size={12} />
                   </button>
@@ -526,7 +526,7 @@ export default function SupportPage() {
             /* Support widget bubble button */
             <motion.button
               onClick={handleOpenChat}
-              className="w-12 h-12 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/20 transition hover:scale-105"
+              className="w-12 h-12 bg-[#5B12D6] hover:bg-[#430bb0] text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/20 transition hover:scale-105"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -539,3 +539,4 @@ export default function SupportPage() {
     </div>
   );
 }
+

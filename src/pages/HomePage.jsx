@@ -294,9 +294,9 @@ export default function HomePage() {
                           dining:  { bg: '#FFF1F0', accent: '#EF4444', bar: '#EF4444' },
                           fitness: { bg: '#F5F0FF', accent: '#8B5CF6', bar: '#8B5CF6' },
                           beauty:  { bg: '#FFF0F7', accent: '#EC4899', bar: '#EC4899' },
-                          tours:   { bg: '#F0FDF4', accent: '#10B981', bar: '#10B981' },
+                          tours:   { bg: '#F0FDF4', accent: '#22C55E', bar: '#22C55E' },
                         };
-                        const colors = catColors[deal.category] || { bg: '#EEF2FF', accent: '#4E2BC4', bar: '#4E2BC4' };
+                        const colors = catColors[deal.category] || { bg: '#EEF2FF', accent: '#5B12D6', bar: '#5B12D6' };
                         return (
                           <div key={deal.id} className="popular-deal-card">
                             {/* Colored top accent bar */}
@@ -409,7 +409,7 @@ export default function HomePage() {
                   <div className="how-works-line" />
 
                   {[
-                    { icon: <Search size={17} />, label: 'Discover', sub: 'deals', color: '#10B981', bg: 'linear-gradient(135deg,#10B981,#059669)' },
+                    { icon: <Search size={17} />, label: 'Discover', sub: 'deals', color: '#22C55E', bg: 'linear-gradient(135deg,#22C55E,#16a34a)' },
                     { icon: <Users size={17} />, label: 'Join', sub: 'offers', color: '#F97316', bg: 'linear-gradient(135deg,#F97316,#EA580C)' },
                     { icon: <BarChart2 size={17} />, label: 'Watch', sub: 'growth', color: '#3B82F6', bg: 'linear-gradient(135deg,#3B82F6,#2563EB)' },
                     { icon: <Gift size={17} />, label: 'Unlock', sub: 'discounts', color: '#EC4899', bg: 'linear-gradient(135deg,#EC4899,#DB2777)' },
@@ -485,3 +485,4 @@ export default function HomePage() {
     </div>
   );
 }
+

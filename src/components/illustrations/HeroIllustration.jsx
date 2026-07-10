@@ -17,10 +17,10 @@ export default function HeroIllustration({ className = "" }) {
       {/* CHARACTER 1: Boy in Blue Hoodie (Left) */}
       <g className="char-left">
         {/* Arm Raised */}
-        <path d="M140 180 C120 140, 110 110, 130 95 C145 85, 160 110, 165 140" fill="#4E2BC4" />
+        <path d="M140 180 C120 140, 110 110, 130 95 C145 85, 160 110, 165 140" fill="#5B12D6" />
         <circle cx="128" cy="92" r="10" fill="#FDBA74" /> {/* Fist */}
         {/* Body */}
-        <path d="M145 175 L195 175 L195 280 L135 280 Z" fill="#4E2BC4" />
+        <path d="M145 175 L195 175 L195 280 L135 280 Z" fill="#5B12D6" />
         {/* Head & Face */}
         <path d="M145 175 C145 155, 185 155, 185 175 Z" fill="#FDBA74" />
         <circle cx="165" cy="148" r="18" fill="#FDBA74" />
@@ -55,7 +55,7 @@ export default function HeroIllustration({ className = "" }) {
       {/* CHARACTER 3: Boy in Green Shirt (Middle-Right) */}
       <g className="char-mid-right">
         {/* Body */}
-        <path d="M260 185 L320 185 L320 280 L260 280 Z" fill="#10B981" />
+        <path d="M260 185 L320 185 L320 280 L260 280 Z" fill="#22C55E" />
         {/* Head */}
         <circle cx="290" cy="155" r="18" fill="#FDBA74" />
         {/* Hair */}
@@ -65,7 +65,7 @@ export default function HeroIllustration({ className = "" }) {
         <circle cx="297" cy="154" r="1.5" fill="#1F2937" />
         <path d="M286 162 Q290 168 294 162" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" fill="none" />
         {/* Hand giving thumbs up */}
-        <path d="M320 185 Q335 180 335 195 Q335 205 320 205" fill="#FDBA74" stroke="#10B981" strokeWidth="1" />
+        <path d="M320 185 Q335 180 335 195 Q335 205 320 205" fill="#FDBA74" stroke="#22C55E" strokeWidth="1" />
         <circle cx="332" cy="188" r="4" fill="#FDBA74" /> {/* Thumb */}
       </g>
 
@@ -74,9 +74,9 @@ export default function HeroIllustration({ className = "" }) {
         {/* Hair Back */}
         <path d="M340 180 C320 150, 320 250, 345 270" fill="#374151" />
         {/* Body */}
-        <path d="M330 185 L390 185 L385 280 L335 280 Z" fill="#6D4EE3" />
+        <path d="M330 185 L390 185 L385 280 L335 280 Z" fill="#7C3AED" />
         {/* Arm Raised */}
-        <path d="M375 175 C395 135, 410 110, 395 95 C380 85, 370 115, 365 145" fill="#6D4EE3" />
+        <path d="M375 175 C395 135, 410 110, 395 95 C380 85, 370 115, 365 145" fill="#7C3AED" />
         <circle cx="400" cy="93" r="10" fill="#FFD2A1" /> {/* Fist */}
         {/* Head */}
         <circle cx="360" cy="155" r="18" fill="#FFD2A1" />
@@ -91,10 +91,11 @@ export default function HeroIllustration({ className = "" }) {
       {/* Gradients */}
       <defs>
         <radialGradient id="bgSphere" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#4E2BC4" />
-          <stop offset="100%" stopColor="#4E2BC4" stopOpacity="0" />
+          <stop offset="0%" stopColor="#5B12D6" />
+          <stop offset="100%" stopColor="#5B12D6" stopOpacity="0" />
         </radialGradient>
       </defs>
     </svg>
   );
 }
+

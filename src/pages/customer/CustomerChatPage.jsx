@@ -135,7 +135,7 @@ export default function CustomerChatPage() {
         <p className="text-sm text-slate-500 mt-1">
           {order ? 'You are still in the matching pool. Chat unlocks once a partner joins!' : 'We couldn\'t find a valid match session.'}
         </p>
-        <Link to="/customer/orders" className="btn btn-primary bg-[#4E2BC4] text-white px-5 py-2.5 rounded-xl text-xs font-bold mt-4">
+        <Link to="/customer/orders" className="btn btn-primary bg-[#5B12D6] text-white px-5 py-2.5 rounded-xl text-xs font-bold mt-4">
           Back to My Orders
         </Link>
       </div>
@@ -191,7 +191,7 @@ export default function CustomerChatPage() {
                 if (msg.sender === 'system') {
                   return (
                     <div key={msg.id} className="flex justify-center my-1">
-                      <span className="bg-indigo-50 border border-indigo-100/60 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#4E2BC4] shadow-sm">
+                      <span className="bg-indigo-50 border border-indigo-100/60 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#5B12D6] shadow-sm">
                         {msg.text}
                       </span>
                     </div>
@@ -208,7 +208,7 @@ export default function CustomerChatPage() {
                       <div>
                         <div className={`p-3 rounded-2xl text-xs font-semibold leading-relaxed ${
                           isUser 
-                            ? 'bg-[#4E2BC4] text-white rounded-tr-none' 
+                            ? 'bg-[#5B12D6] text-white rounded-tr-none' 
                             : 'bg-white border border-slate-200/80 text-slate-800 rounded-tl-none shadow-sm'
                         }`}>
                           {msg.text}
@@ -246,11 +246,11 @@ export default function CustomerChatPage() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder={`Message ${partnerName.split(' ')[0]}...`}
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-[#4E2BC4] focus:bg-white transition"
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs outline-none focus:border-[#5B12D6] focus:bg-white transition"
               />
               <button
                 type="submit"
-                className="w-10 h-10 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-2xl flex items-center justify-center shadow-md shadow-indigo-600/10 transition flex-shrink-0"
+                className="w-10 h-10 bg-[#5B12D6] hover:bg-[#430bb0] text-white rounded-2xl flex items-center justify-center shadow-md shadow-indigo-600/10 transition flex-shrink-0"
               >
                 <Send size={14} />
               </button>
@@ -272,7 +272,7 @@ export default function CustomerChatPage() {
                 </div>
                 <div className="min-w-0">
                   <h5 className="font-bold text-slate-800 text-xs truncate">{order.dealTitle}</h5>
-                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-lg text-[9px] font-bold bg-[#4E2BC4]/5 text-[#4E2BC4] border border-[#4E2BC4]/10">
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-lg text-[9px] font-bold bg-[#5B12D6]/5 text-[#5B12D6] border border-[#5B12D6]/10">
                     🤝 BOGO Partner Paired
                   </span>
                 </div>
@@ -281,7 +281,7 @@ export default function CustomerChatPage() {
               <div className="border-t border-slate-100 pt-3 mt-4 flex justify-between items-center text-xs font-semibold leading-relaxed text-slate-500">
                 <div>
                   <span className="block text-[10px] text-slate-400">Your Share Cost</span>
-                  <span className="text-sm font-extrabold text-[#4E2BC4]">{formatPrice(order.pairleyPrice * order.quantity)}</span>
+                  <span className="text-sm font-extrabold text-[#5B12D6]">{formatPrice(order.pairleyPrice * order.quantity)}</span>
                 </div>
                 <div className="text-right">
                   <span className="block text-[10px] text-slate-400">Total Savings</span>
@@ -337,3 +337,4 @@ export default function CustomerChatPage() {
     </div>
   );
 }
+

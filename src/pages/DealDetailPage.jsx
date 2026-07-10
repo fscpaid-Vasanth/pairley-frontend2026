@@ -162,9 +162,9 @@ const DealDetailPage = () => {
             {/* Beautiful Dual-Ring Loader */}
             <div className="relative flex items-center justify-center w-24 h-24">
               {/* Outer Spin Ring (Primary Violet color) */}
-              <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#4E2BC4] animate-spin"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#5B12D6] animate-spin"></div>
               {/* Inner Reverse-Spin Ring (Secondary Green color) */}
-              <div className="absolute w-16 h-16 rounded-full border-4 border-slate-100 border-b-[#10B981] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }}></div>
+              <div className="absolute w-16 h-16 rounded-full border-4 border-slate-100 border-b-[#22C55E] animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.2s' }}></div>
               {/* Center bouncing element (Accent orange) */}
               <div className="w-5 h-5 bg-[#F97316] rounded-full animate-bounce"></div>
             </div>
@@ -180,7 +180,7 @@ const DealDetailPage = () => {
 
             {/* Glowing progress slider bar */}
             <div className="w-64 h-2 bg-slate-100 rounded-full overflow-hidden mt-2 relative">
-              <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#4E2BC4] via-[#10B981] to-[#F97316] rounded-full animate-pulse w-4/5"></div>
+              <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#5B12D6] via-[#22C55E] to-[#F97316] rounded-full animate-pulse w-4/5"></div>
             </div>
           </div>
         </div>
@@ -605,8 +605,8 @@ const DealDetailPage = () => {
                         {deal.businessOwner.id === currentUser?.id && (
                           <div className="bg-gradient-to-r from-violet-600/10 to-indigo-600/10 border border-violet-200/50 backdrop-blur-md rounded-2xl p-4 shadow-md text-left relative overflow-hidden">
                             <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl"></div>
-                            <h4 className="text-xs font-extrabold text-[#4E2BC4] mb-2.5 flex items-center gap-1.5 uppercase tracking-wider">
-                              <span className="material-symbols-outlined text-[#4E2BC4] animate-pulse" style={{ fontSize: 18 }}>analytics</span>
+                            <h4 className="text-xs font-extrabold text-[#5B12D6] mb-2.5 flex items-center gap-1.5 uppercase tracking-wider">
+                              <span className="material-symbols-outlined text-[#5B12D6] animate-pulse" style={{ fontSize: 18 }}>analytics</span>
                               Deal Performance
                             </h4>
                             <div className="flex items-center justify-between">
@@ -630,7 +630,7 @@ const DealDetailPage = () => {
                             </div>
                             <div className="w-full h-2 bg-slate-100/80 rounded-full overflow-hidden mt-3 border border-slate-200/40">
                               <div 
-                                className="h-full bg-gradient-to-r from-[#4E2BC4] to-[#10B981] rounded-full transition-all duration-700 ease-out" 
+                                className="h-full bg-gradient-to-r from-[#5B12D6] to-[#22C55E] rounded-full transition-all duration-700 ease-out" 
                                 style={{ width: `${conversionRatio}%` }}
                               />
                             </div>
@@ -639,7 +639,7 @@ const DealDetailPage = () => {
                         {deal.businessOwner.id === currentUser?.id && (
                           <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm text-left">
                             <h4 className="text-xs font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-                              <span className="material-symbols-outlined text-[#4E2BC4]" style={{ fontSize: 16 }}>group</span>
+                              <span className="material-symbols-outlined text-[#5B12D6]" style={{ fontSize: 16 }}>group</span>
                               Interested Customers ({deal.interests?.length || 0})
                             </h4>
                             {deal.interests && deal.interests.length > 0 ? (
@@ -651,7 +651,7 @@ const DealDetailPage = () => {
                                       <span className="text-[9px] text-slate-400 font-semibold px-2 py-0.5 bg-slate-50 rounded-md border border-slate-100">{interest.customer?.city || 'No City'}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-slate-500 mt-1">
-                                      <a href={`tel:${interest.customer?.mobile}`} className="hover:underline text-[#4E2BC4] flex items-center gap-0.5 font-bold">
+                                      <a href={`tel:${interest.customer?.mobile}`} className="hover:underline text-[#5B12D6] flex items-center gap-0.5 font-bold">
                                         📞 {interest.customer?.mobile}
                                       </a>
                                       {interest.status === 'COMPLETED' ? (
@@ -669,7 +669,7 @@ const DealDetailPage = () => {
                                             placeholder="Enter Code (e.g. 711-A84)"
                                             value={verifyCodes[interest.id] || ''}
                                             onChange={(e) => setVerifyCodes({ ...verifyCodes, [interest.id]: e.target.value })}
-                                            className="text-[10px] bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-[#4E2BC4] font-bold text-slate-800 w-28"
+                                            className="text-[10px] bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-[#5B12D6] font-bold text-slate-800 w-28"
                                           />
                                           <button
                                             onClick={() => {
@@ -681,7 +681,7 @@ const DealDetailPage = () => {
                                                 showToast('Invalid verification code!', 'error');
                                               }
                                             }}
-                                            className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white text-[10px] font-bold rounded-lg px-2.5 py-1 transition flex-shrink-0"
+                                            className="bg-[#5B12D6] hover:bg-[#430bb0] text-white text-[10px] font-bold rounded-lg px-2.5 py-1 transition flex-shrink-0"
                                           >
                                             Verify & Close
                                           </button>
@@ -718,8 +718,8 @@ const DealDetailPage = () => {
                   </div>
 
                   {userHasJoined && !isBusiness && (
-                    <div className="co-buy-chat-card p-4 rounded-2xl bg-indigo-50/50 border border-[#4E2BC4]/20 mt-4 text-left shadow-sm">
-                      <h4 className="text-xs font-extrabold text-[#4E2BC4] flex items-center gap-1.5 mb-1.5">
+                    <div className="co-buy-chat-card p-4 rounded-2xl bg-indigo-50/50 border border-[#5B12D6]/20 mt-4 text-left shadow-sm">
+                      <h4 className="text-xs font-extrabold text-[#5B12D6] flex items-center gap-1.5 mb-1.5">
                         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chat_bubble</span>
                         Anonymous Co-Buy Chat Room
                       </h4>
@@ -733,7 +733,7 @@ const DealDetailPage = () => {
                       ) : (
                         <Link
                           to={`/customer/deal-chat/${id}`}
-                          className="w-full btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white py-2.5 rounded-xl text-[11px] font-bold text-center block transition shadow-sm"
+                          className="w-full btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white py-2.5 rounded-xl text-[11px] font-bold text-center block transition shadow-sm"
                         >
                           Enter Anonymous Chat Room
                         </Link>
@@ -799,3 +799,4 @@ const DealDetailPage = () => {
 };
 
 export default DealDetailPage;
+

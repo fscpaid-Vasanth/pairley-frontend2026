@@ -13,7 +13,7 @@
 .admin-tab-btn:hover:not(.active-tab) {
   background: white;
   border-color: rgba(78, 43, 196, 0.2);
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 .admin-tab-badge {
@@ -132,4 +132,5 @@ table td {
 .animate-modalSlideUp {
   animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
 

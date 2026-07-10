@@ -8,11 +8,11 @@ export default function CustomerProximityCard({
   category = 'fitness' 
 }) {
   const getCategoryTheme = (cat) => {
-    const defaultTheme = { bg: 'rgba(78,43,196,0.1)', color: '#4E2BC4', emoji: '🛍️' };
+    const defaultTheme = { bg: 'rgba(78,43,196,0.1)', color: '#5B12D6', emoji: '🛍️' };
     const themes = {
       dining: { bg: 'rgba(239,68,68,0.1)', color: '#EF4444', emoji: '🍕' },
       beauty: { bg: 'rgba(236,72,153,0.1)', color: '#EC4899', emoji: '💇' },
-      shopping: { bg: 'rgba(16,185,129,0.1)', color: '#10B981', emoji: '🛍️' },
+      shopping: { bg: 'rgba(16,185,129,0.1)', color: '#22C55E', emoji: '🛍️' },
       fitness: { bg: 'rgba(59,130,246,0.1)', color: '#3B82F6', emoji: '🏋️' },
       tours: { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B', emoji: '✈️' }
     };
@@ -75,7 +75,7 @@ export default function CustomerProximityCard({
               gap: '4px',
               fontSize: '11px',
               fontWeight: 800,
-              color: '#4E2BC4',
+              color: '#5B12D6',
               background: 'rgba(78, 43, 196, 0.08)',
               padding: '2px 8px',
               borderRadius: '99px',
@@ -103,11 +103,11 @@ export default function CustomerProximityCard({
         fontWeight: 600
       }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Users size={12} color="#4E2BC4" />
+          <Users size={12} color="#5B12D6" />
           {joinedCount} groups joined
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Tag size={12} color="#10B981" />
+          <Tag size={12} color="#22C55E" />
           {category}
         </span>
       </div>
@@ -128,3 +128,4 @@ export default function CustomerProximityCard({
     </div>
   );
 }
+

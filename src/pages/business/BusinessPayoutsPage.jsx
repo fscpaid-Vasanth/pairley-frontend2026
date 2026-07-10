@@ -189,7 +189,7 @@ export default function BusinessPayoutsPage() {
           <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col justify-between relative overflow-hidden">
             <div>
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Available Balance</span>
-              <h3 className="text-3xl font-extrabold text-[#4E2BC4] mt-1 font-display">
+              <h3 className="text-3xl font-extrabold text-[#5B12D6] mt-1 font-display">
                 {formatPrice(balance)}
               </h3>
               <span className="text-[9px] text-slate-400 mt-1.5 block font-semibold">Ready for bank settlement request</span>
@@ -244,7 +244,7 @@ export default function BusinessPayoutsPage() {
           {/* Sales graph (2 Cols) */}
           <div className="lg:col-span-2 bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left">
             <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-6 flex items-center gap-1.5">
-              <TrendingUp size={16} className="text-[#4E2BC4]" />
+              <TrendingUp size={16} className="text-[#5B12D6]" />
               Weekly Sales Volume GMV
             </h4>
 
@@ -259,7 +259,7 @@ export default function BusinessPayoutsPage() {
                   
                   {/* Visual Bar */}
                   <div 
-                    className="w-full rounded-t-lg bg-gradient-to-t from-[#4E2BC4]/70 to-[#4E2BC4] group-hover:from-indigo-600 group-hover:to-indigo-500 transition-all duration-300 shadow-sm"
+                    className="w-full rounded-t-lg bg-gradient-to-t from-[#5B12D6]/70 to-[#5B12D6] group-hover:from-indigo-600 group-hover:to-indigo-500 transition-all duration-300 shadow-sm"
                     style={{ height: bar.height }}
                   ></div>
                   
@@ -273,13 +273,13 @@ export default function BusinessPayoutsPage() {
           <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Building size={14} className="text-[#4E2BC4]" />
+                <Building size={14} className="text-[#5B12D6]" />
                 Bank Settlement Account
               </h4>
               {!isEditingBank && (
                 <button 
                   onClick={() => setIsEditingBank(true)}
-                  className="text-[10px] font-bold text-[#4E2BC4] hover:underline"
+                  className="text-[10px] font-bold text-[#5B12D6] hover:underline"
                 >
                   Edit details
                 </button>
@@ -294,7 +294,7 @@ export default function BusinessPayoutsPage() {
                   disabled={!isEditingBank}
                   value={bankForm.name}
                   onChange={(e) => setBankForm({ ...bankForm, name: e.target.value })}
-                  className="border border-slate-200 disabled:bg-slate-50/50 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4] font-semibold text-slate-700"
+                  className="border border-slate-200 disabled:bg-slate-50/50 rounded-xl p-2.5 outline-none focus:border-[#5B12D6] font-semibold text-slate-700"
                 />
               </div>
 
@@ -305,7 +305,7 @@ export default function BusinessPayoutsPage() {
                   disabled={!isEditingBank}
                   value={bankForm.ifsc}
                   onChange={(e) => setBankForm({ ...bankForm, ifsc: e.target.value })}
-                  className="border border-slate-200 disabled:bg-slate-50/50 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4] font-semibold text-slate-700 uppercase"
+                  className="border border-slate-200 disabled:bg-slate-50/50 rounded-xl p-2.5 outline-none focus:border-[#5B12D6] font-semibold text-slate-700 uppercase"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export default function BusinessPayoutsPage() {
                   disabled={!isEditingBank}
                   value={bankForm.account}
                   onChange={(e) => setBankForm({ ...bankForm, account: e.target.value })}
-                  className="border border-slate-200 disabled:bg-slate-50/50 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4] font-semibold text-slate-700"
+                  className="border border-slate-200 disabled:bg-slate-50/50 rounded-xl p-2.5 outline-none focus:border-[#5B12D6] font-semibold text-slate-700"
                 />
               </div>
 
@@ -331,7 +331,7 @@ export default function BusinessPayoutsPage() {
                   </button>
                   <button 
                     type="submit" 
-                    className="px-3.5 py-1.5 bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white rounded-lg text-[10px] font-extrabold shadow-sm transition"
+                    className="px-3.5 py-1.5 bg-[#5B12D6] hover:bg-[#430bb0] text-white rounded-lg text-[10px] font-extrabold shadow-sm transition"
                   >
                     Save Details
                   </button>
@@ -346,7 +346,7 @@ export default function BusinessPayoutsPage() {
         <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
             <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-              <Calendar size={16} className="text-[#4E2BC4]" />
+              <Calendar size={16} className="text-[#5B12D6]" />
               Payout Transaction History
             </h4>
             
@@ -375,7 +375,7 @@ export default function BusinessPayoutsPage() {
                     <td className="py-3.5 px-2 font-bold text-slate-800">{tx.id}</td>
                     <td className="py-3.5 px-2">{tx.date}</td>
                     <td className="py-3.5 px-2">{tx.bank}</td>
-                    <td className="py-3.5 px-2 font-bold text-[#4E2BC4]">{formatPrice(tx.amount)}</td>
+                    <td className="py-3.5 px-2 font-bold text-[#5B12D6]">{formatPrice(tx.amount)}</td>
                     <td className="py-3.5 px-2 text-right">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
                         tx.status === 'settled' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700 border border-amber-100'
@@ -394,3 +394,4 @@ export default function BusinessPayoutsPage() {
     </div>
   );
 }
+

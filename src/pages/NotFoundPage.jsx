@@ -46,7 +46,7 @@ export default function NotFoundPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full justify-center mt-2">
-            <Link to="/" className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01] shadow-md shadow-indigo-600/10">
+            <Link to="/" className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01] shadow-md shadow-indigo-600/10">
               <ArrowLeft size={16} /> Back to Home Feed
             </Link>
             <Link to="/deals" className="btn btn-outline border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition-all">
@@ -58,3 +58,4 @@ export default function NotFoundPage() {
     </div>
   );
 }
+

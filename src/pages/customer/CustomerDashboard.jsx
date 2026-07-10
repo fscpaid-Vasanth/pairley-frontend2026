@@ -208,7 +208,7 @@ export default function CustomerDashboard() {
             </h2>
             <p className="text-sm text-slate-500 mt-1">Here's your live pairing status and co-buying savings summary.</p>
           </div>
-          <Link to="/deals" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#4E2BC4] hover:bg-[#6D4EE3] text-white font-bold rounded-xl text-xs shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-100">
+          <Link to="/deals" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5B12D6] hover:bg-[#7C3AED] text-white font-bold rounded-xl text-xs shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-100">
             <Zap size={14} />
             Explore New Deals
           </Link>
@@ -297,7 +297,7 @@ export default function CustomerDashboard() {
               <span className="w-2.5 h-2.5 bg-purple-500 rounded-full animate-ping"></span>
               My Active Interests
             </h3>
-            <Link to="/deals" className="inline-flex items-center gap-1 text-xs font-bold text-[#4E2BC4] hover:underline">
+            <Link to="/deals" className="inline-flex items-center gap-1 text-xs font-bold text-[#5B12D6] hover:underline">
               View All <ArrowRight size={14} />
             </Link>
           </div>
@@ -353,7 +353,7 @@ export default function CustomerDashboard() {
                           <span className="text-xs text-slate-400">Split Price</span>
                           <div className="text-sm font-bold text-emerald-600 mt-0.5">{formatPrice(deal.pairleyPrice)}</div>
                         </div>
-                        <div className="p-1.5 rounded-lg bg-slate-50 text-slate-500 group-hover:text-[#4E2BC4] group-hover:bg-purple-50 transition-colors duration-200">
+                        <div className="p-1.5 rounded-lg bg-slate-50 text-slate-500 group-hover:text-[#5B12D6] group-hover:bg-purple-50 transition-colors duration-200">
                           <ArrowUpRight size={16} />
                         </div>
                       </div>
@@ -429,7 +429,7 @@ export default function CustomerDashboard() {
                           ) : (
                             <Link 
                               to={`/customer/deal-chat/${deal.id}`}
-                              className="flex items-center gap-1 px-2.5 py-1.5 bg-purple-50 text-[#4E2BC4] hover:bg-[#4E2BC4] hover:text-white rounded-lg text-[10px] font-bold transition-all duration-200"
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-purple-50 text-[#5B12D6] hover:bg-[#5B12D6] hover:text-white rounded-lg text-[10px] font-bold transition-all duration-200"
                             >
                               <MessageSquare size={10} />
                               Open Chat
@@ -531,7 +531,7 @@ export default function CustomerDashboard() {
               <Sparkles className="text-amber-500" size={18} />
               Recommended For You
             </h3>
-            <Link to="/deals" className="inline-flex items-center gap-1 text-xs font-bold text-[#4E2BC4] hover:underline">
+            <Link to="/deals" className="inline-flex items-center gap-1 text-xs font-bold text-[#5B12D6] hover:underline">
               Explore All <ArrowRight size={14} />
             </Link>
           </div>
@@ -610,7 +610,7 @@ export default function CustomerDashboard() {
                         </div>
 
                         <div className="p-4">
-                          <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-[#4E2BC4] transition-colors duration-200">{deal.title}</h4>
+                          <h4 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 min-h-[40px] group-hover:text-[#5B12D6] transition-colors duration-200">{deal.title}</h4>
 
                           {isGroup && (
                             <div className="mt-3">
@@ -648,7 +648,7 @@ export default function CustomerDashboard() {
                           <Lock size={14} />
                         </button>
                       ) : (
-                        <Link to={`/deals/${deal.id}`} className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:text-[#4E2BC4] hover:bg-purple-50 transition-colors duration-200">
+                        <Link to={`/deals/${deal.id}`} className="p-1.5 rounded-lg bg-slate-50 text-slate-500 hover:text-[#5B12D6] hover:bg-purple-50 transition-colors duration-200">
                           <ArrowUpRight size={16} />
                         </Link>
                       )}
@@ -663,3 +663,4 @@ export default function CustomerDashboard() {
     </div>
   );
 }
+

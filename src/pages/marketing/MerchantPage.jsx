@@ -370,7 +370,7 @@ export default function MerchantPage() {
               className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white"
             >
               Turn Nearby Customers Into{' '}
-              <span className="bg-gradient-to-r from-brand-purple-light via-[#9333EA] to-[#34D399] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-brand-purple-light via-[#9333EA] to-[#4ade80] bg-clip-text text-transparent">
                 Paying Customers.
               </span>
             </motion.h1>
@@ -1461,3 +1461,4 @@ function FaqAccordion({ q, a }) {
     </div>
   );
 }
+

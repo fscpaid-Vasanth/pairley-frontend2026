@@ -57,11 +57,11 @@ export default function BusinessNav() {
               to={item.path}
               className={`business-nav__tab flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl whitespace-nowrap transition ${
                 active 
-                  ? 'business-nav__tab--active bg-[#4E2BC4]/5 text-[#4E2BC4] border border-[#4E2BC4]/10 shadow-sm' 
+                  ? 'business-nav__tab--active bg-[#5B12D6]/5 text-[#5B12D6] border border-[#5B12D6]/10 shadow-sm' 
                   : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-transparent'
               }`}
             >
-              <IconComponent size={14} className={active ? 'text-[#4E2BC4]' : 'text-slate-400'} />
+              <IconComponent size={14} className={active ? 'text-[#5B12D6]' : 'text-slate-400'} />
               {item.label}
             </Link>
           );
@@ -70,3 +70,4 @@ export default function BusinessNav() {
     </div>
   );
 }
+

@@ -191,7 +191,7 @@ export default function BusinessSettingsPage() {
             {/* Store Profile Card */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-1.5">
-                <Building2 size={16} className="text-[#4E2BC4]" />
+                <Building2 size={16} className="text-[#5B12D6]" />
                 Business Store Profile
               </h4>
 
@@ -203,7 +203,7 @@ export default function BusinessSettingsPage() {
                     name="businessName"
                     value={store.businessName}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 outline-none transition ${errors.businessName ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 outline-none transition ${errors.businessName ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                   />
                   {errors.businessName && <span className="text-[10px] text-red-500 font-bold">{errors.businessName}</span>}
                 </div>
@@ -214,7 +214,7 @@ export default function BusinessSettingsPage() {
                     name="type"
                     value={store.type}
                     onChange={handleInputChange}
-                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4]"
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   >
                     <option value="shopping">Shopping & Retail</option>
                     <option value="beauty">Beauty, Salon & Spa</option>
@@ -232,7 +232,7 @@ export default function BusinessSettingsPage() {
                       name="email"
                       value={store.email}
                       onChange={handleInputChange}
-                      className={`w-full pl-9 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                      className={`w-full pl-9 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.email ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     />
                   </div>
                   {errors.email && <span className="text-[10px] text-red-500 font-bold">{errors.email}</span>}
@@ -247,7 +247,7 @@ export default function BusinessSettingsPage() {
                       name="phone"
                       value={store.phone}
                       onChange={handleInputChange}
-                      className={`w-full pl-9 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.phone ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                      className={`w-full pl-9 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.phone ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     />
                   </div>
                   {errors.phone && <span className="text-[10px] text-red-500 font-bold">{errors.phone}</span>}
@@ -258,7 +258,7 @@ export default function BusinessSettingsPage() {
             {/* Pickup Hours & Operations */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-1.5">
-                <Clock size={16} className="text-[#4E2BC4]" />
+                <Clock size={16} className="text-[#5B12D6]" />
                 Pickup Timings & Logistics
               </h4>
 
@@ -269,7 +269,7 @@ export default function BusinessSettingsPage() {
                     name="openTime"
                     value={store.openTime}
                     onChange={handleInputChange}
-                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4]"
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   >
                     {['08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM'].map(t => (
                       <option key={t} value={t}>{t}</option>
@@ -283,7 +283,7 @@ export default function BusinessSettingsPage() {
                     name="closeTime"
                     value={store.closeTime}
                     onChange={handleInputChange}
-                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4]"
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   >
                     {['07:00 PM', '08:00 PM', '09:00 PM', '10:00 PM'].map(t => (
                       <option key={t} value={t}>{t}</option>
@@ -296,7 +296,7 @@ export default function BusinessSettingsPage() {
             {/* Location coordinates */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-1.5">
-                <MapPin size={16} className="text-[#4E2BC4]" />
+                <MapPin size={16} className="text-[#5B12D6]" />
                 Physical Store Coordinates
               </h4>
 
@@ -308,7 +308,7 @@ export default function BusinessSettingsPage() {
                     name="address"
                     value={store.address}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 outline-none transition ${errors.address ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 outline-none transition ${errors.address ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                   />
                   {errors.address && <span className="text-[10px] text-red-500 font-bold">{errors.address}</span>}
                 </div>
@@ -319,7 +319,7 @@ export default function BusinessSettingsPage() {
                     name="city"
                     value={store.city}
                     onChange={handleInputChange}
-                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4]"
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   >
                     {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad'].map(c => (
                       <option key={c} value={c}>{c}</option>
@@ -333,7 +333,7 @@ export default function BusinessSettingsPage() {
                     name="mallName"
                     value={store.mallName}
                     onChange={handleInputChange}
-                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#4E2BC4]"
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   >
                     <option value="">No Mall / Standalone Shop</option>
                     {MALLS.map(mall => (
@@ -352,7 +352,7 @@ export default function BusinessSettingsPage() {
             {/* Registered Tax & Verification */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
-                <ShieldCheck size={14} className="text-[#4E2BC4]" />
+                <ShieldCheck size={14} className="text-[#5B12D6]" />
                 Registered Tax Credentials
               </h4>
 
@@ -365,7 +365,7 @@ export default function BusinessSettingsPage() {
                     value={store.gstin}
                     onChange={handleInputChange}
                     placeholder="27AABCU9603R1ZM"
-                    className={`border rounded-xl p-2.5 outline-none transition ${errors.gstin ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                    className={`border rounded-xl p-2.5 outline-none transition ${errors.gstin ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                   />
                   {errors.gstin && <span className="text-[10px] text-red-500 font-bold">{errors.gstin}</span>}
                 </div>
@@ -389,7 +389,7 @@ export default function BusinessSettingsPage() {
                     name="autoConfirm"
                     checked={store.autoConfirm}
                     onChange={handleInputChange}
-                    className="mt-1 flex-shrink-0 accent-[#4E2BC4]"
+                    className="mt-1 flex-shrink-0 accent-[#5B12D6]"
                   />
                   <span className="text-xs text-slate-500 leading-normal font-semibold">
                     <strong>Auto-confirm matched groups</strong>
@@ -403,7 +403,7 @@ export default function BusinessSettingsPage() {
                     name="notificationEmails"
                     checked={store.notificationEmails}
                     onChange={handleInputChange}
-                    className="mt-1 flex-shrink-0 accent-[#4E2BC4]"
+                    className="mt-1 flex-shrink-0 accent-[#5B12D6]"
                   />
                   <span className="text-xs text-slate-500 leading-normal font-semibold">
                     <strong>Email dispatch alerts</strong>
@@ -416,7 +416,7 @@ export default function BusinessSettingsPage() {
             {/* SMS Match Alert Contacts */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left flex flex-col gap-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 pb-2 border-b border-slate-100">
-                <Phone size={14} className="text-[#4E2BC4]" /> Match Alert SMS Contacts
+                <Phone size={14} className="text-[#5B12D6]" /> Match Alert SMS Contacts
               </h4>
               <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
                 Add up to 3 staff mobile numbers to receive full customer details (name and phone) instantly when a BOGO match is successfully completed.
@@ -433,7 +433,7 @@ export default function BusinessSettingsPage() {
                       placeholder="9876543210"
                       value={store.smsNumber1 || ''}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber1 ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber1 ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     />
                   </div>
                   {errors.smsNumber1 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber1}</span>}
@@ -449,7 +449,7 @@ export default function BusinessSettingsPage() {
                       placeholder="9876543210"
                       value={store.smsNumber2 || ''}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber2 ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber2 ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     />
                   </div>
                   {errors.smsNumber2 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber2}</span>}
@@ -465,14 +465,14 @@ export default function BusinessSettingsPage() {
                       placeholder="9876543210"
                       value={store.smsNumber3 || ''}
                       onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber3 ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'}`}
+                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber3 ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
                     />
                   </div>
                   {errors.smsNumber3 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber3}</span>}
                 </div>
 
                 <div className="p-3 bg-indigo-50/50 border border-indigo-100/60 rounded-xl flex items-start gap-2 text-[10px] text-indigo-700 font-bold">
-                  <Info size={14} className="text-[#4E2BC4] flex-shrink-0 mt-0.5" />
+                  <Info size={14} className="text-[#5B12D6] flex-shrink-0 mt-0.5" />
                   <span>If no alert numbers are saved, notifications will fallback to the primary store phone number: {store.phone}.</span>
                 </div>
               </div>
@@ -482,7 +482,7 @@ export default function BusinessSettingsPage() {
             <div className="flex flex-col gap-2">
               <button 
                 type="submit" 
-                className="btn btn-primary w-full bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
+                className="btn btn-primary w-full bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
               >
                 <Save size={16} /> Save Configurations
               </button>
@@ -496,3 +496,4 @@ export default function BusinessSettingsPage() {
     </div>
   );
 }
+

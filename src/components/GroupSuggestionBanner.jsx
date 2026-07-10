@@ -56,3 +56,4 @@ export default function GroupSuggestionBanner({ count = 0, dealTitle = '', remai
     </AnimatePresence>
   );
 }
+

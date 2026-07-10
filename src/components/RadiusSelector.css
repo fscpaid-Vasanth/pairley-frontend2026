@@ -59,7 +59,7 @@
   position: absolute;
   inset: 0;
   border-radius: 99px;
-  background: linear-gradient(135deg, #4E2BC4, #6D28D9);
+  background: linear-gradient(135deg, #5B12D6, #6D28D9);
   z-index: 0;
 }
 
@@ -71,16 +71,16 @@
 
 /* ── Active Pill ── */
 .radius-selector__pill--active {
-  border-color: #4E2BC4;
+  border-color: #5B12D6;
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(78, 43, 196, 0.35), 0 1px 4px rgba(78, 43, 196, 0.2);
 }
 
 /* ── Hover (non-active) ── */
 .radius-selector__pill:not(.radius-selector__pill--active):hover {
-  border-color: #4E2BC4;
+  border-color: #5B12D6;
   background: rgba(78, 43, 196, 0.06);
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 /* ── Focus visible ring ── */
@@ -100,3 +100,4 @@
     font-size: 11px;
   }
 }
+

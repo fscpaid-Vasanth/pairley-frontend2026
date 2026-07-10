@@ -49,3 +49,4 @@ export default function LiveProgressBar({ current = 0, total = 1, label }) {
     </div>
   );
 }
+

@@ -302,7 +302,7 @@
 }
 
 .login-role-card-btn.active.customer-card {
-  border-color: #4E2BC4;
+  border-color: #5B12D6;
   background: rgba(78, 43, 196, 0.03);
   box-shadow: 0 6px 18px -4px rgba(78, 43, 196, 0.12), inset 0 0 0 0.5px rgba(78, 43, 196, 0.1);
 }
@@ -327,7 +327,7 @@
 
 .badge-customer {
   background: rgba(78, 43, 196, 0.08);
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 .badge-merchant {
@@ -336,7 +336,7 @@
 }
 
 .login-role-card-btn.active .badge-customer {
-  background: #4E2BC4;
+  background: #5B12D6;
   color: #ffffff;
 }
 
@@ -366,7 +366,7 @@
 }
 
 .login-role-card-btn.active.customer-card .role-card-icon-wrap {
-  background: #4E2BC4;
+  background: #5B12D6;
   color: #ffffff;
 }
 
@@ -407,7 +407,7 @@
 }
 
 .login-role-card-btn.active.customer-card .role-card-arrow {
-  color: #4E2BC4;
+  color: #5B12D6;
   transform: scale(1.1);
 }
 
@@ -924,8 +924,8 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(180deg, rgba(78, 43, 196, 0) 0%, #4E2BC4 50%, rgba(78, 43, 196, 0) 100%);
-  box-shadow: 0 0 15px #4E2BC4, 0 0 30px #4E2BC4;
+  background: linear-gradient(180deg, rgba(78, 43, 196, 0) 0%, #5B12D6 50%, rgba(78, 43, 196, 0) 100%);
+  box-shadow: 0 0 15px #5B12D6, 0 0 30px #5B12D6;
   animation: scanLaserAnim 2s infinite linear;
 }
 
@@ -946,8 +946,8 @@
 
 .aadhaar-scan-progress-fill {
   height: 100%;
-  background: #4E2BC4;
-  box-shadow: 0 0 8px #4E2BC4;
+  background: #5B12D6;
+  box-shadow: 0 0 8px #5B12D6;
   transition: width 0.2s ease-out;
 }
 
@@ -964,7 +964,7 @@
 .aadhaar-scan-message-box--success {
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  color: #10B981;
+  color: #22C55E;
 }
 
 .aadhaar-scan-message-box--warning {
@@ -976,7 +976,7 @@
 .aadhaar-scan-message-box--info {
   background: rgba(78, 43, 196, 0.08);
   border: 1px solid rgba(78, 43, 196, 0.15);
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 .aadhaar-match-indicator {
@@ -989,7 +989,7 @@
 }
 
 .aadhaar-match-indicator--success {
-  color: #10B981;
+  color: #22C55E;
 }
 
 .aadhaar-match-indicator--error {
@@ -1119,7 +1119,7 @@
   height: 56px;
   border-radius: 50%;
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: #22C55E;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1140,5 +1140,6 @@
     transform: translateY(0);
   }
 }
+
 
 

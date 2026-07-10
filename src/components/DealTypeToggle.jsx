@@ -33,3 +33,4 @@ export default function DealTypeToggle({ selected, onChange }) {
     </div>
   );
 }
+

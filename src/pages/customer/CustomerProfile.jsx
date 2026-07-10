@@ -248,13 +248,13 @@ export default function CustomerProfile() {
         >
           {/* Header Card */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/70 backdrop-blur-md border border-slate-200/80 p-6 rounded-3xl shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#4E2BC4]/5 to-transparent rounded-bl-full pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#5B12D6]/5 to-transparent rounded-bl-full pointer-events-none"></div>
             
             <div className="flex items-center gap-5">
               <div className="customer-profile__avatar-wrap relative">
                 <ImageWithFallback src={profile.profile_photo || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + (profile.name || 'User'))} alt={profile.name} className="w-20 h-20 rounded-full border-4 border-white shadow-md bg-purple-50" fallbackType="avatar" name={profile.name} />
                 {editMode && (
-                  <button className="absolute bottom-0 right-0 w-7 h-7 bg-[#4E2BC4] hover:bg-[#6D4EE3] text-white rounded-full flex items-center justify-center border-2 border-white shadow-md transition-colors duration-200" aria-label="Upload photo">
+                  <button className="absolute bottom-0 right-0 w-7 h-7 bg-[#5B12D6] hover:bg-[#7C3AED] text-white rounded-full flex items-center justify-center border-2 border-white shadow-md transition-colors duration-200" aria-label="Upload photo">
                     <Camera size={12} />
                   </button>
                 )}
@@ -288,7 +288,7 @@ export default function CustomerProfile() {
               className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all duration-200 shadow-sm ${
                 editMode 
                   ? 'bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200' 
-                  : 'bg-white border border-slate-200 hover:border-slate-300 text-[#4E2BC4] hover:bg-purple-50'
+                  : 'bg-white border border-slate-200 hover:border-slate-300 text-[#5B12D6] hover:bg-purple-50'
               }`}
             >
               {editMode ? (
@@ -313,7 +313,7 @@ export default function CustomerProfile() {
             <form onSubmit={handleSave} className="bg-white border border-slate-200/80 p-6 rounded-3xl shadow-sm flex flex-col justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-6 flex items-center gap-2">
-                  <User size={18} className="text-[#4E2BC4]" />
+                  <User size={18} className="text-[#5B12D6]" />
                   Personal Details
                 </h3>
 
@@ -439,7 +439,7 @@ export default function CustomerProfile() {
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden mt-6"
                   >
-                    <button type="submit" className="w-full py-3 bg-[#4E2BC4] hover:bg-[#6D4EE3] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]">
+                    <button type="submit" className="w-full py-3 bg-[#5B12D6] hover:bg-[#7C3AED] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]">
                       <Save size={14} />
                       Save Profile Details
                     </button>
@@ -453,7 +453,7 @@ export default function CustomerProfile() {
               {/* Category Preferences */}
               <div className="bg-white border border-slate-200/80 p-6 rounded-3xl shadow-sm">
                 <h3 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2">
-                  <Sparkles size={18} className="text-[#4E2BC4]" />
+                  <Sparkles size={18} className="text-[#5B12D6]" />
                   Preferred Categories
                 </h3>
                 
@@ -468,7 +468,7 @@ export default function CustomerProfile() {
                         disabled={!editMode}
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all duration-300 ${
                           isSelected
-                            ? 'bg-[#4E2BC4]/10 border-[#4E2BC4]/30 text-[#4E2BC4] font-bold shadow-sm'
+                            ? 'bg-[#5B12D6]/10 border-[#5B12D6]/30 text-[#5B12D6] font-bold shadow-sm'
                             : 'bg-white border-slate-200 hover:border-slate-300 text-slate-500'
                         } ${!editMode ? 'opacity-85 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-100'}`}
                       >
@@ -486,7 +486,7 @@ export default function CustomerProfile() {
               {/* Notification Settings */}
               <div className="bg-white border border-slate-200/80 p-6 rounded-3xl shadow-sm space-y-4">
                 <h3 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-2">
-                  <Bell size={18} className="text-[#4E2BC4]" />
+                  <Bell size={18} className="text-[#5B12D6]" />
                   Notifications
                 </h3>
 
@@ -524,7 +524,7 @@ export default function CustomerProfile() {
                         className="sr-only peer"
                       />
                       <div className={`w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:height-4 after:h-4 after:w-4 after:transition-all ${
-                        editMode ? 'peer-checked:bg-[#4E2BC4] cursor-pointer' : 'peer-checked:bg-[#4E2BC4]/70 cursor-not-allowed opacity-80'
+                        editMode ? 'peer-checked:bg-[#5B12D6] cursor-pointer' : 'peer-checked:bg-[#5B12D6]/70 cursor-not-allowed opacity-80'
                       }`}></div>
                     </label>
                   </div>
@@ -536,7 +536,7 @@ export default function CustomerProfile() {
                 <button
                   type="button"
                   onClick={() => alert('Simulating Reset Password link sent to ' + profile.email)}
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#4E2BC4] bg-slate-50 border border-slate-200 hover:border-slate-300 px-4 py-2.5 rounded-xl transition-all duration-200"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#5B12D6] bg-slate-50 border border-slate-200 hover:border-slate-300 px-4 py-2.5 rounded-xl transition-all duration-200"
                 >
                   <Key size={14} />
                   Reset Password
@@ -566,3 +566,4 @@ const formatPrice = (price) => {
     maximumFractionDigits: 0
   }).format(price);
 };
+

@@ -44,7 +44,7 @@ export default function ImageWithFallback({
     const gradients = [
       'linear-gradient(135deg, #6366F1, #4F46E5)', // Indigo
       'linear-gradient(135deg, #EC4899, #DB2777)', // Pink
-      'linear-gradient(135deg, #10B981, #059669)', // Emerald
+      'linear-gradient(135deg, #22C55E, #16a34a)', // Emerald
       'linear-gradient(135deg, #F59E0B, #D97706)', // Amber
       'linear-gradient(135deg, #3B82F6, #2563EB)'  // Blue
     ];
@@ -69,7 +69,7 @@ export default function ImageWithFallback({
       <div
         className={`image-fallback image-fallback--business ${className}`}
         style={{
-          background: 'linear-gradient(135deg, #4E2BC4, #6D4EE3)',
+          background: 'linear-gradient(135deg, #5B12D6, #7C3AED)',
           ...style
         }}
       >
@@ -80,7 +80,7 @@ export default function ImageWithFallback({
 
   // Default: Deal fallback card (category-specific)
   const catData = getCategoryById(category);
-  const bgGradient = catData?.gradient || 'linear-gradient(135deg, #4E2BC4, #6D4EE3)';
+  const bgGradient = catData?.gradient || 'linear-gradient(135deg, #5B12D6, #7C3AED)';
   const iconEmoji = catData?.icon || '🏷️';
 
   return (
@@ -98,3 +98,4 @@ export default function ImageWithFallback({
     </div>
   );
 }
+

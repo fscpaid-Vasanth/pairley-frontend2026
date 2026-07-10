@@ -1028,3 +1028,4 @@ const MerchantIllustration = () => (
 );
 
 export default LandingPage;
+

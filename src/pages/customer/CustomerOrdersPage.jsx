@@ -91,7 +91,7 @@ export default function CustomerOrdersPage() {
         
         {/* Header Breadcrumbs */}
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mb-4 uppercase tracking-wider">
-          <Link to="/customer/dashboard" className="hover:text-[#4E2BC4] transition">Dashboard</Link>
+          <Link to="/customer/dashboard" className="hover:text-[#5B12D6] transition">Dashboard</Link>
           <span>/</span>
           <span className="text-slate-600">My Orders & Matches</span>
         </div>
@@ -106,8 +106,8 @@ export default function CustomerOrdersPage() {
           </div>
 
           {/* Stats Summary Bubble */}
-          <div className="flex items-center gap-3 bg-[#4E2BC4]/5 border border-[#4E2BC4]/10 px-4 py-3 rounded-2xl w-max">
-            <div className="w-8 h-8 rounded-lg bg-[#4E2BC4] text-white flex items-center justify-center shadow-md shadow-indigo-600/10">
+          <div className="flex items-center gap-3 bg-[#5B12D6]/5 border border-[#5B12D6]/10 px-4 py-3 rounded-2xl w-max">
+            <div className="w-8 h-8 rounded-lg bg-[#5B12D6] text-white flex items-center justify-center shadow-md shadow-indigo-600/10">
               <Wallet size={16} />
             </div>
             <div>
@@ -134,13 +134,13 @@ export default function CustomerOrdersPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition ${
                   activeTab === tab.id 
-                    ? 'bg-white text-[#4E2BC4] shadow-sm' 
+                    ? 'bg-white text-[#5B12D6] shadow-sm' 
                     : 'text-slate-500 hover:text-slate-800 bg-transparent'
                 }`}
               >
                 {tab.label}
                 <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab.id ? 'bg-[#4E2BC4]/10 text-[#4E2BC4]' : 'bg-slate-200 text-slate-600'
+                  activeTab === tab.id ? 'bg-[#5B12D6]/10 text-[#5B12D6]' : 'bg-slate-200 text-slate-600'
                 }`}>
                   {tab.count}
                 </span>
@@ -156,7 +156,7 @@ export default function CustomerOrdersPage() {
               placeholder="Search by Title or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#4E2BC4] focus:bg-white transition"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#5B12D6] focus:bg-white transition"
             />
           </div>
         </div>
@@ -232,7 +232,7 @@ export default function CustomerOrdersPage() {
                         
                         {/* Prices & quantities */}
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs font-extrabold text-[#4E2BC4]">
+                          <span className="text-xs font-extrabold text-[#5B12D6]">
                             {formatPrice(order.pairleyPrice * order.quantity)}
                           </span>
                           <span className="text-[10px] text-slate-400 font-bold">
@@ -287,7 +287,7 @@ export default function CustomerOrdersPage() {
                       {isSearching ? (
                         <button
                           onClick={() => handleCopyLink(order.id)}
-                          className="flex-1 md:flex-initial bg-[#4E2BC4]/5 hover:bg-[#4E2BC4]/10 border border-[#4E2BC4]/20 text-[#4E2BC4] font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition"
+                          className="flex-1 md:flex-initial bg-[#5B12D6]/5 hover:bg-[#5B12D6]/10 border border-[#5B12D6]/20 text-[#5B12D6] font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition"
                         >
                           <Share2 size={14} /> Boost Match
                         </button>
@@ -322,7 +322,7 @@ export default function CustomerOrdersPage() {
                 {activeTab === 'completed' && "No completed matches yet. Share your active deals to secure matches faster!"}
                 {activeTab === 'past' && "Your purchase history is empty. Split deals with partners and review savings here."}
               </p>
-              <Link to="/deals" className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 mt-2">
+              <Link to="/deals" className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 mt-2">
                 <Tag size={14} /> Browse Deals
               </Link>
             </motion.div>
@@ -333,3 +333,4 @@ export default function CustomerOrdersPage() {
     </div>
   );
 }
+

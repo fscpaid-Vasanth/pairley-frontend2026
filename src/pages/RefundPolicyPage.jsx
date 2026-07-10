@@ -51,7 +51,7 @@ export default function RefundPolicyPage() {
         
         {/* Header Breadcrumbs */}
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mb-4 uppercase tracking-wider">
-          <Link to="/" className="hover:text-[#4E2BC4] transition">Home</Link>
+          <Link to="/" className="hover:text-[#5B12D6] transition">Home</Link>
           <span>/</span>
           <span className="text-slate-600">Refund & Matching Policy</span>
         </div>
@@ -68,7 +68,7 @@ export default function RefundPolicyPage() {
 
         {/* Introduction Panel */}
         <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm mb-8 flex gap-4 items-start">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-[#4E2BC4] flex items-center justify-center flex-shrink-0 border border-purple-100">
+          <div className="w-10 h-10 rounded-xl bg-purple-50 text-[#5B12D6] flex items-center justify-center flex-shrink-0 border border-purple-100">
             <ShieldCheck size={20} />
           </div>
           <div className="text-xs md:text-sm text-slate-500 font-semibold leading-relaxed">
@@ -81,7 +81,7 @@ export default function RefundPolicyPage() {
         <div className="space-y-6 mb-10 text-xs md:text-sm leading-relaxed text-slate-500 font-semibold">
           <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm">
             <h4 className="font-extrabold text-slate-800 text-sm md:text-base mb-3 flex items-center gap-1.5">
-              <Clock size={16} className="text-[#4E2BC4]" />
+              <Clock size={16} className="text-[#5B12D6]" />
               1. Direct Lead Sharing
             </h4>
             <p>
@@ -112,7 +112,7 @@ export default function RefundPolicyPage() {
         {/* Legal Policy accordion */}
         <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm">
           <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-1.5">
-            <HelpCircle size={16} className="text-[#4E2BC4]" />
+            <HelpCircle size={16} className="text-[#5B12D6]" />
             Frequently Asked Questions
           </h4>
 
@@ -121,7 +121,7 @@ export default function RefundPolicyPage() {
               <div key={faq.id} className="py-4 first:pt-2 last:pb-2">
                 <button
                   onClick={() => toggleFaq(faq.id)}
-                  className="w-full flex justify-between items-center text-xs md:text-sm font-bold text-slate-700 hover:text-[#4E2BC4] transition text-left"
+                  className="w-full flex justify-between items-center text-xs md:text-sm font-bold text-slate-700 hover:text-[#5B12D6] transition text-left"
                 >
                   {faq.question}
                   {activeFaq === faq.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -151,3 +151,4 @@ export default function RefundPolicyPage() {
     </div>
   );
 }
+

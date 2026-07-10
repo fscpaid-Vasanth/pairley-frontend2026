@@ -100,3 +100,4 @@ export default function CategorySection({ selectedCategory, onSelect, onSelectCa
     </div>
   );
 }
+

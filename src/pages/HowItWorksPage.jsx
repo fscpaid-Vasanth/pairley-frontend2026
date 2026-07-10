@@ -119,7 +119,7 @@ export default function HowItWorksPage() {
         
         <div className="container max-w-4xl mx-auto px-4">
           <motion.span 
-            className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#4E2BC4] bg-[#4E2BC4]/10 border border-[#4E2BC4]/20 inline-block mb-4"
+            className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#5B12D6] bg-[#5B12D6]/10 border border-[#5B12D6]/20 inline-block mb-4"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
@@ -132,7 +132,7 @@ export default function HowItWorksPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Shopping is Better <span className="bg-gradient-to-r from-[#4E2BC4] to-[#6D4EE3] bg-clip-text text-transparent">Together</span>
+            Shopping is Better <span className="bg-gradient-to-r from-[#5B12D6] to-[#7C3AED] bg-clip-text text-transparent">Together</span>
           </motion.h1>
           <motion.p 
             className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed"
@@ -148,7 +148,7 @@ export default function HowItWorksPage() {
       {/* Interactive Simulator Section */}
       <section className="container max-w-5xl mx-auto px-4 mb-20">
         <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#4E2BC4]/5 to-transparent rounded-bl-full pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#5B12D6]/5 to-transparent rounded-bl-full pointer-events-none"></div>
           
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-800 flex items-center justify-center gap-2">
@@ -165,7 +165,7 @@ export default function HowItWorksPage() {
                 onClick={() => setSimMode('bogo')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   simMode === 'bogo'
-                    ? 'bg-[#4E2BC4] text-white shadow-md'
+                    ? 'bg-[#5B12D6] text-white shadow-md'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
@@ -176,7 +176,7 @@ export default function HowItWorksPage() {
                 onClick={() => setSimMode('group')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   simMode === 'group'
-                    ? 'bg-[#4E2BC4] text-white shadow-md'
+                    ? 'bg-[#5B12D6] text-white shadow-md'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
@@ -227,7 +227,7 @@ export default function HowItWorksPage() {
                   {/* Match Indicator */}
                   <div className="z-10 w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-lg">
                     {bogoStep === 0 && <span className="text-slate-300 font-bold text-lg">?</span>}
-                    {bogoStep === 1 && <span className="text-[#4E2BC4] font-bold text-xs animate-pulse">Matching</span>}
+                    {bogoStep === 1 && <span className="text-[#5B12D6] font-bold text-xs animate-pulse">Matching</span>}
                     {bogoStep >= 2 && <span className="text-emerald-500 font-bold text-lg">🤝</span>}
                   </div>
 
@@ -304,7 +304,7 @@ export default function HowItWorksPage() {
                       key={step}
                       onClick={() => setBogoStep(step)}
                       className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                        bogoStep === step ? 'bg-[#4E2BC4] w-6' : 'bg-slate-300'
+                        bogoStep === step ? 'bg-[#5B12D6] w-6' : 'bg-slate-300'
                       }`}
                     />
                   ))}
@@ -315,7 +315,7 @@ export default function HowItWorksPage() {
               <div className="flex flex-col items-center justify-between h-full w-full">
                 <div className="flex justify-between items-center w-full max-w-md mb-4">
                   <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Group Booking: Kerala Resort Tour</div>
-                  <div className="text-xs font-bold text-[#4E2BC4]">
+                  <div className="text-xs font-bold text-[#5B12D6]">
                     {groupPeople} Joined
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default function HowItWorksPage() {
                     </div>
                     <div className="text-right">
                       <div className="text-xs text-slate-400 uppercase">Tier Discount</div>
-                      <div className="text-sm font-semibold text-[#4E2BC4]">
+                      <div className="text-sm font-semibold text-[#5B12D6]">
                         {groupPeople >= 8 ? '40% Off Unlocked! 🔥' : groupPeople >= 4 ? '20% Off Unlocked!' : 'Base Price'}
                       </div>
                     </div>
@@ -380,7 +380,7 @@ export default function HowItWorksPage() {
                     </motion.div>
                   ))}
                   {groupPeople < 10 && (
-                    <div className="h-9 w-9 rounded-full ring-2 ring-white bg-[#4E2BC4]/10 text-[#4E2BC4] flex items-center justify-center text-xs font-bold animate-pulse">
+                    <div className="h-9 w-9 rounded-full ring-2 ring-white bg-[#5B12D6]/10 text-[#5B12D6] flex items-center justify-center text-xs font-bold animate-pulse">
                       +
                     </div>
                   )}
@@ -410,7 +410,7 @@ export default function HowItWorksPage() {
               onClick={() => setActiveTab('customer')}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 activeTab === 'customer'
-                  ? 'bg-white text-[#4E2BC4] shadow-sm'
+                  ? 'bg-white text-[#5B12D6] shadow-sm'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -421,7 +421,7 @@ export default function HowItWorksPage() {
               onClick={() => setActiveTab('merchant')}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                 activeTab === 'merchant'
-                  ? 'bg-white text-[#4E2BC4] shadow-sm'
+                  ? 'bg-white text-[#5B12D6] shadow-sm'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -476,7 +476,7 @@ export default function HowItWorksPage() {
                         {step.num}
                       </div>
                       <div>
-                        <h4 className="font-bold text-slate-800 text-base group-hover:text-[#4E2BC4] transition-colors duration-200">{step.title}</h4>
+                        <h4 className="font-bold text-slate-800 text-base group-hover:text-[#5B12D6] transition-colors duration-200">{step.title}</h4>
                         <p className="text-xs text-slate-500 mt-1 leading-relaxed">{step.desc}</p>
                       </div>
                     </div>
@@ -484,7 +484,7 @@ export default function HowItWorksPage() {
                 </div>
 
                 {/* Feature Graphic */}
-                <div className="bg-gradient-to-tr from-[#4E2BC4]/10 to-[#6D4EE3]/5 border border-purple-100 p-8 rounded-3xl flex flex-col justify-between shadow-sm relative overflow-hidden h-[420px]">
+                <div className="bg-gradient-to-tr from-[#5B12D6]/10 to-[#7C3AED]/5 border border-purple-100 p-8 rounded-3xl flex flex-col justify-between shadow-sm relative overflow-hidden h-[420px]">
                   <div className="absolute top-[-50px] right-[-50px] w-40 h-40 bg-purple-500/10 rounded-full blur-2xl"></div>
                   
                   <div>
@@ -510,7 +510,7 @@ export default function HowItWorksPage() {
 
                   <div className="pt-4 border-t border-purple-100/50 flex justify-between items-center mt-4">
                     <div className="text-xs text-slate-500">Ready to start?</div>
-                    <Link to={ROUTES.DEALS} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4E2BC4] hover:underline">
+                    <Link to={ROUTES.DEALS} className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5B12D6] hover:underline">
                       Explore Active Deals <ArrowRight size={14} />
                     </Link>
                   </div>
@@ -607,7 +607,7 @@ export default function HowItWorksPage() {
       <section className="container max-w-4xl mx-auto px-4 mb-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-extrabold text-slate-800 flex items-center justify-center gap-2">
-            <HelpCircle className="text-[#4E2BC4]" size={28} />
+            <HelpCircle className="text-[#5B12D6]" size={28} />
             Frequently Asked Questions
           </h2>
           <p className="text-slate-500 mt-2">Have a question? We have answered the most common inquiries below.</p>
@@ -627,11 +627,11 @@ export default function HowItWorksPage() {
               >
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full flex justify-between items-center p-5 text-left font-bold text-slate-800 transition-colors duration-200 hover:text-[#4E2BC4]"
+                  className="w-full flex justify-between items-center p-5 text-left font-bold text-slate-800 transition-colors duration-200 hover:text-[#5B12D6]"
                 >
                   <span className="text-sm md:text-base pr-4">{faq.q}</span>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200 ${
-                    isOpen ? 'bg-[#4E2BC4] text-white border-transparent rotate-180' : 'bg-slate-50 border-slate-200 text-slate-600'
+                    isOpen ? 'bg-[#5B12D6] text-white border-transparent rotate-180' : 'bg-slate-50 border-slate-200 text-slate-600'
                   }`}>
                     <ChevronDown size={16} />
                   </div>
@@ -659,7 +659,7 @@ export default function HowItWorksPage() {
 
       {/* CTA Conversion Box */}
       <section className="container max-w-5xl mx-auto px-4 mb-8">
-        <div className="bg-gradient-to-r from-[#4E2BC4] to-[#6D4EE3] rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden shadow-xl">
+        <div className="bg-gradient-to-r from-[#5B12D6] to-[#7C3AED] rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden shadow-xl">
           {/* Floating abstract decorative blobs */}
           <div className="absolute top-[-100px] left-[-100px] w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
           <div className="absolute bottom-[-100px] right-[-100px] w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -670,7 +670,7 @@ export default function HowItWorksPage() {
               Unlock the best prices on dinners, activities, electronics, and hotel bookings. Sign up in under 30 seconds.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to={ROUTES.SIGNUP} className="w-full sm:w-auto px-8 py-4 bg-white text-[#4E2BC4] font-bold rounded-2xl shadow-lg hover:bg-slate-50 hover:scale-[1.02] active:scale-100 transition-all duration-200">
+              <Link to={ROUTES.SIGNUP} className="w-full sm:w-auto px-8 py-4 bg-white text-[#5B12D6] font-bold rounded-2xl shadow-lg hover:bg-slate-50 hover:scale-[1.02] active:scale-100 transition-all duration-200">
                 Join Pairley Free
               </Link>
               <Link to={ROUTES.DEALS} className="w-full sm:w-auto px-8 py-4 bg-purple-600/30 text-white font-bold border border-white/20 rounded-2xl hover:bg-purple-600/50 hover:scale-[1.02] active:scale-100 transition-all duration-200">
@@ -683,4 +683,5 @@ export default function HowItWorksPage() {
     </div>
   );
 }
+
 

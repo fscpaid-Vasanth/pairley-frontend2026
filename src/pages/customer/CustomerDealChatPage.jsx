@@ -136,7 +136,7 @@ const formatDateNice = (dateStr) => {
 
 const CATEGORY_THEMES = [
   {
-    activeBg: '#4E2BC4',
+    activeBg: '#5B12D6',
     activeText: '#ffffff',
     inactiveBg: '#ffffff',
     inactiveText: '#475569',
@@ -144,7 +144,7 @@ const CATEGORY_THEMES = [
     stmtBg: 'hover:border-indigo-500 hover:bg-indigo-50/20 hover:text-indigo-700'
   },
   {
-    activeBg: '#10B981',
+    activeBg: '#22C55E',
     activeText: '#ffffff',
     inactiveBg: '#ffffff',
     inactiveText: '#475569',
@@ -369,7 +369,7 @@ export default function CustomerDealChatPage() {
       <div className="page-wrapper py-24 flex items-center justify-center min-h-[70vh]">
         <div className="bg-white/80 backdrop-blur-lg border border-slate-200/80 p-10 rounded-3xl text-center">
           <div className="relative flex items-center justify-center w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#4E2BC4] animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-slate-100 border-t-[#5B12D6] animate-spin"></div>
           </div>
           <h3 className="text-xl font-bold text-slate-800">Initializing Secure Room...</h3>
         </div>
@@ -382,7 +382,7 @@ export default function CustomerDealChatPage() {
       <div className="page-wrapper py-12 text-center min-h-[60vh] flex flex-col items-center justify-center">
         <Users className="text-slate-400 mb-3" size={48} />
         <h3 className="text-xl font-bold text-slate-800">Deal Not Found</h3>
-        <Link to="/deals" className="btn btn-primary bg-[#4E2BC4] text-white px-5 py-2.5 rounded-xl text-xs font-bold mt-4">
+        <Link to="/deals" className="btn btn-primary bg-[#5B12D6] text-white px-5 py-2.5 rounded-xl text-xs font-bold mt-4">
           Back to Deals
         </Link>
       </div>
@@ -447,7 +447,7 @@ export default function CustomerDealChatPage() {
                 if (msg.sender === 'system') {
                   return (
                     <div key={msg.id} className="flex justify-center my-1">
-                      <span className="bg-purple-50 border border-purple-100/60 px-3.5 py-1.5 rounded-xl text-[9px] font-extrabold text-[#4E2BC4] shadow-sm">
+                      <span className="bg-purple-50 border border-purple-100/60 px-3.5 py-1.5 rounded-xl text-[9px] font-extrabold text-[#5B12D6] shadow-sm">
                         {msg.text}
                       </span>
                     </div>
@@ -470,9 +470,9 @@ export default function CustomerDealChatPage() {
                         
                         {msg.isScheduleCard ? (
                           <div className="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-100 text-slate-800 rounded-tr-none shadow-sm flex items-start gap-2.5 text-xs font-semibold leading-relaxed">
-                            <CalendarDays className="text-[#4E2BC4] flex-shrink-0" size={18} />
+                            <CalendarDays className="text-[#5B12D6] flex-shrink-0" size={18} />
                             <div>
-                              <span className="block text-[#4E2BC4] font-extrabold text-[10px] uppercase tracking-wider mb-0.5">Meetup Timing Proposal</span>
+                              <span className="block text-[#5B12D6] font-extrabold text-[10px] uppercase tracking-wider mb-0.5">Meetup Timing Proposal</span>
                               <span className="block font-bold text-slate-700 text-xs">Day: {msg.day}</span>
                               <span className="block font-bold text-slate-700 text-xs">Time: {msg.timeSlot}</span>
                             </div>
@@ -480,7 +480,7 @@ export default function CustomerDealChatPage() {
                         ) : (
                           <div className={`p-3 rounded-2xl text-xs font-semibold leading-relaxed ${
                             isUser 
-                              ? 'bg-[#4E2BC4] text-white rounded-tr-none shadow-sm' 
+                              ? 'bg-[#5B12D6] text-white rounded-tr-none shadow-sm' 
                               : 'bg-white border border-slate-200/80 text-slate-800 rounded-tl-none shadow-sm'
                           }`}>
                             {msg.text}
@@ -514,7 +514,7 @@ export default function CustomerDealChatPage() {
             {/* Tabbed Predefined Messages Grill (CHAT BOX) */}
             <div className="bg-slate-50/70 border-t border-slate-100 p-4">
               <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                <Sparkles size={12} className="text-[#4E2BC4]" /> CHAT BOX
+                <Sparkles size={12} className="text-[#5B12D6]" /> CHAT BOX
               </span>
 
               {isCompleted && (
@@ -597,7 +597,7 @@ export default function CustomerDealChatPage() {
                 </div>
                 <div className="min-w-0">
                   <h5 className="font-bold text-slate-800 text-xs truncate leading-snug">{deal.title}</h5>
-                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-lg text-[9px] font-bold bg-[#4E2BC4]/5 text-[#4E2BC4] border border-[#4E2BC4]/10">
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-lg text-[9px] font-bold bg-[#5B12D6]/5 text-[#5B12D6] border border-[#5B12D6]/10">
                     🤝 Co-Buy Interest Room
                   </span>
                 </div>
@@ -606,7 +606,7 @@ export default function CustomerDealChatPage() {
               <div className="border-t border-slate-100 pt-3 mt-4 flex justify-between items-center text-xs font-semibold leading-relaxed text-slate-500">
                 <div>
                   <span className="block text-[10px] text-slate-400">Pairley Price</span>
-                  <span className="text-sm font-extrabold text-[#4E2BC4]">{formatPrice(deal.pairleyPrice)}</span>
+                  <span className="text-sm font-extrabold text-[#5B12D6]">{formatPrice(deal.pairleyPrice)}</span>
                 </div>
                 <div className="text-right">
                   <span className="block text-[10px] text-slate-400">Original Price</span>
@@ -618,7 +618,7 @@ export default function CustomerDealChatPage() {
             {/* Date & Time Coordination Widget */}
             <div className="bg-white/70 backdrop-blur-md border border-slate-200/80 p-5 rounded-3xl shadow-sm text-left">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3.5 flex items-center gap-1.5">
-                <Calendar size={14} className="text-[#4E2BC4]" /> Meetup Date & Time Coordinator
+                <Calendar size={14} className="text-[#5B12D6]" /> Meetup Date & Time Coordinator
               </h4>
 
               <div className="space-y-3">
@@ -629,7 +629,7 @@ export default function CustomerDealChatPage() {
                     value={proposeDay}
                     disabled={isCompleted}
                     onChange={(e) => setProposeDay(e.target.value)}
-                    className={`w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#4E2BC4] outline-none ${
+                    className={`w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#5B12D6] outline-none ${
                       isCompleted ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
                   />
@@ -642,7 +642,7 @@ export default function CustomerDealChatPage() {
                     value={proposeTime}
                     disabled={isCompleted}
                     onChange={(e) => setProposeTime(e.target.value)}
-                    className={`w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#4E2BC4] outline-none ${
+                    className={`w-full bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:border-[#5B12D6] outline-none ${
                       isCompleted ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
                   />
@@ -654,7 +654,7 @@ export default function CustomerDealChatPage() {
                   className={`w-full font-extrabold text-[11px] py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm mt-1 ${
                     isCompleted
                       ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                      : 'bg-indigo-50 border-indigo-200 hover:bg-[#4E2BC4] hover:text-white hover:border-[#4E2BC4] text-[#4E2BC4]'
+                      : 'bg-indigo-50 border-indigo-200 hover:bg-[#5B12D6] hover:text-white hover:border-[#5B12D6] text-[#5B12D6]'
                   }`}
                 >
                   <CalendarDays size={14} /> Share Meetup Proposal
@@ -731,7 +731,7 @@ export default function CustomerDealChatPage() {
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
               className="bg-white/90 backdrop-blur-lg border border-slate-200/80 p-8 rounded-3xl shadow-xl max-w-sm w-full text-center relative z-10"
             >
-              <div className="w-12 h-12 bg-purple-50 text-[#4E2BC4] rounded-full flex items-center justify-center mx-auto mb-4 border border-purple-100">
+              <div className="w-12 h-12 bg-purple-50 text-[#5B12D6] rounded-full flex items-center justify-center mx-auto mb-4 border border-purple-100">
                 <Lock size={20} />
               </div>
               <h3 className="font-extrabold text-slate-800 text-lg">Merchant Verification Code</h3>
@@ -740,7 +740,7 @@ export default function CustomerDealChatPage() {
               </p>
               
               <div className="my-6 bg-slate-50 border border-slate-200/60 py-4 px-6 rounded-2xl">
-                <span className="text-2xl font-black tracking-widest text-[#4E2BC4] font-mono block">
+                <span className="text-2xl font-black tracking-widest text-[#5B12D6] font-mono block">
                   {pickupCode}
                 </span>
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">
@@ -750,7 +750,7 @@ export default function CustomerDealChatPage() {
               
               <button
                 onClick={() => setShowCodeModal(false)}
-                className="w-full btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white py-3 rounded-xl text-xs font-bold transition"
+                className="w-full btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white py-3 rounded-xl text-xs font-bold transition"
               >
                 Close Verification Code
               </button>
@@ -762,3 +762,4 @@ export default function CustomerDealChatPage() {
     </div>
   );
 }
+

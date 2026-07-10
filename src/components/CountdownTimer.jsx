@@ -33,7 +33,7 @@ const styles = {
     padding: '4px 10px',
   },
   normal: {
-    color: '#4E2BC4',
+    color: '#5B12D6',
     background: 'rgba(78,43,196,0.07)',
     borderRadius: '8px',
     padding: '4px 10px',
@@ -141,3 +141,4 @@ export default function CountdownTimer({ endDate, label }) {
     </div>
   );
 }
+

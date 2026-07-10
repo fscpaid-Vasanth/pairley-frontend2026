@@ -23,7 +23,7 @@
 .support-page form input:focus,
 .support-page form textarea:focus,
 .support-page form select:focus {
-  border-color: #4E2BC4;
+  border-color: #5B12D6;
   box-shadow: 0 0 0 3px rgba(78, 43, 196, 0.12);
 }
 
@@ -31,3 +31,4 @@
 .support-page .fixed {
   box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
 }
+

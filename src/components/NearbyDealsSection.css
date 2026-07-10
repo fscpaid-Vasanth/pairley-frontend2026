@@ -30,7 +30,7 @@
 .nearby-section__badge {
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(135deg, #4e2bc4 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #5B12D6 0%, #7c3aed 100%);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -45,7 +45,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #4e2bc4;
+  color: #5B12D6;
   font-size: 13px;
   font-weight: 600;
   padding: 0;
@@ -125,7 +125,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: linear-gradient(135deg, #4e2bc4, #7c3aed);
+  background: linear-gradient(135deg, #5B12D6, #7c3aed);
   color: #fff;
   font-size: 10px;
   font-weight: 800;
@@ -209,7 +209,7 @@
 .nearby-card__pairley {
   font-size: 14px;
   font-weight: 800;
-  color: #4e2bc4;
+  color: #5B12D6;
   margin-left: auto;
 }
 
@@ -224,7 +224,7 @@
 
 .nearby-card__mini-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4e2bc4, #7c3aed);
+  background: linear-gradient(90deg, #5B12D6, #7c3aed);
   border-radius: 99px;
   transition: width 0.5s ease;
 }
@@ -240,3 +240,4 @@
   border-radius: 16px;
   border: 1.5px dashed #d6ccf5;
 }
+

@@ -579,7 +579,7 @@ export default function LoginPage() {
                     <div className="login-illustration-ring login-illustration-ring--2" style={{ borderColor: 'rgba(16, 185, 129, 0.15)' }} />
                   </div>
                   <div className="login-illustration-stat">
-                    <span className="login-illustration-stat-val" style={{ color: '#4E2BC4' }}>SECURED</span>
+                    <span className="login-illustration-stat-val" style={{ color: '#5B12D6' }}>SECURED</span>
                     <span className="login-illustration-stat-lbl">Authorized Session Only</span>
                   </div>
                 </div>
@@ -1079,7 +1079,7 @@ export default function LoginPage() {
                 <>
                   {isAdminLogin ? (
                     <div className="admin-login-indicator bg-indigo-50 border border-indigo-200 rounded-xl p-2.5 mb-4 text-center">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#4E2BC4] flex items-center justify-center gap-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#5B12D6] flex items-center justify-center gap-1">
                         🛡️ Admin Login Console
                       </span>
                     </div>
@@ -1359,3 +1359,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

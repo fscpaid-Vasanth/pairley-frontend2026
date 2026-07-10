@@ -13,24 +13,24 @@
 /* ---------- CSS Custom Properties ---------- */
 :root {
   /* Brand Colors */
-  --primary: #4E2BC4;       /* Royal Violet / Indigo */
-  --primary-light: #6D4EE3;
-  --primary-dark: #3B1CA3;
-  --primary-glow: rgba(78, 43, 196, 0.12);
+  --primary: #5B12D6;       /* Royal Purple */
+  --primary-light: #7C3AED;
+  --primary-dark: #430bb0;
+  --primary-glow: rgba(91, 18, 214, 0.12);
 
-  --secondary: #10B981;     /* Success Green */
-  --secondary-light: #34D399;
-  --secondary-dark: #059669;
-  --secondary-glow: rgba(16, 185, 129, 0.12);
+  --secondary: #22C55E;     /* Success Green */
+  --secondary-light: #4ade80;
+  --secondary-dark: #16a34a;
+  --secondary-glow: rgba(34, 197, 94, 0.12);
 
   --accent: #F97316;        /* Orange */
   --accent-light: #FB923C;
   --accent-dark: #EA580C;
   --accent-glow: rgba(249, 115, 22, 0.12);
 
-  --success: #10B981;
-  --success-light: #34D399;
-  --success-glow: rgba(16, 185, 129, 0.15);
+  --success: #22C55E;
+  --success-light: #4ade80;
+  --success-glow: rgba(34, 197, 94, 0.15);
 
   --warning: #F59E0B;
   --danger: #EF4444;
@@ -124,12 +124,12 @@
 
 /* ---------- Category Colors ---------- */
 :root {
-  --cat-shopping: #4E2BC4;
-  --cat-tours: #10B981;
+  --cat-shopping: #5B12D6;
+  --cat-tours: #22C55E;
   --cat-dining: #EF4444;
   --cat-fitness: #8B5CF6;
   --cat-entertainment: #EC4899;
-  --cat-education: #10B981;
+  --cat-education: #22C55E;
   --cat-beauty: #F59E0B;
   --cat-subscriptions: #6366F1;
   --cat-adventure: #14B8A6;
@@ -869,5 +869,6 @@ ul { list-style: none; }
 .group-avatar {
   font-size: 12.1px !important;
 }
+
 
 

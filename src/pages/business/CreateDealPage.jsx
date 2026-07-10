@@ -102,7 +102,7 @@ export default function CreateDealPage() {
           </p>
           <button
             onClick={() => navigate('/business/dashboard')}
-            style={{ padding: '12px 32px', borderRadius: 99, background: '#4E2BC4', color: 'white', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer' }}
+            style={{ padding: '12px 32px', borderRadius: 99, background: '#5B12D6', color: 'white', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer' }}
           >
             Back to Dashboard
           </button>
@@ -501,7 +501,7 @@ export default function CreateDealPage() {
         >
           {/* Header Title */}
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
-            <Sparkles className="text-[#4E2BC4]" size={28} />
+            <Sparkles className="text-[#5B12D6]" size={28} />
             Create New Listing
           </h2>
 
@@ -510,7 +510,7 @@ export default function CreateDealPage() {
             {/* Section 1: Type & Category */}
             <div className="bg-white border border-slate-200/80 p-6 md:p-8 rounded-3xl flex flex-col gap-6 text-left shadow-sm">
               <div className="border-b border-slate-200/60 pb-3">
-                <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                <span className="bg-[#5B12D6]/10 text-[#5B12D6] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 1
                 </span>
                 <h3 className="text-lg font-black text-slate-800 mt-2">Deal Model & Category</h3>
@@ -522,7 +522,7 @@ export default function CreateDealPage() {
                   type="button"
                   className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
                     dealType === 'pair' 
-                      ? 'border-[#4E2BC4] bg-[#4E2BC4]/10 shadow-lg shadow-[#4E2BC4]/10 scale-[1.01]' 
+                      ? 'border-[#5B12D6] bg-[#5B12D6]/10 shadow-lg shadow-[#5B12D6]/10 scale-[1.01]' 
                       : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
                   }`}
                   onClick={() => setDealType('pair')}
@@ -535,7 +535,7 @@ export default function CreateDealPage() {
                     Two customers match to unlock a BOGO deal. They split the cost 50/50 and each gets their item. Great for restaurants, spa services, and retail.
                   </p>
                   {dealType === 'pair' && (
-                    <span className="absolute top-4 right-4 bg-[#4E2BC4] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
+                    <span className="absolute top-4 right-4 bg-[#5B12D6] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
                       <Check size={14} strokeWidth={3} />
                     </span>
                   )}
@@ -545,7 +545,7 @@ export default function CreateDealPage() {
                   type="button"
                   className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
                     dealType === 'group' 
-                      ? 'border-[#4E2BC4] bg-[#4E2BC4]/10 shadow-lg shadow-[#4E2BC4]/10 scale-[1.01]' 
+                      ? 'border-[#5B12D6] bg-[#5B12D6]/10 shadow-lg shadow-[#5B12D6]/10 scale-[1.01]' 
                       : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
                   }`}
                   onClick={() => setDealType('group')}
@@ -558,7 +558,7 @@ export default function CreateDealPage() {
                     Multiple participants pool interest. As the size of the group reaches set milestones, the cost per person decreases. Ideal for travel tours, experiences, and subscriptions.
                   </p>
                   {dealType === 'group' && (
-                    <span className="absolute top-4 right-4 bg-[#4E2BC4] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
+                    <span className="absolute top-4 right-4 bg-[#5B12D6] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
                       <Check size={14} strokeWidth={3} />
                     </span>
                   )}
@@ -574,7 +574,7 @@ export default function CreateDealPage() {
                       type="button"
                       className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left relative ${
                         category === cat.id 
-                          ? 'border-[#4E2BC4] bg-[#4E2BC4]/15 text-[#4E2BC4] font-black shadow-sm scale-[1.02]' 
+                          ? 'border-[#5B12D6] bg-[#5B12D6]/15 text-[#5B12D6] font-black shadow-sm scale-[1.02]' 
                           : 'border-slate-200 bg-white/50 text-slate-600 hover:border-slate-300'
                       }`}
                       onClick={() => setCategory(cat.id)}
@@ -582,7 +582,7 @@ export default function CreateDealPage() {
                       <span className="text-lg">{cat.icon}</span>
                       <span className="text-xs font-semibold">{cat.name}</span>
                       {category === cat.id && (
-                        <span className="absolute right-2 top-2 bg-[#4E2BC4] text-white w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold">
+                        <span className="absolute right-2 top-2 bg-[#5B12D6] text-white w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold">
                           ✓
                         </span>
                       )}
@@ -601,7 +601,7 @@ export default function CreateDealPage() {
                       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 100);
                   }}
-                  className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
+                  className="bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
                 >
                   Continue to Section 2 <ArrowRight size={14} />
                 </button>
@@ -623,7 +623,7 @@ export default function CreateDealPage() {
                 </div>
               )}
               <div className="border-b border-slate-200/60 pb-3 mb-2">
-                <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                <span className="bg-[#5B12D6]/10 text-[#5B12D6] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 2
                 </span>
                 <h3 className="text-lg font-black text-slate-800 mt-2">Product Details & Pricing</h3>
@@ -635,7 +635,7 @@ export default function CreateDealPage() {
                 <input
                   type="text"
                   className={`form-input border rounded-xl p-3 text-slate-800 outline-none transition-all ${
-                    errors.title ? 'border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                    errors.title ? 'border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                   }`}
                   placeholder="e.g. Samsung Galaxy Buds FE BOGO offer"
                   value={title}
@@ -657,7 +657,7 @@ export default function CreateDealPage() {
                 <textarea
                   rows={4}
                   className={`form-textarea border rounded-xl p-3 text-slate-800 outline-none transition-all ${
-                    errors.description ? 'border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                    errors.description ? 'border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                   }`}
                   placeholder="Describe the product details, features, terms, packages details..."
                   value={description}
@@ -678,7 +678,7 @@ export default function CreateDealPage() {
                 <label className="text-sm font-bold text-slate-700">Cover Image</label>
                 <div 
                   className={`create-deal-page__uploader border-2 border-dashed rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between cursor-pointer transition-all ${
-                    errors.image ? 'border-red-500 bg-red-50/20' : 'border-slate-200 hover:border-[#4E2BC4] bg-slate-50/40'
+                    errors.image ? 'border-red-500 bg-red-50/20' : 'border-slate-200 hover:border-[#5B12D6] bg-slate-50/40'
                   }`}
                   onClick={() => setShowUploaderSettings(!showUploaderSettings)}
                 >
@@ -732,7 +732,7 @@ export default function CreateDealPage() {
                             type="button"
                             className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
                               uploaderTab === 'presets' 
-                                ? 'bg-[#4E2BC4] text-white' 
+                                ? 'bg-[#5B12D6] text-white' 
                                 : 'text-slate-600 hover:bg-slate-50'
                             }`}
                             onClick={() => setUploaderTab('presets')}
@@ -743,7 +743,7 @@ export default function CreateDealPage() {
                             type="button"
                             className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
                               uploaderTab === 'url' 
-                                ? 'bg-[#4E2BC4] text-white' 
+                                ? 'bg-[#5B12D6] text-white' 
                                 : 'text-slate-600 hover:bg-slate-50'
                             }`}
                             onClick={() => setUploaderTab('url')}
@@ -776,7 +776,7 @@ export default function CreateDealPage() {
                               <img src={preset.url} alt={preset.name} className="create-deal-page__preset-img" />
                               <span className="create-deal-page__preset-label">{preset.name}</span>
                               {imagePlaceholder === preset.url && (
-                                <div className="absolute top-1 right-1 w-5 h-5 bg-[#4E2BC4] text-white rounded-full flex items-center justify-center text-[10px] shadow-sm">
+                                <div className="absolute top-1 right-1 w-5 h-5 bg-[#5B12D6] text-white rounded-full flex items-center justify-center text-[10px] shadow-sm">
                                   <Check size={12} />
                                 </div>
                               )}
@@ -789,7 +789,7 @@ export default function CreateDealPage() {
                             <LinkIcon className="absolute left-3 top-3 text-slate-400" size={16} />
                             <input
                               type="url"
-                              className="form-input w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#4E2BC4]"
+                              className="form-input w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#5B12D6]"
                               placeholder="https://images.unsplash.com/photo-..."
                               value={customImageUrl}
                               onChange={(e) => setCustomImageUrl(e.target.value)}
@@ -797,7 +797,7 @@ export default function CreateDealPage() {
                           </div>
                           <button
                             type="button"
-                            className="btn btn-primary bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-bold text-xs px-4 py-2 rounded-xl"
+                            className="btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white font-bold text-xs px-4 py-2 rounded-xl"
                             onClick={applyCustomUrl}
                           >
                             Apply
@@ -897,7 +897,7 @@ export default function CreateDealPage() {
                     <input
                       type="number"
                       className={`form-input border rounded-xl p-3 text-slate-800 outline-none transition-all ${
-                        errors.originalPrice ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                        errors.originalPrice ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                       }`}
                       placeholder="6999"
                       value={originalPrice}
@@ -924,7 +924,7 @@ export default function CreateDealPage() {
                     <input
                       type="number"
                       className={`form-input border rounded-xl p-3 text-slate-800 outline-none transition-all ${
-                        errors.pairleyPrice ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                        errors.pairleyPrice ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                       }`}
                       value={pairleyPrice}
                       onChange={(e) => {
@@ -952,7 +952,7 @@ export default function CreateDealPage() {
                     <input
                       type="number"
                       className={`form-input border rounded-xl p-3 text-slate-800 outline-none transition-all ${
-                        errors.originalPrice ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                        errors.originalPrice ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                       }`}
                       placeholder="1200"
                       value={originalPrice}
@@ -1014,7 +1014,7 @@ export default function CreateDealPage() {
                                 <div className="relative">
                                   <input
                                     type="number"
-                                    className={`form-input w-full pl-3 pr-14 py-2 border rounded-lg text-slate-800 outline-none text-xs focus:border-[#4E2BC4] ${
+                                    className={`form-input w-full pl-3 pr-14 py-2 border rounded-lg text-slate-800 outline-none text-xs focus:border-[#5B12D6] ${
                                       rowError.minPeople ? 'border-red-500' : 'border-slate-200'
                                     }`}
                                     placeholder="5"
@@ -1035,7 +1035,7 @@ export default function CreateDealPage() {
                                   <span className="absolute left-3 top-2 text-[10px] text-slate-400 font-bold">₹</span>
                                   <input
                                     type="number"
-                                    className={`form-input w-full pl-6 pr-14 py-2 border rounded-lg text-slate-800 outline-none text-xs focus:border-[#4E2BC4] ${
+                                    className={`form-input w-full pl-6 pr-14 py-2 border rounded-lg text-slate-800 outline-none text-xs focus:border-[#5B12D6] ${
                                       rowError.pricePerHead ? 'border-red-500' : 'border-slate-200'
                                     }`}
                                     placeholder="800"
@@ -1084,7 +1084,7 @@ export default function CreateDealPage() {
                   <label className="text-sm font-bold text-slate-700">Location / City</label>
                   <button
                     type="button"
-                    className="text-xs font-bold text-[#4E2BC4] hover:underline flex items-center gap-1 bg-none border-none p-0 cursor-pointer"
+                    className="text-xs font-bold text-[#5B12D6] hover:underline flex items-center gap-1 bg-none border-none p-0 cursor-pointer"
                     disabled={isDetectingLoc}
                     onClick={async () => {
                       setIsDetectingLoc(true);
@@ -1118,7 +1118,7 @@ export default function CreateDealPage() {
                   <input
                     type="text"
                     className={`form-input w-full pl-9 pr-3 py-3 border rounded-xl text-slate-800 outline-none transition-all ${
-                      errors.location ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                      errors.location ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                     }`}
                     placeholder="e.g. Bangalore, Online"
                     value={location}
@@ -1145,7 +1145,7 @@ export default function CreateDealPage() {
                 <label className="text-sm font-bold text-slate-700">WhatsApp Contact Number (Optional)</label>
                 <input
                   type="text"
-                  className="form-input border border-slate-200 rounded-xl p-3 text-slate-800 outline-none focus:border-[#4E2BC4]"
+                  className="form-input border border-slate-200 rounded-xl p-3 text-slate-800 outline-none focus:border-[#5B12D6]"
                   placeholder="e.g. 9876543210 (Defaults to business owner mobile)"
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value.replace(/\D/g, ''))}
@@ -1168,7 +1168,7 @@ export default function CreateDealPage() {
                 <button
                   type="button"
                   onClick={handleNextToSection3}
-                  className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
+                  className="bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
                 >
                   Continue to Section 3 <ArrowRight size={14} />
                 </button>
@@ -1190,7 +1190,7 @@ export default function CreateDealPage() {
                 </div>
               )}
               <div className="border-b border-slate-200/60 pb-3 mb-2">
-                <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                <span className="bg-[#5B12D6]/10 text-[#5B12D6] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 3
                 </span>
                 <h3 className="text-lg font-black text-slate-800 mt-2">Duration, Capacity & Terms</h3>
@@ -1203,7 +1203,7 @@ export default function CreateDealPage() {
                   <input
                     type="number"
                     className={`form-input border rounded-xl p-3 text-slate-800 outline-none transition-all ${
-                      errors.validDays ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                      errors.validDays ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                     }`}
                     placeholder="30"
                     value={validDays}
@@ -1224,7 +1224,7 @@ export default function CreateDealPage() {
                     <input
                       type="number"
                       className={`form-input border rounded-xl p-3 text-slate-800 outline-none transition-all ${
-                        errors.maxParticipants ? 'border-red-500' : 'border-slate-200 focus:border-[#4E2BC4]'
+                        errors.maxParticipants ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'
                       }`}
                       placeholder="25"
                       value={maxParticipants}
@@ -1246,7 +1246,7 @@ export default function CreateDealPage() {
                 <label className="text-sm font-bold text-slate-700">Detailed Terms & Conditions</label>
                 <textarea
                   rows={4}
-                  className={`form-textarea border border-slate-200 rounded-xl p-3 text-slate-800 outline-none focus:border-[#4E2BC4] transition-all`}
+                  className={`form-textarea border border-slate-200 rounded-xl p-3 text-slate-800 outline-none focus:border-[#5B12D6] transition-all`}
                   value={terms}
                   onChange={(e) => setTerms(e.target.value)}
                 />
@@ -1269,7 +1269,7 @@ export default function CreateDealPage() {
                 <button
                   type="button"
                   onClick={handleNextToSection4}
-                  className="bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
+                  className="bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all"
                 >
                   Continue to Section 4 <ArrowRight size={14} />
                 </button>
@@ -1291,7 +1291,7 @@ export default function CreateDealPage() {
                 </div>
               )}
               <div className="border-b border-slate-200/60 pb-3 mb-2">
-                <span className="bg-[#4E2BC4]/10 text-[#4E2BC4] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                <span className="bg-[#5B12D6]/10 text-[#5B12D6] text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                   Section 4
                 </span>
                 <h3 className="text-lg font-black text-slate-800 mt-2">Review & Live Preview</h3>
@@ -1347,7 +1347,7 @@ export default function CreateDealPage() {
                           </span>
 
                           <span className="text-slate-400 font-medium">Split Price / Head:</span>
-                          <span className="text-[#4E2BC4] font-extrabold text-sm">
+                          <span className="text-[#5B12D6] font-extrabold text-sm">
                             {formatPrice(parseInt(pairleyPrice) || 0)} (50% Off)
                           </span>
                         </>
@@ -1358,7 +1358,7 @@ export default function CreateDealPage() {
                             {formatPrice(parseInt(originalPrice) || 0)}
                           </span>
 
-                          <span className="text-[#4E2BC4] font-medium">Tiers configured:</span>
+                          <span className="text-[#5B12D6] font-medium">Tiers configured:</span>
                           <span className="text-slate-700 font-bold">
                             {tiers.length} price points
                           </span>
@@ -1367,7 +1367,7 @@ export default function CreateDealPage() {
                     </div>
                   </div>
 
-                  <div className="bg-[#4E2BC4]/5 border border-[#4E2BC4]/10 p-4 rounded-xl mt-4">
+                  <div className="bg-[#5B12D6]/5 border border-[#5B12D6]/10 p-4 rounded-xl mt-4">
                     <p className="text-xs text-indigo-900 leading-relaxed font-semibold">
                       💡 **Direct Publish**: Pressing the button below publishes this offer directly across active customer search feeds instantly.
                     </p>
@@ -1405,3 +1405,4 @@ export default function CreateDealPage() {
     </div>
   );
 }
+

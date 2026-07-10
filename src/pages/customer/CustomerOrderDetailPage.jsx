@@ -50,7 +50,7 @@ export default function CustomerOrderDetailPage() {
       <div className="customer-order-detail-page page-wrapper py-12 text-center min-h-[60vh] flex flex-col items-center justify-center">
         <h3 className="text-xl font-bold text-slate-800">Order Not Found</h3>
         <p className="text-sm text-slate-500 mt-1">We couldn't locate an order with ID {orderId}.</p>
-        <Link to="/customer/orders" className="btn btn-primary bg-[#4E2BC4] text-white px-5 py-2.5 rounded-xl text-xs font-bold mt-4">
+        <Link to="/customer/orders" className="btn btn-primary bg-[#5B12D6] text-white px-5 py-2.5 rounded-xl text-xs font-bold mt-4">
           Back to My Orders
         </Link>
       </div>
@@ -162,7 +162,7 @@ export default function CustomerOrderDetailPage() {
             {/* Vertical Timeline */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-6 flex items-center gap-1.5">
-                <Clock size={16} className="text-[#4E2BC4]" />
+                <Clock size={16} className="text-[#5B12D6]" />
                 Transaction Progression Timeline
               </h4>
 
@@ -201,7 +201,7 @@ export default function CustomerOrderDetailPage() {
             {/* Delivery Details Card */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4 flex items-center gap-1.5">
-                <Truck size={16} className="text-[#4E2BC4]" />
+                <Truck size={16} className="text-[#5B12D6]" />
                 Delivery Information
               </h4>
 
@@ -369,12 +369,12 @@ export default function CustomerOrderDetailPage() {
                 
                 <div className="border-t border-slate-100 pt-3 mt-1 flex justify-between items-center text-sm font-extrabold">
                   <span className="text-slate-800">Split Price (Pay Merchant):</span>
-                  <span className="text-[#4E2BC4]">{formatPrice(order.totalPaid)}</span>
+                  <span className="text-[#5B12D6]">{formatPrice(order.totalPaid)}</span>
                 </div>
               </div>
 
               {/* Secure holds note */}
-              <div className="mt-4 bg-[#4E2BC4]/5 border border-[#4E2BC4]/10 p-3 rounded-2xl flex gap-2 text-[10px] text-[#4E2BC4] font-semibold leading-relaxed">
+              <div className="mt-4 bg-[#5B12D6]/5 border border-[#5B12D6]/10 p-3 rounded-2xl flex gap-2 text-[10px] text-[#5B12D6] font-semibold leading-relaxed">
                 <ShieldCheck className="flex-shrink-0 mt-0.5" size={14} />
                 <div>
                   <p className="font-bold">Direct Call Matching</p>
@@ -393,3 +393,4 @@ export default function CustomerOrderDetailPage() {
     </div>
   );
 }
+

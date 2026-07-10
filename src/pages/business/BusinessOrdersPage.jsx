@@ -291,7 +291,7 @@ export default function BusinessOrdersPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg transition ${
                       activeTab === tab.id 
-                        ? 'bg-white text-[#4E2BC4] shadow-sm' 
+                        ? 'bg-white text-[#5B12D6] shadow-sm' 
                         : 'text-slate-500 hover:text-slate-800 bg-transparent'
                     }`}
                   >
@@ -311,7 +311,7 @@ export default function BusinessOrdersPage() {
                   placeholder="Search order or buyer..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#4E2BC4] focus:bg-white transition"
+                  className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#5B12D6] focus:bg-white transition"
                 />
               </div>
             </div>
@@ -326,7 +326,7 @@ export default function BusinessOrdersPage() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <div className="w-8 h-8 border-4 border-[#4E2BC4] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-[#5B12D6] border-t-transparent rounded-full animate-spin"></div>
                   <p className="text-xs text-slate-400">Loading orders...</p>
                 </motion.div>
               ) : filteredOrders.length > 0 ? (
@@ -379,14 +379,14 @@ export default function BusinessOrdersPage() {
                           <div className="grid grid-cols-1 gap-2.5 mt-1.5 border-b border-slate-100/50 pb-2">
                             <div>
                               <span className="font-bold text-slate-800">👤 Buyer A:</span> {order.customerName} &nbsp;|&nbsp; 
-                              📞 <a href={`tel:${order.customerPhone}`} className="text-[#4E2BC4] hover:underline font-bold">{order.customerPhone}</a> &nbsp;|&nbsp; 
-                              ✉️ <a href={`mailto:${order.customerEmail}`} className="text-[#4E2BC4] hover:underline">{order.customerEmail}</a>
+                              📞 <a href={`tel:${order.customerPhone}`} className="text-[#5B12D6] hover:underline font-bold">{order.customerPhone}</a> &nbsp;|&nbsp; 
+                              ✉️ <a href={`mailto:${order.customerEmail}`} className="text-[#5B12D6] hover:underline">{order.customerEmail}</a>
                             </div>
                             {order.partnerPhone && (
                               <div>
                                 <span className="font-bold text-slate-800">👤 Buyer B:</span> {order.partnerName} &nbsp;|&nbsp; 
-                                📞 <a href={`tel:${order.partnerPhone}`} className="text-[#4E2BC4] hover:underline font-bold">{order.partnerPhone}</a> &nbsp;|&nbsp; 
-                                ✉️ <a href={`mailto:${order.partnerEmail}`} className="text-[#4E2BC4] hover:underline">{order.partnerEmail}</a>
+                                📞 <a href={`tel:${order.partnerPhone}`} className="text-[#5B12D6] hover:underline font-bold">{order.partnerPhone}</a> &nbsp;|&nbsp; 
+                                ✉️ <a href={`mailto:${order.partnerEmail}`} className="text-[#5B12D6] hover:underline">{order.partnerEmail}</a>
                               </div>
                             )}
                           </div>
@@ -460,7 +460,7 @@ export default function BusinessOrdersPage() {
             {/* Quick validation card */}
             <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm text-left">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-                <Smartphone size={14} className="text-[#4E2BC4]" />
+                <Smartphone size={14} className="text-[#5B12D6]" />
                 Customer Code Verification
               </h4>
               
@@ -474,11 +474,11 @@ export default function BusinessOrdersPage() {
                   placeholder="Enter Pickup Code..." 
                   value={directCode}
                   onChange={(e) => setDirectCode(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[#4E2BC4] focus:bg-white transition uppercase font-bold text-slate-800"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[#5B12D6] focus:bg-white transition uppercase font-bold text-slate-800"
                 />
                 <button 
                   type="submit" 
-                  className="btn btn-primary w-full bg-[#4E2BC4] hover:bg-[#3D1FB3] text-white font-extrabold text-xs py-2.5 rounded-xl shadow-md shadow-indigo-600/10 transition"
+                  className="btn btn-primary w-full bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold text-xs py-2.5 rounded-xl shadow-md shadow-indigo-600/10 transition"
                 >
                   Verify Code
                 </button>
@@ -524,7 +524,7 @@ export default function BusinessOrdersPage() {
                   placeholder="e.g. DTDC-PK-8919A" 
                   value={trackingIdInput}
                   onChange={(e) => setTrackingIdInput(e.target.value)}
-                  className="w-full border border-slate-200 focus:border-[#4E2BC4] rounded-xl px-3.5 py-2 text-xs outline-none"
+                  className="w-full border border-slate-200 focus:border-[#5B12D6] rounded-xl px-3.5 py-2 text-xs outline-none"
                 />
               </div>
 
@@ -570,7 +570,7 @@ export default function BusinessOrdersPage() {
                   placeholder="e.g. 9021-F" 
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
-                  className="w-full border border-slate-200 focus:border-[#4E2BC4] rounded-xl px-3.5 py-2 text-xs outline-none font-bold uppercase text-slate-800"
+                  className="w-full border border-slate-200 focus:border-[#5B12D6] rounded-xl px-3.5 py-2 text-xs outline-none font-bold uppercase text-slate-800"
                 />
               </div>
 
@@ -597,3 +597,4 @@ export default function BusinessOrdersPage() {
     </div>
   );
 }
+

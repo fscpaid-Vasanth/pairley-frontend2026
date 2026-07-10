@@ -55,7 +55,7 @@
 }
 
 .progress-bar-header__pct {
-  color: #4E2BC4;
+  color: #5B12D6;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -74,7 +74,7 @@
 .progress-bar-fill {
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(90deg, #4E2BC4 0%, #7C3AED 60%, #8B5CF6 100%);
+  background: linear-gradient(90deg, #5B12D6 0%, #7C3AED 60%, #8B5CF6 100%);
   background-size: 200% 100%;
   min-width: 4px;
   animation: pb-glow-pulse 2.5s ease-in-out infinite;
@@ -101,12 +101,12 @@
 .progress-bar-footer {
   font-size: 11px;
   font-weight: 600;
-  color: #4E2BC4;
+  color: #5B12D6;
   min-height: 16px;
 }
 
 .progress-bar-footer__remaining {
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 .progress-bar-footer__remaining strong {
@@ -116,7 +116,7 @@
 
 .progress-bar-footer__complete {
   display: inline-block;
-  color: #059669;
+  color: #16a34a;
   font-weight: 800;
   font-size: 12px;
   animation: pb-confetti-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -124,7 +124,7 @@
 
 /* ── Complete State ── */
 .progress-bar--complete .progress-bar-fill {
-  background: linear-gradient(90deg, #10b981 0%, #059669 60%, #34d399 100%);
+  background: linear-gradient(90deg, #22C55E 0%, #16a34a 60%, #4ade80 100%);
   animation: pb-complete-glow 2s ease-in-out infinite;
 }
 
@@ -133,5 +133,6 @@
 }
 
 .progress-bar--complete .progress-bar-header__pct {
-  color: #059669;
+  color: #16a34a;
 }
+

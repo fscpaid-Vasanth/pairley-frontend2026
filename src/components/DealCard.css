@@ -99,7 +99,7 @@
 
 /* GROUP tag variant */
 .deal-card__type-tag--group {
-  background: linear-gradient(135deg, #10B981, #059669);
+  background: linear-gradient(135deg, #22C55E, #16a34a);
   box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
 }
 
@@ -181,7 +181,7 @@
   background: white;
   transform: scale(1.12);
   box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 /* ── Distance Badge ── */
@@ -193,7 +193,7 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(78,43,196,0.15);
-  color: #4E2BC4;
+  color: #5B12D6;
   padding: 3px 9px;
   border-radius: 99px;
   font-size: 11px;
@@ -299,7 +299,7 @@
 .deal-card__joined-text {
   font-size: 13px;
   font-weight: 700;
-  color: #4E2BC4;
+  color: #5B12D6;
 }
 
 /* ── Progress bar ── */
@@ -362,7 +362,7 @@
   border-radius: 99px;
   background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08));
   border: 1px solid rgba(16,185,129,0.2);
-  color: #059669;
+  color: #16a34a;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -399,3 +399,4 @@
   opacity: 1;
   transform: translateY(0);
 }
+
