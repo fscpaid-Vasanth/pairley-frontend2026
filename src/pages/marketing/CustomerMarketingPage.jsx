@@ -1018,11 +1018,7 @@ function CTASection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-60px' });
 
-  const stats = [
-    { value: '10,000+', label: 'Customers' },
-    { value: '500+', label: 'Merchants' },
-    { value: '₹50L+', label: 'Saved' },
-  ];
+
 
   return (
     <section className="py-20 relative overflow-hidden" ref={ref}>
@@ -1132,24 +1128,6 @@ function CTASection() {
               ✓ No Credit Card Required &nbsp;·&nbsp; ✓ Free Forever for Customers
             </motion.p>
 
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start"
-            >
-              {stats.map((stat, i) => (
-                <motion.div
-                  key={stat.label}
-                  variants={fadeInUp}
-                  custom={i + 5}
-                  className="flex flex-col items-center lg:items-start"
-                >
-                  <span className="text-3xl font-black text-white">{stat.value}</span>
-                  <span className="text-white/60 text-sm font-medium">{stat.label}</span>
-                </motion.div>
-              ))}
-            </motion.div>
           </div>
         </div>
       </div>

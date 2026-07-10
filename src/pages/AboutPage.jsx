@@ -76,42 +76,9 @@ export default function AboutPage() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   
-  const [stats, setStats] = useState([
-    { value: '...', label: 'Deals Listed', desc: 'Across 12 categories' },
-    { value: '...', label: 'Users Paired', desc: 'Splitting costs weekly' },
-    { value: '...', label: 'Money Saved', desc: 'Directly in customer pockets' },
-    { value: '...', label: 'Match Rate', desc: 'For top active cities' },
-  ]);
 
-  useEffect(() => {
-    api.get('/public/stats')
-      .then((data) => {
-        let moneyStr = '₹0';
-        if (data.moneySaved >= 10000000) {
-          moneyStr = `₹${(data.moneySaved / 10000000).toFixed(2)}Cr`;
-        } else if (data.moneySaved >= 100000) {
-          moneyStr = `₹${(data.moneySaved / 100000).toFixed(2)}L`;
-        } else {
-          moneyStr = `₹${data.moneySaved.toLocaleString('en-IN')}`;
-        }
 
-        setStats([
-          { value: data.dealsListed.toString(), label: 'Deals Listed', desc: 'Across 12 categories' },
-          { value: data.usersPaired.toString(), label: 'Users Paired', desc: 'Registered customers' },
-          { value: moneyStr, label: 'Money Saved', desc: 'Directly in customer pockets' },
-          { value: `${data.matchRate}%`, label: 'Match Rate', desc: 'For top active cities' },
-        ]);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch public stats:', err);
-        setStats([
-          { value: '12', label: 'Deals Listed', desc: 'Across 12 categories' },
-          { value: '25', label: 'Users Paired', desc: 'Registered customers' },
-          { value: '₹4,500', label: 'Money Saved', desc: 'Directly in customer pockets' },
-          { value: '95%', label: 'Match Rate', desc: 'For top active cities' },
-        ]);
-      });
-  }, []);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -168,18 +135,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats Counter Bar */}
-      <section className="container max-w-5xl mx-auto px-4 mb-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-white/70 backdrop-blur-md border border-slate-200/60 p-6 md:p-8 rounded-3xl shadow-lg">
-          {stats.map((stat, idx) => (
-            <div key={idx} className="text-center p-3 border-r last:border-0 border-slate-200/60 last:border-r-0">
-              <div className="text-2xl md:text-3xl font-extrabold text-[#5B12D6]">{stat.value}</div>
-              <div className="text-xs font-semibold text-slate-700 mt-1">{stat.label}</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">{stat.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+
 
       {/* Story & Vision split section */}
       <section className="container max-w-5xl mx-auto px-4 mb-20">
