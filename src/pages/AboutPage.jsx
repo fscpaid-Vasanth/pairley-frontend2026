@@ -350,17 +350,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <h5 className="font-bold text-slate-800 text-xs">Phone Call</h5>
-                      <p className="text-xs text-slate-500">+91 22 4567 8900</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                      <MapPin size={18} />
-                    </div>
-                    <div>
-                      <h5 className="font-bold text-slate-800 text-xs">Bengaluru Headquarters</h5>
-                      <p className="text-xs text-slate-500">WeWork Galaxy, MG Road, Bengaluru, KA 560001</p>
+                      <p className="text-xs text-slate-500">+91 861 085 5337</p>
                     </div>
                   </div>
                 </div>
