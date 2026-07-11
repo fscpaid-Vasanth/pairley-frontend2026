@@ -7,7 +7,6 @@ export const categories = [
     color: '#06B6D4',
     gradient: 'linear-gradient(135deg, #06B6D4, #0891B2)',
     description: 'BOGO deals on electronics, clothing, accessories & more',
-    dealCount: 156,
     mode: 'pair',
   },
   {
@@ -18,7 +17,6 @@ export const categories = [
     color: '#F97316',
     gradient: 'linear-gradient(135deg, #F97316, #EA580C)',
     description: 'Group travel packages — more people, lower price',
-    dealCount: 89,
     mode: 'group',
   },
   {
@@ -29,7 +27,6 @@ export const categories = [
     color: '#EF4444',
     gradient: 'linear-gradient(135deg, #EF4444, #DC2626)',
     description: 'BOGO meals, group dinner deals & bulk food orders',
-    dealCount: 234,
     mode: 'both',
   },
   {
@@ -40,7 +37,6 @@ export const categories = [
     color: '#22C55E',
     gradient: 'linear-gradient(135deg, #22C55E, #16A34A)',
     description: 'Pair gym memberships, group fitness class discounts',
-    dealCount: 67,
     mode: 'both',
   },
   {
@@ -51,7 +47,6 @@ export const categories = [
     color: '#8B5CF6',
     gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
     description: 'Movie pairs, concert groups, theme park deals',
-    dealCount: 112,
     mode: 'both',
   },
   {
@@ -62,7 +57,6 @@ export const categories = [
     color: '#3B82F6',
     gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)',
     description: 'Group discounts on online courses & workshops',
-    dealCount: 78,
     mode: 'group',
   },
   {
@@ -73,7 +67,6 @@ export const categories = [
     color: '#EC4899',
     gradient: 'linear-gradient(135deg, #EC4899, #DB2777)',
     description: 'BOGO spa sessions, pair salon treatments',
-    dealCount: 93,
     mode: 'pair',
   },
   {
@@ -84,7 +77,6 @@ export const categories = [
     color: '#6366F1',
     gradient: 'linear-gradient(135deg, #6366F1, #4F46E5)',
     description: 'Share family plans, group software licenses',
-    dealCount: 45,
     mode: 'group',
   },
   {
@@ -95,7 +87,6 @@ export const categories = [
     color: '#14B8A6',
     gradient: 'linear-gradient(135deg, #14B8A6, #0D9488)',
     description: 'Trekking groups, scuba batches, sports equipment',
-    dealCount: 56,
     mode: 'group',
   },
   {
@@ -106,7 +97,6 @@ export const categories = [
     color: '#F59E0B',
     gradient: 'linear-gradient(135deg, #F59E0B, #D97706)',
     description: 'Neighborhood group deals for home maintenance',
-    dealCount: 34,
     mode: 'group',
   },
   {
@@ -117,7 +107,6 @@ export const categories = [
     color: '#22D3EE',
     gradient: 'linear-gradient(135deg, #22D3EE, #06B6D4)',
     description: 'Pair health checkups, group dental & wellness plans',
-    dealCount: 42,
     mode: 'both',
   },
   {
@@ -128,7 +117,6 @@ export const categories = [
     color: '#A78BFA',
     gradient: 'linear-gradient(135deg, #A78BFA, #8B5CF6)',
     description: 'Shared office spaces, co-living group rates',
-    dealCount: 28,
     mode: 'group',
   },
 ];
