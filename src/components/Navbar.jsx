@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, LogIn, UserPlus, ShoppingBag, Tag, Bell } from 'lucide-react';
+import { Search, Menu, X, LogIn, UserPlus, ShoppingBag, Tag, Bell, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ROUTES } from '../utils/constants';
 import { api } from '../utils/api';
@@ -246,6 +246,16 @@ export default function Navbar({ onSearchClick }) {
 
           {/* ── Desktop Nav Links ── */}
           <div className="navbar__links">
+            {/* Launch Pass — campaign CTA, purple/green accent */}
+            <Link
+              to={ROUTES.LAUNCH}
+              className={`navbar__link navbar__link--pill ${isActive(ROUTES.LAUNCH) ? 'navbar__link--active' : ''}`}
+              style={{ background: 'linear-gradient(90deg, #6D28D9, #22C55E)', color: '#fff' }}
+            >
+              <Sparkles size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 4 }} />
+              Launch Pass
+            </Link>
+
             {/* Explore Deals — pill style */}
             <Link
               to={ROUTES.DEALS}
@@ -461,6 +471,16 @@ export default function Navbar({ onSearchClick }) {
                 initial="hidden"
                 animate="show"
               >
+                <motion.div variants={itemVariants}>
+                  <Link
+                    to={ROUTES.LAUNCH}
+                    className={`navbar__drawer-link ${isActive(ROUTES.LAUNCH) ? 'navbar__drawer-link--active' : ''}`}
+                    onClick={() => setDrawerOpen(false)}
+                    style={{ color: '#22C55E' }}
+                  >
+                    <Sparkles size={17} /> Launch Pass
+                  </Link>
+                </motion.div>
                 <motion.div variants={itemVariants}>
                   <Link
                     to={ROUTES.DEALS}

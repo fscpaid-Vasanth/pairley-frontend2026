@@ -27,6 +27,13 @@ import LandingPage from './pages/marketing/LandingPage';
 import MerchantPage from './pages/marketing/MerchantPage';
 import CustomerMarketingPage from './pages/marketing/CustomerMarketingPage';
 
+// Launch Pass (pre-launch campaign)
+import LaunchHome from './pages/launch/LaunchHome';
+import LaunchRegister from './pages/launch/LaunchRegister';
+import LaunchPass from './pages/launch/LaunchPass';
+import LaunchDashboard from './pages/launch/LaunchDashboard';
+import MerchantQuickJoin from './pages/launch/MerchantQuickJoin';
+
 // Auth Pages
 import SignUpPage from './pages/auth/SignUpPage';
 import LoginPage from './pages/auth/LoginPage';
@@ -189,6 +196,33 @@ function AppContent() {
 
         await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
           console.log('Push notification action performed:', action);
+          try {
+            const data = action.notification?.data;
+            if (data) {
+              const notifType = data.type || data.notification_type || data.notificationType;
+              const userStr = localStorage.getItem('pairley_user');
+              const user = userStr ? JSON.parse(userStr) : null;
+              const role = user?.role?.toLowerCase();
+
+              if (notifType === 'NEW_DEAL') {
+                navigate('/deals');
+              } else if (notifType === 'PARTNER_JOINED') {
+                if (role === 'business' || role === 'merchant') {
+                  navigate('/business/dashboard');
+                } else {
+                  navigate('/customer/orders');
+                }
+              } else if (notifType === 'CHAT') {
+                navigate(role === 'business' ? '/business/dashboard' : '/customer/orders');
+              } else if (notifType === 'ORDER') {
+                navigate(role === 'business' ? '/business/orders' : '/customer/orders');
+              } else if (notifType === 'MERCHANT_ONBOARDING') {
+                navigate('/admin/dashboard');
+              }
+            }
+          } catch (err) {
+            console.error('Error handling push notification navigation:', err);
+          }
         });
       } catch (err) {
         console.error('Push notifications setup error:', err);
@@ -229,6 +263,13 @@ function AppContent() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/customer" element={<CustomerMarketingPage />} />
           <Route path="/merchant" element={<MerchantPage />} />
+
+          {/* Launch Pass — own layout, no AppLayout wrapper */}
+          <Route path={ROUTES.LAUNCH} element={<LaunchHome />} />
+          <Route path={ROUTES.LAUNCH_REGISTER} element={<LaunchRegister />} />
+          <Route path={ROUTES.LAUNCH_PASS} element={<LaunchPass />} />
+          <Route path={ROUTES.LAUNCH_DASHBOARD} element={<LaunchDashboard />} />
+          <Route path={ROUTES.MERCHANT_JOIN} element={<MerchantQuickJoin />} />
 
           {/* Legacy home fallback */}
           <Route

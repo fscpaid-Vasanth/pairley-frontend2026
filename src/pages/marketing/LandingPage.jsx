@@ -265,6 +265,15 @@ const LandingPage = () => {
 
             {/* Dynamic Auth / Dashboard Actions */}
             <div className="hidden md:flex items-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate('/launch')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-bold tracking-wide"
+                style={{ background: 'linear-gradient(90deg, #6D28D9, #22C55E)' }}
+              >
+                ✨ Launch Pass
+              </motion.button>
               {authUser ? (
                 <>
                   <motion.button
@@ -693,6 +702,33 @@ const LandingPage = () => {
             </div>
           )}
 
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────
+         LAUNCH PASS PROMO
+      ───────────────────────────────────────── */}
+      <section className="py-16 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a0533, #0d0f1a 60%, #062015)' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold tracking-widest uppercase mb-4">
+            🚀 Pairley Launch Pass
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight mb-4">
+            Registration is <span className="bg-gradient-to-r from-brand-purple-light to-brand-green bg-clip-text text-transparent">FREE.</span>
+          </h2>
+          <p className="text-white/60 text-lg max-w-2xl mx-auto mb-8">
+            Become one of Bangalore's First 100,000 Launch Members. The more we join, the more we unlock — before the Diwali launch.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(34,197,94,0.4)' }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => navigate('/launch')}
+            className="px-8 py-4 rounded-2xl text-white font-bold text-base shadow-lg inline-flex items-center gap-2"
+            style={{ background: 'linear-gradient(90deg, #6D28D9, #22C55E)' }}
+          >
+            Generate My Launch Pass
+            <ArrowRight size={18} />
+          </motion.button>
         </div>
       </section>
 

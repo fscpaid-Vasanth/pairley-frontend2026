@@ -27,6 +27,7 @@ import {
 import { useToast } from '../../context/ToastContext';
 import { api, API_URL } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
+import LaunchPassAdminPanel from './LaunchPassAdminPanel';
 import './AdminDashboard.css';
 
 const isValidImageSrc = (src) => {
@@ -42,13 +43,13 @@ const isValidImageSrc = (src) => {
 
 const getDocumentPreviewUrl = (src) => {
   if (!src) return '';
-  if (src.startsWith('data:image/')) return src;
+  if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
   return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}`;
 };
 
 const getDocumentDownloadUrl = (src) => {
   if (!src) return '#';
-  if (src.startsWith('data:image/')) return src;
+  if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
   return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&download=true`;
 };
 
@@ -397,6 +398,17 @@ export default function AdminDashboard() {
           >
             <Headphones size={14} />
             Support Helpdesk
+          </button>
+          <button
+            onClick={() => handleTabChange('launchpass')}
+            className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'launchpass'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
+                : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
+            }`}
+          >
+            <Sparkles size={14} />
+            Launch Pass
           </button>
         </div>
 
@@ -928,6 +940,12 @@ export default function AdminDashboard() {
               </div>
 
             </div>
+          </div>
+        )}
+
+        {activeTab === 'launchpass' && (
+          <div className="animate-fadeIn">
+            <LaunchPassAdminPanel />
           </div>
         )}
 

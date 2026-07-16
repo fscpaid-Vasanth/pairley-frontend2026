@@ -3,6 +3,9 @@ export default {
   content: [
     "./src/pages/marketing/**/*.{js,jsx}",
     "./src/components/marketing/**/*.{js,jsx}",
+    "./src/pages/customer/**/*.{js,jsx}",
+    "./src/pages/launch/**/*.{js,jsx}",
+    "./src/components/**/*.{js,jsx}",
   ],
   theme: {
     extend: {

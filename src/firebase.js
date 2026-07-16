@@ -35,6 +35,8 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signInWithCredential,
+  signInAnonymously,
+  onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
@@ -135,6 +137,35 @@ export const getGoogleRedirectResult = async () => {
     console.error('Firebase Redirect Result Error:', error);
     throw error;
   }
+};
+
+/**
+ * ensureAnonymousAuth
+ * --------------------
+ * Launch Pass writes to Firestore from the browser with no backend in front of it,
+ * so every visitor needs a stable Firebase `uid` for security rules to scope reads/
+ * writes to ("a user can only write their own launchPassMembers/{uid} doc"). This
+ * signs the visitor in anonymously (no prompt, no cost) if they don't already have
+ * a Firebase session, and resolves once a uid is available.
+ *
+ * Safe to call from any Launch Pass screen — it's idempotent and won't disturb an
+ * existing Google Sign-In session.
+ */
+export const ensureAnonymousAuth = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        unsubscribe();
+        if (user) {
+          resolve(user);
+        } else {
+          signInAnonymously(auth).then((result) => resolve(result.user)).catch(reject);
+        }
+      },
+      reject
+    );
+  });
 };
 
 /**

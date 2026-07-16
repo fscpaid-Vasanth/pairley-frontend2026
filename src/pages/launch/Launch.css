@@ -1,0 +1,515 @@
+/* Shared Launch Pass visual language: dark glassmorphism, purple/green glow. */
+
+/* The rest of the app sets a dark default heading color (see index.css);
+   since Launch Pass isn't CSS-module-scoped, that global rule otherwise
+   beats the inherited white text color on every h1-h6 in here. */
+.launch-shell h1,
+.launch-shell h2,
+.launch-shell h3,
+.launch-shell h4,
+.launch-shell h5,
+.launch-shell h6 {
+  color: #fff;
+}
+
+.launch-shell {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(160deg, #0a001a 0%, #0d0f1a 55%, #001a10 100%);
+  overflow-x: hidden;
+  color: #fff;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.launch-shell__glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+.launch-shell__glow--purple {
+  top: -10%;
+  left: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: rgba(109, 40, 217, 0.35);
+}
+.launch-shell__glow--green {
+  bottom: -10%;
+  right: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: rgba(34, 197, 94, 0.22);
+}
+
+.launch-shell__topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding: 20px 16px 0;
+}
+.launch-shell__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+.launch-shell__logo img {
+  width: 28px;
+  height: 28px;
+}
+
+.launch-shell__content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+.launch-shell__content--wide {
+  max-width: 1100px;
+}
+
+/* ---------- Generic glass surfaces ---------- */
+.launch-glass {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+}
+
+.launch-eyebrow {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(109, 40, 217, 0.15);
+  border: 1px solid rgba(109, 40, 217, 0.3);
+  color: #C4B5FD;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.launch-title {
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 14px 0 8px;
+  color: #fff;
+}
+.launch-title .accent {
+  background: linear-gradient(90deg, #A78BFA, #22C55E);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.launch-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ---------- Buttons ---------- */
+.launch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 26px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.15s ease;
+}
+.launch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.launch-btn:not(:disabled):hover { transform: translateY(-2px); }
+.launch-btn--primary {
+  background: linear-gradient(90deg, #6D28D9, #22C55E);
+  color: #fff;
+  box-shadow: 0 8px 30px rgba(109, 40, 217, 0.35);
+}
+.launch-btn--outline {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.launch-btn--ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 10px 16px;
+}
+.launch-btn--block { width: 100%; }
+
+/* ---------- Journey chooser cards ---------- */
+.launch-journey-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 32px;
+}
+@media (min-width: 720px) {
+  .launch-journey-grid { grid-template-columns: 1fr 1fr; }
+}
+.launch-journey-card {
+  padding: 28px;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+.launch-journey-card:hover { transform: translateY(-6px); }
+.launch-journey-card__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+.launch-journey-card__benefits {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.launch-journey-card__benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ---------- Form fields ---------- */
+.launch-field { margin-bottom: 18px; text-align: left; }
+.launch-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 8px;
+}
+.launch-input, .launch-select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.launch-input:focus, .launch-select:focus { border-color: #6D28D9; }
+.launch-field-error { color: #F87171; font-size: 12px; font-weight: 600; margin-top: 6px; }
+.launch-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+.launch-phone-row { display: flex; gap: 10px; }
+.launch-phone-row__code {
+  padding: 14px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+.launch-interest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (min-width: 480px) {
+  .launch-interest-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.launch-interest-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.launch-interest-chip--active {
+  border-color: #22C55E;
+  background: rgba(34, 197, 94, 0.12);
+  color: #fff;
+}
+
+/* ---------- Avatar picker ---------- */
+.launch-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+.launch-avatar {
+  aspect-ratio: 1;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.launch-avatar__emoji { font-size: 30px; }
+.launch-avatar__label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.6); text-align: center; padding: 0 4px; }
+.launch-avatar--active {
+  border-color: #22C55E;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2), 0 0 30px rgba(34, 197, 94, 0.3);
+  transform: scale(1.05);
+}
+
+/* ---------- Launch Pass wallet card ---------- */
+.launch-pass-card {
+  position: relative;
+  border-radius: 28px;
+  padding: 28px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.35), rgba(0,0,0,0.4) 60%, rgba(34, 197, 94, 0.25));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+.launch-pass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.18) 35%, transparent 50%);
+  background-size: 200% 200%;
+  animation: launch-shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes launch-shine {
+  0% { background-position: 200% 0; }
+  100% { background-position: -50% 0; }
+}
+.launch-pass-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.launch-pass-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+.launch-pass-card__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #22C55E;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.launch-pass-card__number {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.launch-pass-card__name { font-size: 22px; font-weight: 800; margin: 2px 0 4px; }
+.launch-pass-card__meta { font-size: 13px; color: rgba(255, 255, 255, 0.55); }
+.launch-pass-card__footer {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.launch-pass-card__qr {
+  background: #fff;
+  padding: 8px;
+  border-radius: 12px;
+  line-height: 0;
+}
+.launch-pass-card__referral { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+.launch-pass-card__referral strong { color: #fff; letter-spacing: 0.06em; }
+
+/* ---------- Radial rings ---------- */
+.launch-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.launch-ring-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.08em; }
+.launch-ring-value { font-size: 13px; font-weight: 700; color: #fff; }
+
+/* ---------- Milestone chips ---------- */
+.launch-milestone-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px; }
+.launch-milestone-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  min-width: 76px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+}
+.launch-milestone-chip__icon { font-size: 20px; filter: grayscale(1); opacity: 0.4; }
+.launch-milestone-chip--unlocked {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.08);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+}
+.launch-milestone-chip--unlocked .launch-milestone-chip__icon { filter: none; opacity: 1; }
+.launch-milestone-chip__label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7); }
+.launch-milestone-chip__lock { font-size: 10px; color: rgba(255,255,255,0.35); }
+
+/* ---------- Counter strip ---------- */
+.launch-counter-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+@media (min-width: 640px) {
+  .launch-counter-strip { grid-template-columns: repeat(3, 1fr); }
+}
+.launch-counter {
+  padding: 16px;
+  text-align: center;
+}
+.launch-counter__value { font-size: 24px; font-weight: 900; color: #fff; }
+.launch-counter__label { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; font-weight: 600; }
+
+/* ---------- Leaderboard ---------- */
+.launch-leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+}
+.launch-leaderboard-row:nth-child(odd) { background: rgba(255, 255, 255, 0.03); }
+.launch-leaderboard-rank {
+  width: 24px;
+  text-align: center;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+.launch-leaderboard-name { flex: 1; font-size: 13px; font-weight: 600; }
+.launch-leaderboard-points { font-size: 12px; font-weight: 700; color: #22C55E; }
+
+/* ---------- Merchant preview cards ---------- */
+.launch-merchant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+@media (min-width: 640px) {
+  .launch-merchant-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.launch-merchant-card { padding: 16px; text-align: left; }
+.launch-merchant-card__badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #C4B5FD;
+  background: rgba(109, 40, 217, 0.2);
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.launch-merchant-card__name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.launch-merchant-card__blurb { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+/* ---------- Dashboard grid ---------- */
+.launch-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (min-width: 860px) {
+  .launch-dashboard-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---------- Section spacing ---------- */
+.launch-section { margin-top: 32px; }
+.launch-section__title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.launch-section__desc { font-size: 12.5px; color: rgba(255,255,255,0.45); margin-bottom: 4px; }
+
+/* ---------- Celebration overlay ---------- */
+.launch-celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(4, 0, 12, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.launch-celebration__inner {
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  padding: 36px 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(20px);
+}
+
+/* ---------- Loading ---------- */
+.launch-loading-spinner {
+  width: 36px;
+  height: 36px;
+  margin: 80px auto;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #22C55E;
+  animation: launch-spin 0.8s linear infinite;
+}
+@keyframes launch-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .launch-pass-card::before { animation: none; }
+}

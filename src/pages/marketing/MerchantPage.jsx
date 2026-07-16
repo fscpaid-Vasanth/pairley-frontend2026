@@ -33,6 +33,7 @@ import {
   LogOut,
   LayoutDashboard,
 } from 'lucide-react';
+import WhyJoinBeforeDiwali from './WhyJoinBeforeDiwali';
 
 /* ─────────────────────────────────────────
    PAIRLEY INLINE SVG LOGO MARK
@@ -217,6 +218,14 @@ export default function MerchantPage() {
             ) : (
               <>
                 <button
+                  onClick={() => navigate('/launch')}
+                  className="hidden lg:flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all text-white"
+                  style={{ background: 'linear-gradient(90deg, #6D28D9, #22C55E)' }}
+                  title="Show customers the Launch Pass they can join today"
+                >
+                  ✨ Launch Pass
+                </button>
+                <button
                   onClick={() => navigate('/login')}
                   className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                 >
@@ -390,17 +399,17 @@ export default function MerchantPage() {
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2"
             >
               <button
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/merchant/join')}
                 className="group px-8 py-4 bg-gradient-to-r from-brand-purple to-brand-green hover:shadow-glow-purple text-white font-semibold rounded-2xl transition-all flex items-center justify-center space-x-2"
               >
-                <span>Become Merchant</span>
+                <span>Register in 2 Minutes</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/signup')}
                 className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold rounded-2xl transition-all"
               >
-                Book Free Demo
+                Full Setup / Book Demo
               </button>
             </motion.div>
 
@@ -513,6 +522,8 @@ export default function MerchantPage() {
           </motion.div>
         </div>
       </section>
+
+      <WhyJoinBeforeDiwali />
 
       {/* ─────────────────────────────────────────
          3. PROMINENT ANNOUNCEMENT BAR

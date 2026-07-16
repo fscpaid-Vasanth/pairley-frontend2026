@@ -36,7 +36,17 @@ export const ROUTES = {
 
   // Admin
   ADMIN_DASHBOARD: '/admin/dashboard',
+
+  // Launch Pass (pre-launch campaign)
+  LAUNCH: '/launch',
+  LAUNCH_REGISTER: '/launch/register',
+  LAUNCH_PASS: '/launch/pass',
+  LAUNCH_DASHBOARD: '/launch/dashboard',
+  MERCHANT_JOIN: '/merchant/join',
 };
+
+// Diwali 2026 launch date — target for the Launch Pass countdown.
+export const LAUNCH_DATE = '2026-11-08T00:00:00+05:30';
 
 // App info
 export const APP_NAME = 'Pairley';
