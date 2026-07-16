@@ -9,7 +9,7 @@ import { categories } from '../../data/categories';
 import { ROUTES } from '../../utils/constants';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
-import { ensureAnonymousAuth } from '../../firebase';
+import { ensureAnonymousAuth, signInWithGoogle } from '../../firebase';
 import { registerLaunchPassMember } from '../../utils/launchFirestore';
 
 const CITIES = ['Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'];
@@ -44,6 +44,9 @@ export default function LaunchRegister() {
   const [resendSeconds, setResendSeconds] = useState(0);
   const [avatarId, setAvatarId] = useState('minimal');
   const [submitting, setSubmitting] = useState(false);
+  const [googleUid, setGoogleUid] = useState(null);
+  const [googlePhoto, setGooglePhoto] = useState(null);
+  const [googleAuthed, setGoogleAuthed] = useState(false);
 
   const stepNum = STEPS.indexOf(step) + 1;
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -106,6 +109,35 @@ export default function LaunchRegister() {
     }
   };
 
+  // Google Sign-In handler — authenticates and skips OTP step
+  const handleGoogleSignIn = async () => {
+    try {
+      const firebaseUser = await signInWithGoogle();
+      if (!firebaseUser) return;
+      // Auto-fill form with Google profile data
+      setForm((prev) => ({
+        ...prev,
+        name: firebaseUser.displayName || prev.name,
+        email: firebaseUser.email || prev.email,
+      }));
+      setGoogleUid(firebaseUser.uid);
+      setGooglePhoto(firebaseUser.photoURL || null);
+      setGoogleAuthed(true);
+      showToast('Google verified! Complete your profile to claim your Launch Pass.', 'success');
+      // Skip OTP since Google already verified the user
+      setStep('interests');
+    } catch (error) {
+      console.error('Google Auth failed:', error);
+      if (error?.code === 'auth/unauthorized-domain') {
+        showToast('Google Sign-in failed: Domain is not authorized in Firebase Console.', 'error');
+      } else if (error?.code === 'auth/popup-closed-by-user') {
+        showToast('Google Sign-in cancelled.', 'warning');
+      } else {
+        showToast('Google Sign-in failed. Please try with OTP instead.', 'error');
+      }
+    }
+  };
+
   const handleResendOtp = async () => {
     if (resendSeconds > 0) return;
     try {
@@ -139,9 +171,9 @@ export default function LaunchRegister() {
   const handleFinish = async () => {
     setSubmitting(true);
     try {
-      const registerRes = await api.post('/auth/register', {
+      const registerPayload = {
         name: form.name,
-        mobile: form.mobile,
+        mobile: form.mobile || undefined,
         email: form.email || undefined,
         role: 'Customer',
         password: generatePassword(),
@@ -149,10 +181,23 @@ export default function LaunchRegister() {
         city: form.city,
         state: 'Karnataka',
         pincode: '560001',
-      });
+      };
+      // If authenticated via Google, include google_uid and profile_photo
+      if (googleUid) {
+        registerPayload.google_uid = googleUid;
+        registerPayload.profile_photo = googlePhoto || undefined;
+      }
 
-      if (registerRes?.token) {
-        localStorage.setItem('pairley_token', registerRes.token);
+      let registerRes;
+      if (googleUid) {
+        // Use Google auth endpoint for Google-verified users
+        registerRes = await api.post('/auth/google', registerPayload);
+      } else {
+        registerRes = await api.post('/auth/register', registerPayload);
+      }
+
+      if (registerRes?.token || registerRes?.access_token) {
+        localStorage.setItem('pairley_token', registerRes.token || registerRes.access_token);
         localStorage.setItem('pairley_user', JSON.stringify({ ...(registerRes.user || {}), role: registerRes.role }));
       }
 
@@ -184,7 +229,7 @@ export default function LaunchRegister() {
       console.error('Launch Pass registration failed:', err);
       const msg = err.message || '';
       if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
-        showToast('This mobile number is already registered — logging you in to claim your pass.', 'info');
+        showToast('This mobile number is already registered — you can log in anytime via the Sign In page. Claiming your Launch Pass now!', 'info');
         // Already a Pairley account: still fine to mint a Launch Pass tied to
         // this browser's anonymous uid without re-registering on the backend.
         try {
@@ -287,8 +332,29 @@ export default function LaunchRegister() {
             </div>
 
             <button className="launch-btn launch-btn--primary launch-btn--block" type="submit" disabled={otpBusy}>
-              {otpBusy ? 'Sending code…' : 'Continue'}
+              {otpBusy ? 'Sending code…' : 'Continue with OTP'}
               <ArrowRight size={17} />
+            </button>
+
+            {/* Google Sign-In Divider & Button */}
+            <div className="launch-google-divider">
+              <span className="launch-google-divider__line" />
+              <span className="launch-google-divider__text">or</span>
+              <span className="launch-google-divider__line" />
+            </div>
+
+            <button
+              type="button"
+              className="launch-btn launch-btn--google launch-btn--block"
+              onClick={handleGoogleSignIn}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
+              Connect with Google
             </button>
           </motion.form>
         )}

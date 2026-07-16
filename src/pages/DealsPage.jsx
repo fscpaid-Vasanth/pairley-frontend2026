@@ -104,7 +104,7 @@ const DealsPage = () => {
           businessOwner: {
             id: d.business_id,
             name: d.business?.business_name || 'Local Seller',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (d.business?.business_name || 'Seller'),
+            avatar: d.business?.shop_photo || d.business?.profile_photo || null,
             rating: 4.5
           },
           interestCount: d.joined_people || 0,
@@ -149,8 +149,8 @@ const DealsPage = () => {
     /* Filter by search query */
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      deals = deals.filter((d) => 
-        d.title?.toLowerCase().includes(q) || 
+      deals = deals.filter((d) =>
+        d.title?.toLowerCase().includes(q) ||
         d.description?.toLowerCase().includes(q) ||
         d.category?.toLowerCase().includes(q) ||
         (d.businessOwner?.name && d.businessOwner.name.toLowerCase().includes(q))

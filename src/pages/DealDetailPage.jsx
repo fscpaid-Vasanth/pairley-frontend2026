@@ -56,13 +56,14 @@ const MOCK_TERMS = [
   },
 ];
 
-/* Generate mock interested-user avatars */
+/* Interested-user avatars — null triggers initials-based fallback
+   from ImageWithFallback rather than cartoon dicebear avatars. */
 const MOCK_INTERESTED_AVATARS = [
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=User1',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=User2',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=User3',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=User4',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=User5',
+  null,
+  null,
+  null,
+  null,
+  null,
 ];
 
 const fadeInUp = {
@@ -107,7 +108,7 @@ const DealDetailPage = () => {
           businessOwner: {
             id: data.business?.id || data.business_id,
             name: data.business?.business_name || 'Local Seller',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (data.business?.business_name || 'Seller'),
+            avatar: data.business?.shop_photo || data.business?.profile_photo || null,
             rating: 4.5
           },
           interestCount: data.joined_people || 0,
@@ -224,18 +225,18 @@ const DealDetailPage = () => {
   const daysLeft = getDaysRemaining(deal.validUntil);
   const isPair = deal.mode === 'pair';
   const userHasJoined = currentUser && deal?.interests?.some(
-    (i) => i.customer_id === currentUser.id || 
-           i.customer_id === currentUser.sub || 
-           i.customer?.id === currentUser.id || 
-           i.customer?.id === currentUser.sub ||
-           (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
-           (currentUser.email && i.customer?.email === currentUser.email)
+    (i) => i.customer_id === currentUser.id ||
+      i.customer_id === currentUser.sub ||
+      i.customer?.id === currentUser.id ||
+      i.customer?.id === currentUser.sub ||
+      (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
+      (currentUser.email && i.customer?.email === currentUser.email)
   );
   const userInterest = currentUser && deal?.interests?.find(
-    (i) => i.customer_id === currentUser.id || 
-           i.customer_id === currentUser.sub || 
-           i.customer?.id === currentUser.id || 
-           i.customer?.id === currentUser.sub
+    (i) => i.customer_id === currentUser.id ||
+      i.customer_id === currentUser.sub ||
+      i.customer?.id === currentUser.id ||
+      i.customer?.id === currentUser.sub
   );
   const isCompleted = userInterest?.status === 'COMPLETED';
 
@@ -275,7 +276,7 @@ const DealDetailPage = () => {
 
   /* Copy link handler */
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href).catch(() => {});
+    navigator.clipboard.writeText(window.location.href).catch(() => { });
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
@@ -295,14 +296,14 @@ const DealDetailPage = () => {
     if (!currentUser) return;
     setDeal((prev) => {
       if (!prev) return prev;
-      
+
       const userHasJoined = prev.interests?.some(
-        (i) => i.customer_id === currentUser.id || 
-               i.customer_id === currentUser.sub || 
-               i.customer?.id === currentUser.id || 
-               i.customer?.id === currentUser.sub ||
-               (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
-               (currentUser.email && i.customer?.email === currentUser.email)
+        (i) => i.customer_id === currentUser.id ||
+          i.customer_id === currentUser.sub ||
+          i.customer?.id === currentUser.id ||
+          i.customer?.id === currentUser.sub ||
+          (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
+          (currentUser.email && i.customer?.email === currentUser.email)
       );
       if (userHasJoined) return prev;
 
@@ -629,8 +630,8 @@ const DealDetailPage = () => {
                               </div>
                             </div>
                             <div className="w-full h-2 bg-slate-100/80 rounded-full overflow-hidden mt-3 border border-slate-200/40">
-                              <div 
-                                className="h-full bg-gradient-to-r from-[#5B12D6] to-[#22C55E] rounded-full transition-all duration-700 ease-out" 
+                              <div
+                                className="h-full bg-gradient-to-r from-[#5B12D6] to-[#22C55E] rounded-full transition-all duration-700 ease-out"
                                 style={{ width: `${conversionRatio}%` }}
                               />
                             </div>

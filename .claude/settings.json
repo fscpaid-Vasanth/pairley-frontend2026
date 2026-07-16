@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node check-clip2.mjs)",
+      "Bash(node check-chooser.mjs)",
+      "Bash(curl -s -X POST https://pairley-backend2026.onrender.com/api/auth/register -H \"Content-Type: application/json\" -d '{\"name\":\"Curl Test\",\"mobile\":\"9999912345\",\"role\":\"Customer\",\"password\":\"Test1234!A\",\"address\":\"Test\",\"city\":\"Bangalore\",\"state\":\"Karnataka\",\"pincode\":\"560001\"}' -w \"\\\\nHTTP_STATUS:%{http_code}\\\\n\")",
+      "Bash(curl -s -X POST https://pairley-backend2026.onrender.com/api/auth/register -H \"Content-Type: application/json\" -d '{\"name\":\"Curl Test 2\",\"mobile\":\"9999955678\",\"email\":\"rework@example.com\",\"role\":\"Customer\",\"password\":\"Test1234!A\",\"address\":\"Test\",\"city\":\"Bangalore\",\"state\":\"Karnataka\",\"pincode\":\"560001\"}' -w \"\\\\nHTTP_STATUS:%{http_code}\\\\n\")",
+      "Bash(curl -s -X POST https://pairley-backend2026.onrender.com/api/auth/register -H \"Content-Type: application/json\" -d '{\"name\":\"Curl Test 3\",\"mobile\":\"9999966789\",\"email\":\"rework-unique-12345@example.com\",\"role\":\"Customer\",\"password\":\"Test1234!A\",\"address\":\"Test\",\"city\":\"Bangalore\",\"state\":\"Karnataka\",\"pincode\":\"560001\"}' -w \"\\\\nHTTP_STATUS:%{http_code}\\\\n\")",
+      "Bash(taskkill //PID 25656 //F)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

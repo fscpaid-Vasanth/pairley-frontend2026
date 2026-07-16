@@ -4,6 +4,8 @@ import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import SEO from '../../components/SEO';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 import './LoginPage.css';
 
 
@@ -96,17 +98,27 @@ export default function LoginPage() {
       console.log('Aadhaar Scanned Text:', text);
 
       // Clean up text and find 12 digits
-      const cleanDigits = text.replace(/[^0-9\s]/g, '');
-      const regexPattern = /\d{4}\s+\d{4}\s+\d{4}/;
-      const spaceMatch = cleanDigits.match(regexPattern);
+      // 1. Look for three blocks of 4 digits separated by whitespace, e.g. "6144 0928 0925"
+      // the first block must start with 2-9, the others are any 4 digits
+      const spaceMatch = text.match(/\b([2-9]\d{3})\s+(\d{4})\s+(\d{4})\b/);
       let extractedAadhaar = '';
 
       if (spaceMatch) {
-        extractedAadhaar = spaceMatch[0].replace(/\s+/g, '');
+        extractedAadhaar = `${spaceMatch[1]}${spaceMatch[2]}${spaceMatch[3]}`;
       } else {
-        const contiguousMatch = text.replace(/\s+/g, '').match(/\d{12}/);
+        // 2. Look for a contiguous 12-digit sequence bounded by word boundaries, starting with 2-9
+        const contiguousMatch = text.match(/\b([2-9]\d{11})\b/);
         if (contiguousMatch) {
-          extractedAadhaar = contiguousMatch[0];
+          extractedAadhaar = contiguousMatch[1];
+        } else {
+          // 3. Fallback: let's clean all non-digits and see if we can find 12 digits starting with 2-9
+          // But to avoid the year of birth, we can first remove common birth years: e.g. 19\d{2} or 20\d{2}
+          const textWithoutYears = text.replace(/\b(19\d{2}|20\d{2})\b/g, '');
+          const cleanDigits = textWithoutYears.replace(/\D/g, '');
+          const match = cleanDigits.match(/[2-9]\d{11}/);
+          if (match) {
+            extractedAadhaar = match[0];
+          }
         }
       }
 
@@ -116,14 +128,73 @@ export default function LoginPage() {
         setOnboardingForm(prev => ({ ...prev, aadhaar: extractedAadhaar }));
         if (onboardingErrors.aadhaar) setOnboardingErrors(prev => ({ ...prev, aadhaar: '' }));
       } else {
-        setAadhaarScanMessage('Scan complete, but no clear 12-digit number was found. Please enter it manually.');
+        setAadhaarScanMessage('Scan complete, but no clear 12-digit Aadhaar number was found. Please use a clearer photo.');
         setScannedAadhaarNumber('');
       }
     } catch (error) {
       console.error('Aadhaar scan failed:', error);
-      setAadhaarScanMessage('Scanning failed. Please enter the Aadhaar number manually.');
+      setAadhaarScanMessage('Scanning failed. Please try again with a clearer photo.');
     } finally {
       setIsScanningAadhaar(false);
+    }
+  };
+
+  const scanPANCard = async (file) => {
+    try {
+      const { recognize } = await import('tesseract.js');
+      showToast('Scanning PAN card image...', 'info');
+      const result = await recognize(file, 'eng');
+      const text = result.data.text;
+      console.log('PAN Scanned Text:', text);
+
+      // PAN format: 5 letters, 4 digits, 1 letter
+      const panMatch = text.match(/\b([A-Z]{5}\d{4}[A-Z])\b/i);
+      if (panMatch) {
+        const extractedPan = panMatch[1].toUpperCase();
+        setOnboardingForm(prev => ({ ...prev, pan: extractedPan }));
+        if (onboardingErrors.pan) setOnboardingErrors(prev => ({ ...prev, pan: '' }));
+        showToast(`Success! PAN number scanned: ${extractedPan}`, 'success');
+      } else {
+        showToast('PAN Card image uploaded, but no valid PAN number was scanned. Please try again with a clearer photo.', 'warning');
+      }
+    } catch (error) {
+      console.error('PAN scan failed:', error);
+      showToast('PAN scanning failed. Please try again.', 'error');
+    }
+  };
+
+  const handleUploadClick = async (field) => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const image = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Prompt
+        });
+        
+        if (image && image.dataUrl) {
+          setOnboardingForm(prev => ({ ...prev, [field]: image.dataUrl }));
+          if (onboardingErrors[field]) {
+            setOnboardingErrors(prev => ({ ...prev, [field]: '' }));
+          }
+          if (field === 'aadhaarPhoto' || field === 'panPhoto') {
+            const response = await fetch(image.dataUrl);
+            const blob = await response.blob();
+            const file = new File([blob], `${field}.jpg`, { type: 'image/jpeg' });
+            if (field === 'aadhaarPhoto') {
+              scanAadhaarCard(file);
+            } else {
+              scanPANCard(file);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Native camera failed/cancelled:', err);
+        document.getElementById(`onboarding-${field}-input`)?.click();
+      }
+    } else {
+      document.getElementById(`onboarding-${field}-input`)?.click();
     }
   };
 
@@ -138,6 +209,8 @@ export default function LoginPage() {
       }
       if (field === 'aadhaarPhoto') {
         scanAadhaarCard(file);
+      } else if (field === 'panPhoto') {
+        scanPANCard(file);
       }
     };
     reader.onerror = (error) => {
@@ -430,22 +503,16 @@ export default function LoginPage() {
         errs.businessName = 'Business/Shop name is required';
       }
       if (!onboardingForm.aadhaar.trim()) {
-        errs.aadhaar = 'Aadhaar Card Number is required';
+        errs.aadhaar = 'Aadhaar Card Number is required (please upload your Aadhaar image to scan)';
       } else if (!/^\d{12}$/.test(onboardingForm.aadhaar.replace(/\D/g, ''))) {
-        errs.aadhaar = 'Aadhaar must be exactly 12 digits';
-      } else if (!scannedAadhaarNumber) {
-        errs.aadhaar = 'Please upload a clear Aadhaar card image and wait for the scan to complete';
-      } else if (onboardingForm.aadhaar.replace(/\D/g, '') !== scannedAadhaarNumber) {
-        errs.aadhaar = 'Aadhaar number does not match the scanned Aadhaar Card image';
-        setAadhaarMatchError('Aadhaar number does not match the scanned Aadhaar Card image');
-        alert(`Aadhaar Verification Failure:\n\nThe entered Aadhaar Number (${onboardingForm.aadhaar}) does not match the scanned Aadhaar Card image (${scannedAadhaarNumber}).\n\nPlease ensure both match before submitting.`);
+        errs.aadhaar = 'Scanned Aadhaar must be exactly 12 digits';
       }
 
       if (onboardingForm.gst.trim() && onboardingForm.gst.trim().length !== 15) {
         errs.gst = 'GST Number must be exactly 15 characters';
       }
       if (onboardingForm.pan.trim() && onboardingForm.pan.trim().length !== 10) {
-        errs.pan = 'PAN Number must be exactly 10 characters';
+        errs.pan = 'Scanned PAN Number must be exactly 10 characters';
       }
 
       // Photos validation
@@ -815,41 +882,19 @@ export default function LoginPage() {
                               <span className="material-symbols-outlined login-input-icon">fingerprint</span>
                               <input
                                 type="text"
-                                placeholder="12-digit Aadhaar number"
+                                placeholder="Upload Aadhaar card image to scan"
                                 className={`login-input ${onboardingErrors.aadhaar ? 'login-input--error' : ''}`}
                                 value={onboardingForm.aadhaar}
-                                maxLength={12}
-                                onChange={(e) => {
-                                  setOnboardingForm(prev => ({ ...prev, aadhaar: e.target.value.replace(/\D/g, '').slice(0, 12) }));
-                                  if (onboardingErrors.aadhaar) setOnboardingErrors(prev => ({ ...prev, aadhaar: '' }));
-                                  setAadhaarMatchError('');
-                                }}
+                                readOnly={true}
                               />
                             </div>
                             {onboardingErrors.aadhaar && <span className="login-error">{onboardingErrors.aadhaar}</span>}
                             {scannedAadhaarNumber && (
-                              <div className={`aadhaar-match-indicator ${
-                                onboardingForm.aadhaar.replace(/\D/g, '') === scannedAadhaarNumber 
-                                  ? 'aadhaar-match-indicator--success' 
-                                  : 'aadhaar-match-indicator--error'
-                              }`}>
-                                {onboardingForm.aadhaar.replace(/\D/g, '') === scannedAadhaarNumber ? (
-                                  <>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span>
-                                    <span>Matches scanned card image</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>warning</span>
-                                    <span>Does not match scanned card number ({scannedAadhaarNumber})</span>
-                                  </>
-                                )}
+                              <div className="aadhaar-match-indicator aadhaar-match-indicator--success">
+                                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span>
+                                <span>Scanned and verified from card image</span>
                               </div>
                             )}
-                            {aadhaarMatchError && <div className="aadhaar-match-indicator aadhaar-match-indicator--error">
-                              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>error</span>
-                              <span>{aadhaarMatchError}</span>
-                            </div>}
                           </div>
 
                           {/* PAN Card */}
@@ -859,14 +904,10 @@ export default function LoginPage() {
                               <span className="material-symbols-outlined login-input-icon">badge</span>
                               <input
                                 type="text"
-                                placeholder="10-character PAN number"
+                                placeholder="Upload PAN card image to scan (Optional)"
                                 className={`login-input ${onboardingErrors.pan ? 'login-input--error' : ''}`}
                                 value={onboardingForm.pan}
-                                maxLength={10}
-                                onChange={(e) => {
-                                  setOnboardingForm(prev => ({ ...prev, pan: e.target.value.toUpperCase().slice(0, 10) }));
-                                  if (onboardingErrors.pan) setOnboardingErrors(prev => ({ ...prev, pan: '' }));
-                                }}
+                                readOnly={true}
                               />
                             </div>
                             {onboardingErrors.pan && <span className="login-error">{onboardingErrors.pan}</span>}
@@ -899,17 +940,18 @@ export default function LoginPage() {
                               <input
                                 type="file"
                                 accept="image/*"
-                                id="onboarding-shop-photo"
+                                id="onboarding-shopPhoto-input"
                                 style={{ display: 'none' }}
                                 onChange={(e) => handleFileChange('shopPhoto', e.target.files[0])}
                               />
-                              <label
-                                htmlFor="onboarding-shop-photo"
+                              <div
+                                onClick={() => handleUploadClick('shopPhoto')}
                                 className={`su-file-upload-label ${onboardingErrors.shopPhoto ? 'su-file-upload-label--error' : ''}`}
+                                style={{ cursor: 'pointer' }}
                               >
                                 <span className="material-symbols-outlined">add_a_photo</span>
                                 {onboardingForm.shopPhoto ? 'Change Shop Image' : 'Upload Shop Image'}
-                              </label>
+                              </div>
                               {onboardingForm.shopPhoto && (
                                 <div className="su-image-preview-container">
                                   <img src={onboardingForm.shopPhoto} alt="Shop Preview" className="su-image-preview" />
@@ -926,17 +968,18 @@ export default function LoginPage() {
                               <input
                                 type="file"
                                 accept="image/*"
-                                id="onboarding-aadhaar-photo"
+                                id="onboarding-aadhaarPhoto-input"
                                 style={{ display: 'none' }}
                                 onChange={(e) => handleFileChange('aadhaarPhoto', e.target.files[0])}
                               />
-                              <label
-                                htmlFor="onboarding-aadhaar-photo"
+                              <div
+                                onClick={() => handleUploadClick('aadhaarPhoto')}
                                 className={`su-file-upload-label ${onboardingErrors.aadhaarPhoto ? 'su-file-upload-label--error' : ''}`}
+                                style={{ cursor: 'pointer' }}
                               >
                                 <span className="material-symbols-outlined">description</span>
                                 {onboardingForm.aadhaarPhoto ? 'Change Aadhaar Card Image' : 'Upload Aadhaar Card Image'}
-                              </label>
+                              </div>
                               {onboardingForm.aadhaarPhoto && (
                                 <div className="su-image-preview-container aadhaar-scan-container">
                                   <img src={onboardingForm.aadhaarPhoto} alt="Aadhaar Preview" className="su-image-preview" />
@@ -975,17 +1018,18 @@ export default function LoginPage() {
                               <input
                                 type="file"
                                 accept="image/*"
-                                id="onboarding-pan-photo"
+                                id="onboarding-panPhoto-input"
                                 style={{ display: 'none' }}
                                 onChange={(e) => handleFileChange('panPhoto', e.target.files[0])}
                               />
-                              <label
-                                htmlFor="onboarding-pan-photo"
+                              <div
+                                onClick={() => handleUploadClick('panPhoto')}
                                 className={`su-file-upload-label ${onboardingErrors.panPhoto ? 'su-file-upload-label--error' : ''}`}
+                                style={{ cursor: 'pointer' }}
                               >
                                 <span className="material-symbols-outlined">badge</span>
                                 {onboardingForm.panPhoto ? 'Change PAN Card Image' : 'Upload PAN Card Image'}
-                              </label>
+                              </div>
                               {onboardingForm.panPhoto && (
                                 <div className="su-image-preview-container">
                                   <img src={onboardingForm.panPhoto} alt="PAN Preview" className="su-image-preview" />
