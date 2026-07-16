@@ -17,6 +17,7 @@ import { getCategoryById } from '../../data/categories';
 import { getAvatarById } from '../../data/launchAvatars';
 import { ROUTES, LAUNCH_DATE, formatNumber } from '../../utils/constants';
 import CountdownTimer from '../../components/CountdownTimer';
+import { logoutUser } from '../../firebase';
 
 export default function LaunchDashboard() {
   const { uid, member, counters, today, loading } = useLaunchPassMember();
@@ -59,14 +60,20 @@ export default function LaunchDashboard() {
     setEditingAvatar(false);
   };
 
-  // Clears the real Pairley account session created during registration.
-  // The Launch Pass itself stays tied to this browser's anonymous Firebase
-  // session, so it's still here on return — this only logs out of the
-  // backend account (matches Navbar.jsx's handleLogout behavior).
-  const handleLogout = () => {
+  // Clears both the backend account session AND the anonymous Firebase
+  // session the Launch Pass is tied to, so returning afterwards asks the
+  // next person to register fresh rather than auto-loading this pass —
+  // this is what makes "Log Out" work as a reset on a shared/kiosk device
+  // (e.g. a mall booth tablet used for several customers in a row).
+  const handleLogout = async () => {
     localStorage.removeItem('pairley_token');
     localStorage.removeItem('pairley_user');
-    navigate('/');
+    try {
+      await logoutUser();
+    } catch (err) {
+      console.error('Firebase sign-out failed:', err);
+    }
+    navigate(ROUTES.LAUNCH, { replace: true });
   };
 
   const logoutButton = (

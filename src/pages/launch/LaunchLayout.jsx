@@ -20,7 +20,6 @@ export default function LaunchLayout({ children, showLogo = true, wide = false, 
           <span />
           <Link to="/" className="launch-shell__logo">
             <img src="/logo.svg" alt="Pairley" />
-            <span>Pairley</span>
           </Link>
           <div className="launch-shell__topbar-right">{headerRight}</div>
         </div>

@@ -89,8 +89,16 @@
   grid-column: 2;
 }
 .launch-shell__logo img {
-  width: 40px;
+  /* logo.svg is a full wordmark (icon + "PAIRLEY" text baked into the vector,
+     760x270 viewBox) — scale by height only so the proportions stay correct.
+     Forcing an equal width+height here previously squashed the whole wide
+     lockup into a square, which is what made it unreadable. */
   height: 40px;
+  width: auto;
+  display: block;
+}
+@media (max-width: 480px) {
+  .launch-shell__logo img { height: 32px; }
 }
 .launch-shell__topbar-right {
   grid-column: 3;
