@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Store, Tag, Flame, Lock, Trophy, Pencil } from 'lucide-react';
+import { Users, Store, Tag, Flame, Lock, Trophy, Pencil, LogOut } from 'lucide-react';
 import LaunchLayout from './LaunchLayout';
 import LaunchPassCard from './LaunchPassCard';
 import RadialProgress from './RadialProgress';
@@ -59,6 +59,22 @@ export default function LaunchDashboard() {
     setEditingAvatar(false);
   };
 
+  // Clears the real Pairley account session created during registration.
+  // The Launch Pass itself stays tied to this browser's anonymous Firebase
+  // session, so it's still here on return — this only logs out of the
+  // backend account (matches Navbar.jsx's handleLogout behavior).
+  const handleLogout = () => {
+    localStorage.removeItem('pairley_token');
+    localStorage.removeItem('pairley_user');
+    navigate('/');
+  };
+
+  const logoutButton = (
+    <button className="launch-shell__logout-btn" type="button" onClick={handleLogout}>
+      <LogOut size={13} /> Log Out
+    </button>
+  );
+
   if (loading || !member) {
     return (
       <LaunchLayout>
@@ -68,7 +84,7 @@ export default function LaunchDashboard() {
   }
 
   return (
-    <LaunchLayout wide>
+    <LaunchLayout wide headerRight={logoutButton}>
       {/* Daily return banner */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}

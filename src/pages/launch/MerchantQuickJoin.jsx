@@ -13,6 +13,7 @@ import { registerMerchantLead } from '../../utils/launchFirestore';
 const TEST_NUMBERS = ['9962045143', '1234567890'];
 const isTestNumber = (mobile) =>
   TEST_NUMBERS.includes(mobile) || ['99999', '88888', '77777', '66666'].some((p) => mobile.startsWith(p));
+const STEPS = ['business', 'contact', 'otp', 'done'];
 
 export default function MerchantQuickJoin() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function MerchantQuickJoin() {
   const [searchParams] = useSearchParams();
   const source = searchParams.get('src') || 'website';
 
-  const [step, setStep] = useState('details'); // details -> otp -> done
+  const [step, setStep] = useState('business');
   const [form, setForm] = useState({
     shopName: '',
     ownerName: '',
@@ -36,12 +37,19 @@ export default function MerchantQuickJoin() {
   const [resendSeconds, setResendSeconds] = useState(0);
   const [badgeNumber, setBadgeNumber] = useState('');
 
+  const stepNum = STEPS.indexOf(step) + 1;
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
-  const validate = () => {
+  const validateBusiness = () => {
     const errs = {};
     if (!form.shopName.trim()) errs.shopName = 'Shop name is required';
     if (!form.ownerName.trim()) errs.ownerName = 'Your name is required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const validateContact = () => {
+    const errs = {};
     if (!/^\d{10}$/.test(form.mobile)) errs.mobile = 'Enter a valid 10-digit mobile number';
     if (!form.whatsappSame && !/^\d{10}$/.test(form.whatsapp)) errs.whatsapp = 'Enter a valid 10-digit WhatsApp number';
     setErrors(errs);
@@ -61,9 +69,15 @@ export default function MerchantQuickJoin() {
     }, 1000);
   };
 
+  const handleContinueBusiness = (e) => {
+    e.preventDefault();
+    if (!validateBusiness()) return;
+    setStep('contact');
+  };
+
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validateContact()) return;
     setBusy(true);
     try {
       if (isTestNumber(form.mobile)) {
@@ -130,21 +144,20 @@ export default function MerchantQuickJoin() {
   };
 
   return (
-    <LaunchLayout>
+    <LaunchLayout fixed>
       <AnimatePresence mode="wait">
-        {step === 'details' && (
+        {step === 'business' && (
           <motion.form
-            key="details"
+            key="business"
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
-            onSubmit={handleSendOtp}
-            className="launch-glass"
-            style={{ padding: 28 }}
+            onSubmit={handleContinueBusiness}
+            className="launch-glass launch-step-card"
           >
-            <span className="launch-eyebrow">Merchant Registration · Step 1 of 2</span>
-            <h2 className="launch-title" style={{ fontSize: 28 }}>Join Pairley in 2 Minutes</h2>
-            <p className="launch-subtitle" style={{ marginBottom: 24 }}>
+            <span className="launch-eyebrow">Merchant Registration · Step {stepNum} of 4</span>
+            <h2 className="launch-title" style={{ fontSize: 24 }}>Join Pairley in 2 Minutes</h2>
+            <p className="launch-subtitle" style={{ marginBottom: 14 }}>
               Reserve your spot before the Diwali launch. Zero fees, no documents needed today.
             </p>
 
@@ -178,6 +191,28 @@ export default function MerchantQuickJoin() {
                 ))}
               </select>
             </div>
+
+            <button className="launch-btn launch-btn--primary launch-btn--block" type="submit">
+              Continue
+              <ArrowRight size={17} />
+            </button>
+          </motion.form>
+        )}
+
+        {step === 'contact' && (
+          <motion.form
+            key="contact"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            onSubmit={handleSendOtp}
+            className="launch-glass launch-step-card"
+          >
+            <span className="launch-eyebrow">Step {stepNum} of 4</span>
+            <h2 className="launch-title" style={{ fontSize: 24 }}>How Can We Reach You?</h2>
+            <p className="launch-subtitle" style={{ marginBottom: 14 }}>
+              We'll send leads and a verification code here.
+            </p>
 
             <div className="launch-field">
               <label>Mobile Number</label>
@@ -230,6 +265,9 @@ export default function MerchantQuickJoin() {
               {busy ? 'Sending code…' : 'Continue'}
               <ArrowRight size={17} />
             </button>
+            <button type="button" className="launch-btn launch-btn--ghost" onClick={() => setStep('business')}>
+              <ArrowLeft size={14} /> Back
+            </button>
           </motion.form>
         )}
 
@@ -240,12 +278,12 @@ export default function MerchantQuickJoin() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
             onSubmit={handleVerifyAndSubmit}
-            className="launch-glass"
-            style={{ padding: 28, textAlign: 'center' }}
+            className="launch-glass launch-step-card"
+            style={{ textAlign: 'center' }}
           >
-            <span className="launch-eyebrow">Step 2 of 2</span>
-            <h2 className="launch-title" style={{ fontSize: 28 }}>Verify Your Number</h2>
-            <p className="launch-subtitle" style={{ marginBottom: 24 }}>
+            <span className="launch-eyebrow">Step {stepNum} of 4</span>
+            <h2 className="launch-title" style={{ fontSize: 24 }}>Verify Your Number</h2>
+            <p className="launch-subtitle" style={{ marginBottom: 18 }}>
               Enter the 6-digit code sent to +91 {form.mobile}
             </p>
 
@@ -255,7 +293,7 @@ export default function MerchantQuickJoin() {
               className="launch-btn launch-btn--primary launch-btn--block"
               type="submit"
               disabled={busy}
-              style={{ marginTop: 24 }}
+              style={{ marginTop: 20 }}
             >
               {busy ? 'Verifying…' : 'Get My Launch Merchant Badge'}
               <ArrowRight size={17} />
@@ -265,11 +303,11 @@ export default function MerchantQuickJoin() {
               className="launch-btn launch-btn--ghost"
               onClick={handleResendOtp}
               disabled={resendSeconds > 0}
-              style={{ marginTop: 10 }}
+              style={{ marginTop: 6 }}
             >
               {resendSeconds > 0 ? `Resend in ${resendSeconds}s` : 'Resend Code'}
             </button>
-            <button type="button" className="launch-btn launch-btn--ghost" onClick={() => setStep('details')}>
+            <button type="button" className="launch-btn launch-btn--ghost" onClick={() => setStep('contact')}>
               <ArrowLeft size={14} /> Back
             </button>
           </motion.form>
@@ -280,17 +318,17 @@ export default function MerchantQuickJoin() {
             key="done"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="launch-glass"
-            style={{ padding: 28, textAlign: 'center' }}
+            className="launch-glass launch-step-card"
+            style={{ textAlign: 'center' }}
           >
-            <div style={{ fontSize: 44 }}>🏅</div>
-            <span className="launch-eyebrow" style={{ marginTop: 12 }}>Launch Merchant Badge</span>
-            <h2 className="launch-title" style={{ fontSize: 28 }}>{badgeNumber}</h2>
-            <p className="launch-subtitle" style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 40 }}>🏅</div>
+            <span className="launch-eyebrow" style={{ marginTop: 8 }}>Launch Merchant Badge</span>
+            <h2 className="launch-title" style={{ fontSize: 24 }}>{badgeNumber}</h2>
+            <p className="launch-subtitle" style={{ marginBottom: 14 }}>
               {form.shopName} is officially on the list. Our team will WhatsApp you at +91 {form.mobile} within
               24 hours to help you get fully set up before Diwali.
             </p>
-            <div className="launch-milestone-row" style={{ justifyContent: 'center', marginBottom: 24 }}>
+            <div className="launch-milestone-row" style={{ justifyContent: 'center', marginBottom: 16 }}>
               <span className="launch-interest-chip launch-interest-chip--active">
                 <ShieldCheck size={13} /> Zero Onboarding Fee
               </span>

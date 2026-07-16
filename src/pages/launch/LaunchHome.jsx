@@ -41,14 +41,14 @@ export default function LaunchHome() {
 
   if (loading || member) {
     return (
-      <LaunchLayout>
+      <LaunchLayout fixed>
         <div className="launch-loading-spinner" />
       </LaunchLayout>
     );
   }
 
   return (
-    <LaunchLayout>
+    <LaunchLayout fixed>
       <JourneyChooser />
     </LaunchLayout>
   );

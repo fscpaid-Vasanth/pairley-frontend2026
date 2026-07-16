@@ -14,6 +14,7 @@ import { registerLaunchPassMember } from '../../utils/launchFirestore';
 
 const CITIES = ['Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'];
 const REF_KEY = 'pairley_launch_ref';
+const STEPS = ['details', 'otp', 'interests', 'avatar'];
 
 const TEST_NUMBERS = ['9962045143', '1234567890'];
 const isTestNumber = (mobile) =>
@@ -28,7 +29,7 @@ export default function LaunchRegister() {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const [step, setStep] = useState('details'); // details -> otp -> avatar -> submitting
+  const [step, setStep] = useState('details');
   const [form, setForm] = useState({
     name: '',
     mobile: '',
@@ -44,6 +45,7 @@ export default function LaunchRegister() {
   const [avatarId, setAvatarId] = useState('minimal');
   const [submitting, setSubmitting] = useState(false);
 
+  const stepNum = STEPS.indexOf(step) + 1;
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
   const toggleInterest = (id) => {
@@ -123,8 +125,10 @@ export default function LaunchRegister() {
     }
     setOtpBusy(true);
     try {
-      await api.post('/auth/verify-otp', { mobile: form.mobile, code: otp });
-      setStep('avatar');
+      if (!isTestNumber(form.mobile)) {
+        await api.post('/auth/verify-otp', { mobile: form.mobile, code: otp });
+      }
+      setStep('interests');
     } catch (err) {
       showToast(err.message || 'Invalid verification code.', 'error');
     } finally {
@@ -206,7 +210,7 @@ export default function LaunchRegister() {
   };
 
   return (
-    <LaunchLayout>
+    <LaunchLayout fixed>
       <AnimatePresence mode="wait">
         {step === 'details' && (
           <motion.form
@@ -215,12 +219,11 @@ export default function LaunchRegister() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
             onSubmit={handleSendOtp}
-            className="launch-glass"
-            style={{ padding: 28 }}
+            className="launch-glass launch-step-card"
           >
-            <span className="launch-eyebrow">Step 1 of 3</span>
-            <h2 className="launch-title" style={{ fontSize: 28 }}>Claim Your Launch Pass</h2>
-            <p className="launch-subtitle" style={{ marginBottom: 24 }}>
+            <span className="launch-eyebrow">Step {stepNum} of 4</span>
+            <h2 className="launch-title" style={{ fontSize: 22 }}>Claim Your Launch Pass</h2>
+            <p className="launch-subtitle" style={{ marginBottom: 10, fontSize: 13 }}>
               Takes less than a minute. No payment, ever.
             </p>
 
@@ -250,23 +253,24 @@ export default function LaunchRegister() {
               {errors.mobile && <div className="launch-field-error">{errors.mobile}</div>}
             </div>
 
-            <div className="launch-field">
-              <label>City</label>
-              <select className="launch-select" value={form.city} onChange={(e) => update('city', e.target.value)}>
-                {CITIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="launch-field">
-              <label>Area / Locality</label>
-              <input
-                className="launch-input"
-                value={form.area}
-                onChange={(e) => update('area', e.target.value)}
-                placeholder="e.g. Whitefield"
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="launch-field">
+                <label>City</label>
+                <select className="launch-select" value={form.city} onChange={(e) => update('city', e.target.value)}>
+                  {CITIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="launch-field">
+                <label>Area / Locality</label>
+                <input
+                  className="launch-input"
+                  value={form.area}
+                  onChange={(e) => update('area', e.target.value)}
+                  placeholder="e.g. Whitefield"
+                />
+              </div>
             </div>
 
             <div className="launch-field">
@@ -274,28 +278,12 @@ export default function LaunchRegister() {
               <input
                 className="launch-input"
                 type="email"
+                autoComplete="email"
                 value={form.email}
                 onChange={(e) => update('email', e.target.value)}
                 placeholder="you@example.com"
               />
               {errors.email && <div className="launch-field-error">{errors.email}</div>}
-            </div>
-
-            <div className="launch-field">
-              <label>What are you interested in?</label>
-              <div className="launch-interest-grid">
-                {categories.map((cat) => (
-                  <button
-                    type="button"
-                    key={cat.id}
-                    onClick={() => toggleInterest(cat.id)}
-                    className={`launch-interest-chip ${form.interests.includes(cat.id) ? 'launch-interest-chip--active' : ''}`}
-                  >
-                    <span>{cat.icon}</span>
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
             </div>
 
             <button className="launch-btn launch-btn--primary launch-btn--block" type="submit" disabled={otpBusy}>
@@ -312,12 +300,12 @@ export default function LaunchRegister() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
             onSubmit={handleVerifyOtp}
-            className="launch-glass"
-            style={{ padding: 28, textAlign: 'center' }}
+            className="launch-glass launch-step-card"
+            style={{ textAlign: 'center' }}
           >
-            <span className="launch-eyebrow">Step 2 of 3</span>
-            <h2 className="launch-title" style={{ fontSize: 28 }}>Verify Your Number</h2>
-            <p className="launch-subtitle" style={{ marginBottom: 24 }}>
+            <span className="launch-eyebrow">Step {stepNum} of 4</span>
+            <h2 className="launch-title" style={{ fontSize: 24 }}>Verify Your Number</h2>
+            <p className="launch-subtitle" style={{ marginBottom: 18 }}>
               Enter the 6-digit code sent to +91 {form.mobile}
             </p>
 
@@ -327,7 +315,7 @@ export default function LaunchRegister() {
               className="launch-btn launch-btn--primary launch-btn--block"
               type="submit"
               disabled={otpBusy}
-              style={{ marginTop: 24 }}
+              style={{ marginTop: 20 }}
             >
               {otpBusy ? 'Verifying…' : 'Verify & Continue'}
               <ArrowRight size={17} />
@@ -337,7 +325,7 @@ export default function LaunchRegister() {
               className="launch-btn launch-btn--ghost"
               onClick={handleResendOtp}
               disabled={resendSeconds > 0}
-              style={{ marginTop: 10 }}
+              style={{ marginTop: 6 }}
             >
               {resendSeconds > 0 ? `Resend in ${resendSeconds}s` : 'Resend Code'}
             </button>
@@ -351,17 +339,61 @@ export default function LaunchRegister() {
           </motion.form>
         )}
 
+        {step === 'interests' && (
+          <motion.div
+            key="interests"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            className="launch-glass launch-step-card"
+            style={{ textAlign: 'center' }}
+          >
+            <span className="launch-eyebrow">Step {stepNum} of 4</span>
+            <h2 className="launch-title" style={{ fontSize: 22 }}>What Are You Into?</h2>
+            <p className="launch-subtitle" style={{ marginBottom: 10, fontSize: 13 }}>
+              Pick a few — you can change these anytime.
+            </p>
+
+            <div className="launch-interest-grid">
+              {categories.map((cat) => (
+                <button
+                  type="button"
+                  key={cat.id}
+                  onClick={() => toggleInterest(cat.id)}
+                  className={`launch-interest-chip ${form.interests.includes(cat.id) ? 'launch-interest-chip--active' : ''}`}
+                >
+                  <span>{cat.icon}</span>
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            <button
+              className="launch-btn launch-btn--primary launch-btn--block"
+              type="button"
+              onClick={() => setStep('avatar')}
+              style={{ marginTop: 18 }}
+            >
+              Continue
+              <ArrowRight size={17} />
+            </button>
+            <button type="button" className="launch-btn launch-btn--ghost" onClick={() => setStep('otp')}>
+              <ArrowLeft size={14} /> Back
+            </button>
+          </motion.div>
+        )}
+
         {step === 'avatar' && (
           <motion.div
             key="avatar"
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
-            className="launch-glass"
-            style={{ padding: 28, textAlign: 'center' }}
+            className="launch-glass launch-step-card"
+            style={{ textAlign: 'center' }}
           >
-            <span className="launch-eyebrow">Step 3 of 3</span>
-            <h2 className="launch-title" style={{ fontSize: 28 }}>Pick Your Avatar</h2>
+            <span className="launch-eyebrow">Step {stepNum} of 4</span>
+            <h2 className="launch-title" style={{ fontSize: 24 }}>Pick Your Avatar</h2>
             <p className="launch-subtitle">You can change this anytime from your dashboard.</p>
 
             <AvatarPicker value={avatarId} onChange={setAvatarId} />
@@ -371,7 +403,7 @@ export default function LaunchRegister() {
               type="button"
               onClick={handleFinish}
               disabled={submitting}
-              style={{ marginTop: 28 }}
+              style={{ marginTop: 18 }}
             >
               {submitting ? 'Generating your pass…' : 'Generate My Launch Pass'}
               <ArrowRight size={17} />

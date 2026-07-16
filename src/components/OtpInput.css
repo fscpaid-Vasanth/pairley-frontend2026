@@ -28,6 +28,19 @@
   opacity: 0.5;
 }
 
+/* Same autofill-visibility fix as the rest of the Launch Pass forms — some
+   browsers/keyboards offer to autofill a one-time-code into these boxes,
+   which otherwise forces a white background and makes the digit invisible. */
+.otp-input__box:-webkit-autofill,
+.otp-input__box:-webkit-autofill:hover,
+.otp-input__box:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px rgba(30, 12, 50, 0.95) inset;
+  box-shadow: 0 0 0 1000px rgba(30, 12, 50, 0.95) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 @media (max-width: 420px) {
   .otp-input {
     gap: 6px;

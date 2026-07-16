@@ -26,24 +26,24 @@ export default function LaunchPass() {
 
   if (loading || !member) {
     return (
-      <LaunchLayout>
+      <LaunchLayout fixed>
         <div className="launch-loading-spinner" />
       </LaunchLayout>
     );
   }
 
   return (
-    <LaunchLayout>
-      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+    <LaunchLayout fixed>
+      <div style={{ textAlign: 'center', marginBottom: 14 }}>
         <span className="launch-eyebrow">Your Launch Pass</span>
-        <h1 className="launch-title" style={{ fontSize: 30 }}>
+        <h1 className="launch-title" style={{ fontSize: 24 }}>
           You're In, <span className="accent">{member.name?.split(' ')[0] || 'Member'}</span>
         </h1>
       </div>
 
       <LaunchPassCard member={member} />
 
-      <div style={{ textAlign: 'center', marginTop: 28 }}>
+      <div style={{ textAlign: 'center', marginTop: 18 }}>
         <button
           className="launch-btn launch-btn--primary"
           type="button"
