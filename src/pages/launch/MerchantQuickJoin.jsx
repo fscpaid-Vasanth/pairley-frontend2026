@@ -43,6 +43,12 @@ export default function MerchantQuickJoin() {
     warmUpBackend();
   }, []);
 
+  useEffect(() => {
+    if (step === 'otp') {
+      showToast('Use Default OTP: 123456', 'info');
+    }
+  }, [step, showToast]);
+
   const stepNum = STEPS.indexOf(step) + 1;
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -294,6 +300,19 @@ export default function MerchantQuickJoin() {
             </p>
 
             <OtpInput value={otp} onChange={setOtp} />
+
+            <div style={{
+              background: 'rgba(34, 197, 94, 0.12)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              borderRadius: 12,
+              padding: '8px 12px',
+              fontSize: 13,
+              color: '#4ade80',
+              marginTop: 14,
+              textAlign: 'center'
+            }}>
+              💡 Use Default OTP: <strong>123456</strong>
+            </div>
 
             <button
               className="launch-btn launch-btn--primary launch-btn--block"

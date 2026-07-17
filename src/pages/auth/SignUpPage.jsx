@@ -212,6 +212,12 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, [view, resendSeconds]);
 
+  useEffect(() => {
+    if (view === 'otp') {
+      showToast('Use Default OTP: 123456', 'info');
+    }
+  }, [view, showToast]);
+
   const sendOtpAndGoToVerify = (payload, mode) => {
     setPendingPayload(payload);
     setOtpMode(mode);
@@ -365,6 +371,21 @@ export default function SignUpPage() {
                 </p>
                 <form onSubmit={handleVerifyOtp} className="signup-form w-full">
                   <OtpInput value={otp} onChange={setOtp} variant="light" />
+
+                  <div style={{
+                    background: 'rgba(79, 70, 229, 0.06)',
+                    border: '1px dashed rgba(79, 70, 229, 0.3)',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    fontSize: 13,
+                    color: '#4f46e5',
+                    marginTop: 14,
+                    textAlign: 'center',
+                    width: '100%'
+                  }}>
+                    💡 Use Default OTP: <strong>123456</strong>
+                  </div>
+
                   <button type="submit" className="su-submit-btn" disabled={busy} style={{ marginTop: 18 }}>
                     {busy ? 'Verifying…' : 'Verify & Create Account'}
                   </button>

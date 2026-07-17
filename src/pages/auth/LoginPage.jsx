@@ -49,6 +49,12 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
     return () => clearInterval(interval);
   }, [method, otpStep, resendSeconds]);
 
+  useEffect(() => {
+    if (method === 'otp' && otpStep === 'verify') {
+      showToast('Use Default OTP: 123456', 'info');
+    }
+  }, [method, otpStep, showToast]);
+
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
@@ -208,6 +214,22 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
           </p>
           <form onSubmit={handleVerifyOtp} className="login-form w-full">
             <OtpInput value={otp} onChange={setOtp} variant="light" />
+
+            <div style={{
+              background: 'rgba(79, 70, 229, 0.06)',
+              border: '1px dashed rgba(79, 70, 229, 0.3)',
+              borderRadius: 8,
+              padding: '8px 12px',
+              fontSize: 13,
+              color: '#4f46e5',
+              marginTop: 12,
+              textAlign: 'center',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}>
+              💡 Use Default OTP: <strong>123456</strong>
+            </div>
+
             <button type="submit" className="login-submit-btn" disabled={busy} style={{ marginTop: 16 }}>
               {busy ? 'Verifying…' : 'Verify OTP'}
             </button>
@@ -309,6 +331,12 @@ export default function LoginPage() {
     const interval = setInterval(() => setOnboardingResendSeconds((s) => s - 1), 1000);
     return () => clearInterval(interval);
   }, [onboardingOtpStep, onboardingResendSeconds]);
+
+  useEffect(() => {
+    if (onboardingOtpStep === 'otp') {
+      showToast('Use Default OTP: 123456', 'info');
+    }
+  }, [onboardingOtpStep, showToast]);
 
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -434,6 +462,22 @@ export default function LoginPage() {
                   </p>
                   <form onSubmit={handleVerifyOnboardingOtp} className="login-form w-full">
                     <OtpInput value={onboardingOtp} onChange={setOnboardingOtp} variant="light" />
+
+                    <div style={{
+                      background: 'rgba(79, 70, 229, 0.06)',
+                      border: '1px dashed rgba(79, 70, 229, 0.3)',
+                      borderRadius: 8,
+                      padding: '8px 12px',
+                      fontSize: 13,
+                      color: '#4f46e5',
+                      marginTop: 12,
+                      textAlign: 'center',
+                      width: '100%',
+                      boxSizing: 'border-box'
+                    }}>
+                      💡 Use Default OTP: <strong>123456</strong>
+                    </div>
+
                     <button type="submit" className="login-submit-btn" disabled={onboardingBusy} style={{ marginTop: 16 }}>
                       {onboardingBusy ? 'Verifying…' : 'Verify & Complete Profile'}
                     </button>
@@ -477,8 +521,9 @@ export default function LoginPage() {
             <LoginPanel role="customer" onGoogleNewUser={handleGoogleNewUser} onForgotPassword={() => setShowForgotModal(true)} />
             <LoginPanel role="business" onGoogleNewUser={handleGoogleNewUser} onForgotPassword={() => setShowForgotModal(true)} />
           </div>
-        )}
-      </main>
+        )
+        }
+      </main >
 
       {!onboarding && (
         <footer className="login-footer">
@@ -488,50 +533,54 @@ export default function LoginPage() {
         </footer>
       )}
 
-      {!isAdminLogin && !onboarding && (
-        <p className="login-signup-link" style={{ textAlign: 'center', marginBottom: 12 }}>
-          Don't have an account?{' '}
-          <Link to="/signup" className="login-signup-anchor">Sign Up</Link>
-        </p>
-      )}
+      {
+        !isAdminLogin && !onboarding && (
+          <p className="login-signup-link" style={{ textAlign: 'center', marginBottom: 12 }}>
+            Don't have an account?{' '}
+            <Link to="/signup" className="login-signup-anchor">Sign Up</Link>
+          </p>
+        )
+      }
 
-      {showForgotModal && (
-        <div className="forgot-modal-overlay" onClick={() => setShowForgotModal(false)}>
-          <div className="forgot-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="forgot-modal-header">
-              <span className="forgot-modal-title">Reset Password</span>
-              <button type="button" className="forgot-modal-close" onClick={() => setShowForgotModal(false)}>
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            {!forgotSuccess ? (
-              <form onSubmit={handleForgotPassword}>
-                <p className="forgot-modal-body">Enter your registered email address and we'll send you a secure link to reset your password.</p>
-                <div className="login-field" style={{ marginBottom: 20 }}>
-                  <label className="login-label">Email Address</label>
-                  <div className="login-input-wrap">
-                    <span className="material-symbols-outlined login-input-icon">mail</span>
-                    <input type="email" placeholder="e.g. name@domain.com" className={`login-input ${forgotError ? 'login-input--error' : ''}`} value={forgotEmail} onChange={(e) => { setForgotEmail(e.target.value); if (forgotError) setForgotError(''); }} disabled={forgotSending} />
-                  </div>
-                  {forgotError && <span className="login-error">{forgotError}</span>}
-                </div>
-                <button type="submit" className="login-submit-btn" style={{ width: '100%' }} disabled={forgotSending}>
-                  {forgotSending ? 'Sending reset link...' : 'Send Reset Link'}
+      {
+        showForgotModal && (
+          <div className="forgot-modal-overlay" onClick={() => setShowForgotModal(false)}>
+            <div className="forgot-modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="forgot-modal-header">
+                <span className="forgot-modal-title">Reset Password</span>
+                <button type="button" className="forgot-modal-close" onClick={() => setShowForgotModal(false)}>
+                  <span className="material-symbols-outlined">close</span>
                 </button>
-              </form>
-            ) : (
-              <div style={{ textAlign: 'center' }}>
-                <div className="forgot-modal-success-icon"><span className="material-symbols-outlined">check_circle</span></div>
-                <h3 style={{ fontSize: 18, fontWeight: 850, margin: '0 0 10px 0', color: '#0f172a' }}>Link Sent Successfully!</h3>
-                <p className="forgot-modal-body" style={{ textAlign: 'center', marginBottom: 24 }}>
-                  A password recovery link has been sent to <strong>{forgotEmail}</strong>.
-                </p>
-                <button type="button" className="login-submit-btn" style={{ width: '100%' }} onClick={() => setShowForgotModal(false)}>Back to Login</button>
               </div>
-            )}
+              {!forgotSuccess ? (
+                <form onSubmit={handleForgotPassword}>
+                  <p className="forgot-modal-body">Enter your registered email address and we'll send you a secure link to reset your password.</p>
+                  <div className="login-field" style={{ marginBottom: 20 }}>
+                    <label className="login-label">Email Address</label>
+                    <div className="login-input-wrap">
+                      <span className="material-symbols-outlined login-input-icon">mail</span>
+                      <input type="email" placeholder="e.g. name@domain.com" className={`login-input ${forgotError ? 'login-input--error' : ''}`} value={forgotEmail} onChange={(e) => { setForgotEmail(e.target.value); if (forgotError) setForgotError(''); }} disabled={forgotSending} />
+                    </div>
+                    {forgotError && <span className="login-error">{forgotError}</span>}
+                  </div>
+                  <button type="submit" className="login-submit-btn" style={{ width: '100%' }} disabled={forgotSending}>
+                    {forgotSending ? 'Sending reset link...' : 'Send Reset Link'}
+                  </button>
+                </form>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <div className="forgot-modal-success-icon"><span className="material-symbols-outlined">check_circle</span></div>
+                  <h3 style={{ fontSize: 18, fontWeight: 850, margin: '0 0 10px 0', color: '#0f172a' }}>Link Sent Successfully!</h3>
+                  <p className="forgot-modal-body" style={{ textAlign: 'center', marginBottom: 24 }}>
+                    A password recovery link has been sent to <strong>{forgotEmail}</strong>.
+                  </p>
+                  <button type="button" className="login-submit-btn" style={{ width: '100%' }} onClick={() => setShowForgotModal(false)}>Back to Login</button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
