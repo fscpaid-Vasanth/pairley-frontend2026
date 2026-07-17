@@ -51,7 +51,9 @@
   transition: color 0.2s;
 }
 
-.signup-back-btn:hover { color: #000f22; }
+.signup-back-btn:hover {
+  color: #000f22;
+}
 
 /* ── Main ── */
 .signup-main {
@@ -178,8 +180,15 @@
 }
 
 @keyframes su-float {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .signup-decoration-badge {
@@ -189,7 +198,7 @@
   background: white;
   border-radius: 12px;
   padding: 8px 14px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -356,7 +365,8 @@
 
 .role-card-info {
   flex: 1;
-  padding-right: 48px; /* avoid overlapping with badge */
+  padding-right: 48px;
+  /* avoid overlapping with badge */
 }
 
 .role-card-name {
@@ -420,7 +430,10 @@
   margin-bottom: 14px;
 }
 
-.su-half { flex: 1; min-width: 0; }
+.su-half {
+  flex: 1;
+  min-width: 0;
+}
 
 .su-label {
   display: block;
@@ -471,7 +484,9 @@
   background: #fff8f8 !important;
 }
 
-.su-input--pw { padding-right: 38px !important; }
+.su-input--pw {
+  padding-right: 38px !important;
+}
 
 .su-pw-toggle {
   position: absolute;
@@ -486,7 +501,9 @@
   transition: color 0.2s;
 }
 
-.su-pw-toggle:hover { color: #000f22; }
+.su-pw-toggle:hover {
+  color: #000f22;
+}
 
 .su-error {
   display: block;
@@ -570,7 +587,9 @@
   transition: color 0.2s;
 }
 
-.su-terms-link:hover { color: #7C3AED; }
+.su-terms-link:hover {
+  color: #7C3AED;
+}
 
 /* Submit */
 .su-submit-btn {
@@ -593,7 +612,9 @@
   opacity: 0.95;
 }
 
-.su-submit-btn:active { transform: translateY(0); }
+.su-submit-btn:active {
+  transform: translateY(0);
+}
 
 /* Divider */
 .su-divider {
@@ -646,7 +667,7 @@
   background: #f7f9ff;
   border-color: rgba(196, 198, 206, 0.8);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* Login link */
@@ -665,7 +686,9 @@
   transition: color 0.2s;
 }
 
-.su-login-anchor:hover { color: #7C3AED; }
+.su-login-anchor:hover {
+  color: #7C3AED;
+}
 
 /* ── Footer ── */
 .signup-footer {
@@ -676,7 +699,7 @@
   flex-wrap: wrap;
   padding: 16px 64px;
   border-top: 1px solid rgba(196, 198, 206, 0.25);
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .signup-footer-item {
@@ -690,28 +713,53 @@
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
-  .signup-main { padding: 40px 32px; }
-  .signup-header { padding: 0 32px; }
-  .signup-footer { padding: 16px 32px; }
+  .signup-main {
+    padding: 40px 32px;
+  }
+
+  .signup-header {
+    padding: 0 32px;
+  }
+
+  .signup-footer {
+    padding: 16px 32px;
+  }
+
   .signup-split {
     grid-template-columns: 1fr;
     gap: 40px;
     max-width: 520px;
   }
-  .signup-left { display: none; }
+
+  .signup-left {
+    display: none;
+  }
 }
 
 @media (max-width: 600px) {
-  .signup-main { padding: 28px 16px; }
+  .signup-main {
+    padding: 28px 16px;
+  }
+
   .signup-header {
     padding-top: env(safe-area-inset-top);
     height: calc(56px + env(safe-area-inset-top));
     padding-left: calc(16px + env(safe-area-inset-left));
     padding-right: calc(16px + env(safe-area-inset-right));
   }
-  .signup-card { padding: 24px 20px; }
-  .signup-footer { padding: 16px 20px; gap: 16px; }
-  .su-password-row { flex-direction: column; }
+
+  .signup-card {
+    padding: 24px 20px;
+  }
+
+  .signup-footer {
+    padding: 16px 20px;
+    gap: 16px;
+  }
+
+  .su-password-row {
+    flex-direction: column;
+  }
 }
 
 /* ── OTP Verification Styles ── */
@@ -758,6 +806,7 @@
     font-size: 16px;
     border-radius: 8px;
   }
+
   .su-otp-inputs {
     gap: 6px;
   }
@@ -797,6 +846,7 @@
   flex-direction: column;
   gap: 8px;
 }
+
 .su-file-upload-label {
   display: flex;
   align-items: center;
@@ -813,15 +863,18 @@
   transition: all 0.2s ease-in-out;
   text-align: center;
 }
+
 .su-file-upload-label:hover {
   background: rgba(78, 62, 230, 0.05);
   border-color: #4a3ee6;
 }
+
 .su-file-upload-label--error {
   border-color: #ef4444;
   color: #ef4444;
   background: rgba(239, 68, 68, 0.02);
 }
+
 .su-image-preview-container {
   width: 100%;
   max-height: 120px;
@@ -830,6 +883,7 @@
   border: 1px solid rgba(196, 198, 206, 0.5);
   margin-top: 4px;
 }
+
 .su-image-preview {
   width: 100%;
   height: 100%;
@@ -872,9 +926,17 @@
 }
 
 @keyframes scanLaserAnim {
-  0% { top: 0%; }
-  50% { top: 100%; }
-  100% { top: 0%; }
+  0% {
+    top: 0%;
+  }
+
+  50% {
+    top: 100%;
+  }
+
+  100% {
+    top: 0%;
+  }
 }
 
 .aadhaar-scan-progress-bar {
@@ -943,36 +1005,45 @@
   .signup-root {
     min-height: 100vh;
   }
+
   .signup-main {
     padding: 1.5vh 64px;
     justify-content: center;
   }
+
   .signup-split {
     margin: 1vh 0;
     gap: 40px;
     align-items: center;
   }
+
   .signup-left {
     gap: 2vh;
     padding-top: 0;
   }
+
   .signup-left-title {
     font-size: 32px;
   }
+
   .signup-benefits {
     gap: 1.5vh;
   }
+
   .signup-benefit-icon-wrap {
     width: 40px;
     height: 40px;
     font-size: 18px;
   }
+
   .signup-card {
     padding: 20px 28px;
   }
+
   .signup-role-tabs {
     margin-bottom: 12px;
   }
+
   .signup-card-subtitle {
     margin-bottom: 12px;
   }
@@ -984,32 +1055,40 @@
     column-gap: 16px;
     row-gap: 8px;
   }
+
   .su-field {
     margin-bottom: 0;
   }
+
   .su-password-row {
     grid-column: span 2;
   }
+
   .su-terms-wrap {
     grid-column: span 2;
     margin: 4px 0 0 0;
   }
+
   .su-submit-btn {
     grid-column: span 2;
     margin-top: 4px;
     padding: 10px !important;
   }
+
   .su-divider {
     grid-column: span 2;
     margin: 8px 0;
   }
+
   .su-social-row {
     grid-column: span 2;
     margin-bottom: 8px;
   }
+
   .su-login-link {
     grid-column: span 2;
   }
+
   .signup-footer {
     padding: 12px 64px;
   }
@@ -1037,7 +1116,7 @@
   min-height: 0;
   overflow-y: auto;
   padding: clamp(12px, 2.5vh, 24px) 24px;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .signup-dual-grid {
@@ -1047,9 +1126,14 @@
   width: 100%;
   max-width: 1080px;
   align-items: start;
+  margin: auto 0;
 }
+
 @media (max-width: 860px) {
-  .signup-dual-grid { grid-template-columns: 1fr; max-width: 480px; }
+  .signup-dual-grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
 }
 
 .signup-panel {
@@ -1062,8 +1146,13 @@
   box-shadow: 0 4px 6px -1px rgba(10, 37, 64, 0.04), 0 10px 24px -3px rgba(10, 37, 64, 0.06);
 }
 
-.signup-panel--customer { border-top: 3px solid #5B12D6; }
-.signup-panel--business { border-top: 3px solid #d97706; }
+.signup-panel--customer {
+  border-top: 3px solid #5B12D6;
+}
+
+.signup-panel--business {
+  border-top: 3px solid #d97706;
+}
 
 .signup-panel__header {
   display: flex;
@@ -1082,21 +1171,45 @@
   flex-shrink: 0;
   font-size: 18px;
 }
-.signup-panel--customer .signup-panel__icon { background: rgba(91, 18, 214, 0.1); color: #5B12D6; }
-.signup-panel--business .signup-panel__icon { background: rgba(217, 119, 6, 0.1); color: #d97706; }
 
-.signup-panel__title { font-size: 15px; font-weight: 800; color: #000f22; margin: 0; }
-.signup-panel__subtitle { font-size: 11.5px; color: #64748b; margin: 1px 0 0; }
+.signup-panel--customer .signup-panel__icon {
+  background: rgba(91, 18, 214, 0.1);
+  color: #5B12D6;
+}
 
-.signup-panel .su-field { margin-bottom: 10px; }
-.signup-panel .su-password-row { display: flex; gap: 10px; }
-.signup-panel .su-password-row .su-half { flex: 1; }
+.signup-panel--business .signup-panel__icon {
+  background: rgba(217, 119, 6, 0.1);
+  color: #d97706;
+}
+
+.signup-panel__title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #000f22;
+  margin: 0;
+}
+
+.signup-panel__subtitle {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 1px 0 0;
+}
+
+.signup-panel .su-field {
+  margin-bottom: 10px;
+}
+
+.signup-panel .su-password-row {
+  display: flex;
+  gap: 10px;
+}
+
+.signup-panel .su-password-row .su-half {
+  flex: 1;
+}
 
 .signup-single-card-wrap {
   width: 100%;
   max-width: 460px;
   margin: 0 auto;
 }
-
-
-
