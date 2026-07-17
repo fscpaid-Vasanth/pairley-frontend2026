@@ -138,7 +138,7 @@ const LandingPage = () => {
       try {
         document.head.removeChild(link);
         document.head.removeChild(link2);
-      } catch (_) {}
+      } catch (_) { }
     };
   }, []);
 
@@ -220,7 +220,7 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-      
+
       {/* ─────────────────────────────────────────
          MARKETING NAVBAR (Dynamic Session Integration)
       ───────────────────────────────────────── */}
@@ -228,11 +228,10 @@ const LandingPage = () => {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
             ? 'bg-white/10 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/10'
             : 'bg-transparent'
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
@@ -300,7 +299,7 @@ const LandingPage = () => {
                   <motion.button
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate('/login')}
+                    onClick={() => navigate('/login?role=customer')}
                     className="px-4 py-2 text-white/80 hover:text-white text-sm font-semibold transition-colors"
                   >
                     Log In
@@ -308,7 +307,7 @@ const LandingPage = () => {
                   <motion.button
                     whileHover={{ scale: 1.05, boxShadow: '0 0 24px rgba(91,18,214,0.5)' }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate('/signup')}
+                    onClick={() => navigate('/signup?role=customer')}
                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-purple to-brand-purple-light text-white text-sm font-semibold shadow-lg shadow-purple-500/25 transition-all"
                   >
                     Get Started
@@ -349,7 +348,7 @@ const LandingPage = () => {
                     {link.label}
                   </motion.button>
                 ))}
-                
+
                 {authUser ? (
                   <>
                     <motion.button
@@ -373,14 +372,14 @@ const LandingPage = () => {
                   <>
                     <motion.button
                       whileTap={{ scale: 0.97 }}
-                      onClick={() => { navigate('/login'); setMobileOpen(false); }}
+                      onClick={() => { navigate('/login?role=customer'); setMobileOpen(false); }}
                       className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-center font-semibold text-sm"
                     >
                       Log In
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.97 }}
-                      onClick={() => { navigate('/signup'); setMobileOpen(false); }}
+                      onClick={() => { navigate('/signup?role=customer'); setMobileOpen(false); }}
                       className="w-full py-3 rounded-xl bg-gradient-to-r from-brand-purple to-brand-purple-light text-center font-semibold text-sm text-white"
                     >
                       Get Started
@@ -510,7 +509,7 @@ const LandingPage = () => {
       ───────────────────────────────────────── */}
       <section id="deals" className="py-24 bg-gray-900 border-t border-white/5 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-green/10 border border-brand-green/20 text-brand-green text-xs font-bold uppercase tracking-wider mb-3">
@@ -563,11 +562,10 @@ const LandingPage = () => {
           <div className="flex overflow-x-auto pb-4 mb-10 gap-3 scrollbar-none">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-xs font-bold transition-all ${
-                selectedCategory === 'all'
+              className={`flex-shrink-0 px-5 py-2.5 rounded-full text-xs font-bold transition-all ${selectedCategory === 'all'
                   ? 'bg-[#5B12D6] text-white shadow-lg shadow-purple-500/20'
                   : 'bg-white/5 hover:bg-white/10 border border-white/5 text-white/70 hover:text-white'
-              }`}
+                }`}
             >
               All Categories
             </button>
@@ -575,11 +573,10 @@ const LandingPage = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all border ${
-                  selectedCategory === cat.id
+                className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all border ${selectedCategory === cat.id
                     ? 'bg-white text-gray-900 border-white shadow-lg'
                     : 'bg-white/5 hover:bg-white/10 border-white/5 text-white/70 hover:text-white'
-                }`}
+                  }`}
               >
                 <span>{cat.icon}</span>
                 <span>{cat.name}</span>
@@ -902,7 +899,7 @@ const LandingPage = () => {
       <footer className="bg-gray-950 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex flex-col items-center gap-8 text-center">
-            
+
             {/* Logo Connecting figures in footer */}
             <div className="flex items-center gap-2">
               <LogoMark className="w-12 h-12" />

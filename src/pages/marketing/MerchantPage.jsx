@@ -172,11 +172,10 @@ export default function MerchantPage() {
          1. MARKETING NAVBAR
       ───────────────────────────────────────── */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
             ? 'bg-[#0f071b]/85 backdrop-blur-xl border-b border-white/5 py-4'
             : 'bg-transparent py-6'
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div
@@ -234,13 +233,13 @@ export default function MerchantPage() {
                   ✨ Launch Pass
                 </button>
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/login?role=business')}
                   className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                 >
                   Book Demo
                 </button>
                 <button
-                  onClick={() => navigate('/signup')}
+                  onClick={() => navigate('/signup?role=business')}
                   className="px-5 py-2.5 bg-gradient-to-r from-brand-purple to-brand-purple-light hover:shadow-glow-purple text-sm font-semibold rounded-xl transition-all"
                 >
                   Become Merchant
@@ -326,7 +325,7 @@ export default function MerchantPage() {
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        navigate('/login');
+                        navigate('/login?role=business');
                       }}
                       className="w-full py-2.5 border border-white/10 text-center text-sm font-medium rounded-xl hover:bg-white/5"
                     >
@@ -335,7 +334,7 @@ export default function MerchantPage() {
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        navigate('/signup');
+                        navigate('/signup?role=business');
                       }}
                       className="w-full py-2.5 bg-gradient-to-r from-brand-purple to-brand-purple-light text-center text-sm font-semibold rounded-xl"
                     >
@@ -360,7 +359,7 @@ export default function MerchantPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0b0314] via-[#120524] to-[#0b0314] z-0" />
         <div className="absolute top-1/4 left-1/4 w-[35rem] h-[35rem] bg-brand-purple/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow z-0" />
         <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-brand-green/10 rounded-full blur-[100px] mix-blend-screen animate-pulse-slow z-0" />
-        
+
         {/* Fine grid background overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] z-0" />
 
@@ -414,7 +413,7 @@ export default function MerchantPage() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/signup?role=business')}
                 className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold rounded-2xl transition-all"
               >
                 Full Setup / Book Demo
@@ -719,9 +718,8 @@ export default function MerchantPage() {
               ].map((s, i) => (
                 <div
                   key={i}
-                  className={`flex flex-col md:flex-row relative z-10 ${
-                    i % 2 === 0 ? 'md:flex-row-reverse' : ''
-                  }`}
+                  className={`flex flex-col md:flex-row relative z-10 ${i % 2 === 0 ? 'md:flex-row-reverse' : ''
+                    }`}
                 >
                   {/* Timeline Badge */}
                   <div className="absolute left-0 md:left-1/2 transform md:-translate-x-1/2 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-brand-purple to-brand-green p-[2px] z-20">
@@ -1374,13 +1372,13 @@ export default function MerchantPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <button
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/signup?role=business')}
               className="w-full sm:w-auto px-8 py-4 bg-white text-brand-purple hover:bg-white/95 font-bold rounded-2xl shadow-xl transition-all"
             >
               Become Merchant
             </button>
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/login?role=business')}
               className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/20 hover:bg-white/10 text-white font-bold rounded-2xl transition-all"
             >
               Book Demo
@@ -1407,7 +1405,7 @@ export default function MerchantPage() {
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">For Merchants</h4>
             <ul className="space-y-2 text-xs text-white/50">
-              <li><button onClick={() => navigate('/signup')} className="hover:text-white transition-colors">Become Merchant</button></li>
+              <li><button onClick={() => navigate('/signup?role=business')} className="hover:text-white transition-colors">Become Merchant</button></li>
               <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
               <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
               <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -1419,7 +1417,7 @@ export default function MerchantPage() {
             <ul className="space-y-2 text-xs text-white/50">
               <li><button onClick={() => navigate('/customer')} className="hover:text-white transition-colors">Find Deals</button></li>
               <li><button onClick={() => navigate('/customer')} className="hover:text-white transition-colors">How It Works</button></li>
-              <li><button onClick={() => navigate('/signup')} className="hover:text-white transition-colors">Sign Up Free</button></li>
+              <li><button onClick={() => navigate('/signup?role=customer')} className="hover:text-white transition-colors">Sign Up Free</button></li>
             </ul>
           </div>
 
@@ -1457,9 +1455,8 @@ function FaqAccordion({ q, a }) {
       >
         <span>{q}</span>
         <ChevronDown
-          className={`w-4 h-4 text-white/50 transition-transform duration-300 flex-shrink-0 ${
-            isOpen ? 'transform rotate-180' : ''
-          }`}
+          className={`w-4 h-4 text-white/50 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'transform rotate-180' : ''
+            }`}
         />
       </button>
 

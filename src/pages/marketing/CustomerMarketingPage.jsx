@@ -138,11 +138,10 @@ function MarketingNavbar() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
           ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-white/30'
           : 'bg-transparent'
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -164,9 +163,8 @@ function MarketingNavbar() {
               <button
                 key={link.label}
                 onClick={link.fn}
-                className={`text-sm font-semibold transition-colors ${
-                  scrolled ? 'text-gray-700 hover:text-purple-600' : 'text-white/90 hover:text-white'
-                }`}
+                className={`text-sm font-semibold transition-colors ${scrolled ? 'text-gray-700 hover:text-purple-600' : 'text-white/90 hover:text-white'
+                  }`}
               >
                 {link.label}
               </button>
@@ -199,17 +197,16 @@ function MarketingNavbar() {
             ) : (
               <>
                 <button
-                  onClick={() => navigate('/login')}
-                  className={`text-sm font-semibold transition-colors ${
-                    scrolled ? 'text-gray-600 hover:text-purple-600' : 'text-white/80 hover:text-white'
-                  }`}
+                  onClick={() => navigate('/login?role=customer')}
+                  className={`text-sm font-semibold transition-colors ${scrolled ? 'text-gray-600 hover:text-purple-600' : 'text-white/80 hover:text-white'
+                    }`}
                 >
                   Log In
                 </button>
                 <motion.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate('/signup')}
+                  onClick={() => navigate('/signup?role=customer')}
                   className="px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold shadow-lg shadow-emerald-200 hover:shadow-emerald-300 transition-all"
                 >
                   Sign Up Free
@@ -272,13 +269,13 @@ function MarketingNavbar() {
                 ) : (
                   <>
                     <button
-                      onClick={() => { setMenuOpen(false); navigate('/login'); }}
+                      onClick={() => { setMenuOpen(false); navigate('/login?role=customer'); }}
                       className="py-2.5 text-center text-sm font-semibold text-gray-600 border border-gray-200 rounded-full"
                     >
                       Log In
                     </button>
                     <button
-                      onClick={() => { setMenuOpen(false); navigate('/signup'); }}
+                      onClick={() => { setMenuOpen(false); navigate('/signup?role=customer'); }}
                       className="py-2.5 text-center text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-md"
                     >
                       Sign Up Free
@@ -410,7 +407,7 @@ function HeroSection() {
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/signup')}
+            onClick={() => navigate('/signup?role=customer')}
             className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white font-bold text-sm shadow-xl shadow-emerald-900/40 hover:shadow-emerald-900/60 transition-all whitespace-nowrap"
           >
             Search Deals
@@ -748,7 +745,7 @@ function CTASection() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/signup?role=customer')}
                 className="px-8 py-4 rounded-2xl bg-white text-purple-700 font-black text-base shadow-2xl hover:shadow-white/30 transition-all"
               >
                 Sign Up Free
