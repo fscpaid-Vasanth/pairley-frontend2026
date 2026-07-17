@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import CountdownTimer from '../../components/CountdownTimer';
+import MerchantTestimonials from '../../components/marketing/MerchantTestimonials';
 import { subscribeToGlobalCounters } from '../../utils/launchFirestore';
 import { APP_URL, LAUNCH_DATE, formatNumber } from '../../utils/constants';
 
@@ -27,6 +28,13 @@ const BENEFITS = [
   { icon: Users, title: 'Live Customer Counter', desc: 'Watch your future customer base grow before you even open.' },
   { icon: QrCode, title: 'QR Registration', desc: 'Scan, fill 5 fields, done — registered in under 2 minutes.' },
 ];
+
+// Below this, "N Bangaloreans have joined" reads as thin rather than
+// reassuring to a shop owner sizing up whether customers are really coming —
+// "be one of the first businesses in" is a stronger, equally honest pitch
+// at this stage. Swap back to the raw count once it's large enough to look
+// alive on its own.
+const EARLY_PHASE_THRESHOLD = 1000;
 
 export default function WhyJoinBeforeDiwali() {
   const navigate = useNavigate();
@@ -75,8 +83,17 @@ export default function WhyJoinBeforeDiwali() {
           className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-14 p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl text-center"
         >
           <Users className="w-5 h-5 text-brand-green" />
-          <span className="text-white font-bold text-lg">{formatNumber(verifiedMembers)} Bangaloreans</span>
-          <span className="text-white/60 text-sm">have already joined the Launch Pass — waiting to discover businesses like yours.</span>
+          {verifiedMembers < EARLY_PHASE_THRESHOLD ? (
+            <>
+              <span className="text-white font-bold text-lg">Be a founding merchant</span>
+              <span className="text-white/60 text-sm">Bangalore's Launch Pass movement is just getting started — claim your spot among the first businesses in.</span>
+            </>
+          ) : (
+            <>
+              <span className="text-white font-bold text-lg">{formatNumber(verifiedMembers)} Bangaloreans</span>
+              <span className="text-white/60 text-sm">have already joined the Launch Pass — waiting to discover businesses like yours.</span>
+            </>
+          )}
         </motion.div>
 
         {/* 8-benefit grid */}
@@ -98,6 +115,8 @@ export default function WhyJoinBeforeDiwali() {
             </motion.div>
           ))}
         </div>
+
+        <MerchantTestimonials />
 
         {/* QR registration */}
         <motion.div

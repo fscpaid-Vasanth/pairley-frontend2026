@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, ShieldCheck, MessageCircle } from 'lucide-react';
 import LaunchLayout from './LaunchLayout';
 import OtpInput from '../../components/OtpInput';
 import { categories } from '../../data/categories';
-import { api } from '../../utils/api';
+import { api, warmUpBackend } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { ensureAnonymousAuth } from '../../firebase';
 import { registerMerchantLead } from '../../utils/launchFirestore';
@@ -36,6 +36,12 @@ export default function MerchantQuickJoin() {
   const [busy, setBusy] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
   const [badgeNumber, setBadgeNumber] = useState('');
+
+  // A booth QR can deep-link straight here without passing through
+  // /merchant first — warm the backend on mount either way.
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
 
   const stepNum = STEPS.indexOf(step) + 1;
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));

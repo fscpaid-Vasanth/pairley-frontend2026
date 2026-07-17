@@ -20,6 +20,16 @@ const getHeaders = (token) => {
   return headers;
 };
 
+// Fire-and-forget request to start waking a sleeping free-tier backend
+// instance as early as possible. Render's free tier can take 30-60s to
+// cold-start, which is fatal for a mall-booth QR scan if the first real
+// request is the OTP send. Call this the moment a campaign entry page
+// mounts (Launch Pass / merchant landing) so the instance is likely already
+// awake by the time the user reaches a form submission.
+export const warmUpBackend = () => {
+  fetch(`${API_URL}/public/stats`).catch(() => {});
+};
+
 export const api = {
   get: async (endpoint, token) => {
     const response = await fetch(`${API_URL}${endpoint}`, {

@@ -176,24 +176,28 @@ export default function LaunchRegister() {
         mobile: form.mobile || undefined,
         email: form.email || undefined,
         role: 'Customer',
-        password: generatePassword(),
         address: form.area || 'Not specified',
         city: form.city,
         state: 'Karnataka',
         pincode: '560001',
       };
-      // If authenticated via Google, include google_uid and profile_photo
-      if (googleUid) {
-        registerPayload.google_uid = googleUid;
-        registerPayload.profile_photo = googlePhoto || undefined;
-      }
 
       let registerRes;
       if (googleUid) {
-        // Use Google auth endpoint for Google-verified users
-        registerRes = await api.post('/auth/google', registerPayload);
+        // Google-verified users authenticate with their Google credential, not
+        // a password — the backend's /auth/google endpoint rejects any
+        // unrecognized property (including `password`), so it must be left
+        // out of this payload entirely rather than defaulting to a dummy one.
+        registerRes = await api.post('/auth/google', {
+          ...registerPayload,
+          google_uid: googleUid,
+          profile_photo: googlePhoto || undefined,
+        });
       } else {
-        registerRes = await api.post('/auth/register', registerPayload);
+        registerRes = await api.post('/auth/register', {
+          ...registerPayload,
+          password: generatePassword(),
+        });
       }
 
       if (registerRes?.token || registerRes?.access_token) {

@@ -34,6 +34,7 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import WhyJoinBeforeDiwali from './WhyJoinBeforeDiwali';
+import { warmUpBackend } from '../../utils/api';
 
 /* ─────────────────────────────────────────
    PAIRLEY INLINE SVG LOGO MARK
@@ -111,6 +112,13 @@ export default function MerchantPage() {
     if (role === 'business' || role === 'merchant') return '/business/dashboard';
     return '/customer/dashboard';
   };
+
+  // Wake a sleeping free-tier backend instance as early as possible — this
+  // is the page mall reps show on a tablet, so cold-start latency here is
+  // the difference between a smooth pitch and a stalled one.
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
 
   // Monitor scroll to update navbar background opacity
   useEffect(() => {

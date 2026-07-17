@@ -7,6 +7,7 @@ import LaunchPassCard from './LaunchPassCard';
 import RadialProgress from './RadialProgress';
 import ShareCard from './ShareCard';
 import AvatarPicker from './AvatarPicker';
+import LaunchTestimonials from './LaunchTestimonials';
 import { useLaunchPassMember } from './useLaunchPassMember';
 import { recordDailyVisit, subscribeToLeaderboard, updateMemberAvatar } from '../../utils/launchFirestore';
 import { launchMilestones, getCurrentMilestoneIndex, getNextMilestone } from '../../data/launchMilestones';
@@ -47,6 +48,14 @@ export default function LaunchDashboard() {
   const milestoneIdx = getCurrentMilestoneIndex(verifiedMembers);
   const nextMilestone = getNextMilestone(verifiedMembers);
   const ring1Progress = nextMilestone ? verifiedMembers / nextMilestone.threshold : 1;
+
+  // Below this, "X members joined" reads as sparse rather than exciting —
+  // early on, a member's own place in line ("you're #6") is a stronger,
+  // equally honest hook than the raw community total. Once the count is
+  // big enough to look alive on its own, switch back to growth framing.
+  const EARLY_PHASE_THRESHOLD = 1000;
+  const isEarlyPhase = verifiedMembers < EARLY_PHASE_THRESHOLD;
+  const memberOrdinal = member?.passNumber ? parseInt(member.passNumber.replace(/\D/g, ''), 10) : null;
 
   const level = useMemo(() => getLevelForPoints(member?.points || 0), [member]);
   const nextLevel = useMemo(() => getNextLevel(member?.points || 0), [member]);
@@ -99,12 +108,23 @@ export default function LaunchDashboard() {
         className="launch-glass"
         style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}
       >
-        <span style={{ fontSize: 22 }}>{dailyMessage.badge}</span>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>{dailyMessage.text}</div>
-        {today.registrations > 0 && (
-          <span style={{ marginLeft: 'auto', fontSize: 12, color: '#22C55E', fontWeight: 700, whiteSpace: 'nowrap' }}>
-            +{today.registrations} joined today
-          </span>
+        {isEarlyPhase && memberOrdinal ? (
+          <>
+            <span style={{ fontSize: 22 }}>🌱</span>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>
+              You're member <strong style={{ color: '#fff' }}>#{memberOrdinal}</strong> in Bangalore — one of the very first to join Pairley.
+            </div>
+          </>
+        ) : (
+          <>
+            <span style={{ fontSize: 22 }}>{dailyMessage.badge}</span>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 600 }}>{dailyMessage.text}</div>
+            {today.registrations > 0 && (
+              <span style={{ marginLeft: 'auto', fontSize: 12, color: '#22C55E', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                +{today.registrations} joined today
+              </span>
+            )}
+          </>
         )}
       </motion.div>
 
@@ -280,6 +300,8 @@ export default function LaunchDashboard() {
           })}
         </div>
       </div>
+
+      <LaunchTestimonials />
     </LaunchLayout>
   );
 }

@@ -5,6 +5,7 @@ import LaunchLayout from './LaunchLayout';
 import JourneyChooser from './JourneyChooser';
 import { useLaunchPassMember } from './useLaunchPassMember';
 import { ROUTES } from '../../utils/constants';
+import { warmUpBackend } from '../../utils/api';
 
 const REF_KEY = 'pairley_launch_ref';
 
@@ -13,6 +14,10 @@ export default function LaunchHome() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { member, loading } = useLaunchPassMember();
+
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
 
   // Capture a referral code from a shared link (?ref=CODE) so it survives
   // the trip through the intro/registration flow.
