@@ -118,6 +118,51 @@
 
 .navbar__link--pill::after { display: none; }
 
+/* Launch Pass first-visit attention treatment: a soft breathing glow plus a
+   light sweep, so it's noticeable without being obnoxious. Settles down
+   once the visitor has seen it once (see Navbar.jsx isFirstVisit). */
+.navbar__link--launch-pulse {
+  position: relative;
+  overflow: hidden;
+  animation: navbarLaunchBreathe 2.2s ease-in-out infinite;
+}
+.navbar__link--launch-pulse::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.45) 45%, transparent 60%);
+  background-size: 220% 100%;
+  animation: navbarLaunchSweep 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.navbar__link-pulse-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(34, 197, 94, 0.55);
+  animation: navbarLaunchRing 1.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes navbarLaunchBreathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(109, 40, 217, 0.35); }
+  50% { box-shadow: 0 0 14px 2px rgba(34, 197, 94, 0.4); }
+}
+@keyframes navbarLaunchSweep {
+  0% { background-position: 140% 0; }
+  60%, 100% { background-position: -80% 0; }
+}
+@keyframes navbarLaunchRing {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navbar__link--launch-pulse,
+  .navbar__link--launch-pulse::before,
+  .navbar__link-pulse-ring {
+    animation: none;
+  }
+}
+
 /* ══════════════════════════════
    ACTIONS
 ══════════════════════════════ */

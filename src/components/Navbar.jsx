@@ -44,6 +44,22 @@ export default function Navbar({ onSearchClick }) {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // The Launch Pass CTA gets an attention-grabbing pulse/shimmer for
+  // first-time visitors only — once they've seen it (or clicked it), it
+  // settles into the plain pill so it doesn't stay distracting forever.
+  const [isFirstVisit] = useState(() => {
+    try {
+      const seen = localStorage.getItem('pairley_launch_cta_seen');
+      if (!seen) {
+        localStorage.setItem('pairley_launch_cta_seen', '1');
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  });
+
   // Reactive auth state — re-read on every route change so Login/Signup
   // buttons disappear immediately after login without a full page reload.
   const [authUser, setAuthUser] = useState(() => {
@@ -246,14 +262,16 @@ export default function Navbar({ onSearchClick }) {
 
           {/* ── Desktop Nav Links ── */}
           <div className="navbar__links">
-            {/* Launch Pass — campaign CTA, purple/green accent */}
+            {/* Launch Pass — campaign CTA, purple/green accent. Pulses for
+                first-time visitors only (see isFirstVisit above). */}
             <Link
               to={ROUTES.LAUNCH}
-              className={`navbar__link navbar__link--pill ${isActive(ROUTES.LAUNCH) ? 'navbar__link--active' : ''}`}
+              className={`navbar__link navbar__link--pill ${isActive(ROUTES.LAUNCH) ? 'navbar__link--active' : ''} ${isFirstVisit ? 'navbar__link--launch-pulse' : ''}`}
               style={{ background: 'linear-gradient(90deg, #6D28D9, #22C55E)', color: '#fff' }}
             >
               <Sparkles size={13} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 4 }} />
               Launch Pass
+              {isFirstVisit && <span className="navbar__link-pulse-ring" aria-hidden="true" />}
             </Link>
 
             {/* Explore Deals — pill style */}

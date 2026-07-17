@@ -1,12 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./src/pages/marketing/**/*.{js,jsx}",
-    "./src/components/marketing/**/*.{js,jsx}",
-    "./src/pages/customer/**/*.{js,jsx}",
-    "./src/pages/launch/**/*.{js,jsx}",
-    "./src/components/**/*.{js,jsx}",
-  ],
+  // Scanning individual subfolders here has repeatedly bitten this project:
+  // every time a new page directory used Tailwind classes without also
+  // being added to this list, those classes got silently purged in
+  // production (most recently: the entire admin, business, cart, and auth
+  // page directories — ~550 class occurrences across 20+ files were being
+  // dropped). One glob over all of src/ makes that whole bug class
+  // impossible instead of relying on this list staying in sync by hand.
+  content: ["./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {

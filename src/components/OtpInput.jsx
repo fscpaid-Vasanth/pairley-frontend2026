@@ -5,7 +5,7 @@ import './OtpInput.css';
  * Six-box OTP input. Controlled by a single string `value` so callers don't
  * need to manage per-digit state themselves.
  */
-export default function OtpInput({ length = 6, value, onChange, autoFocus = true, disabled = false }) {
+export default function OtpInput({ length = 6, value, onChange, autoFocus = true, disabled = false, variant = 'dark' }) {
   const digits = Array.from({ length }, (_, i) => value[i] || '');
   const refs = useRef(Array.from({ length }, () => null));
 
@@ -41,7 +41,7 @@ export default function OtpInput({ length = 6, value, onChange, autoFocus = true
   };
 
   return (
-    <div className="otp-input">
+    <div className={`otp-input ${variant === 'light' ? 'otp-input--light' : ''}`}>
       {digits.map((digit, i) => (
         <input
           key={i}
