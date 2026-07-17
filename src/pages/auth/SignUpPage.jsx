@@ -197,6 +197,15 @@ function SignupPanel({ role, onBasicInfoSubmit, onGoogleNewUser }) {
 export default function SignUpPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const searchParams = new URLSearchParams(window.location.search);
+
+  const [selectedRole, setSelectedRole] = useState(() => {
+    const roleParam = searchParams.get('role') || '';
+    if (roleParam.toLowerCase() === 'business' || roleParam.toLowerCase() === 'merchant') {
+      return 'business';
+    }
+    return 'customer';
+  });
 
   const [view, setView] = useState('panels'); // 'panels' | 'kyc' | 'otp'
   const [kycContext, setKycContext] = useState(null); // { role, googleUser? , basicInfo? }
@@ -318,7 +327,7 @@ export default function SignUpPage() {
         const msg = err.message || '';
         if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
           showToast('This mobile number or email is already registered. Please log in instead.', 'warning');
-          navigate('/login');
+          navigate(`/login?role=${selectedRole}`);
         } else {
           showToast(msg || 'Invalid verification code or registration failed.', 'error');
         }
@@ -343,9 +352,96 @@ export default function SignUpPage() {
 
       <main className="signup-main">
         {view === 'panels' && (
-          <div className="signup-dual-grid">
-            <SignupPanel role="customer" onBasicInfoSubmit={handleBasicInfoSubmit} onGoogleNewUser={handleGoogleNewUser} />
-            <SignupPanel role="business" onBasicInfoSubmit={handleBasicInfoSubmit} onGoogleNewUser={handleGoogleNewUser} />
+          <div className="signup-split">
+            <div className="signup-left">
+              {selectedRole === 'customer' ? (
+                <>
+                  <div className="signup-left-top">
+                    <h1 className="signup-left-title">Join the Savings<br />Revolution.</h1>
+                    <p className="signup-left-desc">Shop together with friends and neighbors to trigger premium community discounts.</p>
+                  </div>
+                  <div className="signup-steps">
+                    <div className="signup-step-row">
+                      <div className="signup-step-num">1</div>
+                      <div>
+                        <h3 className="signup-step-label">Create Profile</h3>
+                        <p className="signup-step-desc">Register with your name, phone, and local city details.</p>
+                      </div>
+                    </div>
+                    <div className="signup-step-row">
+                      <div className="signup-step-num">2</div>
+                      <div>
+                        <h3 className="signup-step-label">Add Interests</h3>
+                        <p className="signup-step-desc">Pick categories you shop often to personalize your deal feed.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="signup-decoration">
+                    <div className="signup-decoration-inner">
+                      <span className="signup-decoration-emoji">🛍️</span>
+                      <div className="signup-decoration-badge">
+                        <span className="signup-decoration-badge-val">Zero Markup</span>
+                        <span className="signup-decoration-badge-lbl">Guaranteed Save</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="signup-left-top">
+                    <h1 className="signup-left-title" style={{ color: '#d97706' }}>Get Discovered<br />Instantly.</h1>
+                    <p className="signup-left-desc">Publish your retail location and BOGO inventory to thousands of customers.</p>
+                  </div>
+                  <div className="signup-steps">
+                    <div className="signup-step-row">
+                      <div className="signup-step-num" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.3)' }}>1</div>
+                      <div>
+                        <h3 className="signup-step-label">Register Shop</h3>
+                        <p className="signup-step-desc">Add basic store info and set your service boundaries.</p>
+                      </div>
+                    </div>
+                    <div className="signup-step-row">
+                      <div className="signup-step-num" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.3)' }}>2</div>
+                      <div>
+                        <h3 className="signup-step-label">Upload KYC</h3>
+                        <p className="signup-step-desc">Scan Aadhaar or enter business GST to verify and go live.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="signup-decoration" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' }}>
+                    <div className="signup-decoration-inner">
+                      <span className="signup-decoration-emoji">🏪</span>
+                      <div className="signup-decoration-badge">
+                        <span className="signup-decoration-badge-val" style={{ color: '#d97706' }}>Free Setup</span>
+                        <span className="signup-decoration-badge-lbl">No Onboarding Fee</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="signup-right">
+              <div className="signup-card" style={{ width: '100%', maxWidth: '480px' }}>
+                <div className="auth-role-tabs-wrap">
+                  <button
+                    type="button"
+                    className={`auth-tab-btn auth-tab-btn--customer ${selectedRole === 'customer' ? 'active' : ''}`}
+                    onClick={() => setSelectedRole('customer')}
+                  >
+                    Customer Sign Up
+                  </button>
+                  <button
+                    type="button"
+                    className={`auth-tab-btn auth-tab-btn--business ${selectedRole === 'business' ? 'active' : ''}`}
+                    onClick={() => setSelectedRole('business')}
+                  >
+                    Merchant Sign Up
+                  </button>
+                </div>
+                <SignupPanel role={selectedRole} onBasicInfoSubmit={handleBasicInfoSubmit} onGoogleNewUser={handleGoogleNewUser} />
+              </div>
+            </div>
           </div>
         )}
 
@@ -417,7 +513,7 @@ export default function SignUpPage() {
       {view === 'panels' && (
         <p className="su-login-link" style={{ textAlign: 'center', marginBottom: 12 }}>
           Already have an account?{' '}
-          <Link to="/login" className="su-login-anchor">Log In</Link>
+          <Link to={`/login?role=${selectedRole}`} className="su-login-anchor">Log In</Link>
         </p>
       )}
     </div>

@@ -319,6 +319,14 @@ export default function LoginPage() {
   const searchParams = new URLSearchParams(window.location.search);
   const isAdminLogin = searchParams.get('role') === 'admin';
 
+  const [selectedRole, setSelectedRole] = useState(() => {
+    const roleParam = searchParams.get('role') || '';
+    if (roleParam.toLowerCase() === 'business' || roleParam.toLowerCase() === 'merchant') {
+      return 'business';
+    }
+    return 'customer';
+  });
+
   const [onboarding, setOnboarding] = useState(null); // { role, googleUser } | null
   const [onboardingOtpStep, setOnboardingOtpStep] = useState('none'); // 'none' | 'otp'
   const [onboardingOtp, setOnboardingOtp] = useState('');
@@ -517,9 +525,112 @@ export default function LoginPage() {
             <LoginPanel role="admin" isAdminLogin onForgotPassword={() => setShowForgotModal(true)} />
           </div>
         ) : (
-          <div className="login-dual-grid">
-            <LoginPanel role="customer" onGoogleNewUser={handleGoogleNewUser} onForgotPassword={() => setShowForgotModal(true)} />
-            <LoginPanel role="business" onGoogleNewUser={handleGoogleNewUser} onForgotPassword={() => setShowForgotModal(true)} />
+          <div className="login-split">
+            <div className="login-left">
+              {selectedRole === 'customer' ? (
+                <>
+                  <div className="login-left-top">
+                    <h1 className="login-left-title">Shop Together.<br />Save Big.</h1>
+                    <p className="login-left-desc">Join purchase circles, unlock neighborhood deals, and save more with friends.</p>
+                  </div>
+                  <div className="login-benefits">
+                    <div className="login-benefit-row">
+                      <div className="login-benefit-icon-wrap">
+                        <span className="material-symbols-outlined">group</span>
+                      </div>
+                      <div>
+                        <h3 className="login-benefit-title">Purchase Circles</h3>
+                        <p className="login-benefit-desc">Form circles with friends & neighbors to buy together and automatically hit discount thresholds.</p>
+                      </div>
+                    </div>
+                    <div className="login-benefit-row">
+                      <div className="login-benefit-icon-wrap">
+                        <span className="material-symbols-outlined">percent</span>
+                      </div>
+                      <div>
+                        <h3 className="login-benefit-title">Exclusive Deals</h3>
+                        <p className="login-benefit-desc">Access exclusive local BOGO offers and hot retail promotions in your city.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="login-illustration">
+                    <div className="login-illustration-inner">
+                      <span className="login-illustration-emoji">🛍️</span>
+                      <div className="login-illustration-rings">
+                        <div className="login-illustration-ring login-illustration-ring--1"></div>
+                        <div className="login-illustration-ring login-illustration-ring--2"></div>
+                      </div>
+                      <div className="login-illustration-stat">
+                        <span className="login-illustration-stat-val">30%+</span>
+                        <span className="login-illustration-stat-lbl">Average Savings</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="login-left-top">
+                    <h1 className="login-left-title" style={{ color: '#d97706' }}>Grow Your<br />Retail Footprint.</h1>
+                    <p className="login-left-desc">Publish real-time BOGO deals directly to high-intent shoppers in your area.</p>
+                  </div>
+                  <div className="login-benefits">
+                    <div className="login-benefit-row">
+                      <div className="login-benefit-icon-wrap" style={{ background: '#fef3c7', color: '#d97706' }}>
+                        <span className="material-symbols-outlined">campaign</span>
+                      </div>
+                      <div>
+                        <h3 className="login-benefit-title">Instant Reach</h3>
+                        <p className="login-benefit-desc">Post deals and immediately notify shoppers in your neighborhood catchment area.</p>
+                      </div>
+                    </div>
+                    <div className="login-benefit-row">
+                      <div className="login-benefit-icon-wrap" style={{ background: '#fef3c7', color: '#d97706' }}>
+                        <span className="material-symbols-outlined">insights</span>
+                      </div>
+                      <div>
+                        <h3 className="login-benefit-title">Retention Analytics</h3>
+                        <p className="login-benefit-desc">Track customer purchase circle patterns and measure store performance seamlessly.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="login-illustration" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' }}>
+                    <div className="login-illustration-inner">
+                      <span className="login-illustration-emoji">🏪</span>
+                      <div className="login-illustration-rings">
+                        <div className="login-illustration-ring login-illustration-ring--1" style={{ borderColor: 'rgba(217, 119, 6, 0.2)' }}></div>
+                        <div className="login-illustration-ring login-illustration-ring--2" style={{ borderColor: 'rgba(217, 119, 6, 0.2)' }}></div>
+                      </div>
+                      <div className="login-illustration-stat">
+                        <span className="login-illustration-stat-val" style={{ color: '#d97706' }}>x3.4</span>
+                        <span className="login-illustration-stat-lbl">Customer Visits</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="login-right">
+              <div className="login-card" style={{ width: '100%', maxWidth: '480px' }}>
+                <div className="auth-role-tabs-wrap">
+                  <button
+                    type="button"
+                    className={`auth-tab-btn auth-tab-btn--customer ${selectedRole === 'customer' ? 'active' : ''}`}
+                    onClick={() => setSelectedRole('customer')}
+                  >
+                    Customer Login
+                  </button>
+                  <button
+                    type="button"
+                    className={`auth-tab-btn auth-tab-btn--business ${selectedRole === 'business' ? 'active' : ''}`}
+                    onClick={() => setSelectedRole('business')}
+                  >
+                    Merchant Login
+                  </button>
+                </div>
+                <LoginPanel role={selectedRole} onGoogleNewUser={handleGoogleNewUser} onForgotPassword={() => setShowForgotModal(true)} />
+              </div>
+            </div>
           </div>
         )
         }
@@ -537,7 +648,7 @@ export default function LoginPage() {
         !isAdminLogin && !onboarding && (
           <p className="login-signup-link" style={{ textAlign: 'center', marginBottom: 12 }}>
             Don't have an account?{' '}
-            <Link to="/signup" className="login-signup-anchor">Sign Up</Link>
+            <Link to={`/signup?role=${selectedRole}`} className="login-signup-anchor">Sign Up</Link>
           </p>
         )
       }
