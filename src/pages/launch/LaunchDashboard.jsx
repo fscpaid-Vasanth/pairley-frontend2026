@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Store, Tag, Flame, Lock, Trophy, Pencil, LogOut } from 'lucide-react';
+import { Users, Store, Tag, Flame, Lock, Trophy, Pencil, LogOut, ArrowLeft } from 'lucide-react';
 import LaunchLayout from './LaunchLayout';
 import LaunchPassCard from './LaunchPassCard';
 import RadialProgress from './RadialProgress';
@@ -85,10 +85,39 @@ export default function LaunchDashboard() {
     navigate(ROUTES.LAUNCH, { replace: true });
   };
 
-  const logoutButton = (
-    <button className="launch-shell__logout-btn" type="button" onClick={handleLogout}>
-      <LogOut size={13} /> Log Out
-    </button>
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('pairley_user') || 'null');
+    } catch {
+      return null;
+    }
+  })();
+  const userRole = user?.role?.toLowerCase();
+
+  const headerActions = (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      {userRole === 'customer' && (
+        <button
+          className="launch-shell__back-btn"
+          type="button"
+          onClick={() => navigate(ROUTES.CUSTOMER_DASHBOARD)}
+        >
+          <ArrowLeft size={13} /> Customer Account
+        </button>
+      )}
+      {(userRole === 'business' || userRole === 'merchant') && (
+        <button
+          className="launch-shell__back-btn"
+          type="button"
+          onClick={() => navigate(ROUTES.BUSINESS_DASHBOARD)}
+        >
+          <ArrowLeft size={13} /> Merchant Account
+        </button>
+      )}
+      <button className="launch-shell__logout-btn" type="button" onClick={handleLogout}>
+        <LogOut size={13} /> Log Out
+      </button>
+    </div>
   );
 
   if (loading || !member) {
@@ -100,7 +129,7 @@ export default function LaunchDashboard() {
   }
 
   return (
-    <LaunchLayout wide headerRight={logoutButton}>
+    <LaunchLayout wide headerRight={headerActions}>
       {/* Daily return banner */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
 import LaunchLayout from './LaunchLayout';
 import AvatarPicker from './AvatarPicker';
 import OtpInput from '../../components/OtpInput';
@@ -9,7 +10,7 @@ import { categories } from '../../data/categories';
 import { ROUTES } from '../../utils/constants';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
-import { ensureAnonymousAuth, signInWithGoogle } from '../../firebase';
+import { db, ensureAnonymousAuth, signInWithGoogle } from '../../firebase';
 import { registerLaunchPassMember } from '../../utils/launchFirestore';
 
 const CITIES = ['Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'];
@@ -109,11 +110,41 @@ export default function LaunchRegister() {
     }
   };
 
-  // Google Sign-In handler — authenticates and skips OTP step
+  // Google Sign-In handler — authenticates and checks registration
   const handleGoogleSignIn = async () => {
     try {
       const firebaseUser = await signInWithGoogle();
       if (!firebaseUser) return;
+
+      // Check if already registered in Firestore
+      const memberRef = doc(db, 'launchPassMembers', firebaseUser.uid);
+      const memberSnap = await getDoc(memberRef);
+
+      if (memberSnap.exists()) {
+        showToast('Already registered the launch pass', 'info');
+
+        // Log in to the backend so the session is restored correctly
+        const checkPayload = {
+          name: firebaseUser.displayName || 'Google User',
+          email: firebaseUser.email,
+          role: 'Customer',
+          google_uid: firebaseUser.uid,
+          profile_photo: firebaseUser.photoURL || undefined,
+        };
+        try {
+          const res = await api.post('/auth/google', checkPayload);
+          if (res?.token || res?.access_token) {
+            localStorage.setItem('pairley_token', res.token || res.access_token);
+            localStorage.setItem('pairley_user', JSON.stringify({ ...(res.user || {}), role: res.role }));
+          }
+        } catch (e) {
+          console.error('Backend Google login failed:', e);
+        }
+
+        navigate(ROUTES.LAUNCH_DASHBOARD);
+        return;
+      }
+
       // Auto-fill form with Google profile data
       setForm((prev) => ({
         ...prev,
@@ -123,9 +154,8 @@ export default function LaunchRegister() {
       setGoogleUid(firebaseUser.uid);
       setGooglePhoto(firebaseUser.photoURL || null);
       setGoogleAuthed(true);
-      showToast('Google verified! Complete your profile to claim your Launch Pass.', 'success');
-      // Skip OTP since Google already verified the user
-      setStep('interests');
+      showToast('Google verified! Please enter your mobile number and verify it via OTP.', 'success');
+      // Do NOT skip to interests. Keep user on details step to verify mobile number.
     } catch (error) {
       console.error('Google Auth failed:', error);
       if (error?.code === 'auth/unauthorized-domain') {

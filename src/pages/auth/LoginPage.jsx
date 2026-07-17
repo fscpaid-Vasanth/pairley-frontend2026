@@ -293,10 +293,22 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
 
 export default function LoginPage() {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(window.location.search);
   const isAdminLogin = searchParams.get('role') === 'admin';
 
   const [onboarding, setOnboarding] = useState(null); // { role, googleUser } | null
+  const [onboardingOtpStep, setOnboardingOtpStep] = useState('none'); // 'none' | 'otp'
+  const [onboardingOtp, setOnboardingOtp] = useState('');
+  const [onboardingPayload, setOnboardingPayload] = useState(null);
+  const [onboardingBusy, setOnboardingBusy] = useState(false);
+  const [onboardingResendSeconds, setOnboardingResendSeconds] = useState(0);
+
+  useEffect(() => {
+    if (onboardingOtpStep !== 'otp' || onboardingResendSeconds <= 0) return;
+    const interval = setInterval(() => setOnboardingResendSeconds((s) => s - 1), 1000);
+    return () => clearInterval(interval);
+  }, [onboardingOtpStep, onboardingResendSeconds]);
 
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -308,14 +320,79 @@ export default function LoginPage() {
 
   const handleOnboardingComplete = (fields) => {
     const payload = { ...onboarding.googleUser, ...fields };
-    api.post('/auth/google', payload)
+    setOnboardingPayload(payload);
+    setOnboardingBusy(true);
+
+    if (isTestNumber(fields.mobile)) {
+      setOnboardingOtp('123456');
+      setOnboardingOtpStep('otp');
+      setOnboardingResendSeconds(30);
+      setOnboardingBusy(false);
+      showToast('Test number detected — OTP auto-filled with 123456.', 'success');
+      return;
+    }
+
+    api.post('/auth/send-otp', { mobile: fields.mobile })
+      .then(() => {
+        setOnboardingOtp('');
+        setOnboardingOtpStep('otp');
+        setOnboardingResendSeconds(30);
+        showToast(`Verification code sent to +91 ${fields.mobile}.`, 'success');
+      })
+      .catch((err) => {
+        setOnboardingOtp('');
+        setOnboardingOtpStep('otp');
+        setOnboardingResendSeconds(30);
+        showToast('Proceeding to verification. If using a test number, enter 123456.', 'warning');
+      })
+      .finally(() => setOnboardingBusy(false));
+  };
+
+  const handleResendOnboardingOtp = () => {
+    if (onboardingResendSeconds > 0) return;
+    setOnboardingResendSeconds(30);
+    if (isTestNumber(onboardingPayload.mobile)) {
+      setOnboardingOtp('123456');
+      showToast('Test number detected — OTP auto-filled with 123456.', 'success');
+      return;
+    }
+    api.post('/auth/send-otp', { mobile: onboardingPayload.mobile })
+      .then(() => showToast('Verification code resent.', 'success'))
+      .catch((err) => showToast(err.message || 'Failed to resend code.', 'error'));
+  };
+
+  const handleVerifyOnboardingOtp = (e) => {
+    e.preventDefault();
+    if (onboardingOtp.length < 6) {
+      showToast('Enter all 6 digits of the OTP.', 'error');
+      return;
+    }
+    setOnboardingBusy(true);
+    let verifyPromise;
+    if (isTestNumber(onboardingPayload.mobile)) {
+      verifyPromise = Promise.resolve();
+    } else {
+      verifyPromise = api.post('/auth/verify-otp', { mobile: onboardingPayload.mobile, code: onboardingOtp });
+    }
+
+    verifyPromise
+      .then(() => api.post('/auth/google', onboardingPayload))
       .then((res) => {
         localStorage.setItem('pairley_token', res.access_token || res.token);
-        localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
-        showToast('Profile completed and logged in!', 'success');
+        localStorage.setItem('pairley_user', JSON.stringify({ ...(res.user || {}), role: res.role }));
+
+        if (res.role === 'Business') {
+          showToast("Shop registered! Your account is pending admin approval (24–48 hrs). 🎉", 'info');
+        } else {
+          showToast('Profile completed and logged in!', 'success');
+        }
         window.location.href = dashboardPathFor(res.role);
       })
-      .catch((err) => showToast(err.message || 'Registration failed. Please try again.', 'error'));
+      .catch((err) => {
+        console.error('Onboarding registration/verification failed:', err);
+        showToast(err.message || 'Invalid verification code or registration failed.', 'error');
+      })
+      .finally(() => setOnboardingBusy(false));
   };
 
   const handleForgotPassword = (e) => {
@@ -348,12 +425,42 @@ export default function LoginPage() {
       <main className="login-main">
         {onboarding ? (
           <div className="login-single-card-wrap">
-            <div className="login-panel login-panel--customer">
-              <KycOnboardingWizard
-                role={onboarding.role === 'business' ? 'business' : 'customer'}
-                onComplete={handleOnboardingComplete}
-                onCancel={() => setOnboarding(null)}
-              />
+            <div className={`login-panel login-panel--${onboarding.role === 'business' ? 'business' : 'customer'}`}>
+              {onboardingOtpStep === 'otp' ? (
+                <div className="login-otp-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '105%', margin: '0 auto' }}>
+                  <h2 className="login-card-title" style={{ color: '#0f172a' }}>Verify Phone Number</h2>
+                  <p className="login-card-subtitle" style={{ marginBottom: 16 }}>
+                    Enter the code sent to <strong style={{ color: '#00af80' }}>+91 {onboardingPayload?.mobile}</strong>
+                  </p>
+                  <form onSubmit={handleVerifyOnboardingOtp} className="login-form w-full">
+                    <OtpInput value={onboardingOtp} onChange={setOnboardingOtp} variant="light" />
+                    <button type="submit" className="login-submit-btn" disabled={onboardingBusy} style={{ marginTop: 16 }}>
+                      {onboardingBusy ? 'Verifying…' : 'Verify & Complete Profile'}
+                    </button>
+                  </form>
+                  <div className="login-otp-timer" style={{ marginTop: 12 }}>
+                    {onboardingResendSeconds > 0 ? (
+                      <span className="text-sm text-slate-500">Resend in <strong style={{ color: '#0f172a' }}>{onboardingResendSeconds}s</strong></span>
+                    ) : (
+                      <button type="button" onClick={handleResendOnboardingOtp} className="login-otp-resend text-indigo-600 hover:text-indigo-800 font-semibold" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Resend Code</button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="login-signup-anchor"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, marginTop: 12, color: '#4f46e5' }}
+                    onClick={() => setOnboardingOtpStep('none')}
+                  >
+                    ← Back to edit profile
+                  </button>
+                </div>
+              ) : (
+                <KycOnboardingWizard
+                  role={onboarding.role === 'business' ? 'business' : 'customer'}
+                  onComplete={handleOnboardingComplete}
+                  onCancel={() => setOnboarding(null)}
+                />
+              )}
             </div>
           </div>
         ) : isAdminLogin ? (
