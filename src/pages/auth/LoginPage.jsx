@@ -10,9 +10,6 @@ import './LoginPage.css';
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));
-const isTestNumber = (mobile) =>
-  mobile === '9962045143' || mobile === '1234567890' ||
-  ['99999', '88888', '77777', '66666'].some((p) => mobile.startsWith(p));
 
 const dashboardPathFor = (role) =>
   role === 'Admin' ? '/admin/dashboard' : role === 'Customer' ? '/customer/dashboard' : '/business/dashboard';
@@ -48,12 +45,6 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
     const interval = setInterval(() => setResendSeconds((s) => s - 1), 1000);
     return () => clearInterval(interval);
   }, [method, otpStep, resendSeconds]);
-
-  useEffect(() => {
-    if (method === 'otp' && otpStep === 'verify') {
-      showToast('Use Default OTP: 123456', 'info');
-    }
-  }, [method, otpStep, showToast]);
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -102,14 +93,6 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
     }
     setErrors({});
     setBusy(true);
-    if (isTestNumber(phone)) {
-      setOtp('123456');
-      setOtpStep('verify');
-      startResendTimer();
-      showToast('Test number detected — OTP auto-filled with 123456.', 'success');
-      setBusy(false);
-      return;
-    }
     api.post('/auth/send-otp', { mobile: phone })
       .then(() => {
         setOtp('');
@@ -117,11 +100,8 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
         startResendTimer();
         showToast(`OTP sent to +91 ${phone}.`, 'success');
       })
-      .catch(() => {
-        setOtp('');
-        setOtpStep('verify');
-        startResendTimer();
-        showToast('Proceeding to verification. If using a test number, enter 123456.', 'warning');
+      .catch((err) => {
+        showToast(err.message || 'Failed to send OTP. Please try again.', 'error');
       })
       .finally(() => setBusy(false));
   };
@@ -214,21 +194,6 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
           </p>
           <form onSubmit={handleVerifyOtp} className="login-form w-full">
             <OtpInput value={otp} onChange={setOtp} variant="light" />
-
-            <div style={{
-              background: 'rgba(79, 70, 229, 0.06)',
-              border: '1px dashed rgba(79, 70, 229, 0.3)',
-              borderRadius: 8,
-              padding: '8px 12px',
-              fontSize: 13,
-              color: '#4f46e5',
-              marginTop: 12,
-              textAlign: 'center',
-              width: '100%',
-              boxSizing: 'border-box'
-            }}>
-              💡 Use Default OTP: <strong>123456</strong>
-            </div>
 
             <button type="submit" className="login-submit-btn" disabled={busy} style={{ marginTop: 16 }}>
               {busy ? 'Verifying…' : 'Verify OTP'}
@@ -340,12 +305,6 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [onboardingOtpStep, onboardingResendSeconds]);
 
-  useEffect(() => {
-    if (onboardingOtpStep === 'otp') {
-      showToast('Use Default OTP: 123456', 'info');
-    }
-  }, [onboardingOtpStep, showToast]);
-
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSending, setForgotSending] = useState(false);
@@ -359,15 +318,6 @@ export default function LoginPage() {
     setOnboardingPayload(payload);
     setOnboardingBusy(true);
 
-    if (isTestNumber(fields.mobile)) {
-      setOnboardingOtp('123456');
-      setOnboardingOtpStep('otp');
-      setOnboardingResendSeconds(30);
-      setOnboardingBusy(false);
-      showToast('Test number detected — OTP auto-filled with 123456.', 'success');
-      return;
-    }
-
     api.post('/auth/send-otp', { mobile: fields.mobile })
       .then(() => {
         setOnboardingOtp('');
@@ -376,10 +326,7 @@ export default function LoginPage() {
         showToast(`Verification code sent to +91 ${fields.mobile}.`, 'success');
       })
       .catch((err) => {
-        setOnboardingOtp('');
-        setOnboardingOtpStep('otp');
-        setOnboardingResendSeconds(30);
-        showToast('Proceeding to verification. If using a test number, enter 123456.', 'warning');
+        showToast(err.message || 'Failed to send verification code. Please try again.', 'error');
       })
       .finally(() => setOnboardingBusy(false));
   };
@@ -387,11 +334,6 @@ export default function LoginPage() {
   const handleResendOnboardingOtp = () => {
     if (onboardingResendSeconds > 0) return;
     setOnboardingResendSeconds(30);
-    if (isTestNumber(onboardingPayload.mobile)) {
-      setOnboardingOtp('123456');
-      showToast('Test number detected — OTP auto-filled with 123456.', 'success');
-      return;
-    }
     api.post('/auth/send-otp', { mobile: onboardingPayload.mobile })
       .then(() => showToast('Verification code resent.', 'success'))
       .catch((err) => showToast(err.message || 'Failed to resend code.', 'error'));
@@ -404,14 +346,8 @@ export default function LoginPage() {
       return;
     }
     setOnboardingBusy(true);
-    let verifyPromise;
-    if (isTestNumber(onboardingPayload.mobile)) {
-      verifyPromise = Promise.resolve();
-    } else {
-      verifyPromise = api.post('/auth/verify-otp', { mobile: onboardingPayload.mobile, code: onboardingOtp });
-    }
 
-    verifyPromise
+    api.post('/auth/verify-otp', { mobile: onboardingPayload.mobile, code: onboardingOtp })
       .then(() => api.post('/auth/google', onboardingPayload))
       .then((res) => {
         localStorage.setItem('pairley_token', res.access_token || res.token);
@@ -470,21 +406,6 @@ export default function LoginPage() {
                   </p>
                   <form onSubmit={handleVerifyOnboardingOtp} className="login-form w-full">
                     <OtpInput value={onboardingOtp} onChange={setOnboardingOtp} variant="light" />
-
-                    <div style={{
-                      background: 'rgba(79, 70, 229, 0.06)',
-                      border: '1px dashed rgba(79, 70, 229, 0.3)',
-                      borderRadius: 8,
-                      padding: '8px 12px',
-                      fontSize: 13,
-                      color: '#4f46e5',
-                      marginTop: 12,
-                      textAlign: 'center',
-                      width: '100%',
-                      boxSizing: 'border-box'
-                    }}>
-                      💡 Use Default OTP: <strong>123456</strong>
-                    </div>
 
                     <button type="submit" className="login-submit-btn" disabled={onboardingBusy} style={{ marginTop: 16 }}>
                       {onboardingBusy ? 'Verifying…' : 'Verify & Complete Profile'}

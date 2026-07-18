@@ -10,9 +10,6 @@ import './SignUpPage.css';
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));
-const isTestNumber = (mobile) =>
-  mobile === '9962045143' || mobile === '1234567890' ||
-  ['99999', '88888', '77777', '66666'].some((p) => mobile.startsWith(p));
 
 const CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'];
 
@@ -221,22 +218,9 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, [view, resendSeconds]);
 
-  useEffect(() => {
-    if (view === 'otp') {
-      showToast('Use Default OTP: 123456', 'info');
-    }
-  }, [view, showToast]);
-
   const sendOtpAndGoToVerify = (payload, mode) => {
     setPendingPayload(payload);
     setOtpMode(mode);
-    if (isTestNumber(payload.mobile)) {
-      setOtp('123456');
-      setResendSeconds(30);
-      setView('otp');
-      showToast('Test account detected: OTP has been auto-filled with 123456.', 'success');
-      return;
-    }
     setBusy(true);
     api.post('/auth/send-otp', { mobile: payload.mobile })
       .then(() => {
@@ -245,11 +229,8 @@ export default function SignUpPage() {
         setView('otp');
         showToast(`Verification code sent to +91 ${payload.mobile}.`, 'success');
       })
-      .catch(() => {
-        setOtp('');
-        setResendSeconds(30);
-        setView('otp');
-        showToast('Proceeding to verification. If using a test number, enter 123456.', 'warning');
+      .catch((err) => {
+        showToast(err.message || 'Failed to send verification code. Please try again.', 'error');
       })
       .finally(() => setBusy(false));
   };
@@ -467,20 +448,6 @@ export default function SignUpPage() {
                 </p>
                 <form onSubmit={handleVerifyOtp} className="signup-form w-full">
                   <OtpInput value={otp} onChange={setOtp} variant="light" />
-
-                  <div style={{
-                    background: 'rgba(79, 70, 229, 0.06)',
-                    border: '1px dashed rgba(79, 70, 229, 0.3)',
-                    borderRadius: 8,
-                    padding: '8px 12px',
-                    fontSize: 13,
-                    color: '#4f46e5',
-                    marginTop: 14,
-                    textAlign: 'center',
-                    width: '100%'
-                  }}>
-                    💡 Use Default OTP: <strong>123456</strong>
-                  </div>
 
                   <button type="submit" className="su-submit-btn" disabled={busy} style={{ marginTop: 18 }}>
                     {busy ? 'Verifying…' : 'Verify & Create Account'}
