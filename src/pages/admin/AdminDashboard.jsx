@@ -41,16 +41,21 @@ const isValidImageSrc = (src) => {
   );
 };
 
+// document-preview is admin-only server-side; since it's consumed as a raw
+// <img src>/<a href> URL (no Authorization header possible), the JWT is passed
+// as a query param instead — JwtAuthGuard falls back to it when no header is sent.
 const getDocumentPreviewUrl = (src) => {
   if (!src) return '';
   if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
-  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}`;
+  const token = localStorage.getItem('pairley_token') || '';
+  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&token=${encodeURIComponent(token)}`;
 };
 
 const getDocumentDownloadUrl = (src) => {
   if (!src) return '#';
   if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
-  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&download=true`;
+  const token = localStorage.getItem('pairley_token') || '';
+  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&download=true&token=${encodeURIComponent(token)}`;
 };
 
 export default function AdminDashboard() {
