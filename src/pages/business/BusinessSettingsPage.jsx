@@ -1,26 +1,52 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Building2, 
-  MapPin, 
-  Clock, 
+import { useState, useEffect, useMemo, useRef } from 'react';
+import {
+  Building2,
+  MapPin,
+  Clock,
   ShieldCheck,
   CheckCircle,
   Save,
   Mail,
   Phone,
   Settings,
-  Sparkles,
-  Info
+  Info,
+  Image as ImageIcon,
+  Globe,
+  AtSign,
+  Users,
+  MessageCircle,
+  Lock,
+  X,
+  Loader2,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { api } from '../../utils/api';
+import { api, API_URL } from '../../utils/api';
+import { getUserLocation, reverseGeocode } from '../../utils/geo';
+import { calculateProfileCompletion } from '../../utils/profileCompletion';
 import BusinessNav from '../../components/BusinessNav';
 import { MALLS } from '../../utils/constants';
 import './BusinessSettingsPage.css';
 
+const DAYS = [
+  { key: 'monday', label: 'Monday' },
+  { key: 'tuesday', label: 'Tuesday' },
+  { key: 'wednesday', label: 'Wednesday' },
+  { key: 'thursday', label: 'Thursday' },
+  { key: 'friday', label: 'Friday' },
+  { key: 'saturday', label: 'Saturday' },
+  { key: 'sunday', label: 'Sunday' },
+];
+const DEFAULT_DAY_TIMING = { open: '10:00', close: '21:00', isClosed: false };
+const defaultStoreTiming = () =>
+  DAYS.reduce((acc, d) => ({ ...acc, [d.key]: { ...DEFAULT_DAY_TIMING } }), {});
+
+const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('pairley_token') || ''}` });
+
 export default function BusinessSettingsPage() {
   const { showToast } = useToast();
+  const logoInputRef = useRef(null);
+  const coverInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   const [store, setStore] = useState({
     businessName: '',
@@ -28,98 +54,144 @@ export default function BusinessSettingsPage() {
     phone: '',
     gstin: '',
     type: 'shopping',
+    description: '',
+    website: '',
+    instagram: '',
+    facebook: '',
+    whatsapp: '',
+    supportNumber: '',
     address: '',
     city: 'Mumbai',
     mallName: '',
-    openTime: '10:00 AM',
-    closeTime: '09:00 PM',
-    autoConfirm: true,
-    notificationEmails: true,
+    geoLat: null,
+    geoLng: null,
+    storeTiming: defaultStoreTiming(),
+    leadAcceptanceMode: 'MANUAL',
     smsNumber1: '',
     smsNumber2: '',
-    smsNumber3: ''
+    smsNumber3: '',
+    logo: '',
+    coverImage: '',
+    galleryImages: [],
   });
 
   const [errors, setErrors] = useState({});
+  const [isDetectingLoc, setIsDetectingLoc] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [uploadingField, setUploadingField] = useState(null); // 'logo' | 'cover' | 'gallery' | null
+
+  const mapProfileToStore = (data) => {
+    const smsNumbers = (data.notification_mobiles || '').split(',').map((s) => s.trim());
+    return {
+      businessName: data.business_name || data.owner_name || '',
+      email: data.email || '',
+      phone: data.mobile || '',
+      gstin: data.gst_number || '',
+      type: data.category || 'shopping',
+      description: data.description || '',
+      website: data.website || '',
+      instagram: data.instagram || '',
+      facebook: data.facebook || '',
+      whatsapp: data.whatsapp || '',
+      supportNumber: data.support_number || '',
+      address: data.address || '',
+      city: data.city || 'Mumbai',
+      mallName: data.mall_name || '',
+      geoLat: typeof data.geo_lat === 'number' ? data.geo_lat : null,
+      geoLng: typeof data.geo_lng === 'number' ? data.geo_lng : null,
+      storeTiming: data.store_timing && Object.keys(data.store_timing).length > 0 ? { ...defaultStoreTiming(), ...data.store_timing } : defaultStoreTiming(),
+      leadAcceptanceMode: data.lead_acceptance_mode || 'MANUAL',
+      smsNumber1: smsNumbers[0] || '',
+      smsNumber2: smsNumbers[1] || '',
+      smsNumber3: smsNumbers[2] || '',
+      logo: data.logo || '',
+      coverImage: data.cover_image || '',
+      galleryImages: Array.isArray(data.gallery_images) ? data.gallery_images : [],
+    };
+  };
 
   useEffect(() => {
-    // Load profile from backend
     api.get('/business/profile')
-      .then((data) => {
-        const smsNumbers = (data.notification_mobiles || '').split(',').map(s => s.trim());
-        setStore({
-          businessName: data.business_name || data.owner_name || '',
-          email: data.email || '',
-          phone: data.mobile || '',
-          gstin: data.gst_number || '',
-          type: data.category || 'shopping',
-          address: data.address || '',
-          city: data.city || 'Mumbai',
-          mallName: data.mall_name || '',
-          openTime: '10:00 AM',
-          closeTime: '09:00 PM',
-          autoConfirm: true,
-          notificationEmails: true,
-          smsNumber1: smsNumbers[0] || '',
-          smsNumber2: smsNumbers[1] || '',
-          smsNumber3: smsNumbers[2] || ''
-        });
-      })
+      .then((data) => setStore(mapProfileToStore(data)))
       .catch((err) => {
-        console.error('Failed to load profile from server, using local fallback:', err);
-        // Fallback to local storage cached user
-        const userJson = localStorage.getItem('pairley_user');
-        if (userJson) {
-          try {
-            const u = JSON.parse(userJson);
-            const smsNumbers = (u.notification_mobiles || '').split(',').map(s => s.trim());
-            setStore({
-              businessName: u.business_name || u.owner_name || '',
-              email: u.email || '',
-              phone: u.mobile || '',
-              gstin: u.gst_number || '',
-              type: u.category || 'shopping',
-              address: u.address || '',
-              city: u.city || 'Mumbai',
-              mallName: u.mall_name || '',
-              openTime: '10:00 AM',
-              closeTime: '09:00 PM',
-              autoConfirm: true,
-              notificationEmails: true,
-              smsNumber1: smsNumbers[0] || '',
-              smsNumber2: smsNumbers[1] || '',
-              smsNumber3: smsNumbers[2] || ''
-            });
-          } catch (e) {}
-        }
+        console.error('Failed to load profile from server:', err);
+        showToast('Could not load your profile. Please refresh the page.', 'error');
       });
   }, []);
 
+  const completion = useMemo(() => calculateProfileCompletion({
+    business_name: store.businessName,
+    category: store.type,
+    description: store.description,
+    address: store.address,
+    city: store.city,
+    geo_lat: store.geoLat,
+    geo_lng: store.geoLng,
+    logo: store.logo,
+    cover_image: store.coverImage,
+    gallery_images: store.galleryImages,
+    store_timing: store.storeTiming,
+    website: store.website,
+    instagram: store.instagram,
+    facebook: store.facebook,
+    whatsapp: store.whatsapp,
+    support_number: store.supportNumber,
+    gst_number: store.gstin,
+  }), [store]);
+
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setStore(prev => ({
+    const { name, value } = e.target;
+    setStore((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
+
+  const handleDayTimingChange = (day, field, value) => {
+    setStore((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      storeTiming: {
+        ...prev.storeTiming,
+        [day]: { ...prev.storeTiming[day], [field]: value },
+      },
     }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+  };
+
+  const handleDetectLocation = async () => {
+    setIsDetectingLoc(true);
+    try {
+      const coords = await getUserLocation();
+      if (coords?.lat) {
+        setStore((prev) => ({ ...prev, geoLat: coords.lat, geoLng: coords.lng }));
+        const address = await reverseGeocode(coords.lat, coords.lng);
+        if (address?.formattedAddress) {
+          setStore((prev) => ({
+            ...prev,
+            address: address.formattedAddress !== 'Location detected' ? address.formattedAddress : prev.address,
+            city: address.city && address.city !== 'Your City' ? address.city : prev.city,
+          }));
+        }
+        showToast('Store location detected!', 'success');
+      } else {
+        showToast('Could not retrieve GPS coordinates.', 'error');
+      }
+    } catch (err) {
+      showToast('Failed to detect location.', 'error');
+    } finally {
+      setIsDetectingLoc(false);
+    }
   };
 
   const validateForm = () => {
     const errs = {};
     if (!store.businessName.trim()) errs.businessName = 'Business Name is required';
     if (!store.email.trim()) errs.email = 'Contact Email is required';
-    if (!store.phone.trim()) errs.phone = 'Contact Phone is required';
-    
-    // SMS Notifications mobile validation
-    if (store.smsNumber1 && store.smsNumber1.trim() && !/^\d{10}$/.test(store.smsNumber1.trim())) {
-      errs.smsNumber1 = 'SMS number must be exactly 10 digits';
-    }
-    if (store.smsNumber2 && store.smsNumber2.trim() && !/^\d{10}$/.test(store.smsNumber2.trim())) {
-      errs.smsNumber2 = 'SMS number must be exactly 10 digits';
-    }
-    if (store.smsNumber3 && store.smsNumber3.trim() && !/^\d{10}$/.test(store.smsNumber3.trim())) {
-      errs.smsNumber3 = 'SMS number must be exactly 10 digits';
-    }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(store.email.trim())) errs.email = 'Enter a valid email address';
+
+    [1, 2, 3].forEach((n) => {
+      const val = store[`smsNumber${n}`];
+      if (val && val.trim() && !/^\d{10}$/.test(val.trim())) {
+        errs[`smsNumber${n}`] = 'SMS number must be exactly 10 digits';
+      }
+    });
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -133,41 +205,96 @@ export default function BusinessSettingsPage() {
     }
 
     const mobiles = [store.smsNumber1, store.smsNumber2, store.smsNumber3]
-      .map(s => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean)
       .join(',');
 
     const updates = {
       business_name: store.businessName,
       category: store.type,
+      email: store.email,
+      description: store.description,
+      website: store.website,
+      instagram: store.instagram,
+      facebook: store.facebook,
+      whatsapp: store.whatsapp,
+      support_number: store.supportNumber,
       address: store.address,
       city: store.city,
       mall_name: store.mallName || null,
       gst_number: store.gstin,
-      notification_mobiles: mobiles
+      notification_mobiles: mobiles,
+      store_timing: store.storeTiming,
+      lead_acceptance_mode: store.leadAcceptanceMode,
     };
+    if (typeof store.geoLat === 'number') updates.geo_lat = store.geoLat;
+    if (typeof store.geoLng === 'number') updates.geo_lng = store.geoLng;
 
+    setIsSaving(true);
     api.put('/business/profile', updates)
-      .then((res) => {
-        // Save locally to local storage as well
-        localStorage.setItem('pairley_business_settings', JSON.stringify(store));
-        // Update user in localStorage
+      .then(() => {
         const user = JSON.parse(localStorage.getItem('pairley_user') || '{}');
-        const updatedUser = { ...user, ...updates };
-        localStorage.setItem('pairley_user', JSON.stringify(updatedUser));
-        
+        localStorage.setItem('pairley_user', JSON.stringify({ ...user, ...updates }));
         showToast('Merchant profile settings updated successfully!', 'success');
       })
       .catch((err) => {
         console.error(err);
-        showToast('Failed to save settings on server.', 'error');
+        showToast(err.message || 'Failed to save settings on server.', 'error');
+      })
+      .finally(() => setIsSaving(false));
+  };
+
+  const uploadMedia = async (field, files) => {
+    setUploadingField(field);
+    try {
+      const formData = new FormData();
+      if (field === 'gallery') {
+        Array.from(files).forEach((f) => formData.append('gallery', f));
+      } else {
+        formData.append(field === 'cover' ? 'cover_image' : field, files[0]);
+      }
+      const res = await fetch(`${API_URL}/business/media`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: formData,
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Upload failed');
+      }
+      const data = await res.json();
+      setStore((prev) => ({
+        ...prev,
+        logo: data.logo || prev.logo,
+        coverImage: data.cover_image || prev.coverImage,
+        galleryImages: Array.isArray(data.gallery_images) ? data.gallery_images : prev.galleryImages,
+      }));
+      showToast('Image uploaded!', 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to upload image.', 'error');
+    } finally {
+      setUploadingField(null);
+    }
+  };
+
+  const handleRemoveGalleryImage = async (url) => {
+    try {
+      const res = await fetch(`${API_URL}/business/media/gallery?url=${encodeURIComponent(url)}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!res.ok) throw new Error('Failed to remove image');
+      const data = await res.json();
+      setStore((prev) => ({ ...prev, galleryImages: Array.isArray(data.gallery_images) ? data.gallery_images : prev.galleryImages }));
+    } catch (err) {
+      showToast(err.message || 'Failed to remove image.', 'error');
+    }
   };
 
   return (
     <div className="business-settings-page page-wrapper py-6 text-left">
       <div className="container max-w-6xl mx-auto px-4">
-        
+
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/70 backdrop-blur-md border border-slate-200/80 p-6 rounded-3xl shadow-sm mb-6">
           <div>
@@ -175,19 +302,72 @@ export default function BusinessSettingsPage() {
               Store Settings ⚙️
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Configure store timings, registered tax GSTIN details, and pickup locations.
+              Configure your storefront profile, hours, media, and location.
             </p>
+          </div>
+          <div className="flex flex-col items-end gap-1 min-w-[180px]">
+            <span className="text-xs font-bold text-slate-600">Profile Completion: {completion.percent}%</span>
+            <div className="w-full sm:w-44 h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div className="h-full bg-[#5B12D6] transition-all" style={{ width: `${completion.percent}%` }} />
+            </div>
           </div>
         </div>
 
-        {/* Seller Sub-Navigation */}
         <BusinessNav />
 
         <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          
-          {/* Left Columns: Settings fields (2 Cols) */}
+
+          {/* Left Columns */}
           <div className="lg:col-span-2 flex flex-col gap-6">
-            
+
+            {/* Business Media: Logo, Cover, Gallery */}
+            <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
+              <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-1.5">
+                <ImageIcon size={16} className="text-[#5B12D6]" />
+                Business Media
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Logo</label>
+                  <div className="media-upload-box" onClick={() => logoInputRef.current?.click()}>
+                    {store.logo ? <img src={store.logo} alt="Logo" className="media-upload-preview" /> : <span className="text-xs text-slate-400">Click to upload logo</span>}
+                    {uploadingField === 'logo' && <div className="media-upload-overlay"><Loader2 className="animate-spin" size={20} /></div>}
+                  </div>
+                  <input ref={logoInputRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files[0] && uploadMedia('logo', e.target.files)} />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Cover Image</label>
+                  <div className="media-upload-box" onClick={() => coverInputRef.current?.click()}>
+                    {store.coverImage ? <img src={store.coverImage} alt="Cover" className="media-upload-preview" /> : <span className="text-xs text-slate-400">Click to upload cover</span>}
+                    {uploadingField === 'cover' && <div className="media-upload-overlay"><Loader2 className="animate-spin" size={20} /></div>}
+                  </div>
+                  <input ref={coverInputRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files[0] && uploadMedia('cover', e.target.files)} />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-slate-600">Gallery ({store.galleryImages.length}/10)</label>
+                <div className="gallery-grid">
+                  {store.galleryImages.map((img) => (
+                    <div key={img} className="gallery-thumb">
+                      <img src={img} alt="Gallery item" />
+                      <button type="button" className="gallery-thumb-remove" onClick={() => handleRemoveGalleryImage(img)}>
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  {store.galleryImages.length < 10 && (
+                    <div className="gallery-thumb gallery-thumb-add" onClick={() => galleryInputRef.current?.click()}>
+                      {uploadingField === 'gallery' ? <Loader2 className="animate-spin" size={18} /> : <span className="text-2xl text-slate-300">+</span>}
+                    </div>
+                  )}
+                </div>
+                <input ref={galleryInputRef} type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files.length && uploadMedia('gallery', e.target.files)} />
+              </div>
+            </div>
+
             {/* Store Profile Card */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-1.5">
@@ -239,66 +419,125 @@ export default function BusinessSettingsPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600">Contact Phone</label>
+                  <label className="text-slate-600 flex items-center gap-1">
+                    Login Mobile <Lock size={11} className="text-slate-400" />
+                  </label>
                   <div className="relative">
                     <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type="text"
-                      name="phone"
                       value={store.phone}
-                      onChange={handleInputChange}
-                      className={`w-full pl-9 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.phone ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
+                      readOnly
+                      disabled
+                      className="w-full pl-9 pr-3 border border-slate-200 rounded-xl p-2.5 outline-none bg-slate-50 text-slate-500 cursor-not-allowed"
                     />
                   </div>
-                  {errors.phone && <span className="text-[10px] text-red-500 font-bold">{errors.phone}</span>}
+                  <span className="text-[10px] text-slate-400 font-medium">Contact support to change your login mobile number.</span>
+                </div>
+
+                <div className="md:col-span-2 flex flex-col gap-1.5">
+                  <label className="text-slate-600">Description</label>
+                  <textarea
+                    name="description"
+                    value={store.description}
+                    onChange={handleInputChange}
+                    rows={3}
+                    placeholder="Tell customers what makes your store worth visiting..."
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6] resize-none"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Pickup Hours & Operations */}
+            {/* Online Presence */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-1.5">
-                <Clock size={16} className="text-[#5B12D6]" />
-                Pickup Timings & Logistics
+                <Globe size={16} className="text-[#5B12D6]" />
+                Online Presence & Contact
               </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600">Store Opens At</label>
-                  <select
-                    name="openTime"
-                    value={store.openTime}
-                    onChange={handleInputChange}
-                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
-                  >
-                    {['08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM'].map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+                  <label className="text-slate-600 flex items-center gap-1"><Globe size={12} /> Website</label>
+                  <input type="text" name="website" value={store.website} onChange={handleInputChange} placeholder="https://yourstore.com" className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]" />
                 </div>
-
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600">Store Closes At</label>
-                  <select
-                    name="closeTime"
-                    value={store.closeTime}
-                    onChange={handleInputChange}
-                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
-                  >
-                    {['07:00 PM', '08:00 PM', '09:00 PM', '10:00 PM'].map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+                  <label className="text-slate-600 flex items-center gap-1"><AtSign size={12} /> Instagram</label>
+                  <input type="text" name="instagram" value={store.instagram} onChange={handleInputChange} placeholder="@yourstore" className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-600 flex items-center gap-1"><Users size={12} /> Facebook</label>
+                  <input type="text" name="facebook" value={store.facebook} onChange={handleInputChange} placeholder="facebook.com/yourstore" className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-slate-600 flex items-center gap-1"><MessageCircle size={12} /> WhatsApp</label>
+                  <input type="text" name="whatsapp" value={store.whatsapp} onChange={handleInputChange} placeholder="9876543210" className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]" />
+                </div>
+                <div className="flex flex-col gap-1.5 md:col-span-2">
+                  <label className="text-slate-600 flex items-center gap-1"><Phone size={12} /> Customer Support Number</label>
+                  <input type="text" name="supportNumber" value={store.supportNumber} onChange={handleInputChange} placeholder="9876543210" className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]" />
                 </div>
               </div>
             </div>
 
-            {/* Location coordinates */}
+            {/* Store Timing — per day */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
               <h4 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-2 flex items-center gap-1.5">
-                <MapPin size={16} className="text-[#5B12D6]" />
-                Physical Store Coordinates
+                <Clock size={16} className="text-[#5B12D6]" />
+                Store Hours
               </h4>
+
+              <div className="flex flex-col gap-2">
+                {DAYS.map((day) => {
+                  const timing = store.storeTiming[day.key] || DEFAULT_DAY_TIMING;
+                  return (
+                    <div key={day.key} className="store-hours-row">
+                      <span className="store-hours-day">{day.label}</span>
+                      <label className="store-hours-closed-toggle">
+                        <input
+                          type="checkbox"
+                          checked={!!timing.isClosed}
+                          onChange={(e) => handleDayTimingChange(day.key, 'isClosed', e.target.checked)}
+                        />
+                        Closed
+                      </label>
+                      <input
+                        type="time"
+                        value={timing.open}
+                        disabled={timing.isClosed}
+                        onChange={(e) => handleDayTimingChange(day.key, 'open', e.target.value)}
+                        className="store-hours-time-input"
+                      />
+                      <span className="text-slate-400 text-xs">to</span>
+                      <input
+                        type="time"
+                        value={timing.close}
+                        disabled={timing.isClosed}
+                        onChange={(e) => handleDayTimingChange(day.key, 'close', e.target.value)}
+                        className="store-hours-time-input"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-2">
+                <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                  <MapPin size={16} className="text-[#5B12D6]" />
+                  Physical Store Location
+                </h4>
+                <button
+                  type="button"
+                  className="text-xs font-bold text-[#5B12D6] hover:underline flex items-center gap-1 bg-none border-none p-0 cursor-pointer"
+                  disabled={isDetectingLoc}
+                  onClick={handleDetectLocation}
+                >
+                  📍 {isDetectingLoc ? 'Detecting...' : 'Detect Store Location'}
+                </button>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
                 <div className="md:col-span-2 flex flex-col gap-1.5">
@@ -308,9 +547,8 @@ export default function BusinessSettingsPage() {
                     name="address"
                     value={store.address}
                     onChange={handleInputChange}
-                    className={`border rounded-xl p-2.5 outline-none transition ${errors.address ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   />
-                  {errors.address && <span className="text-[10px] text-red-500 font-bold">{errors.address}</span>}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -321,7 +559,7 @@ export default function BusinessSettingsPage() {
                     onChange={handleInputChange}
                     className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   >
-                    {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad'].map(c => (
+                    {['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad'].map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
@@ -336,19 +574,25 @@ export default function BusinessSettingsPage() {
                     className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]"
                   >
                     <option value="">No Mall / Standalone Shop</option>
-                    {MALLS.map(mall => (
+                    {MALLS.map((mall) => (
                       <option key={mall} value={mall}>{mall}</option>
                     ))}
                   </select>
                 </div>
+
+                {typeof store.geoLat === 'number' && (
+                  <div className="md:col-span-3 text-[10px] text-slate-400 font-medium">
+                    Coordinates: {store.geoLat.toFixed(5)}, {store.geoLng.toFixed(5)}
+                  </div>
+                )}
               </div>
             </div>
 
           </div>
 
-          {/* Right Column: Tax Validation and Save action */}
+          {/* Right Column */}
           <div className="flex flex-col gap-6">
-            
+
             {/* Registered Tax & Verification */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-left">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
@@ -365,51 +609,34 @@ export default function BusinessSettingsPage() {
                     value={store.gstin}
                     onChange={handleInputChange}
                     placeholder="27AABCU9603R1ZM"
-                    className={`border rounded-xl p-2.5 outline-none transition ${errors.gstin ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
+                    className="border border-slate-200 rounded-xl p-2.5 outline-none transition focus:border-[#5B12D6]"
                   />
-                  {errors.gstin && <span className="text-[10px] text-red-500 font-bold">{errors.gstin}</span>}
-                </div>
-
-                <div className="p-3 bg-emerald-50/50 border border-emerald-100/60 rounded-xl flex items-center gap-2 text-[10px] text-emerald-700 font-bold">
-                  <CheckCircle size={14} className="text-emerald-600" /> GSTIN Verified & Escrow Active
                 </div>
               </div>
             </div>
 
-            {/* Automation parameters */}
+            {/* Lead Acceptance */}
             <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-sm text-left flex flex-col gap-4">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Settings size={14} /> Automation Configurations
+                <Settings size={14} /> Lead Acceptance
               </h4>
+              <p className="text-[10px] text-slate-400 font-medium -mt-2">How new customer interest is handled when it comes in.</p>
 
-              <div className="flex flex-col gap-3">
-                <label className="flex items-start gap-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    name="autoConfirm"
-                    checked={store.autoConfirm}
-                    onChange={handleInputChange}
-                    className="mt-1 flex-shrink-0 accent-[#5B12D6]"
-                  />
-                  <span className="text-xs text-slate-500 leading-normal font-semibold">
-                    <strong>Auto-confirm matched groups</strong>
-                    <span className="block text-[9.5px] text-slate-400 mt-0.5 font-medium">Instantly capture BOGO holds once pairs align.</span>
-                  </span>
-                </label>
-
-                <label className="flex items-start gap-2.5 cursor-pointer select-none border-t border-slate-100 pt-3 mt-1">
-                  <input
-                    type="checkbox"
-                    name="notificationEmails"
-                    checked={store.notificationEmails}
-                    onChange={handleInputChange}
-                    className="mt-1 flex-shrink-0 accent-[#5B12D6]"
-                  />
-                  <span className="text-xs text-slate-500 leading-normal font-semibold">
-                    <strong>Email dispatch alerts</strong>
-                    <span className="block text-[9.5px] text-slate-400 mt-0.5 font-medium">Send carrier tracking links to paired buyers automatically.</span>
-                  </span>
-                </label>
+              <div className="lead-acceptance-toggle">
+                <button
+                  type="button"
+                  className={`lead-acceptance-option ${store.leadAcceptanceMode === 'MANUAL' ? 'active' : ''}`}
+                  onClick={() => setStore((prev) => ({ ...prev, leadAcceptanceMode: 'MANUAL' }))}
+                >
+                  Manual
+                </button>
+                <button
+                  type="button"
+                  className={`lead-acceptance-option ${store.leadAcceptanceMode === 'AUTOMATIC' ? 'active' : ''}`}
+                  onClick={() => setStore((prev) => ({ ...prev, leadAcceptanceMode: 'AUTOMATIC' }))}
+                >
+                  Automatic
+                </button>
               </div>
             </div>
 
@@ -423,53 +650,23 @@ export default function BusinessSettingsPage() {
               </p>
 
               <div className="flex flex-col gap-3.5 text-xs font-semibold">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600">Primary Alert Mobile</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-sans">+91</span>
-                    <input
-                      type="text"
-                      name="smsNumber1"
-                      placeholder="9876543210"
-                      value={store.smsNumber1 || ''}
-                      onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber1 ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
-                    />
+                {[1, 2, 3].map((n) => (
+                  <div className="flex flex-col gap-1.5" key={n}>
+                    <label className="text-slate-600">{n === 1 ? 'Primary' : n === 2 ? 'Secondary (Optional)' : 'Tertiary (Optional)'} Alert Mobile</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-sans">+91</span>
+                      <input
+                        type="text"
+                        name={`smsNumber${n}`}
+                        placeholder="9876543210"
+                        value={store[`smsNumber${n}`] || ''}
+                        onChange={handleInputChange}
+                        className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors[`smsNumber${n}`] ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
+                      />
+                    </div>
+                    {errors[`smsNumber${n}`] && <span className="text-[10px] text-red-500 font-bold">{errors[`smsNumber${n}`]}</span>}
                   </div>
-                  {errors.smsNumber1 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber1}</span>}
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600">Secondary Alert Mobile (Optional)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-sans">+91</span>
-                    <input
-                      type="text"
-                      name="smsNumber2"
-                      placeholder="9876543210"
-                      value={store.smsNumber2 || ''}
-                      onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber2 ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
-                    />
-                  </div>
-                  {errors.smsNumber2 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber2}</span>}
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-slate-600">Tertiary Alert Mobile (Optional)</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold font-sans">+91</span>
-                    <input
-                      type="text"
-                      name="smsNumber3"
-                      placeholder="9876543210"
-                      value={store.smsNumber3 || ''}
-                      onChange={handleInputChange}
-                      className={`w-full pl-10 pr-3 border rounded-xl p-2.5 outline-none transition ${errors.smsNumber3 ? 'border-red-500' : 'border-slate-200 focus:border-[#5B12D6]'}`}
-                    />
-                  </div>
-                  {errors.smsNumber3 && <span className="text-[10px] text-red-500 font-bold">{errors.smsNumber3}</span>}
-                </div>
+                ))}
 
                 <div className="p-3 bg-indigo-50/50 border border-indigo-100/60 rounded-xl flex items-start gap-2 text-[10px] text-indigo-700 font-bold">
                   <Info size={14} className="text-[#5B12D6] flex-shrink-0 mt-0.5" />
@@ -480,11 +677,13 @@ export default function BusinessSettingsPage() {
 
             {/* Save CTA */}
             <div className="flex flex-col gap-2">
-              <button 
-                type="submit" 
-                className="btn btn-primary w-full bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition"
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="btn btn-primary w-full bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/10 transition disabled:opacity-60"
               >
-                <Save size={16} /> Save Configurations
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {isSaving ? 'Saving...' : 'Save Configurations'}
               </button>
             </div>
 
@@ -496,4 +695,3 @@ export default function BusinessSettingsPage() {
     </div>
   );
 }
-
