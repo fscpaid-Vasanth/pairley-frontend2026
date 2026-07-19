@@ -166,6 +166,11 @@ flowchart TD
 
 ### Module A2 — Merchant Business Profile
 
+> **Status: ✅ COMPLETE** — Tag: `pairley-module2-complete`
+> — **Database:** migration `20260719054640_module2_business_profile` applied and verified against production.
+> — **Application Code:** deployed to production (backend + frontend) and verified via smoke test: profile view/update, logo/cover/gallery upload+delete, description/website/social links, location, per-day store hours, Lead Acceptance mode, profile completion calculation, admin business listing, customer offer browsing — all confirmed working.
+> — **Found and fixed during verification:** email uniqueness on `PUT /business/profile` only checked the `Business` table, allowing a collision with an `Admin`/`Customer` email — now checks all three. See [CHANGELOG.md](./CHANGELOG.md).
+
 **Objective:** Let an approved merchant manage their storefront — details, gallery, per-day hours, location.
 
 **UI Screens:** Business Settings rebuild; Gallery management (new); Store Timing editor (new, per-day); Location picker.
