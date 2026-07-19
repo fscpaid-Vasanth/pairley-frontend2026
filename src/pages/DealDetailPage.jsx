@@ -29,6 +29,7 @@ import {
   getDaysRemaining,
 } from '../utils/constants';
 import { getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../utils/offerTypes';
+import { getOfferBadgeMeta } from '../utils/offerBadges';
 import { getCategoryById } from '../data/categories';
 import { getStaticCode } from './customer/CustomerDealChatPage';
 import './DealDetailPage.css';
@@ -104,6 +105,7 @@ const DealDetailPage = () => {
           category: data.category ? data.category.toLowerCase() : 'shopping',
           offer_type: data.offer_type,
           mode: getDealMode(data.offer_type),
+          badge: data.badge || null,
           originalPrice: data.original_price,
           pairleyPrice: data.offer_price,
           images: [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
@@ -228,6 +230,7 @@ const DealDetailPage = () => {
   const dealMode = getDealMode(deal);
   const isPair = dealMode === 'pair';
   const isStandardOffer = dealMode === 'standard';
+  const badgeMeta = getOfferBadgeMeta(deal.badge);
   const userHasJoined = currentUser && deal?.interests?.some(
     (i) => i.customer_id === currentUser.id ||
       i.customer_id === currentUser.sub ||
@@ -377,6 +380,11 @@ const DealDetailPage = () => {
                     {category && (
                       <span className="deal-hero-badge deal-hero-badge--cat">
                         {category.icon} {category.name}
+                      </span>
+                    )}
+                    {badgeMeta && (
+                      <span className="deal-hero-badge deal-hero-badge--origin">
+                        {badgeMeta.icon} {badgeMeta.label}
                       </span>
                     )}
                   </div>

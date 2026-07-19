@@ -290,6 +290,21 @@
   font-size: 12px;
 }
 
+.deal-card__origin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  color: #059669;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 99px;
+  margin-bottom: 8px;
+}
+
 .deal-card__joined-badge {
   display: inline-flex;
   align-items: center;

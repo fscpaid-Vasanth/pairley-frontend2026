@@ -107,6 +107,7 @@ const DealsPage = () => {
           category: d.category ? d.category.toLowerCase() : 'shopping',
           offer_type: d.offer_type,
           mode: getDealMode(d.offer_type),
+          badge: d.badge || null,
           originalPrice: d.original_price,
           pairleyPrice: d.offer_price,
           images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],

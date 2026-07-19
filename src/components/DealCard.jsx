@@ -5,6 +5,7 @@ import { Heart, MapPin, Users, Zap, Clock, Share2 } from 'lucide-react';
 import { formatPrice, calculateSavings } from '../utils/constants';
 import { getCategoryById } from '../data/categories';
 import { getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../utils/offerTypes';
+import { getOfferBadgeMeta } from '../utils/offerBadges';
 import ImageWithFallback from './ImageWithFallback';
 import './DealCard.css';
 
@@ -74,6 +75,7 @@ export default function DealCard({ deal, onClick, distance }) {
     }
   };
 
+  const badgeMeta  = getOfferBadgeMeta(deal.badge);
   const mode       = getDealMode(deal);
   const isPair     = mode === 'pair';
   const isStandard = mode === 'standard';
@@ -171,6 +173,12 @@ export default function DealCard({ deal, onClick, distance }) {
               <MapPin size={10} /> {deal.location || deal.city || ''}
             </span>
           </div>
+
+          {badgeMeta && (
+            <span className="deal-card__origin-badge">
+              {badgeMeta.icon} {badgeMeta.label}
+            </span>
+          )}
 
           {/* Joined badge / progress — only applies to legacy pair/group
               matching, which is the only mechanic that tracks capacity. */}
