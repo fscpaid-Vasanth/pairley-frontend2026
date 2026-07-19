@@ -21,7 +21,7 @@ import InterestButton from '../components/InterestButton';
 import PricingTierCard from '../components/PricingTierCard';
 import { useToast } from '../context/ToastContext';
 import ImageWithFallback from '../components/ImageWithFallback';
-import { getDealById, mockDeals } from '../data/mockDeals';
+import { getDealById } from '../data/mockDeals';
 import { api } from '../utils/api';
 import {
   formatPrice,
@@ -78,6 +78,7 @@ const DealDetailPage = () => {
   const { showToast } = useToast();
   const [deal, setDeal] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [similarDeals, setSimilarDeals] = useState([]);
   const [openTermIndex, setOpenTermIndex] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [conversionRatio, setConversionRatio] = useState(0);
@@ -93,6 +94,48 @@ const DealDetailPage = () => {
     setStoreCompletedInterests(completed);
     const ratio = total > 0 ? Math.round((completed / total) * 100) : 0;
     setConversionRatio(ratio);
+  };
+
+  /* Real, category-matched similar offers — replaces the old mock-data
+     lookup (src/data/mockDeals.js ships with an empty catalog, so that
+     version always rendered nothing). */
+  const fetchSimilarDeals = (category, excludeId) => {
+    if (!category) {
+      setSimilarDeals([]);
+      return;
+    }
+    api.get(`/offers/list?category=${encodeURIComponent(category)}&status=ACTIVE`)
+      .then((data) => {
+        const mapped = data
+          .filter((d) => d.id !== excludeId)
+          .slice(0, 3)
+          .map((d) => ({
+            id: d.id,
+            title: d.title,
+            category: d.category ? d.category.toLowerCase() : 'shopping',
+            offer_type: d.offer_type,
+            mode: getDealMode(d.offer_type),
+            badge: d.badge || null,
+            originalPrice: d.original_price,
+            pairleyPrice: d.offer_price,
+            images: [d.offer_image || d.cover_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+            businessOwner: {
+              id: d.business_id,
+              name: d.business?.business_name || 'Local Seller',
+              avatar: d.business?.shop_photo || null,
+              rating: 4.5
+            },
+            interestCount: d.joined_people || 0,
+            maxParticipants: d.required_people || 2,
+            location: d.business?.city || 'Select Location',
+            validUntil: d.end_date || '2026-12-31',
+          }));
+        setSimilarDeals(mapped);
+      })
+      .catch((err) => {
+        console.error('Failed to load similar deals:', err);
+        setSimilarDeals([]);
+      });
   };
 
   const fetchDealDetails = () => {
@@ -132,6 +175,8 @@ const DealDetailPage = () => {
         if (mapped.businessOwner.id === currentUser?.id) {
           fetchStoreConversionRatio(mapped.interests);
         }
+
+        fetchSimilarDeals(mapped.category, mapped.id);
       })
       .catch((err) => {
         console.error('Failed to load deal details from backend, falling back to mock:', err);
@@ -246,11 +291,6 @@ const DealDetailPage = () => {
       i.customer?.id === currentUser.sub
   );
   const isCompleted = userInterest?.status === 'COMPLETED';
-
-  /* Similar deals: same category, exclude current, max 3 */
-  const similarDeals = mockDeals
-    .filter((d) => d.category === deal.category && d.id !== deal.id)
-    .slice(0, 3);
 
   /* Stars helper */
   const renderStars = (rating) => {
