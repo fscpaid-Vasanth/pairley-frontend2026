@@ -5,6 +5,7 @@ import { Sparkles, Clock, Users, PartyPopper, Lock } from 'lucide-react';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
+import { getDealMode } from '../utils/offerTypes';
 import './InterestButton.css';
 
 export default function InterestButton({ deal, onInterest }) {
@@ -149,7 +150,9 @@ Thank you,
     }
   };
 
-  const isPair = deal.mode === 'pair';
+  const mode = getDealMode(deal);
+  const isPair = mode === 'pair';
+  const isStandard = mode === 'standard';
 
   return (
     <div className="interest-btn-container">
@@ -166,7 +169,7 @@ Thank you,
             onClick={handleShowInterest}
           >
             <Sparkles size={20} className="interest-btn__icon" />
-            Show Interest & Get Split Pricing
+            {isStandard ? 'Show Interest' : 'Show Interest & Get Split Pricing'}
           </motion.button>
         )}
 
@@ -193,14 +196,20 @@ Thank you,
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`btn btn-outline btn-lg w-full interest-btn interest-btn--interested ${
-              isPair ? 'interest-btn--searching' : 'interest-btn--joined'
+              isPair ? 'interest-btn--searching' : isStandard ? '' : 'interest-btn--joined'
             }`}
-            onClick={() => setInterestState('none')} // Toggle off
+            disabled={isStandard}
+            onClick={isStandard ? undefined : () => setInterestState('none')} // Toggle off
           >
             {isPair ? (
               <>
                 <Clock size={20} className="interest-btn__icon animate-spin" />
                 Searching for Pair Partner... (Tap to Cancel)
+              </>
+            ) : isStandard ? (
+              <>
+                <PartyPopper size={20} className="interest-btn__icon" />
+                Interest Sent! The merchant will contact you.
               </>
             ) : (
               <>

@@ -20,6 +20,7 @@ import { formatPrice } from '../../utils/constants';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import BusinessNav from '../../components/BusinessNav';
+import { isPairMechanic } from '../../utils/offerTypes';
 import './BusinessOrdersPage.css';
 
 export default function BusinessOrdersPage() {
@@ -49,7 +50,7 @@ export default function BusinessOrdersPage() {
         const mappedOrders = [];
         
         data.forEach((offer) => {
-          const isPair = offer.offer_type?.toLowerCase() === 'bogo' || offer.required_people === 2;
+          const isPair = isPairMechanic(offer.offer_type) || offer.required_people === 2;
           
           // Filter interests that have matched (status is READY_TO_BUY, CONTACTED, or COMPLETED)
           const matchedInterests = (offer.interests || []).filter(i => 

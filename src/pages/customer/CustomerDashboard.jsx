@@ -25,6 +25,7 @@ import RadiusSelector from '../../components/RadiusSelector';
 import GroupSuggestionBanner from '../../components/GroupSuggestionBanner';
 import { useLocationContext } from '../../context/LocationContext';
 import { api } from '../../utils/api';
+import { isPairMechanic, isGroupMechanic, getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../../utils/offerTypes';
 import './CustomerDashboard.css';
 
 /* Stagger animation container */
@@ -91,8 +92,8 @@ export default function CustomerDashboard() {
       .then((history) => {
         // Compute stats
         const activeInts = history.filter(h => h.offer.status === 'ACTIVE' && h.status === 'INTERESTED');
-        const pairs = history.filter(h => h.offer.offer_type === 'BOGO' && (h.status === 'READY_TO_BUY' || h.status === 'COMPLETED'));
-        const groups = history.filter(h => h.offer.offer_type === 'GROUP_DISCOUNT' && (h.status === 'READY_TO_BUY' || h.status === 'COMPLETED'));
+        const pairs = history.filter(h => isPairMechanic(h.offer.offer_type) && (h.status === 'READY_TO_BUY' || h.status === 'COMPLETED'));
+        const groups = history.filter(h => isGroupMechanic(h.offer.offer_type) && (h.status === 'READY_TO_BUY' || h.status === 'COMPLETED'));
         const saved = history.filter(h => h.status === 'READY_TO_BUY' || h.status === 'COMPLETED')
           .reduce((acc, h) => acc + (h.offer.original_price - h.offer.offer_price), 0);
 
@@ -548,10 +549,12 @@ export default function CustomerDashboard() {
             ) : (
               recommended.map((deal) => {
                 const cat = getCategoryById(deal.category);
-                const progress = deal.offer_type?.toLowerCase() === 'group_discount'
+                const dealMode = getDealMode(deal.offer_type);
+                const isGroup = dealMode === 'group';
+                const isStandardDeal = dealMode === 'standard';
+                const progress = isGroup
                   ? Math.round((deal.joined_people / deal.required_people) * 100)
                   : null;
-                const isGroup = deal.offer_type?.toLowerCase() === 'group_discount';
                 const isCompleted = completedDealIds.has(deal.id);
 
                 return (
@@ -576,7 +579,9 @@ export default function CustomerDashboard() {
                             <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm text-white ${
                               isGroup ? 'bg-indigo-600' : 'bg-emerald-600'
                             }`}>
-                              {isGroup ? 'Group Deal' : 'Pair BOGO'}
+                              {isStandardDeal
+                                ? `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).shortLabel}`
+                                : isGroup ? 'Group Deal' : 'Pair BOGO'}
                             </span>
                           </div>
                         </div>
@@ -604,7 +609,9 @@ export default function CustomerDashboard() {
                             <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm text-white ${
                               isGroup ? 'bg-indigo-600' : 'bg-emerald-600'
                             }`}>
-                              {isGroup ? 'Group Deal' : 'Pair BOGO'}
+                              {isStandardDeal
+                                ? `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).shortLabel}`
+                                : isGroup ? 'Group Deal' : 'Pair BOGO'}
                             </span>
                           </div>
                         </div>
@@ -626,11 +633,20 @@ export default function CustomerDashboard() {
                             </div>
                           )}
                           
-                          {!isGroup && (
+                          {!isGroup && !isStandardDeal && (
                             <div className="flex items-center gap-1.5 mt-3">
                               <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
                               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100/60">
                                 🤝 Matching Pool Open
+                              </span>
+                            </div>
+                          )}
+
+                          {isStandardDeal && (
+                            <div className="flex items-center gap-1.5 mt-3">
+                              <span className="w-2.5 h-2.5 bg-[#5B12D6] rounded-full"></span>
+                              <span className="text-[10px] font-bold text-[#5B12D6] bg-purple-50 px-2 py-0.5 rounded border border-purple-100/60">
+                                🏷️ Available Now
                               </span>
                             </div>
                           )}

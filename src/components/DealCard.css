@@ -26,6 +26,14 @@
   box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.03), 0 4px 15px rgba(16, 185, 129, 0.04);
 }
 
+.deal-card--standard {
+  border: 1.5px solid rgba(91, 18, 214, 0.22);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.4) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px 0 rgba(91, 18, 214, 0.03), 0 4px 15px rgba(91, 18, 214, 0.04);
+}
+
 .deal-card:hover {
   transform: translateY(-5px);
 }
@@ -44,6 +52,14 @@
   box-shadow:
     0 12px 32px rgba(16, 185, 129, 0.15),
     0 0 0 3px rgba(16, 185, 129, 0.08);
+}
+
+.deal-card--standard:hover {
+  border-color: rgba(91, 18, 214, 0.65);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.5) 100%);
+  box-shadow:
+    0 12px 32px rgba(91, 18, 214, 0.15),
+    0 0 0 3px rgba(91, 18, 214, 0.08);
 }
 
 /* ── Image wrapper ── */

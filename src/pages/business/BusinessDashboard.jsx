@@ -20,6 +20,7 @@ import ImageWithFallback from '../../components/ImageWithFallback';
 import BusinessNav from '../../components/BusinessNav';
 import { api } from '../../utils/api';
 import CustomerProximityCard from '../../components/CustomerProximityCard';
+import { getDealMode, isPairMechanic, getOfferTypeIcon, getOfferTypeMeta } from '../../utils/offerTypes';
 import './BusinessDashboard.css';
 
 /* Stagger animation container */
@@ -88,7 +89,8 @@ export default function BusinessDashboard() {
           id: d.id,
           title: d.title,
           category: d.category ? d.category.toLowerCase() : 'shopping',
-          mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
+          offer_type: d.offer_type,
+          mode: getDealMode(d.offer_type),
           location: d.business?.city || d.city || business.city || 'Mumbai',
           interestCount: d.joined_people || 0,
           maxParticipants: d.required_people || 2,
@@ -107,7 +109,8 @@ export default function BusinessDashboard() {
               id: d.id,
               title: d.title,
               category: d.category ? d.category.toLowerCase() : 'shopping',
-              mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
+              offer_type: d.offer_type,
+              mode: getDealMode(d.offer_type),
               location: d.city || business.city || 'Mumbai',
               interestCount: d.joined_people || 0,
               maxParticipants: d.required_people || 2,
@@ -121,7 +124,7 @@ export default function BusinessDashboard() {
             data.forEach((offer) => {
               (offer.interests || []).forEach((interest) => {
                 const customerName = interest.customer?.name || 'A customer';
-                const isPairOffer = offer.offer_type?.toLowerCase() === 'pair' || offer.offer_type?.toLowerCase() === 'bogo';
+                const isPairOffer = isPairMechanic(offer.offer_type);
                 let actText = `${customerName} joined the deal "${offer.title}"`;
                 let badgeText = 'New Interest';
                 let actType = 'interest';
@@ -330,7 +333,9 @@ export default function BusinessDashboard() {
                 </div>
               ) : (
                 deals.slice(0, 4).map((deal) => {
-                  const isPair = deal.mode === 'pair';
+                  const mode = getDealMode(deal);
+                  const isPair = mode === 'pair';
+                  const isStandard = mode === 'standard';
                   const completion = isPair
                     ? (deal.interestCount / 2) * 100
                     : Math.min(100, (deal.interestCount / deal.maxParticipants) * 100);
@@ -352,7 +357,9 @@ export default function BusinessDashboard() {
                               <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
                                 isPair ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'
                               }`}>
-                                {isPair ? '🤝 Pair BOGO' : '👥 Group Tiers'}
+                                {isStandard
+                                  ? `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).shortLabel}`
+                                  : isPair ? '🤝 Pair BOGO' : '👥 Group Tiers'}
                               </span>
                               <span className="text-[10px] text-slate-400 font-medium">{deal.location}</span>
                             </div>
@@ -364,16 +371,18 @@ export default function BusinessDashboard() {
                         <div className="text-left sm:text-right">
                           <span className="text-[10px] text-slate-400 uppercase font-semibold">Active Interest</span>
                           <div className="text-xs font-bold text-slate-700 mt-0.5">
-                            {deal.interestCount} {isPair ? '/ 2 waiting' : `joined`}
+                            {deal.interestCount} {isPair ? '/ 2 waiting' : isStandard ? 'interested' : 'joined'}
                           </div>
                         </div>
 
-                        <div className="flex flex-col gap-1 items-end w-20">
-                          <span className="text-[9px] text-slate-400 font-semibold">{Math.round(completion)}% filled</span>
-                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${isPair ? 'bg-purple-500' : 'bg-indigo-500'}`} style={{ width: `${completion}%` }}></div>
+                        {!isStandard && (
+                          <div className="flex flex-col gap-1 items-end w-20">
+                            <span className="text-[9px] text-slate-400 font-semibold">{Math.round(completion)}% filled</span>
+                            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full ${isPair ? 'bg-purple-500' : 'bg-indigo-500'}`} style={{ width: `${completion}%` }}></div>
+                            </div>
                           </div>
-                        </div>
+                        )}
 
                         <Link to={`/deals/${deal.id}`} className="p-2 bg-slate-50 text-slate-400 hover:text-[#5B12D6] hover:bg-purple-50 rounded-xl transition-colors duration-200">
                           <ChevronRight size={16} />

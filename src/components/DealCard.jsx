@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Heart, MapPin, Users, Zap, Clock, Share2 } from 'lucide-react';
 import { formatPrice, calculateSavings } from '../utils/constants';
 import { getCategoryById } from '../data/categories';
+import { getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../utils/offerTypes';
 import ImageWithFallback from './ImageWithFallback';
 import './DealCard.css';
 
@@ -73,7 +74,9 @@ export default function DealCard({ deal, onClick, distance }) {
     }
   };
 
-  const isPair     = deal.mode === 'pair' || deal.offer_type === 'BOGO';
+  const mode       = getDealMode(deal);
+  const isPair     = mode === 'pair';
+  const isStandard = mode === 'standard';
   const maxSlots   = isPair ? 2 : (deal.maxParticipants || deal.required_people || 10);
   const joinedNum  = Math.min(deal.interestCount || deal.joined_people || 0, maxSlots);
   const joinedText = `${joinedNum}/${maxSlots} Joined`;
@@ -93,7 +96,7 @@ export default function DealCard({ deal, onClick, distance }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Link to={dealLink} className={`deal-card ${isPair ? 'deal-card--pair' : 'deal-card--group'}`} onClick={onClick}>
+      <Link to={dealLink} className={`deal-card deal-card--${mode}`} onClick={onClick}>
 
         {/* ── Image ── */}
         <div className="deal-card__image-wrap">
@@ -105,9 +108,11 @@ export default function DealCard({ deal, onClick, distance }) {
             category={deal.category}
           />
 
-          {/* BOGO / GROUP badge */}
+          {/* Offer type badge */}
           <span className={`deal-card__type-tag ${!isPair ? 'deal-card__type-tag--group' : ''}`}>
-            {isPair ? '🤝 BOGO' : '👥 GROUP'}
+            {isStandard
+              ? `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).shortLabel.toUpperCase()}`
+              : isPair ? '🤝 BOGO' : '👥 GROUP'}
           </span>
 
           {/* Category tag */}
@@ -167,30 +172,34 @@ export default function DealCard({ deal, onClick, distance }) {
             </span>
           </div>
 
-          {/* Joined badge */}
-          <div className="deal-card__joined-badge">
-            <Users size={12} color="#5B12D6" />
-            <span className="deal-card__joined-text">{joinedText}</span>
-            {remaining > 0 && remaining <= 5 && (
-              <span className="deal-card__urgency">Only {remaining} left!</span>
-            )}
-          </div>
+          {/* Joined badge / progress — only applies to legacy pair/group
+              matching, which is the only mechanic that tracks capacity. */}
+          {!isStandard && (
+            <>
+              <div className="deal-card__joined-badge">
+                <Users size={12} color="#5B12D6" />
+                <span className="deal-card__joined-text">{joinedText}</span>
+                {remaining > 0 && remaining <= 5 && (
+                  <span className="deal-card__urgency">Only {remaining} left!</span>
+                )}
+              </div>
 
-          {/* Progress bar with live fill */}
-          <div className="deal-card__progress-wrap">
-            <div className="deal-card__progress-label">
-              <span>Group filling up</span>
-              <span style={{ color: '#5B12D6', fontWeight: 800 }}>{progressPct}%</span>
-            </div>
-            <div className="deal-card__progress-bar">
-              <motion.div
-                className="deal-card__progress-fill"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPct}%` }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-              />
-            </div>
-          </div>
+              <div className="deal-card__progress-wrap">
+                <div className="deal-card__progress-label">
+                  <span>Group filling up</span>
+                  <span style={{ color: '#5B12D6', fontWeight: 800 }}>{progressPct}%</span>
+                </div>
+                <div className="deal-card__progress-bar">
+                  <motion.div
+                    className="deal-card__progress-fill"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPct}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Bottom: price + savings */}
           <div className="deal-card__bottom">
@@ -210,7 +219,7 @@ export default function DealCard({ deal, onClick, distance }) {
           </div>
 
           {/* Hover CTA */}
-          <div className="deal-card__join-cta">Join This Deal →</div>
+          <div className="deal-card__join-cta">{isStandard ? 'Show Interest →' : 'Join This Deal →'}</div>
         </div>
       </Link>
     </motion.div>

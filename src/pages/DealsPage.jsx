@@ -12,6 +12,7 @@ import { useLocationContext } from '../context/LocationContext';
 import { haversineDistance } from '../utils/geo';
 import { api } from '../utils/api';
 import { MALLS } from '../utils/constants';
+import { getDealMode } from '../utils/offerTypes';
 import SEO from '../components/SEO';
 import './DealsPage.css';
 
@@ -97,7 +98,8 @@ const DealsPage = () => {
           title: d.title,
           description: d.description,
           category: d.category ? d.category.toLowerCase() : 'shopping',
-          mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
+          offer_type: d.offer_type,
+          mode: getDealMode(d.offer_type),
           originalPrice: d.original_price,
           pairleyPrice: d.offer_price,
           images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],

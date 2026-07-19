@@ -28,6 +28,7 @@ import {
   calculateSavings,
   getDaysRemaining,
 } from '../utils/constants';
+import { getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../utils/offerTypes';
 import { getCategoryById } from '../data/categories';
 import { getStaticCode } from './customer/CustomerDealChatPage';
 import './DealDetailPage.css';
@@ -101,7 +102,8 @@ const DealDetailPage = () => {
           title: data.title,
           description: data.description,
           category: data.category ? data.category.toLowerCase() : 'shopping',
-          mode: data.offer_type && (data.offer_type.toLowerCase() === 'bogo' || data.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
+          offer_type: data.offer_type,
+          mode: getDealMode(data.offer_type),
           originalPrice: data.original_price,
           pairleyPrice: data.offer_price,
           images: [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
@@ -223,7 +225,9 @@ const DealDetailPage = () => {
   const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name || !!currentUser?.businessName;
   const { saved, percentage } = calculateSavings(deal.originalPrice, deal.pairleyPrice);
   const daysLeft = getDaysRemaining(deal.validUntil);
-  const isPair = deal.mode === 'pair';
+  const dealMode = getDealMode(deal);
+  const isPair = dealMode === 'pair';
+  const isStandardOffer = dealMode === 'standard';
   const userHasJoined = currentUser && deal?.interests?.some(
     (i) => i.customer_id === currentUser.id ||
       i.customer_id === currentUser.sub ||
@@ -366,7 +370,9 @@ const DealDetailPage = () => {
                 <div className="deal-hero-bottom">
                   <div className="deal-hero-badges">
                     <span className={`deal-hero-badge ${isPair ? 'deal-hero-badge--type' : 'deal-hero-badge--group'}`}>
-                      {isPair ? '🤝 BOGO Pair' : '👥 Group Deal'}
+                      {isStandardOffer
+                        ? `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).label}`
+                        : isPair ? '🤝 BOGO Pair' : '👥 Group Deal'}
                     </span>
                     {category && (
                       <span className="deal-hero-badge deal-hero-badge--cat">
@@ -558,7 +564,7 @@ const DealDetailPage = () => {
                 {/* Gradient header */}
                 <div className="deal-pricing-card__header">
                   <div className="deal-pricing-card__label">
-                    {isPair ? 'Pair Deal Price' : 'Group Deal — Starting From'}
+                    {isStandardOffer ? 'Offer Price' : isPair ? 'Pair Deal Price' : 'Group Deal — Starting From'}
                   </div>
                   <div className="deal-pricing-card__price-row">
                     <span className="deal-pricing-card__price-current">

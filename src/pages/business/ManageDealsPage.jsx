@@ -25,6 +25,7 @@ import { useEffect } from 'react';
 import { formatPrice } from '../../utils/constants';
 import { api } from '../../utils/api';
 import { getCategoryById } from '../../data/categories';
+import { getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../../utils/offerTypes';
 import ImageWithFallback from '../../components/ImageWithFallback';
 import BusinessNav from '../../components/BusinessNav';
 import './ManageDealsPage.css';
@@ -53,7 +54,8 @@ export default function ManageDealsPage() {
           title: d.title,
           description: d.description,
           category: d.category ? d.category.toLowerCase() : 'shopping',
-          mode: d.offer_type && (d.offer_type.toLowerCase() === 'bogo' || d.offer_type.toLowerCase() === 'pair') ? 'pair' : 'group',
+          offer_type: d.offer_type,
+          mode: getDealMode(d.offer_type),
           originalPrice: d.original_price,
           pairleyPrice: d.offer_price,
           images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
@@ -339,7 +341,9 @@ export default function ManageDealsPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-sm">
                       {filteredDeals.map((deal) => {
-                        const isPair = deal.mode === 'pair';
+                        const mode = getDealMode(deal);
+                        const isPair = mode === 'pair';
+                        const isStandard = mode === 'standard';
                         const cat = getCategoryById(deal.category);
                         const limit = isPair ? 2 : (deal.maxParticipants || 10);
                         const progress = Math.min(100, ((deal.interestCount || 0) / limit) * 100);
@@ -364,7 +368,9 @@ export default function ManageDealsPage() {
                             {/* Column 2: Model */}
                             <td className="p-4">
                               <span className="font-bold text-slate-700 capitalize flex items-center gap-1.5">
-                                {isPair ? '🤝 Pair' : '👥 Group'}
+                                {isStandard
+                                  ? `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).shortLabel}`
+                                  : isPair ? '🤝 Pair' : '👥 Group'}
                               </span>
                             </td>
                             {/* Column 3: Status */}
@@ -373,18 +379,25 @@ export default function ManageDealsPage() {
                             </td>
                             {/* Column 4: Progress */}
                             <td className="p-4">
-                              <div className="w-40 flex flex-col gap-1">
-                                <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
-                                  <span className="flex items-center gap-1">
-                                    <Users size={12} />
-                                    {deal.interestCount || 0}/{limit}
-                                  </span>
-                                  <span>{Math.round(progress)}%</span>
+                              {isStandard ? (
+                                <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+                                  <Users size={12} />
+                                  {deal.interestCount || 0} interested
+                                </span>
+                              ) : (
+                                <div className="w-40 flex flex-col gap-1">
+                                  <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
+                                    <span className="flex items-center gap-1">
+                                      <Users size={12} />
+                                      {deal.interestCount || 0}/{limit}
+                                    </span>
+                                    <span>{Math.round(progress)}%</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-[#5B12D6] rounded-full" style={{ width: `${progress}%` }}></div>
+                                  </div>
                                 </div>
-                                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                  <div className="h-full bg-[#5B12D6] rounded-full" style={{ width: `${progress}%` }}></div>
-                                </div>
-                              </div>
+                              )}
                             </td>
                             {/* Column 5: Pricing */}
                             <td className="p-4">
@@ -452,7 +465,9 @@ export default function ManageDealsPage() {
                   exit={{ opacity: 0 }}
                 >
                   {filteredDeals.map((deal) => {
-                    const isPair = deal.mode === 'pair';
+                    const mode = getDealMode(deal);
+                    const isPair = mode === 'pair';
+                    const isStandard = mode === 'standard';
                     const cat = getCategoryById(deal.category);
                     const limit = isPair ? 2 : (deal.maxParticipants || 10);
                     const progress = Math.min(100, ((deal.interestCount || 0) / limit) * 100);
@@ -476,7 +491,9 @@ export default function ManageDealsPage() {
                             <div className="flex justify-between items-center text-xs text-slate-400 mb-1">
                               <span>ID: #{deal.id}</span>
                               <span className="font-bold uppercase tracking-wider text-slate-500">
-                                {isPair ? '🤝 Pair Split' : '👥 Group Tiers'}
+                                {isStandard
+                                  ? `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).shortLabel}`
+                                  : isPair ? '🤝 Pair Split' : '👥 Group Tiers'}
                               </span>
                             </div>
                             
@@ -495,18 +512,25 @@ export default function ManageDealsPage() {
                             </div>
 
                             {/* Progress bar info */}
-                            <div className="flex flex-col gap-1.5">
-                              <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
-                                <span className="flex items-center gap-1">
-                                  <Users size={12} />
-                                  {deal.interestCount || 0}/{limit} Matching
-                                </span>
-                                <span>{Math.round(progress)}%</span>
+                            {isStandard ? (
+                              <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+                                <Users size={12} />
+                                {deal.interestCount || 0} interested
                               </div>
-                              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#5B12D6]" style={{ width: `${progress}%` }}></div>
+                            ) : (
+                              <div className="flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
+                                  <span className="flex items-center gap-1">
+                                    <Users size={12} />
+                                    {deal.interestCount || 0}/{limit} Matching
+                                  </span>
+                                  <span>{Math.round(progress)}%</span>
+                                </div>
+                                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-[#5B12D6]" style={{ width: `${progress}%` }}></div>
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                         </div>
 
