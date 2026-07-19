@@ -449,6 +449,14 @@ function AppContent() {
             }
           />
           <Route
+            path={ROUTES.EDIT_DEAL}
+            element={
+              <AppLayout>
+                <CreateDealPage />
+              </AppLayout>
+            }
+          />
+          <Route
             path={ROUTES.MANAGE_DEALS}
             element={
               <AppLayout>

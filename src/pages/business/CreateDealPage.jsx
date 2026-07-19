@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Sparkles, 
-  ArrowRight, 
-  ArrowLeft, 
-  Image as ImageIcon, 
-  MapPin, 
-  Calendar, 
-  Plus, 
-  Trash2, 
-  Check, 
+import {
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  Image as ImageIcon,
+  MapPin,
+  Calendar,
+  Plus,
+  Trash2,
+  Check,
   Users,
   Layers,
   Settings,
@@ -18,11 +18,13 @@ import {
   AlertCircle,
   Upload,
   Link as LinkIcon,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import { categories } from '../../data/categories';
 import { formatPrice } from '../../utils/constants';
 import DealCard from '../../components/DealCard';
+import MediaUploadPanel from '../../components/business/MediaUploadPanel';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import { getUserLocation, reverseGeocode } from '../../utils/geo';
@@ -75,6 +77,8 @@ const IMAGE_PRESETS = [
 export default function CreateDealPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { id: offerId } = useParams();
+  const isEditMode = !!offerId;
 
   const token = localStorage.getItem('pairley_token');
   const business = JSON.parse(localStorage.getItem('pairley_user') || 'null');
@@ -129,6 +133,63 @@ export default function CreateDealPage() {
   const [maxParticipants, setMaxParticipants] = useState('20');
   const [terms, setTerms] = useState('Valid only through the Pairley web/mobile app interface. Match must be achieved within deal timeframe.');
   const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [isLoadingOffer, setIsLoadingOffer] = useState(isEditMode);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Edit mode: fetch the existing offer and pre-fill the form. Note:
+  // minParticipants, additional group tiers beyond the first, terms text,
+  // and the free-text location string were never persisted by the original
+  // create flow (confirmed in Module 3 STEP 1 research) — those fields fall
+  // back to their create-mode defaults rather than restoring anything,
+  // since there's nothing to restore.
+  useEffect(() => {
+    if (!isEditMode) return;
+    api.get(`/offers/details/${offerId}`)
+      .then((offer) => {
+        if (offer.business_id !== business.id) {
+          showToast('You do not own this offer.', 'error');
+          navigate('/business/manage-deals');
+          return;
+        }
+        const isPair = offer.offer_type === 'BOGO';
+        setDealType(isPair ? 'pair' : 'group');
+        setCategory(offer.category || 'shopping');
+        setTitle(offer.title || '');
+        setDescription(offer.description || '');
+        setImagePlaceholder(offer.cover_image || offer.offer_image || '');
+        setOriginalPrice(String(offer.original_price ?? ''));
+        if (isPair) {
+          setPairleyPrice(String(offer.offer_price ?? ''));
+        } else {
+          setTiers([{ id: 1, minPeople: offer.required_people || 5, pricePerHead: offer.offer_price || 0 }]);
+        }
+        setLocation(offer.business?.city || business.city || '');
+        if (typeof offer.geo_lat === 'number') setLatitude(offer.geo_lat);
+        if (typeof offer.geo_lng === 'number') setLongitude(offer.geo_lng);
+        const startMs = new Date(offer.start_date).getTime();
+        const endMs = new Date(offer.end_date).getTime();
+        const daysRemaining = Math.max(1, Math.round((endMs - startMs) / (24 * 60 * 60 * 1000)));
+        setValidDays(String(daysRemaining));
+        setMaxParticipants(String(offer.required_people ?? '20'));
+        setWhatsappNumber(offer.whatsapp_number || '');
+        const existingGallery = Array.isArray(offer.gallery_images) && offer.gallery_images.length > 0
+          ? offer.gallery_images
+          : (offer.facility_images || []);
+        setFacilityImages(existingGallery);
+        try {
+          const staff = JSON.parse(offer.facility_details || '[]');
+          if (Array.isArray(staff) && staff.length > 0) setStaffList(staff);
+        } catch (e) {
+          // facility_details wasn't valid staff JSON — leave the default row
+        }
+      })
+      .catch(() => {
+        showToast('Failed to load this offer for editing.', 'error');
+        navigate('/business/manage-deals');
+      })
+      .finally(() => setIsLoadingOffer(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offerId]);
 
   // Facility showcase and staff/trainers details state
   const [facilityImages, setFacilityImages] = useState([]);
@@ -422,7 +483,7 @@ export default function CreateDealPage() {
     const orig = originalPrice.toString().replace(/\D/g, '');
     const offerPriceVal = dealType === 'pair' ? pairleyPrice.toString().replace(/\D/g, '') : (tiers[0]?.pricePerHead || orig).toString();
     const capacityVal = dealType === 'pair' ? '2' : maxParticipants.toString();
-    
+
     const startDateIso = new Date().toISOString();
     const endDateIso = new Date(Date.now() + parseInt(validDays || '30') * 24 * 60 * 60 * 1000).toISOString();
 
@@ -436,23 +497,29 @@ export default function CreateDealPage() {
       required_people: capacityVal,
       start_date: startDateIso,
       end_date: endDateIso,
-      offer_image: imagePlaceholder || null,
-      facility_images: facilityImages,
+      cover_image: imagePlaceholder || null,
+      gallery_images: facilityImages,
       facility_details: JSON.stringify(staffList.filter(s => s.name.trim() || s.role.trim())),
       whatsapp_number: whatsappNumber || null,
-      latitude: latitude,
-      longitude: longitude
+      geo_lat: latitude,
+      geo_lng: longitude
     };
 
-    api.post('/offers/create', payload)
-      .then((res) => {
-        showToast('Deal published successfully to the live feed!', 'success');
-        navigate('/business/dashboard');
+    setIsSubmitting(true);
+    const request = isEditMode
+      ? api.put(`/offers/update/${offerId}`, payload)
+      : api.post('/offers/create', payload);
+
+    request
+      .then(() => {
+        showToast(isEditMode ? 'Deal updated successfully!' : 'Deal published successfully to the live feed!', 'success');
+        navigate(isEditMode ? '/business/manage-deals' : '/business/dashboard');
       })
       .catch((err) => {
-        console.error('Failed to publish live deal:', err);
-        showToast(err.message || 'Failed to publish deal. Please check your connection and try again.', 'error');
-      });
+        console.error('Failed to save deal:', err);
+        showToast(err.message || 'Failed to save deal. Please check your connection and try again.', 'error');
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   // Apply custom image URL
@@ -490,6 +557,14 @@ export default function CreateDealPage() {
     }
   };
 
+  if (isLoadingOffer) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader2 className="animate-spin text-[#5B12D6]" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="create-deal-page page-wrapper py-8">
       <div className="container max-w-4xl mx-auto px-4">
@@ -502,7 +577,7 @@ export default function CreateDealPage() {
           {/* Header Title */}
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
             <Sparkles className="text-[#5B12D6]" size={28} />
-            Create New Listing
+            {isEditMode ? 'Edit Listing' : 'Create New Listing'}
           </h2>
 
           <form onSubmit={handlePublish} className="flex flex-col gap-8 py-4">
@@ -674,9 +749,36 @@ export default function CreateDealPage() {
                 )}
               </div>
 
+              {isEditMode && (
+                <div className="form-group flex flex-col gap-1.5">
+                  <label className="text-sm font-bold text-slate-700">Upload Real Images</label>
+                  <p className="text-xs text-slate-500 -mt-1">
+                    Uploads here replace the preset/URL cover image below with a real hosted image, and manage the gallery directly on this offer.
+                  </p>
+                  <MediaUploadPanel
+                    singleSlots={[
+                      { key: 'cover', label: 'Cover Image', value: imagePlaceholder, uploadUrl: `/offers/${offerId}/media`, responseField: 'cover_image' },
+                    ]}
+                    gallery={{
+                      images: facilityImages,
+                      uploadUrl: `/offers/${offerId}/media`,
+                      removeUrl: `/offers/${offerId}/media/gallery`,
+                      responseField: 'gallery',
+                      maxCount: 10,
+                    }}
+                    onUpdated={(data) => {
+                      if (data.cover_image) setImagePlaceholder(data.cover_image);
+                      if (Array.isArray(data.gallery_images)) setFacilityImages(data.gallery_images);
+                      if (errors.image) setErrors({ ...errors, image: null });
+                    }}
+                    onError={(msg) => showToast(msg, 'error')}
+                  />
+                </div>
+              )}
+
               <div className="form-group flex flex-col gap-1.5">
-                <label className="text-sm font-bold text-slate-700">Cover Image</label>
-                <div 
+                <label className="text-sm font-bold text-slate-700">Cover Image {isEditMode ? '(Preset/URL fallback)' : ''}</label>
+                <div
                   className={`create-deal-page__uploader border-2 border-dashed rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between cursor-pointer transition-all ${
                     errors.image ? 'border-red-500 bg-red-50/20' : 'border-slate-200 hover:border-[#5B12D6] bg-slate-50/40'
                   }`}
@@ -1392,9 +1494,12 @@ export default function CreateDealPage() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-8 py-3.5 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/10 transition-all hover:scale-[1.01]"
+                  disabled={isSubmitting}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-8 py-3.5 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/10 transition-all hover:scale-[1.01] disabled:opacity-60"
                 >
-                  Publish Deal <Check size={16} />
+                  {isSubmitting
+                    ? <Loader2 size={16} className="animate-spin" />
+                    : <>{isEditMode ? 'Save Changes' : 'Publish Deal'} <Check size={16} /></>}
                 </button>
               </div>
             </div>

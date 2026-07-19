@@ -408,7 +408,7 @@ export default function ManageDealsPage() {
                                 </button>
                                 <button
                                   className="p-2 bg-slate-50 border border-slate-200/50 hover:bg-indigo-50 text-[#5B12D6] rounded-xl transition"
-                                  onClick={() => alert(`Redirecting to edit deal: ${deal.title}`)}
+                                  onClick={() => navigate(`/business/edit-deal/${deal.id}`)}
                                   title="Edit Listing"
                                 >
                                   <Pencil size={14} />
@@ -514,7 +514,7 @@ export default function ManageDealsPage() {
                           <div className="flex items-center gap-1">
                             <button
                               className="p-2 text-slate-400 hover:text-slate-700 bg-white border border-slate-200 rounded-xl transition-all"
-                              onClick={() => alert(`Redirecting to edit: ${deal.title}`)}
+                              onClick={() => navigate(`/business/edit-deal/${deal.id}`)}
                             >
                               <Pencil size={13} />
                             </button>

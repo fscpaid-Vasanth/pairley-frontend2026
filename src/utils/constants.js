@@ -29,6 +29,7 @@ export const ROUTES = {
   // Business
   BUSINESS_DASHBOARD: '/business/dashboard',
   CREATE_DEAL: '/business/create-deal',
+  EDIT_DEAL: '/business/edit-deal/:id',
   MANAGE_DEALS: '/business/manage-deals',
   BUSINESS_ORDERS: '/business/orders',
   BUSINESS_PAYOUTS: '/business/payouts',
