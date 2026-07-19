@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Building2,
   MapPin,
@@ -16,14 +16,14 @@ import {
   Users,
   MessageCircle,
   Lock,
-  X,
   Loader2,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { api, API_URL } from '../../utils/api';
+import { api } from '../../utils/api';
 import { getUserLocation, reverseGeocode } from '../../utils/geo';
 import { calculateProfileCompletion } from '../../utils/profileCompletion';
 import BusinessNav from '../../components/BusinessNav';
+import MediaUploadPanel from '../../components/business/MediaUploadPanel';
 import { MALLS } from '../../utils/constants';
 import './BusinessSettingsPage.css';
 
@@ -40,13 +40,8 @@ const DEFAULT_DAY_TIMING = { open: '10:00', close: '21:00', isClosed: false };
 const defaultStoreTiming = () =>
   DAYS.reduce((acc, d) => ({ ...acc, [d.key]: { ...DEFAULT_DAY_TIMING } }), {});
 
-const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('pairley_token') || ''}` });
-
 export default function BusinessSettingsPage() {
   const { showToast } = useToast();
-  const logoInputRef = useRef(null);
-  const coverInputRef = useRef(null);
-  const galleryInputRef = useRef(null);
 
   const [store, setStore] = useState({
     businessName: '',
@@ -78,7 +73,6 @@ export default function BusinessSettingsPage() {
   const [errors, setErrors] = useState({});
   const [isDetectingLoc, setIsDetectingLoc] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingField, setUploadingField] = useState(null); // 'logo' | 'cover' | 'gallery' | null
 
   const mapProfileToStore = (data) => {
     const smsNumbers = (data.notification_mobiles || '').split(',').map((s) => s.trim());
@@ -244,52 +238,17 @@ export default function BusinessSettingsPage() {
       .finally(() => setIsSaving(false));
   };
 
-  const uploadMedia = async (field, files) => {
-    setUploadingField(field);
-    try {
-      const formData = new FormData();
-      if (field === 'gallery') {
-        Array.from(files).forEach((f) => formData.append('gallery', f));
-      } else {
-        formData.append(field === 'cover' ? 'cover_image' : field, files[0]);
-      }
-      const res = await fetch(`${API_URL}/business/media`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: formData,
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Upload failed');
-      }
-      const data = await res.json();
-      setStore((prev) => ({
-        ...prev,
-        logo: data.logo || prev.logo,
-        coverImage: data.cover_image || prev.coverImage,
-        galleryImages: Array.isArray(data.gallery_images) ? data.gallery_images : prev.galleryImages,
-      }));
-      showToast('Image uploaded!', 'success');
-    } catch (err) {
-      showToast(err.message || 'Failed to upload image.', 'error');
-    } finally {
-      setUploadingField(null);
-    }
+  const handleMediaUpdated = (data) => {
+    setStore((prev) => ({
+      ...prev,
+      logo: data.logo ?? prev.logo,
+      coverImage: data.cover_image ?? prev.coverImage,
+      galleryImages: Array.isArray(data.gallery_images) ? data.gallery_images : prev.galleryImages,
+    }));
+    showToast('Image updated!', 'success');
   };
 
-  const handleRemoveGalleryImage = async (url) => {
-    try {
-      const res = await fetch(`${API_URL}/business/media/gallery?url=${encodeURIComponent(url)}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-      });
-      if (!res.ok) throw new Error('Failed to remove image');
-      const data = await res.json();
-      setStore((prev) => ({ ...prev, galleryImages: Array.isArray(data.gallery_images) ? data.gallery_images : prev.galleryImages }));
-    } catch (err) {
-      showToast(err.message || 'Failed to remove image.', 'error');
-    }
-  };
+  const handleMediaError = (message) => showToast(message, 'error');
 
   return (
     <div className="business-settings-page page-wrapper py-6 text-left">
@@ -327,45 +286,21 @@ export default function BusinessSettingsPage() {
                 Business Media
               </h4>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-600">Logo</label>
-                  <div className="media-upload-box" onClick={() => logoInputRef.current?.click()}>
-                    {store.logo ? <img src={store.logo} alt="Logo" className="media-upload-preview" /> : <span className="text-xs text-slate-400">Click to upload logo</span>}
-                    {uploadingField === 'logo' && <div className="media-upload-overlay"><Loader2 className="animate-spin" size={20} /></div>}
-                  </div>
-                  <input ref={logoInputRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files[0] && uploadMedia('logo', e.target.files)} />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-600">Cover Image</label>
-                  <div className="media-upload-box" onClick={() => coverInputRef.current?.click()}>
-                    {store.coverImage ? <img src={store.coverImage} alt="Cover" className="media-upload-preview" /> : <span className="text-xs text-slate-400">Click to upload cover</span>}
-                    {uploadingField === 'cover' && <div className="media-upload-overlay"><Loader2 className="animate-spin" size={20} /></div>}
-                  </div>
-                  <input ref={coverInputRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files[0] && uploadMedia('cover', e.target.files)} />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-600">Gallery ({store.galleryImages.length}/10)</label>
-                <div className="gallery-grid">
-                  {store.galleryImages.map((img) => (
-                    <div key={img} className="gallery-thumb">
-                      <img src={img} alt="Gallery item" />
-                      <button type="button" className="gallery-thumb-remove" onClick={() => handleRemoveGalleryImage(img)}>
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
-                  {store.galleryImages.length < 10 && (
-                    <div className="gallery-thumb gallery-thumb-add" onClick={() => galleryInputRef.current?.click()}>
-                      {uploadingField === 'gallery' ? <Loader2 className="animate-spin" size={18} /> : <span className="text-2xl text-slate-300">+</span>}
-                    </div>
-                  )}
-                </div>
-                <input ref={galleryInputRef} type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files.length && uploadMedia('gallery', e.target.files)} />
-              </div>
+              <MediaUploadPanel
+                singleSlots={[
+                  { key: 'logo', label: 'Logo', value: store.logo, uploadUrl: '/business/media', responseField: 'logo' },
+                  { key: 'cover', label: 'Cover Image', value: store.coverImage, uploadUrl: '/business/media', responseField: 'cover_image' },
+                ]}
+                gallery={{
+                  images: store.galleryImages,
+                  uploadUrl: '/business/media',
+                  removeUrl: '/business/media/gallery',
+                  responseField: 'gallery',
+                  maxCount: 10,
+                }}
+                onUpdated={handleMediaUpdated}
+                onError={handleMediaError}
+              />
             </div>
 
             {/* Store Profile Card */}

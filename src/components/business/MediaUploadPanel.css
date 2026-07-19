@@ -1,0 +1,91 @@
+/* Shared media upload UI — single-image slots (logo/cover) + gallery grid.
+   Used by BusinessSettingsPage (Module 2) and offer create/edit (Module 3). */
+
+.media-upload-panel__slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.media-upload-box {
+  position: relative;
+  height: 110px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  background: #f8fafc;
+  transition: border-color 0.2s ease;
+}
+
+.media-upload-box:hover {
+  border-color: #5B12D6;
+}
+
+.media-upload-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5B12D6;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+}
+
+.gallery-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-thumb-remove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.gallery-thumb-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  cursor: pointer;
+}
+
+.gallery-thumb-add:hover {
+  border-color: #5B12D6;
+}
