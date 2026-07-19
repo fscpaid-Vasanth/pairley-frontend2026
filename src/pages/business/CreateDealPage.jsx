@@ -28,6 +28,7 @@ import MediaUploadPanel from '../../components/business/MediaUploadPanel';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import { getUserLocation, reverseGeocode } from '../../utils/geo';
+import { STANDARD_OFFER_TYPES, getOfferTypeIcon, getOfferTypeMeta, isLegacyMatchingType, isPairMechanic } from '../../utils/offerTypes';
 import './CreateDealPage.css';
 
 // Preset stock images for the merchant to choose from
@@ -116,7 +117,9 @@ export default function CreateDealPage() {
   }
 
 
-  const [dealType, setDealType] = useState('pair'); // 'pair' or 'group'
+  const [dealType, setDealType] = useState('standard'); // 'standard' (default) | 'pair' | 'group' (legacy)
+  const [standardOfferType, setStandardOfferType] = useState('STANDARD'); // which of STANDARD_OFFER_TYPES, only used when dealType === 'standard'
+  const [showLegacyOptions, setShowLegacyOptions] = useState(false);
   const [category, setCategory] = useState('shopping');
   const [activeSection, setActiveSection] = useState(1);
   const [title, setTitle] = useState('');
@@ -136,6 +139,11 @@ export default function CreateDealPage() {
   const [isLoadingOffer, setIsLoadingOffer] = useState(isEditMode);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Standard and Pair both use a single original/split price; only Group
+  // uses tiered pricing. Kept as one derived flag so pricing UI/validation
+  // doesn't re-duplicate the dealType comparison at every call site.
+  const usesSinglePrice = dealType !== 'group';
+
   // Edit mode: fetch the existing offer and pre-fill the form. Note:
   // minParticipants, additional group tiers beyond the first, terms text,
   // and the free-text location string were never persisted by the original
@@ -151,14 +159,21 @@ export default function CreateDealPage() {
           navigate('/business/manage-deals');
           return;
         }
-        const isPair = offer.offer_type === 'BOGO';
-        setDealType(isPair ? 'pair' : 'group');
+        const legacy = isLegacyMatchingType(offer.offer_type);
+        const isPair = legacy && isPairMechanic(offer.offer_type);
+        if (legacy) {
+          setDealType(isPair ? 'pair' : 'group');
+          setShowLegacyOptions(true);
+        } else {
+          setDealType('standard');
+          setStandardOfferType(offer.offer_type || 'STANDARD');
+        }
         setCategory(offer.category || 'shopping');
         setTitle(offer.title || '');
         setDescription(offer.description || '');
         setImagePlaceholder(offer.cover_image || offer.offer_image || '');
         setOriginalPrice(String(offer.original_price ?? ''));
-        if (isPair) {
+        if (isPair || !legacy) {
           setPairleyPrice(String(offer.offer_price ?? ''));
         } else {
           setTiers([{ id: 1, minPeople: offer.required_people || 5, pricePerHead: offer.offer_price || 0 }]);
@@ -296,7 +311,7 @@ export default function CreateDealPage() {
     }
     
     const orig = parseFloat(originalPrice);
-    if (dealType === 'pair') {
+    if (usesSinglePrice) {
       const pairley = parseFloat(pairleyPrice);
       if (!originalPrice || isNaN(orig) || orig <= 0) {
         newErrors.originalPrice = 'Please enter a valid original price.';
@@ -376,7 +391,7 @@ export default function CreateDealPage() {
     if (!imagePlaceholder) sec2Errors.image = 'Please select a cover image.';
     
     const orig = parseFloat(originalPrice);
-    if (dealType === 'pair') {
+    if (usesSinglePrice) {
       const pairley = parseFloat(pairleyPrice);
       if (!originalPrice || isNaN(orig) || orig <= 0) {
         sec2Errors.originalPrice = 'Please enter a valid original price.';
@@ -481,8 +496,8 @@ export default function CreateDealPage() {
     }
 
     const orig = originalPrice.toString().replace(/\D/g, '');
-    const offerPriceVal = dealType === 'pair' ? pairleyPrice.toString().replace(/\D/g, '') : (tiers[0]?.pricePerHead || orig).toString();
-    const capacityVal = dealType === 'pair' ? '2' : maxParticipants.toString();
+    const offerPriceVal = usesSinglePrice ? pairleyPrice.toString().replace(/\D/g, '') : (tiers[0]?.pricePerHead || orig).toString();
+    const capacityVal = dealType === 'pair' ? '2' : dealType === 'standard' ? '1' : maxParticipants.toString();
 
     const startDateIso = new Date().toISOString();
     const endDateIso = new Date(Date.now() + parseInt(validDays || '30') * 24 * 60 * 60 * 1000).toISOString();
@@ -490,7 +505,7 @@ export default function CreateDealPage() {
     const payload = {
       title,
       description,
-      offer_type: dealType === 'pair' ? 'BOGO' : 'GROUP_DISCOUNT',
+      offer_type: dealType === 'pair' ? 'BOGO' : dealType === 'group' ? 'GROUP_DISCOUNT' : standardOfferType,
       category: category.toLowerCase(),
       original_price: orig,
       offer_price: offerPriceVal,
@@ -547,8 +562,9 @@ export default function CreateDealPage() {
     category: category,
     images: [imagePlaceholder],
     originalPrice: parseInt(originalPrice) || 0,
-    pairleyPrice: dealType === 'pair' ? (parseInt(pairleyPrice) || 0) : (tiers[0]?.pricePerHead || 0),
+    pairleyPrice: usesSinglePrice ? (parseInt(pairleyPrice) || 0) : (tiers[0]?.pricePerHead || 0),
     mode: dealType,
+    offer_type: dealType === 'pair' ? 'BOGO' : dealType === 'group' ? 'GROUP_DISCOUNT' : standardOfferType,
     interestCount: 0,
     maxParticipants: dealType === 'pair' ? 2 : parseInt(maxParticipants),
     location: location || 'Select Location',
@@ -592,52 +608,118 @@ export default function CreateDealPage() {
                 <p className="text-xs text-slate-500 mt-0.5">Select the co-buying social model and target category.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Standard Offer — the default, recommended model. Customer shows
+                  interest, a Lead is created, the merchant follows up directly.
+                  No chat, no matching, no waiting. */}
+              <button
+                type="button"
+                className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
+                  dealType === 'standard'
+                    ? 'border-[#5B12D6] bg-[#5B12D6]/10 shadow-lg shadow-[#5B12D6]/10 scale-[1.01]'
+                    : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
+                }`}
+                onClick={() => setDealType('standard')}
+              >
+                <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center text-2xl mb-4">
+                  🏷️
+                </div>
+                <h4 className="font-extrabold text-slate-800 text-lg">Standard Offer (Recommended)</h4>
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                  Customers show interest and your team follows up directly to close the sale. No chat, no matching, no waiting — the simplest way to list a deal.
+                </p>
+                {dealType === 'standard' && (
+                  <span className="absolute top-4 right-4 bg-[#5B12D6] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
+                    <Check size={14} strokeWidth={3} />
+                  </span>
+                )}
+              </button>
+
+              {dealType === 'standard' && (
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm mb-3">Offer Type</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {STANDARD_OFFER_TYPES.map((type) => {
+                      const meta = getOfferTypeMeta(type);
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all flex items-center gap-1.5 ${
+                            standardOfferType === type
+                              ? 'border-[#5B12D6] bg-[#5B12D6]/10 text-[#5B12D6]'
+                              : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                          }`}
+                          onClick={() => setStandardOfferType(type)}
+                        >
+                          <span>{meta.icon}</span> {meta.shortLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Advanced: Legacy Matching Type — Pairley 1.0's Pair/Group
+                  matching mechanics. Kept fully working, but no longer the
+                  default; merchants opt in explicitly. */}
+              <div className="border-t border-slate-200/60 pt-4">
                 <button
                   type="button"
-                  className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
-                    dealType === 'pair' 
-                      ? 'border-[#5B12D6] bg-[#5B12D6]/10 shadow-lg shadow-[#5B12D6]/10 scale-[1.01]' 
-                      : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
-                  }`}
-                  onClick={() => setDealType('pair')}
+                  className="text-xs font-bold text-slate-500 hover:text-[#5B12D6] flex items-center gap-1.5 transition-colors"
+                  onClick={() => setShowLegacyOptions((prev) => !prev)}
                 >
-                  <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl mb-4">
-                    🤝
-                  </div>
-                  <h4 className="font-extrabold text-slate-800 text-lg">Pair Deal (BOGO Split)</h4>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                    Two customers match to unlock a BOGO deal. They split the cost 50/50 and each gets their item. Great for restaurants, spa services, and retail.
-                  </p>
-                  {dealType === 'pair' && (
-                    <span className="absolute top-4 right-4 bg-[#5B12D6] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                  )}
+                  Advanced: Legacy Matching Type {showLegacyOptions ? '▲' : '▼'}
                 </button>
 
-                <button
-                  type="button"
-                  className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
-                    dealType === 'group' 
-                      ? 'border-[#5B12D6] bg-[#5B12D6]/10 shadow-lg shadow-[#5B12D6]/10 scale-[1.01]' 
-                      : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
-                  }`}
-                  onClick={() => setDealType('group')}
-                >
-                  <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl mb-4">
-                    👥
+                {showLegacyOptions && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <button
+                      type="button"
+                      className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
+                        dealType === 'pair'
+                          ? 'border-[#5B12D6] bg-[#5B12D6]/10 shadow-lg shadow-[#5B12D6]/10 scale-[1.01]'
+                          : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
+                      }`}
+                      onClick={() => setDealType('pair')}
+                    >
+                      <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl mb-4">
+                        🤝
+                      </div>
+                      <h4 className="font-extrabold text-slate-800 text-lg">Pair Deal (BOGO Split)</h4>
+                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                        Two customers match to unlock a BOGO deal. They split the cost 50/50 and each gets their item. Great for restaurants, spa services, and retail.
+                      </p>
+                      {dealType === 'pair' && (
+                        <span className="absolute top-4 right-4 bg-[#5B12D6] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
+                          <Check size={14} strokeWidth={3} />
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`create-deal-page__model-card flex flex-col text-left p-6 rounded-2xl border-4 transition-all relative ${
+                        dealType === 'group'
+                          ? 'border-[#5B12D6] bg-[#5B12D6]/10 shadow-lg shadow-[#5B12D6]/10 scale-[1.01]'
+                          : 'border-slate-200 bg-white opacity-60 hover:opacity-100'
+                      }`}
+                      onClick={() => setDealType('group')}
+                    >
+                      <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl mb-4">
+                        👥
+                      </div>
+                      <h4 className="font-extrabold text-slate-800 text-lg">Group Deal (Tiered Pricing)</h4>
+                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                        Multiple participants pool interest. As the size of the group reaches set milestones, the cost per person decreases. Ideal for travel tours, experiences, and subscriptions.
+                      </p>
+                      {dealType === 'group' && (
+                        <span className="absolute top-4 right-4 bg-[#5B12D6] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
+                          <Check size={14} strokeWidth={3} />
+                        </span>
+                      )}
+                    </button>
                   </div>
-                  <h4 className="font-extrabold text-slate-800 text-lg">Group Deal (Tiered Pricing)</h4>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                    Multiple participants pool interest. As the size of the group reaches set milestones, the cost per person decreases. Ideal for travel tours, experiences, and subscriptions.
-                  </p>
-                  {dealType === 'group' && (
-                    <span className="absolute top-4 right-4 bg-[#5B12D6] text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md border border-white">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                  )}
-                </button>
+                )}
               </div>
 
               <div>
@@ -992,7 +1074,7 @@ export default function CreateDealPage() {
               </div>
 
               {/* Price Fields */}
-              {dealType === 'pair' ? (
+              {usesSinglePrice ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="form-group flex flex-col gap-1.5">
                     <label className="text-sm font-bold text-slate-700">Original Retail Price (₹)</label>
@@ -1006,8 +1088,10 @@ export default function CreateDealPage() {
                       onChange={(e) => {
                         const val = e.target.value;
                         setOriginalPrice(val);
-                        setPairleyPrice(val ? Math.round(parseInt(val) / 2) : '');
-                        
+                        if (dealType === 'pair') {
+                          setPairleyPrice(val ? Math.round(parseInt(val) / 2) : '');
+                        }
+
                         const updatedErrors = { ...errors };
                         delete updatedErrors.originalPrice;
                         delete updatedErrors.pairleyPrice;
@@ -1022,7 +1106,9 @@ export default function CreateDealPage() {
                     )}
                   </div>
                   <div className="form-group flex flex-col gap-1.5">
-                    <label className="text-sm font-bold text-slate-700">Split Deal Price per Head (50% Off) (₹)</label>
+                    <label className="text-sm font-bold text-slate-700">
+                      {dealType === 'pair' ? 'Split Deal Price per Head (50% Off) (₹)' : 'Offer Price (₹)'}
+                    </label>
                     <input
                       type="number"
                       className={`form-input border rounded-xl p-3 text-slate-800 outline-none transition-all ${
@@ -1420,7 +1506,11 @@ export default function CreateDealPage() {
                     <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs font-semibold">
                       <span className="text-slate-400 font-medium">Marketing Model:</span>
                       <span className="text-slate-700 font-extrabold capitalize">
-                        {dealType === 'pair' ? '🤝 Pair Deal (BOGO Split)' : '👥 Group Deal (Tiered)'}
+                        {dealType === 'pair'
+                          ? '🤝 Pair Deal (BOGO Split)'
+                          : dealType === 'group'
+                          ? '👥 Group Deal (Tiered)'
+                          : `${getOfferTypeIcon(standardOfferType)} ${getOfferTypeMeta(standardOfferType).label}`}
                       </span>
 
                       <span className="text-slate-400 font-medium">Category:</span>
@@ -1441,16 +1531,18 @@ export default function CreateDealPage() {
                         <Calendar size={10} /> Valid for {validDays || 30} Days
                       </span>
 
-                      {dealType === 'pair' ? (
+                      {usesSinglePrice ? (
                         <>
                           <span className="text-slate-400 font-medium">Original Price:</span>
                           <span className="text-slate-500 line-through font-bold">
                             {formatPrice(parseInt(originalPrice) || 0)}
                           </span>
 
-                          <span className="text-slate-400 font-medium">Split Price / Head:</span>
+                          <span className="text-slate-400 font-medium">
+                            {dealType === 'pair' ? 'Split Price / Head:' : 'Offer Price:'}
+                          </span>
                           <span className="text-[#5B12D6] font-extrabold text-sm">
-                            {formatPrice(parseInt(pairleyPrice) || 0)} (50% Off)
+                            {formatPrice(parseInt(pairleyPrice) || 0)}{dealType === 'pair' ? ' (50% Off)' : ''}
                           </span>
                         </>
                       ) : (
