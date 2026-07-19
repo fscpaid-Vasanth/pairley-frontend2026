@@ -129,10 +129,10 @@ flowchart TD
 
 ### Module A1 — Authentication & Merchant Registration
 
-> **Status: 🟡 IN PROGRESS**
-> — **Database:** Completed (migration `20260718173010_module1_identity_foundation` applied and verified against production; see [ROADMAP.md](./ROADMAP.md#delivery-status)).
-> — **Application Code:** Ready for Deployment (committed locally — security fixes, `business_status`/`source` schema support, OTP bypass removal — not yet deployed to production; production smoke test so far only covered the pre-Module-1 code against the migrated schema).
-> — **Next:** deploy backend + frontend changes, then a second smoke test against the deployed code specifically verifying random OTP generation, bypass removal, `business_status`/`source` assignment, and the KYC-preview auth guard, before this module is marked complete.
+> **Status: ✅ COMPLETE** — Tag: `pairley-module1-complete`
+> — **Database:** migration `20260718173010_module1_identity_foundation` applied and verified against production.
+> — **Application Code:** deployed to production (backend + frontend) and re-verified with a second smoke test against the live deployed code: random OTP generation, bypass removal, `business_name` validation, `business_status`/`source` assignment, JWT auth, merchant/customer registration and login, admin login, and the KYC-preview auth guard (401/403) all confirmed working.
+> — **Known unrelated issue:** KYC document *retrieval* (not the auth guard, which is verified) is currently blocked by a pre-existing AWS credential compromise (`AWSCompromisedKeyQuarantineV3`) found during verification — needs credential rotation, tracked separately, does not block this module.
 
 **Objective:** Unified identity for customers, merchants, and admins using Firebase Auth for token issuance, with the Render backend as the authority that creates profile records and assigns roles. Removes the hardcoded `123456` OTP bypass flagged in the audit.
 

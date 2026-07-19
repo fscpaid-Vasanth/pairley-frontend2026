@@ -16,7 +16,9 @@ Tracks module-level delivery against [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_P
 
 | Module | Status |
 |---|---|
-| Group A — Module 1: Identity & Business Onboarding Foundation | 🟡 IN PROGRESS — Database: Completed · Application Code: Ready for Deployment |
+| Group A — Module 1: Identity & Business Onboarding Foundation | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module1-complete`. |
+
+**Note:** during Module 1 verification, an unrelated pre-existing issue was found — AWS flagged the backend's S3 credentials as compromised (`AWSCompromisedKeyQuarantineV3`), blocking file reads (e.g. KYC document retrieval). This does not affect any Module 1 code and does not block Module 1's completion, but needs credential rotation independently — tracked separately, not part of this roadmap's feature scope.
 
 ---
 
