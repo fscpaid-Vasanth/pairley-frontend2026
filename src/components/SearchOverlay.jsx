@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search, X, Trash2, TrendingUp, Clock, ArrowRight } from 'lucide-react';
-import { mockDeals } from '../data/mockDeals';
 import { categories } from '../data/categories';
 import { formatPrice } from '../utils/constants';
 import { getCategoryById } from '../data/categories';
+import { getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../utils/offerTypes';
+import { api } from '../utils/api';
 import ImageWithFallback from './ImageWithFallback';
 import './SearchOverlay.css';
 
@@ -28,7 +29,18 @@ export default function SearchOverlay({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
   const [modeFilter, setModeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [results, setResults] = useState([]);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [categoryCounts, setCategoryCounts] = useState({});
   const inputRef = useRef(null);
+
+  // Category tile counts — fetched once when the overlay first opens.
+  useEffect(() => {
+    if (!isOpen) return;
+    api.get('/offers/category-counts')
+      .then((counts) => setCategoryCounts(counts || {}))
+      .catch((err) => console.error('Failed to load category counts:', err));
+  }, [isOpen]);
 
   // Manage search history in session storage
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -82,34 +94,51 @@ export default function SearchOverlay({ isOpen, onClose }) {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  /* Filtered results */
-  const results = useMemo(() => {
-    let filtered = [...mockDeals];
-
-    if (modeFilter !== 'all') {
-      filtered = filtered.filter((d) => d.mode === modeFilter);
-    }
-
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter((d) => d.category === categoryFilter);
-    }
-
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      filtered = filtered.filter(
-        (d) =>
-          d.title.toLowerCase().includes(q) ||
-          d.businessOwner?.name.toLowerCase().includes(q) ||
-          d.location?.toLowerCase().includes(q) ||
-          d.tags?.some((t) => t.toLowerCase().includes(q))
-      );
-    }
-
-    return filtered;
-  }, [query, modeFilter, categoryFilter]);
-
   // Determine if user has actively started filtering or searching
   const isSearching = query.trim() !== '' || categoryFilter !== 'all' || modeFilter !== 'all';
+
+  /* Real backend search — debounced, re-fires on query/category change.
+     modeFilter (pair/group/all) has no server-side param; applied
+     client-side on the fetched result set via the shared offer_type
+     helper, same as DealsPage. */
+  useEffect(() => {
+    if (!isSearching) {
+      setResults([]);
+      return;
+    }
+
+    const params = new URLSearchParams({ status: 'ACTIVE' });
+    if (query.trim()) params.set('search', query.trim());
+    if (categoryFilter !== 'all') params.set('category', categoryFilter);
+
+    setIsLoadingResults(true);
+    const timeoutId = setTimeout(() => {
+      api.get(`/offers/list?${params.toString()}`)
+        .then((data) => {
+          const mapped = data.map((d) => ({
+            id: d.id,
+            title: d.title,
+            category: d.category ? d.category.toLowerCase() : 'shopping',
+            offer_type: d.offer_type,
+            mode: getDealMode(d.offer_type),
+            pairleyPrice: d.offer_price,
+            images: [d.offer_image || d.cover_image],
+            location: d.business?.city || '',
+            businessOwner: { name: d.business?.business_name || 'Local Seller' },
+          }));
+          const filtered =
+            modeFilter === 'all' ? mapped : mapped.filter((d) => d.mode === modeFilter);
+          setResults(filtered);
+        })
+        .catch((err) => {
+          console.error('Search failed:', err);
+          setResults([]);
+        })
+        .finally(() => setIsLoadingResults(false));
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [query, categoryFilter, modeFilter, isSearching]);
 
   const handleKeywordClick = (term) => {
     setQuery(term);
@@ -203,9 +232,11 @@ export default function SearchOverlay({ isOpen, onClose }) {
               >
                 <div className="flex justify-between items-center mb-2">
                   <p className="search-overlay__results-title">
-                    {results.length} matched offer{results.length !== 1 ? 's' : ''}
+                    {isLoadingResults
+                      ? 'Searching…'
+                      : `${results.length} matched offer${results.length !== 1 ? 's' : ''}`}
                   </p>
-                  <button 
+                  <button
                     onClick={() => {
                       setQuery('');
                       setCategoryFilter('all');
@@ -216,10 +247,21 @@ export default function SearchOverlay({ isOpen, onClose }) {
                     Clear Filters
                   </button>
                 </div>
-                
-                {results.length > 0 ? (
+
+                {isLoadingResults ? (
+                  <div className="search-overlay__no-results py-12">
+                    <div className="search-overlay__no-results-emoji">⏳</div>
+                    <p className="font-bold text-slate-300 text-lg">Searching offers…</p>
+                  </div>
+                ) : results.length > 0 ? (
                   results.map((deal) => {
                     const cat = getCategoryById(deal.category);
+                    const modeLabel =
+                      deal.mode === 'pair'
+                        ? '🤝 Pair BOGO'
+                        : deal.mode === 'group'
+                        ? '👥 Group Tiers'
+                        : `${getOfferTypeIcon(deal.offer_type)} ${getOfferTypeMeta(deal.offer_type).shortLabel}`;
                     return (
                       <Link
                         key={deal.id}
@@ -240,7 +282,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                         <div className="search-overlay__result-info">
                           <div className="search-overlay__result-title">{deal.title}</div>
                           <div className="search-overlay__result-meta">
-                            {cat?.icon} {cat?.name} · {deal.location} · {deal.mode === 'pair' ? '🤝 Pair BOGO' : '👥 Group Tiers'}
+                            {cat?.icon} {cat?.name} · {deal.location} · {modeLabel}
                           </div>
                         </div>
                         <span className="search-overlay__result-price">
@@ -335,7 +377,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                           {cat.name}
                         </span>
                         <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-1 group-hover:text-indigo-300">
-                          {cat.dealCount} active deals <ArrowRight size={10} />
+                          {categoryCounts[cat.id] || 0} active deals <ArrowRight size={10} />
                         </span>
                       </button>
                     ))}
