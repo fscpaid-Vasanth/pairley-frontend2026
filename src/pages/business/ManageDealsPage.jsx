@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   Pencil, 
-  Pause, 
-  Trash2, 
-  Plus, 
+  Pause,
+  Trash2,
+  Archive,
+  Plus,
   Eye, 
   Users, 
   LayoutGrid, 
@@ -217,7 +218,7 @@ export default function ManageDealsPage() {
             >
               <div className="flex flex-col">
                 <span className="text-xs font-semibold text-slate-400">Action Completed</span>
-                <span className="text-sm font-bold mt-0.5">Listing deleted successfully</span>
+                <span className="text-sm font-bold mt-0.5">Listing archived successfully</span>
               </div>
               <button 
                 onClick={handleUndoDelete}
@@ -416,8 +417,8 @@ export default function ManageDealsPage() {
                                 {deal.status !== 'expired' && (
                                   <button
                                     className={`p-2 border rounded-xl transition ${
-                                      deal.status === 'active' 
-                                        ? 'bg-amber-50 border-amber-200/50 text-amber-600 hover:bg-amber-100' 
+                                      deal.status === 'active'
+                                        ? 'bg-amber-50 border-amber-200/50 text-amber-600 hover:bg-amber-100'
                                         : 'bg-emerald-50 border-emerald-200/50 text-emerald-600 hover:bg-emerald-100'
                                     }`}
                                     onClick={() => handleToggleStatus(deal.id)}
@@ -426,6 +427,13 @@ export default function ManageDealsPage() {
                                     {deal.status === 'active' ? <Pause size={14} /> : <Play size={14} />}
                                   </button>
                                 )}
+                                <button
+                                  className="p-2 bg-slate-50 border border-slate-200/50 hover:bg-red-50 text-red-500 rounded-xl transition"
+                                  onClick={() => handleDelete(deal.id)}
+                                  title="Archive Listing"
+                                >
+                                  <Archive size={14} />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -530,6 +538,13 @@ export default function ManageDealsPage() {
                                 {deal.status === 'active' ? <Pause size={13} /> : <Play size={13} />}
                               </button>
                             )}
+                            <button
+                              className="p-2 bg-slate-50 border border-slate-200 hover:bg-red-50 text-red-500 rounded-xl transition"
+                              onClick={() => handleDelete(deal.id)}
+                              title="Archive Listing"
+                            >
+                              <Archive size={13} />
+                            </button>
                           </div>
                         </div>
                       </div>
