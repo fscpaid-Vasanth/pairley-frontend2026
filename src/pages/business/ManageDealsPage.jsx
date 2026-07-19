@@ -80,7 +80,7 @@ export default function ManageDealsPage() {
       });
   }, [business.id]);
 
-  const [activeTab, setActiveTab] = useState('all'); // 'all', 'active', 'draft', 'paired', 'expired'
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'active', 'paused', 'paired', 'expired'
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
   
@@ -95,12 +95,12 @@ export default function ManageDealsPage() {
   const handleToggleStatus = (dealId) => {
     const deal = dealsList.find(d => d.id === dealId);
     if (!deal) return;
-    const nextStatus = deal.status === 'active' ? 'draft' : 'active';
-    
+    const nextStatus = deal.status === 'active' ? 'paused' : 'active';
+
     // Optimistic UI update
     setDealsList(prev => prev.map(d => d.id === dealId ? { ...d, status: nextStatus } : d));
-    
-    api.put(`/offers/update/${dealId}`, { status: nextStatus.toUpperCase() })
+
+    api.put(`/offers/${dealId}/status`, { status: nextStatus.toUpperCase() })
       .catch((err) => {
         console.error('Failed to update status on server:', err);
       });
@@ -146,7 +146,7 @@ export default function ManageDealsPage() {
     if (activeTab === 'active' && deal.status !== 'active') return false;
     if (activeTab === 'paired' && deal.status !== 'paired') return false;
     if (activeTab === 'expired' && deal.status !== 'expired') return false;
-    if (activeTab === 'draft' && deal.status !== 'draft') return false;
+    if (activeTab === 'paused' && deal.status !== 'paused') return false;
 
     // Search matching
     if (searchQuery && !deal.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -169,7 +169,7 @@ export default function ManageDealsPage() {
             Active
           </span>
         );
-      case 'draft':
+      case 'paused':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 border border-amber-200/50">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -256,17 +256,17 @@ export default function ManageDealsPage() {
           <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white/40 p-3 rounded-2xl border border-slate-200/60 backdrop-blur-sm">
             {/* Filter Tabs */}
             <div className="flex flex-wrap gap-1">
-              {['all', 'active', 'draft', 'paired', 'expired'].map((tab) => (
+              {['all', 'active', 'paused', 'paired', 'expired'].map((tab) => (
                 <button
                   key={tab}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    activeTab === tab 
-                      ? 'bg-[#5B12D6] text-white shadow-sm' 
+                    activeTab === tab
+                      ? 'bg-[#5B12D6] text-white shadow-sm'
                       : 'text-slate-600 hover:bg-slate-100 bg-transparent'
                   }`}
                   onClick={() => setActiveTab(tab)}
                 >
-                  <span className="capitalize">{tab === 'draft' ? 'Paused' : tab}</span>
+                  <span className="capitalize">{tab}</span>
                   <span className={`ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] ${
                     activeTab === tab ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                   }`}>
