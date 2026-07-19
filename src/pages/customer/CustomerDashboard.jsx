@@ -507,8 +507,8 @@ export default function CustomerDashboard() {
               images: d.offer_image ? [d.offer_image] : d.images,
               interestCount: d.joined_people || d.interestCount || 0,
               maxParticipants: d.required_people || d.maxParticipants || 10,
-              latitude: d.latitude,
-              longitude: d.longitude,
+              latitude: d.geo_lat,
+              longitude: d.geo_lng,
               city: d.city || d.location,
             }))}
             userLat={userLocation?.lat}

@@ -14,7 +14,19 @@ const CITY_SUGGESTIONS = [
 ];
 
 export default function LocationBar() {
-  const { location, status, requestLocation, setManualLocation } = useLocationContext();
+  const { location, permissionStatus, isLoading, refreshLocation, setManualLocation } = useLocationContext();
+  // LocationContext exposes { permissionStatus, isLoading, location }, not a
+  // single combined status — derive the state this component actually
+  // renders against from those.
+  const status = isLoading
+    ? 'loading'
+    : permissionStatus === 'denied'
+    ? 'denied'
+    : location?.lat != null
+    ? 'success'
+    : location?.city
+    ? 'manual'
+    : 'idle';
   const [modalOpen, setModalOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [filteredCities, setFilteredCities] = useState([]);
@@ -97,7 +109,7 @@ export default function LocationBar() {
               <motion.button
                 key="denied"
                 className="location-bar__enable-btn"
-                onClick={requestLocation}
+                onClick={refreshLocation}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
@@ -218,7 +230,7 @@ export default function LocationBar() {
               <button
                 className="location-bar__modal-gps-btn"
                 onClick={() => {
-                  requestLocation();
+                  refreshLocation();
                   setModalOpen(false);
                 }}
               >

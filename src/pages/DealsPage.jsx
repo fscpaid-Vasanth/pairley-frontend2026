@@ -9,7 +9,6 @@ import CustomDropdown from '../components/CustomDropdown';
 import LocationBar from '../components/LocationBar';
 import RadiusSelector from '../components/RadiusSelector';
 import { useLocationContext } from '../context/LocationContext';
-import { haversineDistance } from '../utils/geo';
 import { api } from '../utils/api';
 import { MALLS } from '../utils/constants';
 import { getDealMode } from '../utils/offerTypes';
@@ -90,7 +89,15 @@ const DealsPage = () => {
   };
 
   useEffect(() => {
-    api.get('/offers/list?status=ACTIVE')
+    setLoading(true);
+    const params = new URLSearchParams({ status: 'ACTIVE' });
+    if (userLocation?.lat != null && userLocation?.lng != null) {
+      params.set('lat', userLocation.lat);
+      params.set('lng', userLocation.lng);
+      params.set('radiusKm', radiusKm);
+    }
+
+    api.get(`/offers/list?${params.toString()}`)
       .then((data) => {
         // Map backend fields to frontend DealCard format
         const mapped = data.map((d) => ({
@@ -115,7 +122,10 @@ const DealsPage = () => {
           validUntil: d.end_date || '2026-12-31',
           status: d.status ? d.status.toLowerCase() : 'active',
           createdAt: d.created_at || d.createdAt || '2026-06-01',
-          mallName: d.business?.mall_name || null
+          mallName: d.business?.mall_name || null,
+          // Only present when lat/lng/radiusKm were sent — computed
+          // server-side (offer's own geo_lat/geo_lng, else its business's).
+          distanceKm: d.distanceKm ?? null
         }));
         setDealsList(mapped);
         setLoading(false);
@@ -125,7 +135,7 @@ const DealsPage = () => {
         setDealsList([]);
         setLoading(false);
       });
-  }, []);
+  }, [userLocation?.lat, userLocation?.lng, radiusKm]);
 
   /* Filtered + sorted deals */
   const filteredDeals = useMemo(() => {
@@ -177,20 +187,21 @@ const DealsPage = () => {
         deals.sort((a, b) => new Date(a.validUntil) - new Date(b.validUntil));
         break;
       case 'nearby':
-        if (userLocation?.lat && userLocation?.lng) {
-          deals.sort((a, b) => {
-            const distA = a.latitude ? haversineDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude) : 999;
-            const distB = b.latitude ? haversineDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude) : 999;
-            return distA - distB;
-          });
-        }
+        // distanceKm is only populated when the fetch included lat/lng
+        // (i.e. the user has a known location) — computed server-side.
+        deals.sort((a, b) => {
+          if (a.distanceKm == null && b.distanceKm == null) return 0;
+          if (a.distanceKm == null) return 1;
+          if (b.distanceKm == null) return -1;
+          return a.distanceKm - b.distanceKm;
+        });
         break;
       default:
         break;
     }
 
     return deals;
-  }, [dealsList, dealType, selectedCategory, mallQuery, searchQuery, sortBy, userLocation, radiusKm]);
+  }, [dealsList, dealType, selectedCategory, mallQuery, searchQuery, sortBy]);
 
   return (
     <div className="page-wrapper">
@@ -231,7 +242,7 @@ const DealsPage = () => {
             transition={{ delay: 0.15, duration: 0.45 }}
           >
             <div className="deals-toolbar-left">
-              <DealTypeToggle activeType={dealType} onTypeChange={setDealType} />
+              <DealTypeToggle selected={dealType} onChange={setDealType} />
             </div>
             <div className="deals-toolbar-right">
               <CustomDropdown
@@ -319,16 +330,11 @@ const DealsPage = () => {
               animate="visible"
               key={`${dealType}-${selectedCategory}-${sortBy}`}
             >
-              {filteredDeals.map((deal) => {
-                const distKm = (userLocation?.lat && deal.latitude)
-                  ? haversineDistance(userLocation.lat, userLocation.lng, deal.latitude, deal.longitude)
-                  : null;
-                return (
-                  <motion.div key={deal.id} variants={cardVariants}>
-                    <DealCard deal={deal} distance={distKm} />
-                  </motion.div>
-                );
-              })}
+              {filteredDeals.map((deal) => (
+                <motion.div key={deal.id} variants={cardVariants}>
+                  <DealCard deal={deal} distance={deal.distanceKm} />
+                </motion.div>
+              ))}
             </motion.div>
           ) : (
             <motion.div

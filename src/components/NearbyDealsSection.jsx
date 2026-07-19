@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { haversineDistance, formatDistance } from '../utils/geo';
+import { formatDistance } from '../utils/geo';
+import { useNearbyDeals } from '../hooks/useNearbyDeals';
 import './NearbyDealsSection.css';
 
 const CATEGORY_EMOJIS = {
@@ -58,7 +59,7 @@ function sortDeals(deals, sortBy) {
       );
     case 'distance':
     default:
-      return arr.sort((a, b) => (a._distance ?? 0) - (b._distance ?? 0));
+      return arr.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
   }
 }
 
@@ -73,31 +74,20 @@ export default function NearbyDealsSection({
 }) {
   const navigate = useNavigate();
 
-  const filteredDeals = useMemo(() => {
-    const enriched = deals.map((deal) => {
-      const dealLat = deal.lat ?? deal.latitude ?? deal.location?.lat;
-      const dealLng = deal.lng ?? deal.longitude ?? deal.location?.lng;
-      let distance = null;
+  // Single source of truth for distance computation/radius filtering — see
+  // src/hooks/useNearbyDeals.js. This section's own popularity/discount/
+  // expiry sort modes apply on top of the hook's within-radius result.
+  const { withinRadius } = useNearbyDeals({
+    deals,
+    userLat,
+    userLng,
+    radiusKm: maxDistance,
+  });
 
-      if (
-        userLat != null &&
-        userLng != null &&
-        dealLat != null &&
-        dealLng != null
-      ) {
-        distance = haversineDistance(userLat, userLng, dealLat, dealLng);
-      }
-
-      return { ...deal, _distance: distance };
-    });
-
-    const nearby = enriched.filter((deal) => {
-      if (deal._distance == null) return true;
-      return deal._distance <= maxDistance;
-    });
-
-    return sortDeals(nearby, sortBy);
-  }, [deals, userLat, userLng, maxDistance, sortBy]);
+  const filteredDeals = useMemo(
+    () => sortDeals(withinRadius, sortBy),
+    [withinRadius, sortBy]
+  );
 
   const headerLabel = `${emoji} ${title} (Within ${maxDistance} KM)`;
 
@@ -145,19 +135,19 @@ export default function NearbyDealsSection({
               deal.imageUrl ??
               deal.image ??
               deal.coverImage ??
-              `https://picsum.photos/seed/${deal._id ?? index}/300/200`;
+              `https://picsum.photos/seed/${deal.id ?? index}/300/200`;
             const distLabel =
-              deal._distance != null ? formatDistance(deal._distance) : null;
+              deal.distance != null ? formatDistance(deal.distance) : null;
 
             return (
               <motion.div
-                key={deal._id ?? index}
+                key={deal.id ?? index}
                 className="nearby-card"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.06, duration: 0.3 }}
                 whileHover={{ y: -3 }}
-                onClick={() => navigate(`/deals/${deal._id}`)}
+                onClick={() => navigate(`/deals/${deal.id}`)}
               >
                 <div className="nearby-card__img-wrap">
                   <img
