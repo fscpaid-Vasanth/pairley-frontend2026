@@ -9,6 +9,7 @@ import CustomDropdown from '../components/CustomDropdown';
 import LocationBar from '../components/LocationBar';
 import RadiusSelector from '../components/RadiusSelector';
 import { useLocationContext } from '../context/LocationContext';
+import { useSavedOffers } from '../hooks/useSavedOffers';
 import { api } from '../utils/api';
 import { MALLS } from '../utils/constants';
 import { getDealMode } from '../utils/offerTypes';
@@ -44,6 +45,7 @@ const DealsPage = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [radiusKm, setRadiusKm] = useState(5);
   const { location: userLocation } = useLocationContext();
+  const { savedIds, toggleSave } = useSavedOffers();
   const [isDarkTheme, setIsDarkTheme] = useState(() => {
     return localStorage.getItem('deals-theme') === 'dark';
   });
@@ -333,7 +335,12 @@ const DealsPage = () => {
             >
               {filteredDeals.map((deal) => (
                 <motion.div key={deal.id} variants={cardVariants}>
-                  <DealCard deal={deal} distance={deal.distanceKm} />
+                  <DealCard
+                    deal={deal}
+                    distance={deal.distanceKm}
+                    isSaved={savedIds.has(deal.id)}
+                    onToggleSave={toggleSave}
+                  />
                 </motion.div>
               ))}
             </motion.div>

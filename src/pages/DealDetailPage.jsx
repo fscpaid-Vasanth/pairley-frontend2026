@@ -22,6 +22,7 @@ import PricingTierCard from '../components/PricingTierCard';
 import { useToast } from '../context/ToastContext';
 import ImageWithFallback from '../components/ImageWithFallback';
 import { getDealById } from '../data/mockDeals';
+import { useSavedOffers } from '../hooks/useSavedOffers';
 import { api } from '../utils/api';
 import {
   formatPrice,
@@ -79,6 +80,7 @@ const DealDetailPage = () => {
   const [deal, setDeal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [similarDeals, setSimilarDeals] = useState([]);
+  const { savedIds, toggleSave } = useSavedOffers();
   const [openTermIndex, setOpenTermIndex] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [conversionRatio, setConversionRatio] = useState(0);
@@ -842,7 +844,12 @@ const DealDetailPage = () => {
               <h2 className="deal-similar-header">Similar Deals</h2>
               <div className="deal-similar-grid">
                 {similarDeals.map((d) => (
-                  <DealCard key={d.id} deal={d} />
+                  <DealCard
+                    key={d.id}
+                    deal={d}
+                    isSaved={savedIds.has(d.id)}
+                    onToggleSave={toggleSave}
+                  />
                 ))}
               </div>
             </motion.section>

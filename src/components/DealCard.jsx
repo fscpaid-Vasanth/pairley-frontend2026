@@ -53,8 +53,15 @@ function CountdownBadge({ endDate }) {
 }
 
 // ── Main DealCard ─────────────────────────────────────────────────────────────
-export default function DealCard({ deal, onClick, distance }) {
+// isSaved/onToggleSave: when provided, the parent owns saved-state and the
+// real API call (fetched once per page, not per-card — see DealsPage.jsx/
+// DealDetailPage.jsx). Without them (e.g. CreateDealPage.jsx's own-deal
+// preview, which has no customer context to save against), the heart falls
+// back to a local, non-persisted toggle exactly as before.
+export default function DealCard({ deal, onClick, distance, isSaved: isSavedProp, onToggleSave }) {
   const [wishlisted, setWishlisted] = useState(false);
+  const isControlled = onToggleSave != null;
+  const isSaved = isControlled ? !!isSavedProp : wishlisted;
 
   const category = getCategoryById(deal.category);
   const { saved, percentage } = calculateSavings(deal.originalPrice, deal.pairleyPrice);
@@ -62,7 +69,11 @@ export default function DealCard({ deal, onClick, distance }) {
   const handleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setWishlisted((prev) => !prev);
+    if (isControlled) {
+      onToggleSave(deal.id || deal._id, isSaved);
+    } else {
+      setWishlisted((prev) => !prev);
+    }
   };
 
   const handleShare = (e) => {
@@ -145,11 +156,11 @@ export default function DealCard({ deal, onClick, distance }) {
           {/* Action buttons */}
           <div className="deal-card__actions">
             <button
-              className={`deal-card__wishlist ${wishlisted ? 'deal-card__wishlist--active' : ''}`}
+              className={`deal-card__wishlist ${isSaved ? 'deal-card__wishlist--active' : ''}`}
               onClick={handleWishlist}
-              aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+              aria-label={isSaved ? 'Remove from wishlist' : 'Add to wishlist'}
             >
-              <Heart size={15} fill={wishlisted ? '#EF4444' : 'none'} strokeWidth={2} />
+              <Heart size={15} fill={isSaved ? '#EF4444' : 'none'} strokeWidth={2} />
             </button>
             <button
               className="deal-card__share"
