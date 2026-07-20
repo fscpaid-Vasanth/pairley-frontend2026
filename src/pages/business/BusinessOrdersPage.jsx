@@ -266,7 +266,7 @@ export default function BusinessOrdersPage() {
               Fulfillment & Orders 🚚
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Review buyer contact coordinates, coordinate BOGO matches, and mark leads as completed.
+              Review buyer contact coordinates, coordinate BOGO/Group matches, and mark them as completed.
             </p>
           </div>
         </div>
@@ -283,7 +283,7 @@ export default function BusinessOrdersPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/80 p-3 rounded-2xl shadow-sm">
               <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl w-full sm:w-max">
                 {[
-                  { id: 'awaiting_dispatch', label: 'Leads to Contact', count: awaitingCount },
+                  { id: 'awaiting_dispatch', label: 'Matches to Contact', count: awaitingCount },
                   { id: 'shipped', label: 'In Transit', count: shippedCount },
                   { id: 'completed', label: 'Delivered', count: completedCount }
                 ].map(tab => (
@@ -490,7 +490,7 @@ export default function BusinessOrdersPage() {
             <div className="bg-slate-50 border border-slate-200 p-4.5 rounded-2xl text-[10px] text-slate-400 leading-relaxed text-left flex gap-2">
               <ShieldCheck size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-slate-500">Direct Lead Coordination</p>
+                <p className="font-bold text-slate-500">Direct Match Coordination</p>
                 <p className="mt-0.5">
                   No billing is executed inside the app. Review buyer coordinates on the left cards to contact them directly, coordinate matches, and secure payouts offline.
                 </p>
