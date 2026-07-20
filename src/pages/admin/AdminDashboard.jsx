@@ -28,6 +28,7 @@ import { useToast } from '../../context/ToastContext';
 import { api, API_URL } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
+import SystemHealthTile from './SystemHealthTile';
 import './AdminDashboard.css';
 
 const isValidImageSrc = (src) => {
@@ -481,6 +482,8 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+
+            <SystemHealthTile />
           </div>
         )}
 
