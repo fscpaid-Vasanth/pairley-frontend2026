@@ -2,6 +2,31 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module5-complete] — 2026-07-20
+
+### Module 5 — Lead Management
+
+**Added**
+- `GET /leads` (optional `?offerId=&status=` filters), `GET /leads/:id`, `PUT /leads/:id/status` — the first read/update surface the `Lead` table has ever had (Module 3 only ever wrote to it)
+- `LeadStatus` enum (`NEW`/`CONTACTED`/`CONVERTED`/`NOT_INTERESTED`) replacing `Lead.status`'s previous unconstrained free-text field
+- Server-side lead notification — `createLead()` now writes a `Notification` row (and sends an FCM push if a token exists) when a lead comes in, independent of whether the customer's own `wa.me` popups fired successfully
+- `LeadsPage.jsx` — the first merchant-facing surface for leads, ever: filter by status, search, per-lead status dropdown, one-click "Contact" via WhatsApp (auto-advances NEW → CONTACTED). New nav entry between Deals Manager and Fulfillment & Orders
+- `src/utils/whatsapp.js` — shared WhatsApp deep-link helper, extracted from `InterestButton.jsx`'s previously-duplicated inline logic
+- "New Leads" stat card on `BusinessDashboard.jsx`, clickable through to the Leads page
+
+**Changed**
+- `BusinessOrdersPage.jsx`'s "Leads to Contact" tab (and "Direct Lead Coordination" note) relabeled "Matches to Contact" / "Direct Match Coordination" — that page is `OfferInterest`-based (legacy Pair/Group matching only), not `Lead`-based, and predates the real Lead model; disambiguated now that a real Leads page exists
+
+**Fixed**
+- Deployment-time catch: `Lead.updated_at`'s initial migration used `@updatedAt` alone, which has no SQL-level default — `prisma db push` correctly refused to apply it against the 7 existing production leads rather than fail. Fixed with `@default(now()) @updatedAt` before re-applying; zero data touched by the aborted attempt
+
+**Verified in production**
+- Lead creation via Show Interest, full status workflow (NEW → CONTACTED → CONVERTED, invalid status rejected with 400)
+- Ownership enforcement: a second merchant's account correctly got 403 on both the leads list and direct fetch/status-update of the first merchant's lead
+- Server-side `Notification` row confirmed created on lead creation
+- Filtering by status and offer, "New Leads" dashboard count accuracy
+- No regressions in Module 3 (offer lifecycle, version snapshots, legacy `OfferInterest` flow) or Module 4 (PII protection, field-exposure discipline, `status=ALL` lockdown, category counts)
+
 ## [pairley-module4-complete] — 2026-07-20
 
 ### Module 4 — Customer Discovery
