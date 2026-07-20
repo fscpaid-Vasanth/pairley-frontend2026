@@ -396,6 +396,12 @@ flowchart TD
 
 ### Module A9 — Customer Profile
 
+> **Status: ✅ COMPLETE** — Tag: `pairley-module6-complete` (numbered Module 6 in delivery order).
+> — **Database:** migration `20260720120000_module6_customer_profile_notify_prefs` (3 additive boolean columns on `customers`, each with a `DEFAULT`) applied via `prisma db push` and verified against production — zero data loss, all record counts identical before and after.
+> — **Application Code:** deployed to production (backend + frontend) and verified with a full production smoke test using disposable accounts (two customers, one merchant) — save/unsave an offer with real persistence confirmed across a fresh fetch (not just within a session), two-customer isolation on saved offers and profile updates, an archived offer staying visible in the saved list with the correct "No Longer Available" badge, real notification-preference persistence (previously `localStorage`-only), the `UpdateCustomerProfileDto` whitelist rejecting a non-whitelisted field live, and full regression coverage across Modules 3 (offer lifecycle + version history), 4 (discovery, category counts, PII protection), and 5 (lead creation/workflow/ownership, legacy `OfferInterest` compatibility) — all passed with no regressions.
+> — **Finding, not a build-from-scratch:** the backend for this module (`GET/PUT customers/profile`, `GET/POST/DELETE customers/save-offer(s)`) already existed and worked — the actual gap was that `DealCard.jsx`'s wishlist button never called it (pure local state, reset on every reload) and the profile page's "Notifications" section only wrote to `localStorage`. Module 6 was a wiring/hardening pass, not new backend construction — smaller in scope than this section's original 3-day estimate.
+> — **Deviation from this spec:** "Preferred Categories" stayed client-side/local per an explicit decision (no defined server-side purpose like recommendations yet, so no new column was added for it) rather than being "extended into `customers` schema" as originally drafted here.
+
 **Objective:** Persistent customer identity — saved offers, notification preferences, interest history. Fixes the audit's unpersisted "Save Offer" bug.
 
 **UI Screens:** Customer Profile, Saved Offers (persisted), "My Interests," notification preferences.

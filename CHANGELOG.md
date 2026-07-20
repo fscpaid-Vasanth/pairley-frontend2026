@@ -2,6 +2,31 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module6-complete] — 2026-07-20
+
+### Module 6 — Customer Profile & Saved Offers
+
+**Added**
+- `UpdateCustomerProfileDto` — `PUT customers/profile` previously took `@Body() body: any` with only a 5-field deny-list at the service layer, the weakest-guarded profile-update endpoint in the codebase; now whitelisted (name/email/city/state/address/pincode/profile_photo/gender/date_of_birth/age/notify_email/notify_push/notify_matching)
+- `notify_email`/`notify_push`/`notify_matching` columns on `Customer`, persisted via the existing `PUT customers/profile` — save/retrieve only, `notificationService` doesn't yet consult these on any send path (deliberately deferred to a future module)
+- Real save/unsave on `DealCard.jsx` — the wishlist heart was pure local `useState`, always `false` on mount, reset on every reload; now controlled via `isSaved`/`onToggleSave` props backed by the already-existing (but previously unused) `customers/save-offer` endpoints
+- `src/hooks/useSavedOffers.js` — fetches the customer's saved offers once per page, shared by `DealsPage.jsx`, `DealDetailPage.jsx`'s similar-deals grid, and the new Saved Offers page
+- `SavedOffersPage.jsx` (new route, new `CustomerNav` entry) — expired/archived/paused offers stay visible with a clear "Expired"/"No Longer Available"/"Paused" badge rather than disappearing, per the approved UX decision
+
+**Changed**
+- `CustomerProfile.jsx`'s Notifications toggles now persist to the real backend instead of `localStorage`
+- `CustomerProfile.jsx`'s phone number field was shown as editable (`disabled={!editMode}`) but silently discarded on save (mobile is deny-listed server-side, OTP-verified) — now always disabled with a note explaining why, instead of misleadingly looking editable
+
+**Fixed**
+- Caught during my own Phase 4 draft, before committing: an early version double-fetched `GET customers/saved-offers` (once in the hook, once in the page) with a broken filter-on-unsave effect — reworked `useSavedOffers.js` to serve both the id-set and full offer list from a single fetch
+
+**Verified in production**
+- Save/unsave persists across a fresh fetch (not just within a session)
+- Two-customer isolation on saved offers and profile updates
+- An archived offer stays visible in Saved Offers with the correct badge after the merchant archives it
+- `UpdateCustomerProfileDto` rejects a non-whitelisted field (400) and accepts whitelisted fields including notification prefs
+- No regressions in Module 3 (offer lifecycle, version history), Module 4 (discovery, category counts, PII protection), or Module 5 (lead creation/workflow/ownership, legacy `OfferInterest` compatibility)
+
 ## [pairley-module5-complete] — 2026-07-20
 
 ### Module 5 — Lead Management
