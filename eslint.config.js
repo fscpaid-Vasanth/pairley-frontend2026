@@ -27,4 +27,13 @@ export default defineConfig([
       'react-hooks/immutability': 'off',
     },
   },
+  {
+    // Vite config runs in Node (not the browser) before the client build
+    // starts, so it needs process.env rather than import.meta.env. Must
+    // come after the general **/*.{js,jsx} block so its globals win.
+    files: ['vite.config.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])

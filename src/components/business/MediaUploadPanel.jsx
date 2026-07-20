@@ -1,9 +1,12 @@
 import { useRef, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
-import { API_URL } from '../../utils/api';
+import { API_URL, generateCorrelationId } from '../../utils/api';
 import './MediaUploadPanel.css';
 
-const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('pairley_token') || ''}` });
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem('pairley_token') || ''}`,
+  'X-Request-Id': generateCorrelationId(),
+});
 
 /**
  * Shared media upload UI — single-image slots (e.g. logo/cover) plus an
