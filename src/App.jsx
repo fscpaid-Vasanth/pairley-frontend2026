@@ -41,6 +41,7 @@ import LoginPage from './pages/auth/LoginPage';
 // Customer Pages
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import CustomerProfile from './pages/customer/CustomerProfile';
+import SavedOffersPage from './pages/customer/SavedOffersPage';
 import CustomerOrdersPage from './pages/customer/CustomerOrdersPage';
 import CustomerOrderDetailPage from './pages/customer/CustomerOrderDetailPage';
 import CustomerChatPage from './pages/customer/CustomerChatPage';
@@ -388,6 +389,14 @@ function AppContent() {
             element={
               <AppLayout>
                 <CustomerDashboard />
+              </AppLayout>
+            }
+          />
+          <Route
+            path={ROUTES.CUSTOMER_SAVED_OFFERS}
+            element={
+              <AppLayout>
+                <SavedOffersPage />
               </AppLayout>
             }
           />

@@ -20,6 +20,7 @@ export const ROUTES = {
 
   // Customer
   CUSTOMER_DASHBOARD: '/customer/dashboard',
+  CUSTOMER_SAVED_OFFERS: '/customer/saved-offers',
   CUSTOMER_PROFILE: '/customer/profile',
   CUSTOMER_ORDERS: '/customer/orders',
   CUSTOMER_ORDER_DETAIL: '/customer/orders/:id',

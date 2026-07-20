@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Settings, 
-  ShoppingBag
+import {
+  LayoutDashboard,
+  Settings,
+  ShoppingBag,
+  Heart
 } from 'lucide-react';
 import { ROUTES } from '../utils/constants';
 import './CustomerNav.css';
@@ -11,20 +12,25 @@ export default function CustomerNav() {
   const location = useLocation();
 
   const navItems = [
-    { 
-      label: 'Dashboard', 
-      path: ROUTES.CUSTOMER_DASHBOARD, 
-      icon: LayoutDashboard 
+    {
+      label: 'Dashboard',
+      path: ROUTES.CUSTOMER_DASHBOARD,
+      icon: LayoutDashboard
     },
-    { 
-      label: 'My Orders & Matches', 
-      path: ROUTES.CUSTOMER_ORDERS, 
-      icon: ShoppingBag 
+    {
+      label: 'Saved Offers',
+      path: ROUTES.CUSTOMER_SAVED_OFFERS,
+      icon: Heart
     },
-    { 
-      label: 'Profile Settings', 
-      path: ROUTES.CUSTOMER_PROFILE, 
-      icon: Settings 
+    {
+      label: 'My Orders & Matches',
+      path: ROUTES.CUSTOMER_ORDERS,
+      icon: ShoppingBag
+    },
+    {
+      label: 'Profile Settings',
+      path: ROUTES.CUSTOMER_PROFILE,
+      icon: Settings
     }
   ];
 
