@@ -32,6 +32,7 @@ export const ROUTES = {
   EDIT_DEAL: '/business/edit-deal/:id',
   MANAGE_DEALS: '/business/manage-deals',
   BUSINESS_ORDERS: '/business/orders',
+  BUSINESS_LEADS: '/business/leads',
   BUSINESS_PAYOUTS: '/business/payouts',
   BUSINESS_SETTINGS: '/business/settings',
 

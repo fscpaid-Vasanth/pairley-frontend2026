@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Settings, 
-  Wallet, 
-  Truck, 
-  Tag
+import {
+  LayoutDashboard,
+  Settings,
+  Wallet,
+  Truck,
+  Tag,
+  Users
 } from 'lucide-react';
 import { ROUTES } from '../utils/constants';
 import './BusinessNav.css';
@@ -18,15 +19,20 @@ export default function BusinessNav() {
       path: ROUTES.BUSINESS_DASHBOARD, 
       icon: LayoutDashboard 
     },
-    { 
-      label: 'Deals Manager', 
-      path: ROUTES.MANAGE_DEALS, 
-      icon: Tag 
+    {
+      label: 'Deals Manager',
+      path: ROUTES.MANAGE_DEALS,
+      icon: Tag
     },
-    { 
-      label: 'Fulfillment & Orders', 
-      path: ROUTES.BUSINESS_ORDERS, 
-      icon: Truck 
+    {
+      label: 'Leads',
+      path: ROUTES.BUSINESS_LEADS,
+      icon: Users
+    },
+    {
+      label: 'Fulfillment & Orders',
+      path: ROUTES.BUSINESS_ORDERS,
+      icon: Truck
     },
     { 
       label: 'Payouts & Earnings', 

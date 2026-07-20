@@ -51,6 +51,7 @@ import BusinessDashboard from './pages/business/BusinessDashboard';
 import CreateDealPage from './pages/business/CreateDealPage';
 import ManageDealsPage from './pages/business/ManageDealsPage';
 import BusinessOrdersPage from './pages/business/BusinessOrdersPage';
+import LeadsPage from './pages/business/LeadsPage';
 import BusinessPayoutsPage from './pages/business/BusinessPayoutsPage';
 import BusinessSettingsPage from './pages/business/BusinessSettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -461,6 +462,14 @@ function AppContent() {
             element={
               <AppLayout>
                 <ManageDealsPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path={ROUTES.BUSINESS_LEADS}
+            element={
+              <AppLayout>
+                <LeadsPage />
               </AppLayout>
             }
           />
