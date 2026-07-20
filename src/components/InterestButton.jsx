@@ -6,6 +6,7 @@ import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
 import { getDealMode } from '../utils/offerTypes';
+import { buildNewLeadMessage, openWhatsAppMultiple } from '../utils/whatsapp';
 import './InterestButton.css';
 
 export default function InterestButton({ deal, onInterest }) {
@@ -84,33 +85,8 @@ export default function InterestButton({ deal, onInterest }) {
         if (onInterest) onInterest();
 
         const { targetMobiles, offerName, shopName, customerName, customerMobile } = res;
-        const message = `\u{1F525} New Customer Interest on Pairley
-
-\u{1F4CC} Offer: ${offerName}
-\u{1F3EA} Shop: ${shopName}
-
-\u{1F464} Customer Name: ${customerName}
-\u{1F4DE} Mobile Number: ${customerMobile}
-
-The customer has shown interest in this offer.
-
-Please contact the customer to confirm availability and complete the booking.
-
-Thank you,
-*Pairley*`;
-
-        const mobiles = targetMobiles || [];
-        mobiles.forEach((mobile, index) => {
-          const clean = mobile.replace(/\D/g, '').slice(-10);
-          const url = `https://wa.me/91${clean}?text=${encodeURIComponent(message)}`;
-          if (index === 0) {
-            window.open(url, '_blank');
-          } else {
-            setTimeout(() => {
-              window.open(url, '_blank');
-            }, index * 1000);
-          }
-        });
+        const message = buildNewLeadMessage({ offerName, shopName, customerName, customerMobile });
+        openWhatsAppMultiple(targetMobiles, message);
       })
       .catch((err) => {
         console.error('Failed to express interest:', err);
