@@ -54,6 +54,7 @@ export default function BusinessDashboard() {
   const [deals, setDeals] = useState([]);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [newLeadsCount, setNewLeadsCount] = useState(0);
 
   const formatTimeAgo = (dateStr) => {
     const date = new Date(dateStr);
@@ -81,6 +82,10 @@ export default function BusinessDashboard() {
         setMetrics(data);
       })
       .catch((err) => console.error('Failed to fetch business metrics:', err));
+
+    api.get('/leads?status=NEW')
+      .then((data) => setNewLeadsCount((data || []).length))
+      .catch((err) => console.error('Failed to fetch new leads count:', err));
 
     const bId = business.id;
     api.get(`/offers/list?businessId=${bId}&status=ALL`)
@@ -186,14 +191,24 @@ export default function BusinessDashboard() {
       trendColor: 'text-blue-600',
       gradient: 'from-blue-500 to-cyan-500'
     },
-    { 
-      label: 'Successful matches', 
-      value: loading ? '...' : (metrics.completedDeals + metrics.readyToBuyCustomers), 
-      icon: TrendingUp, 
-      color: 'text-amber-600 bg-amber-100 border-amber-200/50', 
-      trend: `₹${(metrics.completedDeals + metrics.readyToBuyCustomers) * 800} saved`, 
+    {
+      label: 'Successful matches',
+      value: loading ? '...' : (metrics.completedDeals + metrics.readyToBuyCustomers),
+      icon: TrendingUp,
+      color: 'text-amber-600 bg-amber-100 border-amber-200/50',
+      trend: `₹${(metrics.completedDeals + metrics.readyToBuyCustomers) * 800} saved`,
       trendColor: 'text-amber-600',
       gradient: 'from-amber-500 to-orange-500'
+    },
+    {
+      label: 'New Leads',
+      value: loading ? '...' : newLeadsCount,
+      icon: Sparkles,
+      color: 'text-rose-600 bg-rose-100 border-rose-200/50',
+      trend: newLeadsCount > 0 ? 'Awaiting your response' : 'All caught up',
+      trendColor: 'text-rose-600',
+      gradient: 'from-rose-500 to-pink-500',
+      linkTo: '/business/leads'
     },
   ];
 
@@ -271,7 +286,7 @@ export default function BusinessDashboard() {
 
         {/* ===== Stats Row ===== */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
+          className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10"
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -279,10 +294,11 @@ export default function BusinessDashboard() {
           {stats.map((stat, idx) => {
             const Icon = stat.icon;
             return (
-              <motion.div 
-                key={idx} 
-                className="bg-white border border-slate-200/80 p-5 rounded-2xl flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
+              <motion.div
+                key={idx}
+                className={`bg-white border border-slate-200/80 p-5 rounded-2xl flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 relative overflow-hidden ${stat.linkTo ? 'cursor-pointer' : ''}`}
                 variants={itemVariants}
+                onClick={stat.linkTo ? () => navigate(stat.linkTo) : undefined}
               >
                 {/* Glow ball decoration */}
                 <div className="absolute -right-6 -bottom-6 w-16 h-16 rounded-full bg-slate-50/50 blur-xl"></div>
