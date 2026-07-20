@@ -90,7 +90,9 @@ export default function CustomerProfile() {
         setProfile(prof);
         setOriginalProfile(prof);
 
-        // Load preferred categories
+        // Preferred categories stay client-side/local — no backend field for
+        // this yet (kept local per Module 6's approved scope; not tied to
+        // any defined server-side use like recommendations).
         const localInterestsKey = `pairley_interests_${data.id}`;
         const savedCategories = localStorage.getItem(localInterestsKey)
           ? JSON.parse(localStorage.getItem(localInterestsKey))
@@ -102,14 +104,13 @@ export default function CustomerProfile() {
           }))
         );
 
-        // Load notifications
-        const localNotifsKey = `pairley_notifications_${data.id}`;
-        const savedNotifs = localStorage.getItem(localNotifsKey);
-        if (savedNotifs) {
-          try {
-            setNotifications(JSON.parse(savedNotifs));
-          } catch (e) {}
-        }
+        // Notification preferences are now real — persisted on Customer,
+        // not localStorage.
+        setNotifications({
+          email: data.notify_email ?? true,
+          push: data.notify_push ?? true,
+          matching: data.notify_matching ?? true,
+        });
       })
       .catch((err) => {
         console.error('Failed to load customer profile, falling back:', err);
@@ -176,7 +177,10 @@ export default function CustomerProfile() {
       name: profile.name,
       email: profile.email,
       city: profile.city,
-      address: profile.address
+      address: profile.address,
+      notify_email: notifications.email,
+      notify_push: notifications.push,
+      notify_matching: notifications.matching
     };
 
     api.put('/customers/profile', updates)
@@ -191,13 +195,15 @@ export default function CustomerProfile() {
         };
         setProfile(updatedProf);
         setOriginalProfile(updatedProf);
+        setNotifications({
+          email: res.notify_email ?? notifications.email,
+          push: res.notify_push ?? notifications.push,
+          matching: res.notify_matching ?? notifications.matching,
+        });
 
-        // Save selected categories
+        // Save selected categories (still local-only, see fetch effect above)
         const selectedIds = interests.filter(c => c.selected).map(c => c.id);
         localStorage.setItem(`pairley_interests_${profile.id}`, JSON.stringify(selectedIds));
-
-        // Save notifications
-        localStorage.setItem(`pairley_notifications_${profile.id}`, JSON.stringify(notifications));
 
         // Update local cache
         const localUser = JSON.parse(localStorage.getItem('pairley_user') || '{}');
@@ -372,16 +378,13 @@ export default function CustomerProfile() {
                         type="tel"
                         name="phone"
                         value={profile.phone}
-                        onChange={handleProfileChange}
-                        disabled={!editMode}
-                        required
-                        className={`w-full bg-white border rounded-xl pl-9 pr-4 py-2.5 text-xs focus:ring-2 focus:ring-purple-200 focus:outline-none transition-all duration-200 ${
-                          editMode 
-                            ? 'border-purple-300 shadow-sm bg-purple-50/5' 
-                            : 'border-slate-200 opacity-70 cursor-not-allowed'
-                        }`}
+                        disabled
+                        className="w-full bg-white border rounded-xl pl-9 pr-4 py-2.5 text-xs border-slate-200 opacity-70 cursor-not-allowed"
                       />
                     </div>
+                    <p className="text-[10px] text-slate-400 mt-1.5">
+                      Your phone number is verified via OTP and can't be changed here.
+                    </p>
                   </div>
 
                   <div>
