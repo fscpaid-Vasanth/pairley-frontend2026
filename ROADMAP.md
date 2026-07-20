@@ -19,6 +19,7 @@ Tracks module-level delivery against [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_P
 | Group A — Module 1: Identity & Business Onboarding Foundation | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module1-complete`. |
 | Group A — Module 2: Merchant Business Profile | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module2-complete`. See [CHANGELOG.md](./CHANGELOG.md). |
 | Group A — Module 3: Offer Management | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module3-complete`. See [CHANGELOG.md](./CHANGELOG.md). |
+| Group A — Module 4: Customer Discovery | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module4-complete`. See [CHANGELOG.md](./CHANGELOG.md). |
 
 **Note:** during Module 1 verification, an unrelated pre-existing issue was found — AWS flagged the backend's S3 credentials as compromised (`AWSCompromisedKeyQuarantineV3`), blocking file reads (e.g. KYC document retrieval). This does not affect any Module 1 code and does not block Module 1's completion, but needs credential rotation independently — tracked separately, not part of this roadmap's feature scope.
 

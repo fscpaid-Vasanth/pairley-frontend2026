@@ -2,6 +2,35 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module4-complete] — 2026-07-20
+
+### Module 4 — Customer Discovery
+
+**Added**
+- `GET /offers/list` accepts `lat`/`lng`/`radiusKm` — server-side Haversine radius filtering and nearest-first sorting, resolving each offer's effective location (its own `geo_lat`/`geo_lng` if set, else its business's)
+- `category` validated against the real 12-value allowlist on `/offers/list` and `/offers/category/:category` — unknown category now 400s instead of silently returning nothing
+- `end_date >= NOW()` added to `listOffers()`'s default `ACTIVE` view — defensive complement to Module 3's hourly expiry scheduler
+- `GET /offers/category-counts` — backs `SearchOverlay`'s category tiles with real counts (was reading a field that never existed)
+- Server-computed offer origin badge (`verified` / `exclusive` / `imported` / `null`, fixed priority Verified Merchant > Pairley Exclusive > Imported from Public Information) — raw provenance fields never reach the client, same discipline as `PUBLIC_OFFER_FIELDS`
+- `PUT admin/offers/:id/exclusive` — admin-only, versioned, dormant (no frontend UI yet — capability only, ahead of a future admin-tools module)
+- `(geo_lat, geo_lng)` index on `offers`
+- `src/utils/offerBadges.js` (frontend) — display-only badge helper, `DealCard`/`DealDetailPage` now render it
+- `SearchOverlay.jsx` wired to the real backend (was entirely mock-data-driven against a permanently empty catalog — search always returned zero results)
+- Real "Similar Deals" on `DealDetailPage.jsx` (was reading the same empty mock catalog, so the section never rendered)
+- `src/hooks/useNearbyDeals.js` adopted as the single distance/radius calculation source, replacing duplicated inline Haversine logic in `NearbyDealsSection.jsx`
+
+**Changed**
+- `DealsPage.jsx` now sends real coordinates to the backend and uses server-computed `distanceKm` for the "Nearest First" sort and card distance badge
+
+**Fixed**
+- `GET /offers/details/:id` was fully unauthenticated and returned every interested customer's name/mobile/email/address to any caller who knew/guessed an offer id — confirmed live against a real production offer, patched as a standalone security fix ahead of the rest of this module (same "security fixes never wait" discipline as the Module 1 KYC-preview guard)
+- `GET /offers/list` accepted `status=ALL` (surfacing draft/pending/rejected/archived offers) from any unauthenticated caller — now requires authentication for any non-default status
+- `GET /offers/details/:id` returned full offer content for non-`ACTIVE` offers to anyone who knew the id — now 404s for anyone except the owning business or an admin
+- `DealsPage.jsx`'s radius selector and "Nearest First" sort were no-ops against live data — they read `deal.latitude`/`deal.longitude`, fields that never existed on API-backed deal objects (only `geo_lat`/`geo_lng` did)
+- `CustomerDashboard.jsx`'s "Deals Near You" section had the same field-name bug, plus a second bug where every card read `deal._id` (always `undefined`) instead of `deal.id`, so every card linked to `/deals/undefined`
+- `LocationBar.jsx` destructured `status`/`requestLocation` from `useLocationContext()`, neither of which the context exposes (it provides `permissionStatus`/`isLoading` and `refreshLocation`/`requestPermission`) — the location-enable button and status display never worked
+- `DealsPage.jsx`'s `DealTypeToggle` usage passed `activeType`/`onTypeChange`; the component consumes `selected`/`onChange` — the toggle never reflected the active filter
+
 ## [pairley-module3-complete] — 2026-07-19
 
 ### Module 3 — Offer Management
