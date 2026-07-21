@@ -36,6 +36,7 @@ export const ROUTES = {
   BUSINESS_LEADS: '/business/leads',
   BUSINESS_PAYOUTS: '/business/payouts',
   BUSINESS_SETTINGS: '/business/settings',
+  CLAIM_BUSINESS: '/claim/:businessId',
 
   // Admin
   ADMIN_DASHBOARD: '/admin/dashboard',

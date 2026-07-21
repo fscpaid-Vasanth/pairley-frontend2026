@@ -36,6 +36,7 @@ import MerchantQuickJoin from './pages/launch/MerchantQuickJoin';
 
 // Auth Pages
 import SignUpPage from './pages/auth/SignUpPage';
+import ClaimBusinessPage from './pages/business/ClaimBusinessPage';
 import LoginPage from './pages/auth/LoginPage';
 
 // Customer Pages
@@ -440,6 +441,9 @@ function AppContent() {
               </AppLayout>
             }
           />
+
+          {/* Module 9 Phase 4 — public, unauthenticated claim flow */}
+          <Route path={ROUTES.CLAIM_BUSINESS} element={<ClaimBusinessPage />} />
 
           {/* Business Dashboard Routes */}
           <Route

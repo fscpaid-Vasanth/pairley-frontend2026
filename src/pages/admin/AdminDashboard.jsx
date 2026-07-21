@@ -23,13 +23,15 @@ import {
   X,
   Headphones,
   Download,
-  Radar
+  Radar,
+  UserCheck
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api, API_URL } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
 import DiscoveredOffersPanel from './DiscoveredOffersPanel';
+import ClaimRequestsPanel from './ClaimRequestsPanel';
 import SystemHealthTile from './SystemHealthTile';
 import './AdminDashboard.css';
 
@@ -408,6 +410,17 @@ export default function AdminDashboard() {
             Discovered Offers
           </button>
           <button
+            onClick={() => handleTabChange('claims')}
+            className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'claims'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
+                : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
+            }`}
+          >
+            <UserCheck size={14} />
+            Claim Requests
+          </button>
+          <button
             onClick={() => handleTabChange('tickets')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'tickets'
@@ -774,6 +787,8 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'discovered' && <DiscoveredOffersPanel />}
+
+        {activeTab === 'claims' && <ClaimRequestsPanel />}
 
         {activeTab === 'tickets' && (
           <div className="space-y-6 animate-fadeIn text-left">
