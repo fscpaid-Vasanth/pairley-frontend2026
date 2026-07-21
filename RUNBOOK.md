@@ -149,28 +149,44 @@ occurring), or the Sentry dashboard itself is unreachable.
 
 ## WhatsApp API Outage (Meta Graph API unreachable or erroring)
 
-**How you'll know**: merchant/customer WhatsApp notifications aren't
-arriving. There's no dedicated health check for this yet (WhatsApp Business
-API integration is Module 8, not yet built as of this Module 7 — only the
-webhook scaffold exists today in `src/whatsapp/`).
+**How you'll know**: merchants report not receiving WhatsApp lead alerts.
+Check `WhatsAppMessage` rows (`whatsapp_messages` table, Module 8) for the
+affected business — `status: "FAILED"` with an `error` field containing
+Meta's actual response is the fastest way to see what's actually wrong,
+faster than digging through Render's logs.
 
 **Steps**:
 1. Check the [Meta for Developers status page](https://developers.facebook.com/status/)
    for the WhatsApp Cloud API / Graph API.
-2. Check Render's logs for `Failed to send WhatsApp message` /
-   `Failed to send template` entries (from
-   `src/whatsapp/whatsapp.service.ts`) — these include the Graph API's own
-   error response, which usually says exactly what's wrong (expired token,
-   rate limit, template not approved, etc.) rather than a generic failure.
-3. **Important**: WhatsApp send failures are already fail-open by design —
-   `sendTextMessage()`/`sendTemplateMessage()` catch every error internally
-   and just log it, never throwing. A WhatsApp outage **cannot** break lead
-   creation, offer creation, or any other core flow that happens to trigger
-   a notification alongside it. If you're seeing core flows fail during a
-   WhatsApp issue, that's a separate bug, not this outage.
-4. Common non-outage causes to rule out first: `WHATSAPP_ACCESS_TOKEN`/
-   `WHATSAPP_API_TOKEN` expired (these tokens have a limited lifetime and
-   need periodic renewal in Meta's dashboard) — check the specific error
-   code in the logged response before assuming it's a Meta-side outage.
-5. No user-facing fallback needed — this is a notification channel, not a
-   dependency of the core marketplace flow.
+2. Query recent `WhatsAppMessage` rows with `status: "FAILED"` — the
+   `error` field is Meta's raw error response and almost always says
+   exactly what's wrong. Two error codes to recognize immediately, since
+   they're **not** outages:
+   - `(#132001) Template name does not exist` — the `new_lead_alert`
+     template hasn't been created/approved yet in Meta Business Manager
+     (a real WhatsApp Business Messaging Policy requirement, not a bug —
+     business-initiated messages outside a 24h customer session window
+     require a pre-approved template). Every lead alert will fail with
+     this until the template is submitted and approved (3-10 day Meta
+     review). Check whether this has been done before assuming an outage.
+   - `WHATSAPP_ACCESS_TOKEN`/`WHATSAPP_API_TOKEN` expired — these tokens
+     have a limited lifetime and need periodic renewal in Meta's dashboard.
+3. If neither of those, check Render's logs for `Failed to send WhatsApp
+   message` / `Failed to send template` entries
+   (`src/whatsapp/whatsapp.service.ts`) for more context.
+4. **Important**: WhatsApp send failures are fail-open by design —
+   `sendTextMessage()`/`sendTemplateMessage()` never throw, and
+   `createLead()` (`offer.service.ts`) fires the alert fire-and-forget
+   with one retry, then logs and moves on regardless of outcome. A
+   WhatsApp outage **cannot** break lead creation or any other core flow.
+   If you're seeing core flows fail during a WhatsApp issue, that's a
+   separate bug, not this outage.
+5. If the webhook itself seems to have stopped receiving events (inbound
+   bot replies not firing), check that `WHATSAPP_APP_SECRET` is still
+   correctly set — an incorrect value would cause every inbound webhook
+   POST to be rejected with a 403 (signature verification, Module 8). An
+   *unset* value fails open with a logged warning instead, so this is only
+   a concern if the secret was set and then changed incorrectly.
+6. No user-facing fallback needed for the lead-alert failure case — the
+   existing DB/push notification (`Notification` model) is a separate,
+   unaffected channel a merchant still sees in the dashboard.
