@@ -2,6 +2,54 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module8-complete] — 2026-07-21
+
+### Module 8 — WhatsApp Business API Integration
+
+Scope: A8 only (lead alerts to verified, opted-in merchants). B7's cold-outreach
+flow to unclaimed/AI-imported businesses remains part of the deprioritized
+Group B, per the approved STEP 1 scope decision.
+
+**Added**
+- `Business.lead_whatsapp_number`/`lead_whatsapp_verified`/`notify_whatsapp` and
+  a new `WhatsAppMessage` log model — additive schema, applied via `prisma db
+  push`, verified against production (10 businesses intact before/after)
+- `X-Hub-Signature-256` verification on `POST /whatsapp/webhook` (HMACs the raw
+  request bytes against `WHATSAPP_APP_SECRET`; fails open with a logged
+  warning until that env var is set, so it doesn't take the live webhook down)
+- `GET /whatsapp/health` now `Role.ADMIN`-gated — previously leaked whether
+  secrets were configured to any caller
+- `GET /business/whatsapp-status`, `PUT /business/whatsapp-number`,
+  `POST /business/whatsapp-number/verify` — defaults to the already
+  OTP-verified `Business.mobile` (treated as verified automatically); an
+  explicit override requires a fresh code, delivered via WhatsApp itself
+  rather than SMS since WhatsApp reachability is the property being verified
+- `sendLeadWhatsappAlert()` wired into `createLead()` (`offer.service.ts`) —
+  fire-and-forget alongside the existing DB/push notification (an additional
+  channel, not a replacement), one retry on failure, logs every attempt to
+  `WhatsAppMessage`
+- `GET /leads` now attaches `whatsappStatus` per lead (batched query, no
+  `@relation` — `Lead` and `WhatsAppMessage` are both standalone logs by
+  design)
+- `WhatsappLeadAlertsCard` (Business Settings) and a "WA Sent"/"WA Failed"
+  badge on the Leads list (frontend)
+
+**Verified in production**
+- Full lead-notification flow, twice (once during STEP 2 build, once after
+  acceptance with a fresh test customer): lead creation succeeds, the
+  existing DB/push notification is unaffected, the WhatsApp send is
+  correctly attempted and logged
+- Admin-gating, webhook signature verification (valid/invalid/missing/
+  unconfigured-fail-open — all four cases), correlation IDs, no regressions
+  across Modules 3–7
+
+**Known, expected, external dependency**
+- Every WhatsApp send currently logs `status: "FAILED"` with Meta's real
+  error, `(#132001) Template name does not exist` — the `new_lead_alert`
+  template hasn't been submitted/approved in Meta Business Manager yet.
+  This proves the pipeline is correct, not broken; it will start succeeding
+  the moment the template is approved, with no code changes required.
+
 ## [pairley-module7-complete] — 2026-07-21
 
 ### Module 7 — Monitoring & Observability
