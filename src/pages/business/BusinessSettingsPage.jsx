@@ -24,6 +24,7 @@ import { getUserLocation, reverseGeocode } from '../../utils/geo';
 import { calculateProfileCompletion } from '../../utils/profileCompletion';
 import BusinessNav from '../../components/BusinessNav';
 import MediaUploadPanel from '../../components/business/MediaUploadPanel';
+import WhatsappLeadAlertsCard from '../../components/business/WhatsappLeadAlertsCard';
 import { MALLS } from '../../utils/constants';
 import './BusinessSettingsPage.css';
 
@@ -54,6 +55,7 @@ export default function BusinessSettingsPage() {
     instagram: '',
     facebook: '',
     whatsapp: '',
+    notifyWhatsapp: true,
     supportNumber: '',
     address: '',
     city: 'Mumbai',
@@ -87,6 +89,7 @@ export default function BusinessSettingsPage() {
       instagram: data.instagram || '',
       facebook: data.facebook || '',
       whatsapp: data.whatsapp || '',
+      notifyWhatsapp: data.notify_whatsapp !== false,
       supportNumber: data.support_number || '',
       address: data.address || '',
       city: data.city || 'Mumbai',
@@ -212,6 +215,7 @@ export default function BusinessSettingsPage() {
       instagram: store.instagram,
       facebook: store.facebook,
       whatsapp: store.whatsapp,
+      notify_whatsapp: store.notifyWhatsapp,
       support_number: store.supportNumber,
       address: store.address,
       city: store.city,
@@ -412,8 +416,18 @@ export default function BusinessSettingsPage() {
                   <label className="text-slate-600 flex items-center gap-1"><Phone size={12} /> Customer Support Number</label>
                   <input type="text" name="supportNumber" value={store.supportNumber} onChange={handleInputChange} placeholder="9876543210" className="border border-slate-200 rounded-xl p-2.5 outline-none focus:border-[#5B12D6]" />
                 </div>
+                <label className="flex items-center gap-2 md:col-span-2 text-slate-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={store.notifyWhatsapp}
+                    onChange={(e) => setStore((prev) => ({ ...prev, notifyWhatsapp: e.target.checked }))}
+                  />
+                  Send me WhatsApp alerts for new leads
+                </label>
               </div>
             </div>
+
+            <WhatsappLeadAlertsCard />
 
             {/* Store Timing — per day */}
             <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col gap-4">

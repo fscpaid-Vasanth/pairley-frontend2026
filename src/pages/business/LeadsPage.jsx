@@ -167,6 +167,18 @@ export default function LeadsPage() {
                       >
                         {lead.status?.replace('_', ' ')}
                       </span>
+                      {lead.whatsappStatus && (
+                        <span
+                          title={lead.whatsappStatus === 'SENT' ? 'WhatsApp alert delivered' : 'WhatsApp alert failed to send'}
+                          className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border flex items-center gap-1 ${
+                            lead.whatsappStatus === 'SENT'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : 'bg-rose-50 text-rose-700 border-rose-100'
+                          }`}
+                        >
+                          <MessageCircle size={9} /> {lead.whatsappStatus === 'SENT' ? 'WA Sent' : 'WA Failed'}
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] text-slate-500 font-semibold">
                       <span className="flex items-center gap-1">
