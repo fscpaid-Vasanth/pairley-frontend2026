@@ -22,10 +22,19 @@ Tracks module-level delivery against [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_P
 | Group A — Module 4: Customer Discovery | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module4-complete`. See [CHANGELOG.md](./CHANGELOG.md). |
 | Group A — Module 5: Lead Management | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module5-complete`. See [CHANGELOG.md](./CHANGELOG.md). |
 | Group A — Module 6: Customer Profile & Saved Offers | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module6-complete`. See [CHANGELOG.md](./CHANGELOG.md). |
+| Group A — Module 7: Monitoring & Observability | ✅ **COMPLETE** — application code deployed to production and verified (no schema changes this module). Tag: `pairley-module7-complete`. See [CHANGELOG.md](./CHANGELOG.md). Two items intentionally deferred as post-launch operational tasks, not code work — see notes below. |
 
 **Note:** during Module 1 verification, an unrelated pre-existing issue was found — AWS flagged the backend's S3 credentials as compromised (`AWSCompromisedKeyQuarantineV3`), blocking file reads (e.g. KYC document retrieval). This does not affect any Module 1 code and does not block Module 1's completion, but needs credential rotation independently — tracked separately, not part of this roadmap's feature scope.
 
 **Note:** during Module 3 verification, the Neon Postgres project temporarily exhausted its free-tier compute-time quota mid-verification, causing brief production 500s on database-backed endpoints. Resolved by upgrading the Neon plan (Launch tier). Unrelated to Module 3's code — flagged here since it's an infra/billing concern worth tracking, not a code defect.
+
+**Note:** Module 7 built `/api/health`'s S3 reachability check, which immediately surfaced that the Module 1 `AWSCompromisedKeyQuarantineV3` issue above never actually cleared — the IAM user is still under an active quarantine even after a full credential rotation (new access key created, applied to Render, verified in use). A new AWS Support case is open (Case ID `178454777500456`) requesting removal of the quarantine policy. Concretely, this means `GetObject` is denied (admin KYC document preview/download is broken) while `PutObject` still works (uploads and normal browsing are unaffected). **Status: Pending AWS Support — external dependency, not a Module 7 or Module 1 code defect.**
+
+**Sentry / uptime monitoring status (Module 7):**
+- **Backend error tracking (Sentry):** ✅ Completed and verified — a test exception was confirmed delivered to the `pairley-backend` Sentry project.
+- **Web frontend error tracking (Sentry):** ✅ Completed and verified — a test exception was confirmed delivered to the `pairley-frontend` Sentry project.
+- **Android error tracking (Sentry):** ⏸ **Deferred** — verification postponed until the Android release is finalized. The same `@sentry/react` initialization ships in the Capacitor build; only the Android-specific release/build verification is outstanding, not a missing integration.
+- **External uptime monitoring (UptimeRobot or equivalent):** ⏸ **Deferred** — planned alongside an upcoming Render paid-plan upgrade. `/api/health` is live and ready to be polled; standing up the external monitor is being treated as a post-launch operational task rather than a Module 7 coding blocker, per explicit direction.
 
 ---
 

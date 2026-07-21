@@ -2,6 +2,34 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module7-complete] — 2026-07-21
+
+### Module 7 — Monitoring & Observability
+
+**Added**
+- `GET /api/health` extended with `@nestjs/terminus`'s built-in `PrismaHealthIndicator`, a best-effort S3 reachability check, and `release`/`environment`/`serverTime`/`processUptimeSeconds` fields — DB failure remains a hard 503, storage failure only downgrades to `"degraded"` (200)
+- `SystemHealthService` (in the global `CommonModule`) — extracted so `/api/health` and the new admin-gated `GET /api/admin/system-health` run the identical check instead of two copies that could drift
+- `@sentry/nestjs` (backend) and `@sentry/react` + `@sentry/vite-plugin` (frontend) — error tracking with release tagging, hidden source maps (uploaded then stripped from the shipped bundle), and a shared `redactSensitive()` utility scrubbing auth tokens/KYC fields/customer PII/third-party credentials before anything leaves the process
+- `nestjs-pino` structured JSON logging, replacing Nest's default logger app-wide with zero per-file changes; per-request correlation IDs (`x-request-id`, generated client-side in `api.js` or server-side if absent, always echoed back) traceable across frontend Sentry events, backend logs, and backend Sentry events
+- `Sentry.ErrorBoundary` around `<App />` with a themed fallback screen, so a render crash shows a recoverable UI instead of a blank page
+- `SystemHealthTile` on `AdminDashboard`'s overview tab — live status pills, release version, links to Sentry/uptime dashboards
+- `MONITORING_SETUP.md`, `INCIDENT_RESPONSE.md`, `TROUBLESHOOTING.md`, `RUNBOOK.md` — written last, against the actual configuration, grounded in this project's real prior incidents (Neon quota exhaustion, AWS key compromise) rather than generic guidance
+
+**Verified in production**
+- `/api/health` and `/api/admin/system-health`: correct shape, correct DB-hard-fail/storage-soft-fail behavior, release SHA matches deployed commit
+- Correlation IDs: custom ID echoed back, omitted ID auto-generated, confirmed live against the deployed backend
+- Redaction: a real `Authorization` header confirmed redacted to `[REDACTED]` in the emitted log line
+- Backend Sentry: a controlled test exception confirmed delivered to the `pairley-backend` Sentry project (required switching from fire-and-forget capture to an explicit `Sentry.captureException()` + `await Sentry.flush()` — the global exception filter's default async capture was losing events before the process moved on to the next request)
+- Web frontend Sentry: a controlled test exception confirmed delivered to the `pairley-frontend` Sentry project, using the same explicit flush pattern
+- Regression: Module 3 (offer lifecycle), Module 4 (discovery/category counts/public stats), Module 5 (lead ownership/role guards), Module 6 (admin dashboard metrics) all unaffected by the `DashboardController`/`CommonModule` refactor
+
+**Deferred (explicitly, as post-launch operational tasks — not incomplete code)**
+- Android Sentry verification — the same `@sentry/react` init ships in the Capacitor build; only the Android-specific release build verification is outstanding, postponed until the Android release is finalized
+- External uptime monitoring (UptimeRobot or equivalent polling `/api/health`) — planned alongside an upcoming Render paid-plan upgrade
+
+**Found, not caused by Module 7**
+- The Module 1 AWS `AWSCompromisedKeyQuarantineV3` issue never actually cleared — Module 7's new S3 health check surfaced that the IAM user is still under an active quarantine even after a full credential rotation. `GetObject` is denied (admin KYC document preview/download is currently broken); `PutObject` still works (uploads/browsing unaffected). AWS Support case open (`178454777500456`) — pending AWS, not a code fix
+
 ## [pairley-module6-complete] — 2026-07-20
 
 ### Module 6 — Customer Profile & Saved Offers
