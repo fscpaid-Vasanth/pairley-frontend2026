@@ -22,12 +22,14 @@ import {
   Check,
   X,
   Headphones,
-  Download
+  Download,
+  Radar
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api, API_URL } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
+import DiscoveredOffersPanel from './DiscoveredOffersPanel';
 import SystemHealthTile from './SystemHealthTile';
 import './AdminDashboard.css';
 
@@ -395,6 +397,17 @@ export default function AdminDashboard() {
             Deals Moderation
           </button>
           <button
+            onClick={() => handleTabChange('discovered')}
+            className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'discovered'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
+                : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
+            }`}
+          >
+            <Radar size={14} />
+            Discovered Offers
+          </button>
+          <button
             onClick={() => handleTabChange('tickets')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
               activeTab === 'tickets'
@@ -759,6 +772,8 @@ export default function AdminDashboard() {
             )}
           </div>
         )}
+
+        {activeTab === 'discovered' && <DiscoveredOffersPanel />}
 
         {activeTab === 'tickets' && (
           <div className="space-y-6 animate-fadeIn text-left">
