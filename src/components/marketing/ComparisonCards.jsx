@@ -23,7 +23,7 @@ const POINTS = [
 
 export default function ComparisonCards() {
   return (
-    <section className="py-20 lg:py-28 bg-slate-50">
+    <section className="py-20 lg:py-28 bg-ink-section">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={fadeInUp}
@@ -32,10 +32,10 @@ export default function ComparisonCards() {
           viewport={revealViewport}
           className="text-center mb-14"
         >
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Why Pairley?
           </h2>
-          <p className="mt-3 text-slate-500 max-w-lg mx-auto">
+          <p className="mt-3 text-white/50 max-w-lg mx-auto">
             Traditional shopping vs. how Pairley actually works.
           </p>
         </motion.div>
@@ -54,18 +54,21 @@ export default function ComparisonCards() {
               custom={i}
               className="grid sm:grid-cols-2 gap-3 sm:gap-4"
             >
-              <div className="flex items-start gap-3 p-5 rounded-2xl bg-white border border-slate-200">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mt-0.5">
-                  <X size={13} className="text-slate-400" strokeWidth={3} />
+              <div className="flex items-start gap-3 p-5 rounded-2xl bg-white/[0.03] border border-white/10">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 flex items-center justify-center mt-0.5">
+                  <X size={13} className="text-white/30" strokeWidth={3} />
                 </div>
-                <p className="text-sm text-slate-500 leading-relaxed">{p.problem}</p>
+                <p className="text-sm text-white/45 leading-relaxed">{p.problem}</p>
               </div>
-              <div className="flex items-start gap-3 p-5 rounded-2xl bg-white border border-brand-purple/20 shadow-sm shadow-brand-purple/5">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-green/10 flex items-center justify-center mt-0.5">
+              <motion.div
+                whileHover={{ y: -3 }}
+                className="flex items-start gap-3 p-5 rounded-2xl bg-white/[0.05] border border-brand-purple/25 shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-glow-purple transition-shadow duration-300"
+              >
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-green/15 flex items-center justify-center mt-0.5">
                   <Check size={13} className="text-brand-green" strokeWidth={3} />
                 </div>
-                <p className="text-sm text-slate-800 font-medium leading-relaxed">{p.solution}</p>
-              </div>
+                <p className="text-sm text-white font-medium leading-relaxed">{p.solution}</p>
+              </motion.div>
             </motion.div>
           ))}
         </motion.div>

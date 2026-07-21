@@ -1,12 +1,13 @@
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Heart, Share2, CheckCircle2, TrendingUp, Users, Tag, User, Bookmark } from 'lucide-react';
-import { fadeInUp, stagger, revealViewport } from './animations';
+import { fadeInUp, revealViewport } from './animations';
 import PhoneFrame from './PhoneFrame';
 
 // Faithful, simplified recreations of the real screens — same colors/
-// layout language as the actual app components (DealCard, BusinessDashboard
-// stat cards, etc.) rather than decorative illustrations. See PhoneMockup.jsx
-// for the same rationale (no screenshot-capture tooling available).
+// layout language as the actual app components, rendered inside the phone
+// itself (kept light, matching the real product's own light in-app theme —
+// a deliberate contrast against this page's dark surroundings).
 
 function HomeScreen() {
   return (
@@ -141,16 +142,48 @@ function ProfileScreen() {
 }
 
 const SCREENS = [
-  { label: 'Home', Screen: HomeScreen },
-  { label: 'Offer Details', Screen: OfferDetailsScreen },
-  { label: 'Interest Flow', Screen: InterestFlowScreen },
-  { label: 'Merchant Dashboard', Screen: MerchantDashboardScreen },
-  { label: 'Profile', Screen: ProfileScreen },
+  { label: 'Home', Screen: HomeScreen, tilt: -3 },
+  { label: 'Offer Details', Screen: OfferDetailsScreen, tilt: 2 },
+  { label: 'Interest Flow', Screen: InterestFlowScreen, tilt: -2 },
+  { label: 'Merchant Dashboard', Screen: MerchantDashboardScreen, tilt: 3 },
+  { label: 'Profile', Screen: ProfileScreen, tilt: -2 },
 ];
 
+const AUTO_SCROLL_PX_PER_SEC = 22;
+
 export default function ScreenshotShowcase() {
+  const trackRef = useRef(null);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) return undefined;
+
+    const el = trackRef.current;
+    if (!el) return undefined;
+    let frame;
+    let last = performance.now();
+
+    const tick = (now) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      if (!paused && el) {
+        // The track renders SCREENS twice back-to-back, so resetting to 0
+        // once we've scrolled past exactly one set's width is an invisible
+        // loop point (the content there is identical) — unlike resetting
+        // at scrollWidth's true end, which would jump visibly.
+        const oneSetWidth = el.scrollWidth / 2;
+        const next = el.scrollLeft + AUTO_SCROLL_PX_PER_SEC * dt;
+        el.scrollLeft = next >= oneSetWidth ? next - oneSetWidth : next;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [paused]);
+
   return (
-    <section className="py-20 lg:py-28 bg-slate-50 overflow-hidden">
+    <section className="py-20 lg:py-28 bg-ink-section overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={fadeInUp}
@@ -159,35 +192,34 @@ export default function ScreenshotShowcase() {
           viewport={revealViewport}
           className="text-center mb-14"
         >
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             See Pairley in Action
           </h2>
-          <p className="mt-3 text-slate-500 max-w-lg mx-auto">
+          <p className="mt-3 text-white/50 max-w-lg mx-auto">
             The customer and merchant experience, side by side.
           </p>
         </motion.div>
 
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={revealViewport}
-          className="flex gap-6 overflow-x-auto pb-4 lg:justify-center lg:overflow-visible snap-x snap-mandatory"
+        <div
+          ref={trackRef}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onTouchStart={() => setPaused(true)}
+          className="flex gap-8 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {SCREENS.map(({ label, Screen }, i) => (
-            <motion.div
-              key={label}
-              variants={fadeInUp}
-              custom={i}
-              className="flex-shrink-0 snap-center flex flex-col items-center gap-4"
+          {[...SCREENS, ...SCREENS].map(({ label, Screen, tilt }, i) => (
+            <div
+              key={`${label}-${i}`}
+              className="flex-shrink-0 flex flex-col items-center gap-4"
+              style={{ transform: `rotate(${tilt}deg)` }}
             >
-              <PhoneFrame width={200} height={400}>
+              <PhoneFrame width={190} height={380}>
                 <Screen />
               </PhoneFrame>
-              <span className="text-xs font-bold text-slate-600">{label}</span>
-            </motion.div>
+              <span className="text-xs font-bold text-white/60">{label}</span>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -14,7 +14,7 @@ const BENEFITS = [
 
 export default function MerchantBenefitsSection() {
   return (
-    <section id="merchant-benefits" className="py-20 lg:py-28 bg-white">
+    <section id="merchant-benefits" className="py-20 lg:py-28 bg-ink-section">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={fadeInUp}
@@ -23,10 +23,10 @@ export default function MerchantBenefitsSection() {
           viewport={revealViewport}
           className="text-center mb-14"
         >
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Built for Merchants
           </h2>
-          <p className="mt-3 text-slate-500 max-w-lg mx-auto">
+          <p className="mt-3 text-white/50 max-w-lg mx-auto">
             Grow your business without paying for every click.
           </p>
         </motion.div>

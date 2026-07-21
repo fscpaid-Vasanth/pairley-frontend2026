@@ -18,6 +18,14 @@ export default {
           green: '#22C55E',
           'green-light': '#4ade80',
           'green-dark': '#16a34a',
+          yellow: '#FFD84D',
+        },
+        // Premium semi-dark marketing-page palette — distinct from the
+        // app's own light glassmorphic theme (index.css), used only on the
+        // public landing page per the approved dark redesign.
+        ink: {
+          DEFAULT: '#0F1117', // page background
+          section: '#171A23', // alternating section background
         },
       },
       fontFamily: {
@@ -52,13 +60,20 @@ export default {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(100%)' },
         },
+        ripple: {
+          '0%': { transform: 'scale(1)', opacity: '0.5' },
+          '100%': { transform: 'scale(28)', opacity: '0' },
+        },
       },
       boxShadow: {
         'glow-purple': '0 0 40px rgba(91,18,214,0.4)',
         'glow-green': '0 0 40px rgba(34,197,94,0.3)',
+        'glow-yellow': '0 0 40px rgba(255,216,77,0.25)',
         'glow-xl': '0 0 80px rgba(91,18,214,0.3)',
         'card': '0 8px 32px rgba(0,0,0,0.08)',
         'card-hover': '0 20px 60px rgba(91,18,214,0.2)',
+        'card-dark': '0 8px 32px rgba(0,0,0,0.35)',
+        'card-dark-hover': '0 24px 64px rgba(91,18,214,0.25)',
       },
       backdropBlur: {
         xs: '2px',

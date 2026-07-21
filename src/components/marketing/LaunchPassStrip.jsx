@@ -10,7 +10,7 @@ export default function LaunchPassStrip() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-8 bg-slate-50 border-y border-slate-100">
+    <section className="py-8 bg-ink-section border-y border-white/10">
       <motion.div
         variants={fadeInUp}
         initial="hidden"
@@ -18,12 +18,12 @@ export default function LaunchPassStrip() {
         viewport={revealViewport}
         className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left"
       >
-        <p className="text-sm text-slate-600">
-          <span className="font-bold text-slate-800">Launch Pass</span> — register early and be first in line when we launch in your city.
+        <p className="text-sm text-white/60">
+          <span className="font-bold text-white">Launch Pass</span> — register early and be first in line when we launch in your city.
         </p>
         <button
           onClick={() => navigate('/launch')}
-          className="flex-shrink-0 inline-flex items-center gap-1.5 text-sm font-bold text-brand-purple hover:text-brand-purple-dark transition-colors"
+          className="flex-shrink-0 inline-flex items-center gap-1.5 text-sm font-bold text-brand-yellow hover:text-white transition-colors"
         >
           Get your Launch Pass
           <ArrowRight size={15} />

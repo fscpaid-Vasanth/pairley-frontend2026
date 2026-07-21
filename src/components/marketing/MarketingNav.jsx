@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 import LogoMark from './LogoMark';
+import MarketingButton from './MarketingButton';
 
 const SECTION_LINKS = [
   { label: 'How It Works', id: 'how-it-works' },
@@ -32,9 +33,6 @@ export default function MarketingNav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Active-section highlight — whichever section currently occupies the
-  // middle band of the viewport wins, rather than reacting to every pixel
-  // of scroll.
   useEffect(() => {
     const sections = SECTION_LINKS.map((l) => document.getElementById(l.id)).filter(Boolean);
     if (sections.length === 0) return;
@@ -77,7 +75,7 @@ export default function MarketingNav() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/85 backdrop-blur-xl border-b border-slate-200/70 shadow-sm'
+          ? 'bg-ink/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20'
           : 'bg-transparent'
       }`}
     >
@@ -88,7 +86,7 @@ export default function MarketingNav() {
             className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple rounded-lg"
           >
             <LogoMark className="w-9 h-9" />
-            <span className="text-xl font-black tracking-tight text-slate-900">Pairley</span>
+            <span className="text-xl font-black tracking-tight text-white">Pairley</span>
           </button>
 
           <div className="hidden md:flex items-center gap-1">
@@ -96,13 +94,16 @@ export default function MarketingNav() {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                  activeSection === link.id
-                    ? 'text-brand-purple bg-brand-purple/5'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                }`}
+                className="relative px-4 py-2 text-sm font-semibold text-white/70 hover:text-white transition-colors"
               >
                 {link.label}
+                {activeSection === link.id && (
+                  <motion.span
+                    layoutId="nav-underline"
+                    className="absolute left-4 right-4 -bottom-0.5 h-0.5 bg-gradient-to-r from-brand-purple to-brand-green rounded-full"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -112,14 +113,14 @@ export default function MarketingNav() {
               <>
                 <button
                   onClick={() => navigate(getDashboardPath())}
-                  className="flex items-center gap-1.5 px-4 py-2 text-slate-700 hover:text-slate-900 text-sm font-semibold rounded-xl border border-slate-200 hover:bg-slate-50 transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2 text-white/80 hover:text-white text-sm font-semibold rounded-xl border border-white/10 hover:bg-white/5 transition-all"
                 >
                   <LayoutDashboard size={15} />
                   Dashboard
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-4 py-2 text-slate-500 hover:text-slate-700 text-sm font-semibold transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 text-white/50 hover:text-white/80 text-sm font-semibold transition-colors"
                 >
                   <LogOut size={15} />
                   Log Out
@@ -129,18 +130,17 @@ export default function MarketingNav() {
               <>
                 <button
                   onClick={() => navigate('/login?role=customer')}
-                  className="px-4 py-2 text-slate-700 hover:text-slate-900 text-sm font-semibold transition-colors"
+                  className="px-4 py-2 text-white/80 hover:text-white text-sm font-semibold transition-colors"
                 >
                   Log In
                 </button>
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                <MarketingButton
+                  variant="primary"
                   onClick={() => navigate('/signup?role=customer')}
-                  className="px-5 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-dark text-white text-sm font-bold shadow-lg shadow-brand-purple/20 transition-colors"
+                  className="!px-5 !py-2.5 !text-sm"
                 >
                   Get Started
-                </motion.button>
+                </MarketingButton>
               </>
             )}
           </div>
@@ -148,7 +148,7 @@ export default function MarketingNav() {
           <button
             onClick={() => setMobileOpen((v) => !v)}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            className="md:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
+            className="md:hidden p-2 rounded-xl text-white/80 hover:bg-white/10 transition-colors"
           >
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -162,31 +162,31 @@ export default function MarketingNav() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-t border-slate-200"
+            className="md:hidden overflow-hidden bg-ink/95 backdrop-blur-xl border-t border-white/10"
           >
             <div className="px-4 py-5 flex flex-col gap-1">
               {SECTION_LINKS.map((link) => (
                 <button
                   key={link.id}
                   onClick={() => scrollToSection(link.id)}
-                  className="text-left text-slate-700 hover:text-brand-purple py-2.5 text-base font-semibold transition-colors"
+                  className="text-left text-white/80 hover:text-white py-2.5 text-base font-semibold transition-colors"
                 >
                   {link.label}
                 </button>
               ))}
-              <div className="h-px bg-slate-100 my-2" />
+              <div className="h-px bg-white/10 my-2" />
               {authUser ? (
                 <>
                   <button
                     onClick={() => { navigate(getDashboardPath()); setMobileOpen(false); }}
-                    className="w-full py-3 rounded-xl bg-slate-50 border border-slate-200 text-center font-semibold text-sm flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-center font-semibold text-sm flex items-center justify-center gap-2"
                   >
                     <LayoutDashboard size={16} />
                     Dashboard
                   </button>
                   <button
                     onClick={() => { handleLogout(); setMobileOpen(false); }}
-                    className="w-full py-3 mt-2 text-slate-500 text-center font-semibold text-sm"
+                    className="w-full py-3 mt-2 text-white/50 text-center font-semibold text-sm"
                   >
                     Log Out
                   </button>
@@ -195,13 +195,13 @@ export default function MarketingNav() {
                 <>
                   <button
                     onClick={() => { navigate('/login?role=customer'); setMobileOpen(false); }}
-                    className="w-full py-3 rounded-xl bg-slate-50 border border-slate-200 text-center font-semibold text-sm"
+                    className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white text-center font-semibold text-sm"
                   >
                     Log In
                   </button>
                   <button
                     onClick={() => { navigate('/signup?role=customer'); setMobileOpen(false); }}
-                    className="w-full py-3 mt-2 rounded-xl bg-brand-purple text-center font-bold text-sm text-white"
+                    className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-brand-purple to-brand-purple-light text-center font-bold text-sm text-white"
                   >
                     Get Started
                   </button>

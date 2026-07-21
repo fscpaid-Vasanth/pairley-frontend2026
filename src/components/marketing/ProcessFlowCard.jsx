@@ -1,14 +1,13 @@
 import { motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
 import { fadeInUp, revealViewport } from './animations';
 
-// One "how it works" flow — a title, a short one-line explainer, and a
-// vertical sequence of steps connected by arrows. Used twice (Group Offers,
-// Smart Discounts) with different step data and an accent color.
-export default function ProcessFlowCard({ title, tagline, steps, accent = 'purple', delay = 0 }) {
+// One "how it works" flow — a title, a short one-line explainer, an
+// optional live animation (GroupOfferAnimation / SmartDiscountAnimation),
+// and a numbered step list underneath it.
+export default function ProcessFlowCard({ title, tagline, steps, accent = 'purple', delay = 0, children }) {
   const accentClasses = accent === 'green'
-    ? { badge: 'bg-brand-green/10 text-brand-green-dark border-brand-green/20', dot: 'bg-brand-green' }
-    : { badge: 'bg-brand-purple/10 text-brand-purple border-brand-purple/20', dot: 'bg-brand-purple' };
+    ? { badge: 'bg-brand-green/15 text-brand-green border-brand-green/20', dot: 'bg-brand-green text-ink' }
+    : { badge: 'bg-brand-purple/15 text-brand-purple-light border-brand-purple/25', dot: 'bg-brand-purple text-white' };
 
   return (
     <motion.div
@@ -17,25 +16,23 @@ export default function ProcessFlowCard({ title, tagline, steps, accent = 'purpl
       initial="hidden"
       whileInView="visible"
       viewport={revealViewport}
-      className="rounded-3xl bg-white border border-slate-200 p-7 sm:p-8 shadow-sm h-full"
+      whileHover={{ y: -4 }}
+      className="rounded-3xl bg-white/[0.03] border border-white/10 p-6 sm:p-7 shadow-card-dark hover:shadow-card-dark-hover transition-shadow duration-300 h-full"
     >
       <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${accentClasses.badge}`}>
         {title}
       </span>
-      <p className="mt-3 text-slate-500 text-sm">{tagline}</p>
+      <p className="mt-3 text-white/50 text-sm">{tagline}</p>
 
-      <div className="mt-7 flex flex-col items-stretch">
+      {children && <div className="mt-5">{children}</div>}
+
+      <div className="mt-6 flex flex-col gap-2.5">
         {steps.map((step, i) => (
-          <div key={step} className="flex flex-col items-center">
-            <div className="w-full flex items-center gap-3 py-1">
-              <div className={`flex-shrink-0 w-7 h-7 rounded-full ${accentClasses.dot} text-white text-xs font-black flex items-center justify-center`}>
-                {i + 1}
-              </div>
-              <p className="text-sm font-semibold text-slate-800">{step}</p>
+          <div key={step} className="flex items-center gap-3">
+            <div className={`flex-shrink-0 w-6 h-6 rounded-full ${accentClasses.dot} text-[11px] font-black flex items-center justify-center`}>
+              {i + 1}
             </div>
-            {i < steps.length - 1 && (
-              <ArrowDown size={16} className="text-slate-300 my-1 ml-[13px] self-start" />
-            )}
+            <p className="text-sm font-semibold text-white/80">{step}</p>
           </div>
         ))}
       </div>

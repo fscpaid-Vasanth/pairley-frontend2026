@@ -24,13 +24,13 @@ export default function MarketingStats() {
   ];
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+    <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-10 gap-y-4">
       {items.map((item) => (
-        <div key={item.label} className="text-center">
-          <div className="text-2xl sm:text-3xl font-black text-slate-900">
+        <div key={item.label} className="text-center lg:text-left">
+          <div className="text-2xl sm:text-3xl font-black text-white">
             <AnimatedCounter value={item.value} />
           </div>
-          <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mt-0.5">
+          <div className="text-[11px] font-semibold text-white/45 uppercase tracking-wide mt-0.5">
             {item.label}
           </div>
         </div>

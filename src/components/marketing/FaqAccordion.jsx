@@ -22,17 +22,20 @@ const MERCHANT_FAQS = [
 
 function FaqItem({ q, a, isOpen, onToggle }) {
   return (
-    <div className="border-b border-slate-100 last:border-0">
+    <div className="border-b border-white/10 last:border-0">
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-4 py-5 text-left"
         aria-expanded={isOpen}
       >
-        <span className="text-sm sm:text-base font-semibold text-slate-800">{q}</span>
-        <ChevronDown
-          size={18}
-          className={`flex-shrink-0 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-        />
+        <span className="text-sm sm:text-base font-semibold text-white/90">{q}</span>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.25 }}
+          className="flex-shrink-0 text-white/40"
+        >
+          <ChevronDown size={18} />
+        </motion.span>
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
@@ -43,7 +46,7 @@ function FaqItem({ q, a, isOpen, onToggle }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <p className="pb-5 text-sm text-slate-500 leading-relaxed">{a}</p>
+            <p className="pb-5 text-sm text-white/50 leading-relaxed">{a}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -63,7 +66,7 @@ export default function FaqAccordion() {
   };
 
   return (
-    <section id="faq" className="py-20 lg:py-28 bg-white">
+    <section id="faq" className="py-20 lg:py-28 bg-ink">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={fadeInUp}
@@ -72,7 +75,7 @@ export default function FaqAccordion() {
           viewport={revealViewport}
           className="text-center mb-10"
         >
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Frequently Asked Questions
           </h2>
         </motion.div>
@@ -81,7 +84,7 @@ export default function FaqAccordion() {
           <button
             onClick={() => handleAudienceChange('customer')}
             className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
-              audience === 'customer' ? 'bg-brand-purple text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              audience === 'customer' ? 'bg-brand-purple text-white' : 'bg-white/5 text-white/60 hover:bg-white/10'
             }`}
           >
             For Customers
@@ -89,7 +92,7 @@ export default function FaqAccordion() {
           <button
             onClick={() => handleAudienceChange('merchant')}
             className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
-              audience === 'merchant' ? 'bg-brand-green text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              audience === 'merchant' ? 'bg-brand-green text-ink' : 'bg-white/5 text-white/60 hover:bg-white/10'
             }`}
           >
             For Merchants
@@ -101,7 +104,7 @@ export default function FaqAccordion() {
           initial="hidden"
           whileInView="visible"
           viewport={revealViewport}
-          className="rounded-2xl border border-slate-200 px-5 sm:px-6"
+          className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 sm:px-6"
         >
           {faqs.map((faq, i) => (
             <FaqItem
