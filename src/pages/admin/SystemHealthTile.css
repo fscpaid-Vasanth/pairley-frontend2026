@@ -144,37 +144,3 @@
 .system-health-links a:hover {
   text-decoration: underline;
 }
-
-.system-health-sentry-test {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed rgba(226, 232, 240, 0.8);
-}
-
-.system-health-sentry-test-btn {
-  font-size: 11px;
-  font-weight: 700;
-  color: #5b12d6;
-  background: rgba(91, 18, 214, 0.08);
-  border: 1px solid rgba(91, 18, 214, 0.2);
-  border-radius: 8px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.system-health-sentry-test-btn:hover:not(:disabled) {
-  background: rgba(91, 18, 214, 0.15);
-}
-
-.system-health-sentry-test-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.system-health-sentry-test-result {
-  margin: 8px 0 0;
-  font-size: 10px;
-  color: #64748b;
-  word-break: break-all;
-}

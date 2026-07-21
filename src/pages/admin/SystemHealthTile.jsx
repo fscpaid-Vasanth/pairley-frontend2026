@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Activity, Database, HardDrive, ExternalLink, RefreshCw } from 'lucide-react';
-import * as Sentry from '@sentry/react';
 import { api } from '../../utils/api';
 import './SystemHealthTile.css';
 
@@ -23,26 +22,6 @@ export default function SystemHealthTile() {
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [sentryTestResult, setSentryTestResult] = useState(null);
-  const [sentryTesting, setSentryTesting] = useState(false);
-
-  // TEMPORARY — Module 7 frontend Sentry verification only. Mirrors the
-  // backend's explicit capture+flush pattern (relying on the fire-and-forget
-  // default lost events there). Remove this handler and the button below
-  // once the test event is confirmed in the pairley-frontend Sentry project.
-  const runSentryTest = async () => {
-    setSentryTesting(true);
-    setSentryTestResult(null);
-    try {
-      const eventId = Sentry.captureException(
-        new Error('Module 7 frontend Sentry verification test — safe to ignore, this is intentional.'),
-      );
-      const flushed = await Sentry.flush(5000);
-      setSentryTestResult({ eventId, flushed });
-    } finally {
-      setSentryTesting(false);
-    }
-  };
 
   const fetchHealth = () => {
     api.get('/admin/system-health')
@@ -105,18 +84,6 @@ export default function SystemHealthTile() {
         <a href={UPTIME_DASHBOARD_URL} target="_blank" rel="noreferrer">
           Uptime monitor <ExternalLink size={11} />
         </a>
-      </div>
-
-      {/* TEMPORARY — remove once the test event is confirmed in Sentry */}
-      <div className="system-health-sentry-test">
-        <button onClick={runSentryTest} disabled={sentryTesting} className="system-health-sentry-test-btn">
-          {sentryTesting ? 'Sending…' : 'Send test Sentry event'}
-        </button>
-        {sentryTestResult && (
-          <p className="system-health-sentry-test-result">
-            eventId: <code>{sentryTestResult.eventId}</code> · flushed: {String(sentryTestResult.flushed)}
-          </p>
-        )}
       </div>
     </div>
   );
