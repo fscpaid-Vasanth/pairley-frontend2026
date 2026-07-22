@@ -13,6 +13,7 @@ import {
   FileText,
   Image as ImageIcon,
   Eye,
+  Copy,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
@@ -316,7 +317,17 @@ export default function DiscoveredOffersPanel() {
                     </span>
                   </td>
                   <td className="px-4 py-4">
-                    <ConfidenceBadge score={c.confidence_score} />
+                    <div className="flex flex-col items-start gap-1">
+                      <ConfidenceBadge score={c.confidence_score} />
+                      {(c.duplicate_of_offer_id || c.business_duplicate_of_id) && (
+                        <span
+                          title="Possible duplicate — see Review for details"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-amber-50 border border-amber-200 text-amber-700"
+                        >
+                          <Copy size={9} /> Possible duplicate
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-4">
                     <span className="flex items-center gap-0.5 text-slate-700 font-bold">

@@ -1,13 +1,70 @@
-import { useState } from 'react';
-import { X, Check, RotateCcw, IndianRupee, FileText, ImageOff, ExternalLink, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Check, RotateCcw, IndianRupee, FileText, ImageOff, ExternalLink, AlertTriangle, Copy } from 'lucide-react';
 import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '../../utils/adminFilePreview';
 import { formatPrice } from '../../utils/constants';
+import { api } from '../../utils/api';
 
 function ConfidenceBadge({ score }) {
   const pct = Math.round((score ?? 0) * 100);
   const tone =
     pct >= 70 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : pct >= 40 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-rose-50 border-rose-200 text-rose-700';
   return <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${tone}`}>{pct}% confidence</span>;
+}
+
+const DUPLICATE_WARNING_TEXT = new Set([
+  'Possible duplicate offer detected — please verify',
+  'Possible duplicate business detected — please verify',
+]);
+
+function genericWarnings(candidate) {
+  return (candidate.warnings || []).filter((w) => !DUPLICATE_WARNING_TEXT.has(w));
+}
+
+// Module 11 Phase 2 — duplicate detection is a recommendation only (never
+// auto-merged/rejected); this banner is where the admin actually sees it.
+// Lazily fetches the suspected-original OFFER's title/business via the
+// existing candidate-detail endpoint (no new backend surface needed) — kept
+// out of the list endpoint entirely so listCandidates stays free of N+1s.
+// No such lookup exists for the business-level flag (no admin
+// single-business-by-id endpoint today), so that one shows score/reasons
+// only, without a cross-link.
+function DuplicateBanner({ candidate }) {
+  const [originalOffer, setOriginalOffer] = useState(null);
+
+  useEffect(() => {
+    setOriginalOffer(null);
+    if (!candidate.duplicate_of_offer_id) return;
+    api
+      .get(`/discovery/candidates/${candidate.duplicate_of_offer_id}`)
+      .then((data) => setOriginalOffer(data))
+      .catch(() => setOriginalOffer(null));
+  }, [candidate.duplicate_of_offer_id]);
+
+  if (!candidate.duplicate_of_offer_id && !candidate.business_duplicate_of_id) return null;
+
+  return (
+    <div className="flex flex-col gap-2 text-[10px] text-amber-700 font-semibold bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+      {candidate.duplicate_of_offer_id && (
+        <div className="flex items-start gap-1.5">
+          <Copy size={13} className="flex-shrink-0 mt-0.5" />
+          <span>
+            Possible duplicate offer ({Math.round((candidate.duplicate_score ?? 0) * 100)}% match)
+            {originalOffer ? <> — likely the same as <strong>"{originalOffer.title}"</strong> ({originalOffer.business_name})</> : null}
+            {candidate.duplicate_reasons?.length > 0 && <span className="block font-normal text-amber-600 mt-0.5">{candidate.duplicate_reasons.join(' • ')}</span>}
+          </span>
+        </div>
+      )}
+      {candidate.business_duplicate_of_id && (
+        <div className="flex items-start gap-1.5">
+          <Copy size={13} className="flex-shrink-0 mt-0.5" />
+          <span>
+            Possible duplicate business ({Math.round((candidate.business_duplicate_score ?? 0) * 100)}% match)
+            {candidate.business_duplicate_reasons?.length > 0 && <span className="block font-normal text-amber-600 mt-0.5">{candidate.business_duplicate_reasons.join(' • ')}</span>}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // Module 10 Phase 3 — the "compare original vs. extracted" surface required
@@ -122,10 +179,14 @@ export default function CandidateReviewModal({ candidate, actioning, onClose, on
               ) : null}
             </div>
 
-            {candidate.warnings?.length > 0 && (
+            <DuplicateBanner candidate={candidate} />
+
+            {/* Duplicate-specific warnings already have their own banner above with
+                more detail — filtered out here to avoid saying the same thing twice. */}
+            {genericWarnings(candidate).length > 0 && (
               <div className="flex items-start gap-1.5 text-[10px] text-amber-600 font-semibold bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
                 <AlertTriangle size={13} className="flex-shrink-0 mt-0.5" />
-                <span>{candidate.warnings.join(' • ')}</span>
+                <span>{genericWarnings(candidate).join(' • ')}</span>
               </div>
             )}
           </div>
