@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import LandingAmbient from '../../components/marketing/LandingAmbient';
 import LandingNav from '../../components/marketing/LandingNav';
 import HeroSection from '../../components/marketing/HeroSection';
 import TrustBar from '../../components/marketing/TrustBar';
@@ -24,7 +25,8 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white font-inter text-pairley-ink antialiased">
+    <div className="relative min-h-screen font-inter text-pairley-ink antialiased">
+      <LandingAmbient />
       <LandingNav />
       <main>
         <HeroSection />

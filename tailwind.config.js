@@ -64,11 +64,29 @@ export default {
         'gradient-shift': 'gradientShift 8s ease infinite',
         'counter-up': 'counterUp 0.5s ease-out forwards',
         'shimmer': 'shimmer 2s linear infinite',
+        // Landing-page ambient background blobs — large, slow, organic
+        // drift so the white space feels alive without distracting.
+        'drift-slow': 'drift 16s ease-in-out infinite',
+        'drift-slow-2': 'drift2 20s ease-in-out infinite',
+        'drift-slow-3': 'drift3 24s ease-in-out infinite',
       },
       keyframes: {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-20px)' },
+        },
+        drift: {
+          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+          '50%': { transform: 'translate(140px, -100px) scale(1.25)' },
+        },
+        drift2: {
+          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+          '50%': { transform: 'translate(-160px, 90px) scale(1.3)' },
+        },
+        drift3: {
+          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+          '33%': { transform: 'translate(120px, 80px) scale(1.15)' },
+          '66%': { transform: 'translate(-100px, -60px) scale(0.9)' },
         },
         gradientShift: {
           '0%, 100%': { backgroundPosition: '0% 50%' },
