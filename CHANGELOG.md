@@ -2,6 +2,130 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module12-complete] — 2026-07-22
+
+### Module 12 — Merchant Self-Service Claim & Management
+
+Scope: turns Module 9's admin-assisted claim flow into a merchant
+self-service workflow backed by real evidence, gives admins a proper
+surface to review that evidence and act on Module 11's duplicate signals,
+and closes the loop with an admin-only, fully-audited business
+consolidation workflow. The underlying claim state machine
+(`PENDING_ADMIN_REVIEW → ADMIN_APPROVED → COMPLETED`, admin approval always
+required, OTP-gated ownership transfer) is unchanged from Module 9 —
+nothing here bypasses admin review. Built in 4 phases, each independently
+reviewed/approved/deployed-verified.
+
+**Phase 1 — Schema & Evidence-Based Claim Backend**
+- `ClaimRequest` gains `claimant_name` and `evidence_urls: String[]`, both
+  optional/additive — a claim submitted with neither still works exactly
+  as it did pre-Module-12
+- Evidence (up to 5 files) is validated with the same magic-byte/mimetype/
+  size checks Module 10's `FileValidationService` already established
+  (reject-before-processing — a malformed batch never partially uploads),
+  then stored via the existing generic `StorageService.uploadBase64`
+- `@nestjs/throttler` added, scoped to just `POST claim/request` (5/10min)
+  and `POST claim/otp/send` (3/10min, real per-send SMS cost) — not a
+  global guard, since every other route already sits behind
+  `JwtAuthGuard`/`RolesGuard`
+- Maintenance fix (found during the Phase 1 audit, unrelated to the
+  evidence feature itself): `BusinessService.uploadDocuments()` was
+  writing uploaded aadhaar/PAN file URLs into `aadhaar_number`/`pan_number`
+  (the text ID-number fields) instead of `aadhaar_photo`/`pan_photo` (the
+  document-image fields) — corrected, covered by regression tests
+
+**Phase 2 — Merchant Self-Service UI**
+- An unobtrusive "Is this your business? Claim it." prompt on the public
+  deal page, shown only when the offer's business is still `UNCLAIMED`
+- `ClaimBusinessPage` extended with a claimant-name field and an optional
+  multi-file evidence uploader (client-side count/size guardrails ahead of
+  the same server-side limits), styled after the existing KYC upload
+  components
+
+**Phase 3 — Admin Evidence Review UI**
+- A new claim-detail modal — claimant name/mobile/timestamps, an evidence
+  gallery (images inline, PDFs open in a new tab), and a duplicate-business
+  awareness banner (Module 11's `duplicate_of_business_id`/`score`/
+  `reasons`) — all read-only context feeding the same unchanged
+  Approve/Reject actions
+- Maintenance fix, benefits every admin document-preview surface (KYC,
+  Module 10 poster/PDF, and this phase's claim evidence): the shared
+  `adminFilePreview.js` helper was passing private S3 URLs straight
+  through to `<img src>`/`<a href>` instead of routing them through the
+  authenticated `document-preview` proxy, so they 403'd in the browser.
+  Fixed to only pass through genuinely external URLs
+- Vitest introduced as this repo's first frontend test runner, scoped to
+  this phase's pure-logic units (URL routing, PDF-vs-image detection)
+
+**Phase 4 — Business Duplicate Consolidation**
+- The first thing that ever acts on Module 11 Phase 2's advisory
+  `duplicate_of_business_id`/`duplicate_score`/`duplicate_reasons`: an
+  admin-only "Business Duplicates" panel lists flagged pairs, and a
+  consolidation modal lets the admin pick which of the two to keep —
+  including overriding the AI's suggested direction
+- Consolidating reassigns every `Offer.business_id` off the losing
+  business and soft-removes it (`business_status: REMOVED`) — never a
+  hard delete, so `Subscription`/`Rating`/`ClaimRequest` history stays
+  intact. A separate audit trail (`consolidated_into_business_id`/
+  `consolidated_at`/`consolidated_by`) keeps that distinct from the
+  original, possibly-never-acted-on AI suggestion
+- Safety guards: refuses to consolidate a business that isn't
+  `UNCLAIMED` (can never touch a real merchant's claimed listing — matches
+  the duplicate detector's own UNCLAIMED-only comparison pool), refuses to
+  consolidate into an already-removed business, and refuses while a claim
+  request is pending on either side, per the STEP 1-approved decision
+
+**Verified in production (Phase 5)**
+- Full merchant lifecycle against the live Render/Vercel deployment:
+  discover an UNCLAIMED business → submit a claim with claimant name and
+  evidence → admin reviews the evidence in the new detail modal → approve
+  → OTP send/verify (real MSG91 send, code read back from the database for
+  a disposable test mobile) → atomic ownership transfer
+  (`business_status: CLAIMED`, JWT issued only post-commit) → the newly
+  claimed business's own dashboard correctly shows its offer and profile
+- Business duplicate consolidation re-confirmed end to end: offer
+  reassignment, soft-remove, all four safety guards, idempotency, and
+  public-visibility filtering all correct against disposable data
+- Regression: Module 9 website import, Module 10 OCR/PDF pipeline, and
+  Module 11 normalization/duplicate-detection/enrichment are all
+  untouched by any Module 12 code path (zero files in those pipelines were
+  modified this module); merchant-created (`MANUAL`) offers, the public
+  discovery feed, and the admin Shop Onboardings list all confirmed
+  working correctly against live production data; WhatsApp lead-alert
+  code path confirmed untouched by inspection (Module 12 only modified
+  `offer.service.ts`'s two read queries, not the lead/notification write
+  path)
+- 275 backend unit tests (274 passing — 1 pre-existing, previously-flagged
+  `app.controller.spec.ts` failure unrelated to Module 12, see Module
+  1/7 notes in ROADMAP.md), 16 frontend unit tests (new this module); both
+  repos build clean
+- All test data (businesses, offers, claims, OTPs) created during Phase
+  1-5 verification fully deleted; production DB confirmed back to its
+  exact pre-verification baseline after every phase
+
+**Known, expected, external/deferred**
+- Live evidence-preview rendering (images/PDFs actually loading through
+  the browser) could not be given a final live-browser confirmation this
+  module — the backend's S3 `GetObject` calls are currently denied by the
+  same `AWSCompromisedKeyQuarantineV3` IAM quarantine first documented at
+  Module 1 and still open as of Module 7 (AWS Support Case
+  `178454777500456`). The Phase 3 proxy-routing fix is verified correct up
+  to the point the AWS SDK call itself is denied; this is an external AWS
+  infrastructure issue, not a Module 12 code defect. **Action once AWS
+  clears the quarantine**: re-run image/PDF preview verification for KYC
+  documents, Module 10 poster/PDF imports, and claim evidence through the
+  `document-preview` proxy.
+- The "suspected canonical business" reference in the duplicate-review
+  banner shows the candidate business's own ID rather than resolving a
+  friendly name — no admin single-business-by-id lookup endpoint exists
+  yet (the same limitation Module 11's business-duplicate banner already
+  had). A minor future enhancement, not a blocker.
+- A "not a duplicate" dismissal action does not exist yet — a false-
+  positive duplicate flag simply has no admin-facing effect if left alone
+  (it's advisory only), but there's no way to explicitly clear it from the
+  Business Duplicates panel today. Deferred; add if false positives turn
+  out to be common enough to need it.
+
 ## [pairley-module11-complete] — 2026-07-22
 
 ### Module 11 — AI Offer Standardization & Enrichment

@@ -27,12 +27,13 @@ Tracks module-level delivery against [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_P
 | Group B — Module 9: AI Offer Discovery Engine (foundation) | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module9-complete`. See [CHANGELOG.md](./CHANGELOG.md). A deliberately scoped vertical slice of Group B: website-URL import (deterministic extraction, no AI/LLM), admin review queue, and admin-assisted merchant claim flow. Instagram/Facebook import, poster OCR, and LLM-based standardization are explicitly out of scope, proposed for later modules once Meta Graph API App Review and an OCR/LLM provider decision land. |
 | Group B — Module 10: Poster OCR + AI Offer Standardization | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module10-complete`. See [CHANGELOG.md](./CHANGELOG.md). Extends Module 9's discovery pipeline with poster/flyer/menu image and text-layer PDF import via `tesseract.js` OCR (kept behind a swappable `OcrService` interface), feeding the same review-queue/approval/public-visibility workflow. Instagram/Facebook import and LLM-based standardization remain out of scope, pending Meta Business Verification. |
 | Group B — Module 11: AI Offer Standardization & Enrichment | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module11-complete`. See [CHANGELOG.md](./CHANGELOG.md). Adds deterministic price/offer-type normalization, duplicate detection (offer- and business-level, recommendation-only), rule-based AI enrichment (category/merchant-type/tags/keywords via a provider-agnostic `EnrichmentProvider`, no LLM yet), and an AI-assisted review workflow (Accept/Edit/Reject per suggestion, atomic approve-with-overrides). Canonical fields (`category`, `offer_type`, `business_type`) are never auto-modified by enrichment — only an explicit admin acceptance changes them. |
+| Group B — Module 12: Merchant Self-Service Claim & Management | ✅ **COMPLETE** — database migrated, application code deployed to production and verified. Tag: `pairley-module12-complete`. See [CHANGELOG.md](./CHANGELOG.md). Turns Module 9's admin-assisted claim flow into merchant self-service: evidence-backed claim submission, an admin evidence-review UI (claimant info, evidence gallery, duplicate-awareness banner), and an admin-only business duplicate consolidation workflow that acts on Module 11's duplicate signals (atomic offer reassignment, soft-remove with full audit trail, four independent safety guards). Admin approval and OTP-gated ownership transfer remain mandatory throughout — nothing here bypasses human review. |
 
 **Note:** during Module 1 verification, an unrelated pre-existing issue was found — AWS flagged the backend's S3 credentials as compromised (`AWSCompromisedKeyQuarantineV3`), blocking file reads (e.g. KYC document retrieval). This does not affect any Module 1 code and does not block Module 1's completion, but needs credential rotation independently — tracked separately, not part of this roadmap's feature scope.
 
 **Note:** during Module 3 verification, the Neon Postgres project temporarily exhausted its free-tier compute-time quota mid-verification, causing brief production 500s on database-backed endpoints. Resolved by upgrading the Neon plan (Launch tier). Unrelated to Module 3's code — flagged here since it's an infra/billing concern worth tracking, not a code defect.
 
-**Note:** Module 7 built `/api/health`'s S3 reachability check, which immediately surfaced that the Module 1 `AWSCompromisedKeyQuarantineV3` issue above never actually cleared — the IAM user is still under an active quarantine even after a full credential rotation (new access key created, applied to Render, verified in use). A new AWS Support case is open (Case ID `178454777500456`) requesting removal of the quarantine policy. Concretely, this means `GetObject` is denied (admin KYC document preview/download is broken) while `PutObject` still works (uploads and normal browsing are unaffected). **Status: Pending AWS Support — external dependency, not a Module 7 or Module 1 code defect.**
+**Note:** Module 7 built `/api/health`'s S3 reachability check, which immediately surfaced that the Module 1 `AWSCompromisedKeyQuarantineV3` issue above never actually cleared — the IAM user is still under an active quarantine even after a full credential rotation (new access key created, applied to Render, verified in use). A new AWS Support case is open (Case ID `178454777500456`) requesting removal of the quarantine policy. Concretely, this means `GetObject` is denied (admin KYC document preview/download is broken) while `PutObject` still works (uploads and normal browsing are unaffected). **Status: Pending AWS Support — external dependency, not a Module 7 or Module 1 code defect.** Re-confirmed still active during Module 12 Phase 3 (2026-07-22) — `GetObject` still denied with the same `AWSCompromisedKeyQuarantineV3` explicit-deny error, upload paths still unaffected. See the Module 12 note below for the related frontend fix.
 
 **Note:** Module 8's outbound lead-alert WhatsApp sends require a Meta-approved message template (`new_lead_alert`) — business-initiated messages outside a 24h customer session window can't use freeform text, per WhatsApp Business Messaging Policy. Production verification confirmed the entire pipeline (number resolution, send, retry, `WhatsAppMessage` logging, leads-list status) is correct, correctly logging `whatsappStatus: "FAILED"` with Meta's real error (`template does not exist`) until the template is submitted and approved (3-10 day Meta review). **Status: Pending Meta template approval — external dependency, not a Module 8 code defect.** Every lead alert will start succeeding the moment approval lands, with no code changes required. Module 9 production verification (below) re-confirmed this exact same known state — not a new or Module 9-caused issue.
 
@@ -47,6 +48,33 @@ Tracks module-level delivery against [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_P
 **Note:** Module 10's poster/PDF import is scoped to JPEG, PNG, WebP, and text-layer PDFs only — scanned/image-only PDFs fail gracefully with a clear `UNSUPPORTED_SCANNED_PDF` reason rather than silently producing junk. Tesseract.js was chosen as the OCR provider (free, no new infra) behind a swappable `OcrService` interface; a future move to AWS Textract or another provider only requires reimplementing that one service. The first OCR call in any given backend process incurs a one-time ~5MB language-model download — see RUNBOOK.md.
 
 **Note:** Module 10's poster/PDF thumbnail previews reuse the same `document-preview` proxy as KYC document previews, so they inherit the exact same pre-existing `AWSCompromisedKeyQuarantineV3` `GetObject` limitation described above (Case `178454777500456`) when that quarantine is active — not a new or Module 10-caused issue.
+
+**Note:** Module 12 Phase 3 found and fixed a real (pre-existing, not
+Module-12-caused) frontend bug while building the claim-evidence viewer:
+`adminFilePreview.js`'s `getDocumentPreviewUrl`/`getDocumentDownloadUrl`
+were passing any `https://` URL straight through unproxied, including
+private S3 URLs, which 403 in the browser independent of the
+`AWSCompromisedKeyQuarantineV3` quarantine above. Fixed to route S3 URLs
+through the authenticated `document-preview` proxy. However, the
+quarantine itself (still open, Case `178454777500456`) means live
+image/PDF preview rendering could not be given a final end-to-end
+browser confirmation as of Module 12 — the proxy-routing fix is verified
+correct up to the point the backend's AWS SDK `GetObject` call is denied.
+**Action once AWS clears the quarantine:** re-verify KYC, Module 10
+poster/PDF, and Module 12 claim-evidence previews all render correctly
+through the proxy.
+
+**Note:** Module 12 Phase 4's business duplicate consolidation only ever
+operates on `UNCLAIMED` businesses (matching Module 11 Phase 2's
+duplicate detector, which only ever compares within that pool) — it can
+never reassign or remove a real merchant's claimed business. The
+"suspected canonical business" reference in the admin review banner shows
+the candidate's raw ID rather than a resolved name (no admin
+single-business-by-id lookup endpoint exists yet — the same limitation
+Module 11's business-duplicate banner already had), and there is no
+"not a duplicate" dismissal action yet (a false-positive flag is simply
+inert if left alone). Both are minor, deferred enhancements, not
+blockers.
 
 **Sentry / uptime monitoring status (Module 7):**
 - **Backend error tracking (Sentry):** ✅ Completed and verified — a test exception was confirmed delivered to the `pairley-backend` Sentry project.

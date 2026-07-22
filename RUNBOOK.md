@@ -51,12 +51,16 @@ search, leads, auth) keeps working.
 2. If AWS-side: nothing to fix, wait it out — `/api/health` recovers
    automatically, no redeploy needed.
 3. If AWS reports healthy but we still can't reach it: check
-   `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` on Render haven't been
-   flagged/rotated. This happened once before (Module 1 verification — AWS
-   flagged the original keys as compromised via
-   `AWSCompromisedKeyQuarantineV3`, since resolved by rotating credentials
-   and disabling the old ones) — check the AWS IAM console for a similar
-   flag on the current keys before assuming it's a transient network issue.
+   `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` on Render for an
+   `AWSCompromisedKeyQuarantineV3` flag in the IAM console. **This is an
+   active, ongoing issue as of Module 12** (not a one-time incident,
+   despite the original Module 1 note suggesting it was resolved by
+   rotation) — a full credential rotation at Module 7 did not clear it,
+   and it was re-confirmed still active during Module 12 Phase 3
+   (2026-07-22). `GetObject` (file reads — document previews) is denied
+   while `PutObject` (uploads) still works. Open AWS Support case:
+   `178454777500456`. Check the case status first before assuming a fresh
+   rotation will help — it didn't last time.
 4. Confirm the bucket itself (`AWS_S3_BUCKET_NAME`) still exists and hasn't
    had its policy changed.
 5. Once resolved, confirm via `/api/health` — expect `checks.storage: "ok"`.
@@ -361,7 +365,7 @@ flagged when it obviously should be); or `enrichment_status` shows
    fields is independently Accept/Edit/Reject in the UI) rather than
    assuming all suggestions were meant to apply.
 
-## Merchant Claim Flow Issues (Module 9)
+## Merchant Claim Flow Issues (Module 9 / Module 12)
 
 **How you'll know**: a merchant reports being stuck partway through
 claiming a business, or an admin can't find a claim request they expected
@@ -395,3 +399,65 @@ to see.
    CLAIMED`, that's a real bug worth escalating immediately (the
    transaction guarantees these move together); this has never been
    observed in testing.
+6. **(Module 12)** A merchant reports "request rejected instantly" when
+   submitting a claim: check `@nestjs/throttler` rate limits first —
+   `POST business/claim/request` is capped at 5/10min and
+   `POST business/claim/otp/send` at 3/10min, per IP. A `429` here is the
+   throttle working as designed (this route has zero auth gate, so it's
+   the one most worth protecting), not a bug — legitimate repeated
+   attempts from the same network (e.g. a shared office IP, a mall Wi-Fi)
+   can hit this. Wait out the 10-minute window; there's no manual reset.
+7. **(Module 12)** Evidence upload rejected with "Evidence rejected: ...":
+   this is `FileValidationService`'s magic-byte/mimetype/size check
+   failing — the same validation Module 10's poster/PDF import uses. Check
+   the specific reason in the message (signature mismatch, unsupported
+   type, over the 15MB limit, more than 5 files) — this is
+   reject-before-processing, so a rejected batch never partially uploads
+   or creates a partial `ClaimRequest` row.
+8. **(Module 12)** A claim's evidence images/PDFs don't render in the
+   admin review modal: see the S3/`AWSCompromisedKeyQuarantineV3` note
+   above — this is the same underlying quarantine issue, not specific to
+   claim evidence. The URLs themselves (`evidence_urls` on the
+   `ClaimRequest` row) are correct even if the preview proxy can't
+   currently read them back.
+
+## Business Duplicate Consolidation Issues (Module 12)
+
+**How you'll know**: an admin reports a "Consolidate" attempt failing, or
+asks why a business/its offers don't show up where expected after a
+consolidation.
+
+**Steps**:
+1. **Consolidate returns 400 "Only an unclaimed business can be
+   consolidated away"**: working as designed — `BusinessConsolidationService`
+   refuses to remove any business whose `business_status` isn't
+   `UNCLAIMED`, specifically so this feature can never touch a real
+   merchant's claimed listing. If the admin genuinely needs to merge two
+   claimed businesses, that's a different, unbuilt workflow — do not work
+   around this guard directly in the database.
+2. **Consolidate returns 400 "Cannot consolidate while a claim request is
+   pending"**: check `ClaimRequest` rows for either business id with
+   status `PENDING_ADMIN_REVIEW` or `ADMIN_APPROVED` — resolve (approve or
+   reject) that claim first via the Claim Requests tab, then retry the
+   consolidation.
+3. **Consolidate returns 400 "This business has already been
+   consolidated"**: the target's `business_status` is already `REMOVED`
+   (`consolidated_at`/`consolidated_into_business_id` will be set on its
+   row) — this is the idempotency guard, not a bug. Check
+   `consolidated_into_business_id` to see where its offers actually went.
+4. **An offer seems to have "disappeared" after a consolidation**: it
+   hasn't — `Offer.business_id` is reassigned, not deleted, as part of the
+   same atomic transaction as the soft-remove. Look it up under the
+   *canonical* business (`consolidated_into_business_id` on the
+   now-`REMOVED` business tells you which one). If it's genuinely missing,
+   that's a real bug worth escalating — offer reassignment and the
+   soft-remove are supposed to be atomic (`$transaction`), so one without
+   the other should never happen.
+5. **A `REMOVED` business still shows up somewhere it shouldn't**: public
+   offer queries (`GET offers/list`, `GET offers/details/:id`) explicitly
+   filter out `business_status: REMOVED`. The admin's general Shop
+   Onboardings list (`GET admin/businesses`) does **not** filter it out by
+   design — admins can still see removed businesses there for audit
+   purposes. If a `REMOVED` business's offer shows up in a *public* query,
+   that's a real bug (check whether the offer's `business_id` was actually
+   reassigned during consolidation, per point 4).
