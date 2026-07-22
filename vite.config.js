@@ -89,4 +89,13 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
   },
+
+  // Module 12 Phase 3 — first test setup in this repo. jsdom is needed
+  // since adminFilePreview.js reads localStorage; scope is deliberately
+  // just src/**/*.test.js (pure-logic unit tests), not a full
+  // component/RTL setup.
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.test.js'],
+  },
 });

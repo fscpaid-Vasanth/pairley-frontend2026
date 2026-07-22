@@ -21,16 +21,33 @@ export const isValidImageSrc = (src) => {
   );
 };
 
+// The S3 bucket backing uploads is private — a direct https://...s3....
+// amazonaws.com/... URL 403s in the browser. Every uploaded document (KYC
+// photos, poster/PDF imports, claim evidence) is stored as exactly that
+// kind of URL, so it always needs to go through the document-preview
+// proxy below, which fetches it server-side with AWS credentials. Only a
+// genuinely external https:// URL (e.g. a WEBSITE-source import's source
+// page) should ever be passed through unproxied.
+const isS3Url = (src) => {
+  try {
+    return new URL(src).hostname.includes('.amazonaws.com');
+  } catch {
+    return false;
+  }
+};
+
 export const getDocumentPreviewUrl = (src) => {
   if (!src) return '';
-  if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
+  if (src.startsWith('data:image/')) return src;
+  if ((src.startsWith('http://') || src.startsWith('https://')) && !isS3Url(src)) return src;
   const token = localStorage.getItem('pairley_token') || '';
   return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&token=${encodeURIComponent(token)}`;
 };
 
 export const getDocumentDownloadUrl = (src) => {
   if (!src) return '#';
-  if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
+  if (src.startsWith('data:image/')) return src;
+  if ((src.startsWith('http://') || src.startsWith('https://')) && !isS3Url(src)) return src;
   const token = localStorage.getItem('pairley_token') || '';
   return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&download=true&token=${encodeURIComponent(token)}`;
 };

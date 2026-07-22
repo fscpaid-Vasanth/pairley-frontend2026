@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Check, X, Phone, Clock } from 'lucide-react';
+import { Check, X, Phone, Clock, Eye } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
+import ClaimDetailModal from './ClaimDetailModal';
+import { STATUS_STYLES } from './claimStatusStyles';
 
 const STATUS_FILTERS = [
   { value: '', label: 'All' },
@@ -11,14 +13,6 @@ const STATUS_FILTERS = [
   { value: 'COMPLETED', label: 'Completed' },
   { value: 'EXPIRED', label: 'Expired' },
 ];
-
-const STATUS_STYLES = {
-  PENDING_ADMIN_REVIEW: 'bg-orange-50 border-orange-200 text-orange-700 animate-pulse',
-  ADMIN_APPROVED: 'bg-indigo-50 border-indigo-200 text-[#5B12D6]',
-  ADMIN_REJECTED: 'bg-rose-50 border-rose-200 text-rose-700',
-  COMPLETED: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-  EXPIRED: 'bg-slate-100 border-slate-200 text-slate-500',
-};
 
 // Module 9 Phase 4 — admin side of the claim state machine. Approve/reject
 // only ever act on PENDING_ADMIN_REVIEW requests (enforced server-side);
@@ -32,6 +26,7 @@ export default function ClaimRequestsPanel() {
   const [actioningId, setActioningId] = useState(null);
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [detailTarget, setDetailTarget] = useState(null);
 
   const fetchRequests = useCallback(() => {
     setLoading(true);
@@ -139,31 +134,38 @@ export default function ClaimRequestsPanel() {
                     {r.reviewed_at ? new Date(r.reviewed_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                   </td>
                   <td className="px-4 py-4 text-center">
-                    {r.status === 'PENDING_ADMIN_REVIEW' ? (
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          disabled={actioningId === r.id}
-                          onClick={() => handleApprove(r.id)}
-                          title="Approve"
-                          className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg disabled:opacity-50"
-                        >
-                          <Check size={12} />
-                        </button>
-                        <button
-                          disabled={actioningId === r.id}
-                          onClick={() => {
-                            setRejectReason('');
-                            setRejectTarget(r.id);
-                          }}
-                          title="Reject"
-                          className="p-1.5 border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg disabled:opacity-50"
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] text-slate-300 font-semibold">—</span>
-                    )}
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        onClick={() => setDetailTarget(r.id)}
+                        title="View evidence & detail"
+                        className="p-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 rounded-lg"
+                      >
+                        <Eye size={12} />
+                      </button>
+                      {r.status === 'PENDING_ADMIN_REVIEW' && (
+                        <>
+                          <button
+                            disabled={actioningId === r.id}
+                            onClick={() => handleApprove(r.id)}
+                            title="Approve"
+                            className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg disabled:opacity-50"
+                          >
+                            <Check size={12} />
+                          </button>
+                          <button
+                            disabled={actioningId === r.id}
+                            onClick={() => {
+                              setRejectReason('');
+                              setRejectTarget(r.id);
+                            }}
+                            title="Reject"
+                            className="p-1.5 border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg disabled:opacity-50"
+                          >
+                            <X size={12} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -174,6 +176,17 @@ export default function ClaimRequestsPanel() {
         <div className="text-center py-20 bg-white/50 border border-slate-200/30 rounded-3xl text-slate-400 font-bold text-sm">
           No claim requests matching this filter.
         </div>
+      )}
+
+      {detailTarget && (
+        <ClaimDetailModal
+          claimId={detailTarget}
+          onClose={() => setDetailTarget(null)}
+          onActionComplete={() => {
+            setDetailTarget(null);
+            fetchRequests();
+          }}
+        />
       )}
 
       {rejectTarget && (
