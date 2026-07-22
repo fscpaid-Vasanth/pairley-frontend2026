@@ -27,9 +27,27 @@ export default {
           DEFAULT: '#0F1117', // page background
           section: '#171A23', // alternating section background
         },
+        // Light landing-page redesign palette (2026-07 investor-ready
+        // rebuild). Deliberately its own token group so it can use the
+        // brief's exact #6D28D9 purple without disturbing the app-wide
+        // brand.purple (#5B12D6) every other page depends on.
+        pairley: {
+          purple: '#6D28D9',
+          'purple-light': '#7C3AED',
+          'purple-dark': '#5B21B6',
+          green: '#22C55E',
+          'green-dark': '#16A34A',
+          orange: '#F97316',
+          ink: '#111827',
+          mist: '#FAF9FF', // faint tinted section background
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        'space-grotesk': ['Space Grotesk', 'Inter', 'sans-serif'],
+        syne: ['Syne', 'Space Grotesk', 'sans-serif'],
+        outfit: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
+        inter: ['Inter', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
         'brand-gradient': 'linear-gradient(135deg, #5B12D6 0%, #7C3AED 40%, #22C55E 100%)',

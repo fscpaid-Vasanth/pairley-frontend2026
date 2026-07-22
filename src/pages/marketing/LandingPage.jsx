@@ -1,81 +1,46 @@
 import { useEffect } from 'react';
-import {
-  User,
-  Search,
-  Heart,
-  TrendingDown,
-  MessageCircle,
-  ShoppingBag,
-  Store,
-  Tag,
-  Users,
-  TrendingUp,
-} from 'lucide-react';
-import MarketingNav from '../../components/marketing/MarketingNav';
+import LandingNav from '../../components/marketing/LandingNav';
 import HeroSection from '../../components/marketing/HeroSection';
-import ComparisonCards from '../../components/marketing/ComparisonCards';
-import HowItWorksSection from '../../components/marketing/HowItWorksSection';
-import CustomerBenefitsSection from '../../components/marketing/CustomerBenefitsSection';
-import MerchantBenefitsSection from '../../components/marketing/MerchantBenefitsSection';
-import WhyDifferentSection from '../../components/marketing/WhyDifferentSection';
-import JourneyTimeline from '../../components/marketing/JourneyTimeline';
-import ScreenshotShowcase from '../../components/marketing/ScreenshotShowcase';
+import TrustBar from '../../components/marketing/TrustBar';
+import WhyPairley from '../../components/marketing/WhyPairley';
+import HowItWorks from '../../components/marketing/HowItWorks';
+import PriceDiscovery from '../../components/marketing/PriceDiscovery';
+import MerchantDashboardPreview from '../../components/marketing/MerchantDashboardPreview';
+import BenefitsSplit from '../../components/marketing/BenefitsSplit';
+import LiveOffers from '../../components/marketing/LiveOffers';
+import StatsBand from '../../components/marketing/StatsBand';
+import Testimonials from '../../components/marketing/Testimonials';
 import FaqAccordion from '../../components/marketing/FaqAccordion';
-import LaunchPassStrip from '../../components/marketing/LaunchPassStrip';
-import FinalCtaBanner from '../../components/marketing/FinalCtaBanner';
-import MarketingFooter from '../../components/marketing/MarketingFooter';
+import FinalCta from '../../components/marketing/FinalCta';
+import SiteFooter from '../../components/marketing/SiteFooter';
 
-const CUSTOMER_JOURNEY_STEPS = [
-  { icon: User, label: 'Customer' },
-  { icon: Search, label: 'Browse' },
-  { icon: Heart, label: 'Show Interest' },
-  { icon: TrendingDown, label: 'Price Drops' },
-  { icon: MessageCircle, label: 'Merchant Contacts' },
-  { icon: ShoppingBag, label: 'Purchase' },
-];
-
-const MERCHANT_JOURNEY_STEPS = [
-  { icon: Store, label: 'Merchant' },
-  { icon: Tag, label: 'Create Offer' },
-  { icon: Users, label: 'Interested Customers' },
-  { icon: MessageCircle, label: 'WhatsApp Notification' },
-  { icon: ShoppingBag, label: 'Sale' },
-  { icon: TrendingUp, label: 'Business Growth' },
-];
-
+// Pairley public landing page — light/white "investor-ready" redesign
+// (2026-07). Section order follows the approved brief: hero (group-deal
+// explainer) → trust → why → how → price discovery → merchant dashboard →
+// benefits → live offers → stats → testimonials → FAQ → CTA → footer.
 export default function LandingPage() {
   useEffect(() => {
-    document.title = "Pairley — India's Hyperlocal Group Buying Platform";
+    document.title = "Pairley — Discover Better Local Deals Together";
   }, []);
 
   return (
-    <div className="min-h-screen bg-ink">
-      <MarketingNav />
-      <HeroSection />
-      <ComparisonCards />
-      <HowItWorksSection />
-      <CustomerBenefitsSection />
-      <MerchantBenefitsSection />
-      <WhyDifferentSection />
-      <JourneyTimeline
-        id="customer-journey"
-        title="The Customer Journey"
-        tagline="From browsing to buying, in six simple steps."
-        steps={CUSTOMER_JOURNEY_STEPS}
-        accent="purple"
-      />
-      <JourneyTimeline
-        id="merchant-journey"
-        title="The Merchant Journey"
-        tagline="From your first offer to real business growth."
-        steps={MERCHANT_JOURNEY_STEPS}
-        accent="green"
-      />
-      <ScreenshotShowcase />
-      <FaqAccordion />
-      <LaunchPassStrip />
-      <FinalCtaBanner />
-      <MarketingFooter />
+    <div className="min-h-screen bg-white font-inter text-pairley-ink antialiased">
+      <LandingNav />
+      <main>
+        <HeroSection />
+        <TrustBar />
+        <WhyPairley />
+        <HowItWorks />
+        <PriceDiscovery />
+        <MerchantDashboardPreview />
+        <BenefitsSplit />
+        <LiveOffers />
+        <StatsBand />
+        <Testimonials />
+        <FaqAccordion />
+        <FinalCta />
+      </main>
+      <SiteFooter />
     </div>
   );
 }
