@@ -161,9 +161,16 @@ export default function DiscoveredOffersPanel() {
       .finally(() => setActioningId(null));
   };
 
-  const handleApprove = (id) => {
+  // Module 11 Phase 4 — overrides (from the AI Suggestions panel) are
+  // optional and only ever come from the review modal; the table's quick
+  // Approve button still means "approve exactly as extracted," unchanged.
+  const handleApprove = (id, overrides) => {
     setReviewTarget(null);
-    runAction(id, api.put(`/discovery/candidates/${id}/approve`), 'Offer approved and published.');
+    runAction(
+      id,
+      api.put(`/discovery/candidates/${id}/approve`, overrides && Object.keys(overrides).length > 0 ? { overrides } : undefined),
+      'Offer approved and published.',
+    );
   };
   const handleTakedown = (id) => {
     setReviewTarget(null);
