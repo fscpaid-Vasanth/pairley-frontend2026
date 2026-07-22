@@ -283,6 +283,11 @@ upload after a fresh deploy is noticeably slower than subsequent ones.
    cold-start delays become a recurring complaint in production,
    consider preloading the model at boot or baking it into the deploy
    image rather than relying on the lazy first-request download.
+   **Production observation (Module 10 Phase 4 verification):** the
+   first real poster upload against the live Render deployment
+   completed end-to-end (upload → OCR → candidate creation) in ~7
+   seconds — no noticeable cold-start delay was observed in practice.
+   Revisit preloading only if this changes under real usage patterns.
 3. **Poster/PDF thumbnail previews in the admin review UI** are served
    through the same `GET /business/document-preview` proxy already
    used for KYC documents (reused as-is, not a new endpoint — it

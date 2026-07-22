@@ -2,6 +2,111 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module10-complete] — 2026-07-22
+
+### Module 10 — Poster OCR + AI Offer Standardization
+
+Scope: extends the Module 9 discovery pipeline with a second import
+source — poster/flyer/menu images and text-layer PDFs — feeding the exact
+same review-queue → admin-approval → public-visibility workflow. No new
+pipeline was built; the existing one was generalized. Instagram/Facebook
+import and LLM-based standardization remain deferred (Meta Business
+Verification still pending). Built in 3 phases, each independently
+reviewed/approved/deployed-verified.
+
+**Phase 1 — OCR Service Foundation + Module 9 Refactor**
+- `OcrService` — a single-method `extractText(buffer)` wrapper around
+  `tesseract.js`, deliberately kept behind a narrow interface so a future
+  swap to AWS Textract (or any other provider) touches one file
+- `TextExtractionService` — plain-text sibling of `ContentExtractionService`
+  (title/description/price from raw OCR/PDF text instead of HTML)
+- `ConfidenceScoringService` extended with an optional OCR-confidence
+  blend (70% field-completeness / 30% OCR confidence) — additive, website
+  imports are scored exactly as before
+- Module 9's hardcoded `Source.WEBSITE` refactored into an explicit,
+  optional `sourceType` parameter through `CandidateOfferService` and
+  `ImportOrchestrationService` — defaults preserve byte-for-byte identical
+  website-import behavior (verified live)
+
+**Phase 2 — File Upload + Async Import Pipeline**
+- `FileValidationService` — mimetype allowlist, magic-byte signature
+  checks (JPEG/PNG/WebP/PDF — never trusts the client-declared
+  Content-Type), a 15MB soft limit distinct from Multer's 20MB hard
+  transport ceiling (the 15–20MB gap produces a real `FAILED` `ImportJob`
+  instead of a bare transport error), filename sanitization
+- `PdfTextService` (`pdf-parse` v1.1.1) — text-layer PDFs only; a PDF
+  with no extractable text is treated as scanned/image-only and fails
+  with a clear, distinct reason rather than silently producing junk
+- `ImagePreprocessingService` (`sharp`) — resizes to a 2000px max
+  dimension before OCR, falls back to the original buffer if the image
+  can't be read
+- `POST /discovery/import-file` — `202 Accepted`; validation/upload run
+  synchronously (fast, always produces a job record even on rejection),
+  OCR/PDF-extraction continues asynchronously against the same
+  `QUEUED → PROCESSING → DONE/FAILED` `ImportJob` lifecycle Module 9
+  already had, no new queue infrastructure introduced
+- **Bug found and fixed during live testing**: PDF uploads kept the
+  job's initial `POSTER` placeholder `source_type` instead of correcting
+  it once the real mimetype was known — fixed, regression-tested
+
+**Phase 3 — Review Queue Integration & Admin Upload UI**
+- Candidate summaries extended with `description` and `source_file_url`
+  (the original poster/PDF's storage location) — additive fields only
+- `ImportJobRepository.findJobs()` gains a bounded `limit` (clamped
+  1–100, default 20) so the new admin polling UI stays lightweight
+  regardless of total import volume
+- `PosterUploadCard.jsx` — upload control plus a self-stopping "Recent
+  Imports" list (polls only while a job is non-terminal)
+- `CandidateReviewModal.jsx` — the original poster/PDF/source-page
+  preview shown side-by-side with extracted title/description/price/
+  confidence, so an admin can compare before approving
+- Thumbnail column added to the existing Discovered Offers table; reuses
+  the same admin-gated `document-preview` proxy already used for KYC
+  document previews (`adminFilePreview.js` extracted for shared reuse)
+- **Bug found and fixed during live testing**: the failure-message
+  lookup matched on the full `"REASON: message"` string the backend
+  stores instead of just the reason code — fixed, re-verified against a
+  real `INVALID_FILE_SIGNATURE` failure
+
+**Verified in production**
+- Full lifecycle against the live Render/Vercel deployment: poster
+  upload → OCR (94–95% confidence on synthetic test posters) →
+  confidence scoring → review queue (thumbnail/description fields
+  present) → approve → confirmed live on `GET /offers/list` → takedown
+  (confirmed removed from public listing) → re-approval (confirmed back)
+- PDF upload → text extraction → review queue → same lifecycle, correct
+  `source_type: "PDF"` throughout (confirms the Phase 2 bug-fix holds)
+- Regression: Module 9 website import, offer creation (business
+  approval + active-subscription guards both correctly enforced, then a
+  real offer created once both were satisfied), lead creation (the
+  WhatsApp-notification code path executes without error), admin
+  dashboard, existing discovery APIs — all confirmed unmodified on the
+  deployed build. Auth/claim-flow regression covered via the full
+  backend test suite plus endpoint-level checks (send-otp/login/google/
+  claim-status all return correct, sane error responses against
+  production) rather than new live SMS-based registrations, since Module
+  10 touched no auth/claim code and the prior module's guidance was to
+  minimize real SMS-provider spend where practical
+- All test data (businesses, offers, leads, subscriptions, import jobs)
+  cleaned up after verification; production DB confirmed back to its
+  exact pre-verification baseline
+- 144 backend unit tests (138 at Module 10 Phase 2's end); lint clean;
+  both repos build clean
+
+**Known, expected, external/deferred**
+- Tesseract's ~5MB English language model downloads lazily on the first
+  OCR call in any given backend process — a one-time per-process
+  cold-start cost, documented in RUNBOOK.md. Not observed as a
+  noticeable delay during production verification (first real request
+  completed in ~7s including OCR)
+- Poster/PDF thumbnail previews are served through the same
+  `document-preview` proxy as KYC documents, so they're subject to the
+  same pre-existing `AWSCompromisedKeyQuarantineV3` `GetObject` block
+  (Case `178454777500456`) if/when that quarantine is active — not a new
+  or Module 10-caused issue
+- Instagram/Facebook import and LLM-based standardization remain fully
+  unbuilt, pending Meta Business Verification
+
 ## [pairley-module9-complete] — 2026-07-22
 
 ### Module 9 — AI Offer Discovery Engine (Group B foundation)
