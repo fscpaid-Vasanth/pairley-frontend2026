@@ -2,6 +2,109 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module11-complete] — 2026-07-22
+
+### Module 11 — AI Offer Standardization & Enrichment
+
+Scope: transforms every imported offer (Website, Poster, PDF — and,
+source-agnostically, whatever Instagram/Facebook eventually feed in) into
+a consistent, searchable, explainable canonical shape, while preserving
+the review-first principle every module since Module 9 has held to: AI
+suggests, administrators decide. Built in 4 phases, each independently
+reviewed/approved/deployed-verified.
+
+**Phase 1 — Canonical Schema + Normalization Foundation**
+- `Offer` gains `subtitle`, `tags`, `keywords`, an enrichment audit trail
+  (`enrichment_status`/`enrichment_confidence`/`enrichment_metadata`), and
+  duplicate-tracking fields; `Business` gains `suggested_merchant_type` —
+  all additive, nullable/defaulted
+- `NormalizationService` — deterministic (no AI/LLM) discount-split
+  parsing ("was X now Y", "X% off", "flat X off"), offer_type
+  classification against the real 17-value enum, best-effort
+  validity-end-date extraction. Before this phase, `original_price`
+  always equaled `offer_price` and `offer_type` was always `STANDARD` —
+  neither was ever actually computed
+
+**Phase 2 — Duplicate Detection**
+- `DuplicateDetectionService` — deterministic, weighted-scoring
+  comparison (title similarity, offer type, price proximity, category,
+  merchant-name similarity for offers; name similarity, mobile, geo for
+  businesses) against a bounded, recency-ordered candidate pool.
+  Recommendation only — nothing is ever auto-merged, auto-rejected, or
+  blocked
+- Two real false-positive risks found and fixed during live testing:
+  category and generic per-source-type business labels (e.g. "Poster
+  Import") were being credited as genuine matches purely because every
+  AI-imported candidate shared the same unclassified placeholder — both
+  now excluded from scoring unless genuinely differentiated
+
+**Phase 3 — AI Enrichment Layer (rule-based)**
+- A provider-agnostic `EnrichmentProvider` abstraction, bound via NestJS
+  DI to `RuleBasedEnrichmentProvider` — deterministic keyword matching,
+  no AI/LLM. A future real-LLM provider (OpenAI, per explicit preference)
+  plugs in behind the identical `EnrichmentResult` contract by changing
+  one line in `discovery.module.ts`
+- Suggests category, merchant type, tags, and keywords; restates
+  Phase 1's offer_type decision inside the same result for one unified
+  audit trail. Every suggestion carries `{suggested, original,
+  confidence, rationale}`
+- Critically: only the dedicated enrichment fields are ever written —
+  `Offer.category`, `Offer.offer_type`, and `Business.business_type`
+  stay exactly as extraction/normalization left them until an admin
+  explicitly accepts a suggestion
+
+**Phase 4 — Review Integration**
+- `PUT /discovery/candidates/:id/approve` accepts an optional
+  `overrides` payload (category/offerType/merchantType/tags/keywords),
+  applied atomically — in one transaction alongside the approval, audit
+  log, and any Business.business_type update. Every field independently
+  optional; omitted fields keep exactly what extraction/normalization
+  already set
+- `AiSuggestionsPanel` in the admin review modal — Accept/Edit/Reject per
+  field, high-confidence suggestions defaulting to accepted, low-confidence
+  ones to rejected, so the admin only has to act where they disagree
+- `enrichment_metadata` is never touched by applying an override — it
+  stays a frozen record of the original suggestion, so comparing it
+  against the live offer fields after approval is itself the audit trail
+  of what was accepted, edited, or rejected
+
+**Verified in production**
+- Full lifecycle against the live Render/Vercel deployment: poster/PDF/
+  website import → normalization (real discount splits, offer_type
+  classification) → duplicate detection (a near-duplicate poster
+  correctly flagged, an unrelated one correctly not) → rule-based
+  enrichment → admin accepts one suggestion and edits another to a value
+  different from what was suggested → atomic approve-with-overrides →
+  confirmed live on `GET /offers/list` → takedown → re-approval
+  (confirmed restored)
+- `enrichment_metadata` confirmed unchanged after approval while the live
+  offer fields reflected the admin's decisions — the audit trail working
+  exactly as designed
+- Regression: Module 9 website import, Module 10 OCR/PDF pipeline,
+  merchant self-service offer creation (confirmed untouched by any
+  Module 11 code path — `enrichment_status: NOT_ENRICHED` as expected),
+  lead creation (WhatsApp code path), admin dashboard, claim-flow
+  endpoints, bulk-approve (no-overrides path) — all confirmed working
+  unmodified on the deployed build
+- All test data cleaned up after verification; production DB confirmed
+  back to its exact pre-verification baseline
+- 246 backend unit tests (0 at Module 11's start); lint clean; both repos
+  build clean
+
+**Known, expected, external/deferred**
+- Tags/keywords are populated directly by enrichment at import time
+  (not gated behind admin acceptance the way category/offerType/
+  merchantType are) — "Reject" on those two fields in the review UI
+  leaves them as enrichment already set them rather than reverting to
+  empty. Not a bug; documented behavior, revisit only if merchant/admin
+  feedback asks for manual tag management
+- No real LLM provider is wired up yet — `RuleBasedEnrichmentProvider`
+  is deterministic keyword matching only, by design (Decision 1's staged
+  approach). OpenAI integration remains a clearly-scoped future addition
+  behind the existing `EnrichmentProvider` interface
+- Instagram/Facebook import remains fully unbuilt, pending Meta Business
+  Verification
+
 ## [pairley-module10-complete] — 2026-07-22
 
 ### Module 10 — Poster OCR + AI Offer Standardization

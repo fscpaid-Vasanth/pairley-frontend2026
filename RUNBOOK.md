@@ -301,6 +301,66 @@ upload after a fresh deploy is noticeably slower than subsequent ones.
    thumbnail rendering. Not a Module 10 defect — same external
    dependency already tracked under AWS Support Case `178454777500456`.
 
+## AI Standardization & Enrichment Issues (Module 11)
+
+**How you'll know**: an admin reports a discovered offer's price/discount,
+offer type, category suggestion, or tags/keywords look wrong; or a
+candidate is flagged as a possible duplicate that clearly isn't (or isn't
+flagged when it obviously should be); or `enrichment_status` shows
+`ENRICHMENT_FAILED` on a candidate.
+
+**Steps**:
+
+1. **Normalization looks wrong (discount split / offer_type / validity
+   date)**: `NormalizationService` is deterministic and best-effort —
+   check the raw extracted text (`ImportJob.extracted_fields.rawText` /
+   the candidate's OCR text) for what it was actually working from. A
+   garbled OCR read or unusual phrasing ("was 999 rs now 599 rs" instead
+   of "was ₹999 now ₹599") can miss a pattern — the fallback is always
+   the same safe default (`original_price == offer_price`, `offer_type:
+   STANDARD`, the existing 30-day validity window), never a hard
+   failure. The admin corrects it during review either via the AI
+   Suggestions panel (if enrichment separately suggested something
+   better) or by editing the offer directly after approval.
+2. **Duplicate flagged incorrectly (false positive) or missed (false
+   negative)**: `DuplicateDetectionService`'s score/reasons are visible
+   directly on the candidate (`duplicate_score`, `duplicate_reasons`) —
+   check which signals contributed. Remember: business-level name
+   similarity is deliberately excluded when both businesses still carry
+   a generic per-source-type label (e.g. two separate "Poster Import"
+   businesses never match on name alone) — this is intentional, not a
+   bug, see Module 11 Phase 2's completion notes. A missed duplicate is
+   the safer failure mode by design (Decision 7) — the threshold
+   requires corroboration from more than one signal, so a single
+   degraded/OCR-mangled title alone won't cross it. This is a
+   recommendation only either way; nothing is ever auto-merged or
+   auto-rejected, so a wrong flag never blocks a legitimate offer.
+3. **`enrichment_status: ENRICHMENT_FAILED`**: check the backend logs
+   for `[EnrichmentService] Enrichment failed for offer=...` — since
+   `RuleBasedEnrichmentProvider` is pure deterministic logic with no
+   external dependency (no network call, no API), this should be rare;
+   if it recurs, it likely indicates a real code bug rather than a
+   transient issue. The import itself is never affected — enrichment
+   failure only means the candidate has no AI suggestions to review, not
+   that it's broken or missing.
+4. **AI Suggestions panel shows nothing for a candidate**: expected when
+   `enrichment_status` is `NOT_ENRICHED` (all `MANUAL`/merchant-created
+   offers, since enrichment only ever runs on AI-imported candidates) or
+   `ENRICHMENT_FAILED` (see above) — not a bug.
+5. **Tags/keywords don't match what the admin expected after
+   "Reject"**: by design, `tags`/`keywords` are populated directly by
+   enrichment at import time rather than gated behind acceptance the way
+   `category`/`offer_type`/`merchant_type` are — "Reject" in the AI
+   Suggestions panel leaves them as enrichment already set them, it does
+   not revert them to empty. Documented in ROADMAP.md; revisit only if
+   this becomes a recurring point of confusion.
+6. **Approve-with-overrides didn't apply an expected value**: overrides
+   are atomic and additive — an omitted field in the `overrides` payload
+   means "keep the current value," it does not mean "clear it." Check
+   the actual request body sent by the review modal (each of the 5
+   fields is independently Accept/Edit/Reject in the UI) rather than
+   assuming all suggestions were meant to apply.
+
 ## Merchant Claim Flow Issues (Module 9)
 
 **How you'll know**: a merchant reports being stuck partway through
