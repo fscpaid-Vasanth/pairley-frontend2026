@@ -2,6 +2,120 @@
 
 Tracks Pairley MVP module deliveries, per [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Each entry covers both repos (frontend + [`pairley-backend2026`](https://github.com/fscpaid-Vasanth/pairley-backend2026)).
 
+## [pairley-module9-complete] — 2026-07-22
+
+### Module 9 — AI Offer Discovery Engine (Group B foundation)
+
+Scope: a vertical slice of Group B proving the full pipeline end to end via
+the lowest-risk import source (website URL) — deterministic rule-based
+extraction only, no LLM/AI inference. Instagram/Facebook import (blocked on
+Meta Graph API App Review), poster OCR, and LLM-based standardization are
+explicitly deferred to later modules. Built in 4 phases, each independently
+reviewed/approved/deployed-verified.
+
+**Phase 1 — Schema & Repository Foundation**
+- `Business.mobile` made nullable (additive) — an AI-imported `UNCLAIMED`
+  business may have no verified phone number yet. 8 call sites across
+  auth/business/whatsapp/offer services widened accordingly; zero behavior
+  change for any of the 10 existing (always-`CLAIMED`) production businesses
+- New `ImportJob` model + `ImportJobStatus` enum — one row per import attempt
+- `src/discovery/` module scaffold (repository layer only)
+
+**Phase 2 — Website Import + SSRF-Safe Fetch Service**
+- `UrlFetchService` — multi-layer SSRF protection: rejects localhost/
+  loopback/private/link-local IP ranges (resolved, not just string-matched,
+  so DNS-based bypasses are caught), limits redirects, enforces a hard
+  timeout and max response size, rejects non-HTML content types. Documented
+  limitation: no protection against DNS rebinding between the initial
+  resolve and the actual connection — acceptable for an admin-only v1,
+  flagged for future hardening if this ever becomes less trusted
+- `ContentExtractionService` — deterministic regex-based extraction (title,
+  meta description, og:image, ₹/Rs/INR price patterns). No LLM anywhere
+- `ConfidenceScoringService` — rule-based heuristic (field-completeness),
+  not ML
+- `ImportOrchestrationService` — coordinates `QUEUED → PROCESSING →
+  DONE/FAILED`; known/expected failures (bad URL, SSRF-blocked, timeout)
+  logged only, unexpected errors explicitly `Sentry.captureException()` +
+  `flush()`'d (the Module 7 fire-and-forget lesson applied here too)
+- `POST /discovery/import`, `GET /discovery/jobs`, `GET /discovery/jobs/:id`
+  (all `Role.ADMIN`)
+
+**Phase 3 — Admin Review Queue**
+- `CandidateOfferService` — a successful import (with at least a title)
+  materializes a real `UNCLAIMED` `Business` + `DRAFT`, `review_required:
+  true` `Offer`. `DRAFT` status alone keeps it out of every customer-facing
+  query (`listOffers`/`getDetails` both already gate on `status === ACTIVE`)
+  — zero changes needed to any existing customer/merchant code path.
+  Missing fields get sensible placeholders (category defaults to
+  "Shopping", price to ₹0), each one surfaced as an explicit warning
+- `ReviewQueueService` — search/paginate/filter, `approve`/`reject`/
+  `takedown` as reversible status transitions (nothing hard-deleted), full
+  audit trail via the existing append-only `OfferVersion` model (real admin
+  id via `@CurrentUser`, not the null placeholder the pre-existing
+  `ADMIN_MODERATION` precedent elsewhere in this codebase used), bulk
+  approve/reject with per-id partial-failure reporting
+- `GET/PUT discovery/candidates/*`, `POST discovery/candidates/bulk-*`
+- `DiscoveredOffersPanel.jsx` — new `AdminDashboard` tab: search, status
+  filter, confidence/source badges, extraction warnings, multi-select bulk
+  actions, server-side pagination
+
+**Phase 4 — Merchant Claim Flow (admin-assisted, not self-service)**
+- New `ClaimRequest` model + `ClaimRequestStatus` enum. Flow: merchant
+  requests → admin reviews → OTP verification → atomic ownership transfer →
+  dashboard access. No self-service auto-approval path exists anywhere
+- Non-guessable tokens (`crypto.randomBytes(32)`), single-use/replay
+  protection (a token is permanently inert once it leaves `ADMIN_APPROVED`),
+  7-day token expiry, 5-attempt OTP retry limit (auto-expires the claim),
+  mobile-conflict protection (checked at request time and again immediately
+  before transfer)
+- Ownership transfer is one atomic `$transaction` (Business status/mobile/
+  claimed_at/claimed_by + ClaimRequest → `COMPLETED` + OTP cleanup,
+  all-or-nothing); JWT issued only after it commits. Offers/leads/analytics
+  need zero code changes — they're keyed by `business_id`, which never
+  changes during a claim
+- Reuses the existing `OtpVerification` table/`OtpService`/`JwtService` —
+  zero changes to `auth.service.ts`/`auth.controller.ts`, so normal
+  registration/login have no regression surface from this phase by
+  construction
+- `POST/GET business/claim/*` (public), `GET/PUT business/claim/requests/*`
+  (`Role.ADMIN`)
+- `ClaimBusinessPage.jsx` (new public route `/claim/:businessId`) and
+  `ClaimRequestsPanel.jsx` (new `AdminDashboard` tab)
+
+**Verified in production**
+- Full 8-step lifecycle against the live Render deployment (real HTTP, real
+  JWTs, disposable admin/test accounts): website import → review queue →
+  approve → confirmed live in the real `GET /offers/list` with the existing
+  `imported` badge auto-applied → merchant claim (request → admin approve →
+  OTP → atomic transfer → new JWT confirmed working) → existing admin
+  offer-moderation endpoint (regression) → takedown (confirmed removed from
+  public listing, soft state) → re-approval (confirmed back)
+- Regression: customer registration, merchant registration, OTP-based login,
+  offer creation, offer discovery (list + category), admin dashboard
+  metrics, existing admin login, and the Module 8 WhatsApp lead-alert
+  pipeline (correctly attempted and logged `FAILED` with Meta's real
+  `template does not exist` error — same known, expected, external
+  dependency as Module 8, not a regression) — all verified working
+  unmodified on the deployed build
+- All test data (businesses, offers, leads, claim requests, import jobs,
+  customers, admins, OTP rows) cleaned up after verification; production
+  DB confirmed back to its exact pre-verification baseline each time
+- 89 backend unit tests (0 at Module 9's start) across the `discovery`
+  module; lint clean; both repos build clean
+
+**Known, expected, external/deferred**
+- OTP sends during Phase 4/Phase 5 verification used the real MSG91 API
+  (`USE_MOCK_OTP=false` in this environment), consuming a small number of
+  real SMS-provider credits against fabricated test numbers — same
+  real-provider tradeoff already accepted for Module 8's WhatsApp testing
+- No "Is this your business?" entry point exists yet on public offer pages
+  — `/claim/:businessId` is reachable but not yet linked from anywhere
+  customer-facing, a deliberate choice to keep zero touches to
+  customer-facing code this module
+- Instagram/Facebook import, poster OCR, and LLM-based standardization
+  remain fully unbuilt — proposed as later modules once Meta Graph API App
+  Review and an OCR/LLM provider decision are in place
+
 ## [pairley-module8-complete] — 2026-07-21
 
 ### Module 8 — WhatsApp Business API Integration

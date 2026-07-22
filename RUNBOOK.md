@@ -190,3 +190,81 @@ faster than digging through Render's logs.
 6. No user-facing fallback needed for the lead-alert failure case — the
    existing DB/push notification (`Notification` model) is a separate,
    unaffected channel a merchant still sees in the dashboard.
+
+## Discovery Import Failures (Module 9 — website/offer import)
+
+**How you'll know**: an admin submits a URL via `POST /discovery/import`
+and the job comes back (or later reads back via `GET /discovery/jobs/:id`)
+with `status: "FAILED"`.
+
+**Steps**:
+1. Read the job's `error` field first — it's prefixed with a reason code
+   that tells you immediately whether this is expected or not:
+   - `INVALID_URL` / `INVALID_SCHEME` — the submitted URL is malformed or
+     not `http(s)://`. User error, not a bug.
+   - `SSRF_BLOCKED` — the target resolved to a private/loopback/link-local
+     IP. Working as intended (`src/discovery/url-fetch.service.ts`) — do
+     **not** disable this to "fix" a legitimate import attempt against an
+     internal address.
+   - `TIMEOUT` / `NETWORK_ERROR` / `DNS_ERROR` — the target site is slow,
+     down, or doesn't exist. Not a Pairley-side issue; retry later or with
+     a different URL.
+   - `UNSUPPORTED_CONTENT_TYPE` / `RESPONSE_TOO_LARGE` / `REDIRECT_LIMIT` /
+     `REDIRECT_INVALID` — the target returned something that isn't a
+     reasonably-sized HTML page, or redirected somewhere the fetch won't
+     follow. Expected guard behavior, not a bug.
+   - Anything **not** in the list above reaching this field is an
+     unexpected error — `import-orchestration.service.ts` already routed it
+     to Sentry (`Sentry.captureException()` + `flush()`, same explicit
+     pattern as Module 7, not fire-and-forget) at the time it happened, so
+     check Sentry's `discovery` tag first rather than re-diagnosing from
+     scratch.
+2. A `DONE` job with `extracted_fields.candidate_created: false` means
+   extraction found no title — not a failure, just nothing worth putting in
+   front of an admin for review. This is expected for pages with no
+   scrapeable offer content.
+3. A `DONE` job that did create a candidate but with several entries in
+   `extracted_fields.warnings` (or visible directly in the Discovered
+   Offers admin tab) is normal — extraction is deterministic/rule-based,
+   not AI, so incomplete fields are the common case, not the exception. The
+   review-first workflow exists precisely so nothing incomplete reaches a
+   customer without a human looking at it first.
+4. Discovery import failures **cannot** affect any other part of the
+   platform — `ImportJob`/candidate `Offer`/`Business` rows are entirely
+   additive and isolated; a bad import never touches an existing
+   merchant's data.
+
+## Merchant Claim Flow Issues (Module 9)
+
+**How you'll know**: a merchant reports being stuck partway through
+claiming a business, or an admin can't find a claim request they expected
+to see.
+
+**Steps**:
+1. Check the `ClaimRequest` row's `status` first (`claim_requests` table) —
+   the flow is strictly `PENDING_ADMIN_REVIEW → ADMIN_APPROVED →
+   COMPLETED`, with `ADMIN_REJECTED`/`EXPIRED` as the only other terminal
+   states. A merchant reporting "nothing happens" after submitting a claim
+   almost always just means it's still sitting in `PENDING_ADMIN_REVIEW` —
+   check the admin **Claim Requests** tab.
+2. `EXPIRED` has two distinct causes, both intentional, not bugs: the
+   7-day `token_expires_at` window lapsed, or the merchant exceeded 5
+   failed OTP attempts (`otp_attempts` on the row, capped in
+   `claim-request.service.ts`). Either way, the fix is the same: the
+   merchant submits a fresh claim request — there is no "extend" or
+   "reset attempts" action by design (keeps the security properties simple
+   to reason about).
+3. OTP delivery for the claim flow reuses the exact same `OtpService` /
+   MSG91 path as every other OTP in this app — if OTP send is failing here,
+   check it the same way you'd check any other OTP delivery issue (MSG91
+   dashboard/credentials), not as a Module-9-specific problem.
+4. A claim that fails at the final verify step with "already registered to
+   another business" means the mobile number the merchant is claiming with
+   collides with an existing account — this is the mobile-uniqueness guard
+   working correctly, not a bug. Resolve by confirming with the merchant
+   which number they actually control.
+5. Ownership transfer is atomic — if you ever see a `ClaimRequest` at
+   `COMPLETED` where the target `Business` is *not* `business_status:
+   CLAIMED`, that's a real bug worth escalating immediately (the
+   transaction guarantees these move together); this has never been
+   observed in testing.
