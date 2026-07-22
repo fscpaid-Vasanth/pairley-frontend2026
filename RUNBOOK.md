@@ -234,6 +234,68 @@ with `status: "FAILED"`.
    additive and isolated; a bad import never touches an existing
    merchant's data.
 
+## Poster/PDF Import Failures & Cold Start (Module 10)
+
+**How you'll know**: an admin uploads a poster image or PDF via the
+Discovered Offers panel's Upload action, and the job (`POST
+/discovery/import-file`, tracked the same way as website imports —
+`GET /discovery/jobs/:id`) comes back `FAILED`, or the very first
+upload after a fresh deploy is noticeably slower than subsequent ones.
+
+**Steps**:
+1. Same first move as website-import failures — read the job's `error`
+   field for its reason code:
+   - `INVALID_FILE_TYPE` — the file's declared type isn't JPEG/PNG/
+     WebP/PDF. User error.
+   - `FILE_TOO_LARGE` — over the 15MB application-level limit (distinct
+     from the 20MB hard Multer ceiling, which rejects with a plain 413
+     and never even creates a job — see `discovery.controller.ts`).
+   - `INVALID_FILE_SIGNATURE` — the file's actual bytes don't match any
+     supported format's magic-byte signature, regardless of what it
+     claimed to be.
+   - `FILE_TYPE_MISMATCH` — the declared Content-Type and the actual
+     file content disagree (e.g. a PNG uploaded with a `.jpg`
+     extension/declared JPEG type). Treat repeated occurrences from the
+     same admin as worth a quick conversation, not just a retry — this
+     is the check that catches deliberate or accidental spoofing.
+   - `STORAGE_FAILED` — the S3 upload itself failed. Check the same
+     things you'd check for any S3 issue (credentials, the ongoing
+     `AWSCompromisedKeyQuarantineV3` quarantine noted elsewhere in this
+     file — note that quarantine has historically blocked `GetObject`
+     while leaving `PutObject` working, so uploads succeeding while
+     KYC-document *reads* fail is expected, not a new bug).
+   - `PDF_PARSE_FAILED` — the PDF itself is malformed/corrupted.
+   - `UNSUPPORTED_SCANNED_PDF` — the PDF has no real text layer (a
+     scanned/photographed document saved as PDF). Expected, not a bug —
+     Module 10 deliberately doesn't attempt page rasterization (see
+     ROADMAP.md's Module 10 notes). Tell the admin to re-upload it as a
+     photo/image instead, which goes through OCR.
+   - `OCR_FAILED` — tesseract.js couldn't process the image at all
+     (corrupt/unreadable image data survived the earlier validation
+     checks). Rare; if it recurs often, check Sentry's `discovery` tag.
+2. **Tesseract cold start**: the first real OCR call in any given
+   backend process downloads a ~5MB English language model
+   (`eng.traineddata`) to local disk if it isn't already cached —
+   expect that specific request to take noticeably longer than normal
+   (a few extra seconds). This happens once per process lifetime (i.e.
+   once per deploy/restart on Render, not once per request) and is
+   normal tesseract.js behavior, not a bug or a sign of a stuck job. If
+   cold-start delays become a recurring complaint in production,
+   consider preloading the model at boot or baking it into the deploy
+   image rather than relying on the lazy first-request download.
+3. **Poster/PDF thumbnail previews in the admin review UI** are served
+   through the same `GET /business/document-preview` proxy already
+   used for KYC documents (reused as-is, not a new endpoint — it
+   already generically handles any `amazonaws.com` URL or local
+   `/uploads/` path). This means poster/PDF previews are subject to the
+   **exact same** `AWSCompromisedKeyQuarantineV3` `GetObject` block as
+   KYC document previews — if that's still unresolved, expect poster/
+   PDF thumbnails to fail to load in production the same way KYC
+   documents currently do, even though the underlying upload succeeded
+   and the offer itself is fully reviewable/approvable without the
+   thumbnail rendering. Not a Module 10 defect — same external
+   dependency already tracked under AWS Support Case `178454777500456`.
+
 ## Merchant Claim Flow Issues (Module 9)
 
 **How you'll know**: a merchant reports being stuck partway through

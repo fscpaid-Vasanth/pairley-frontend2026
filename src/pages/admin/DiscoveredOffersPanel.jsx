@@ -10,10 +10,16 @@ import {
   RotateCcw,
   Link2,
   IndianRupee,
+  FileText,
+  Image as ImageIcon,
+  Eye,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
+import { isValidImageSrc, getDocumentPreviewUrl } from '../../utils/adminFilePreview';
+import PosterUploadCard from './PosterUploadCard';
+import CandidateReviewModal from './CandidateReviewModal';
 
 const STATUS_FILTERS = [
   { value: '', label: 'All' },
@@ -39,6 +45,34 @@ function ConfidenceBadge({ score }) {
   );
 }
 
+// Module 10 Phase 3 — POSTER gets a lazy-loaded inline thumbnail (falling
+// back to a generic file icon if the S3 read is blocked — see the
+// AWSCompromisedKeyQuarantineV3 note in RUNBOOK.md), PDF gets a document
+// icon, and WEBSITE has no uploaded file at all so shows nothing here (its
+// source link lives in the review modal instead).
+function CandidateThumbnail({ candidate }) {
+  const [errored, setErrored] = useState(false);
+  if (candidate.source === 'POSTER' && candidate.source_file_url && isValidImageSrc(candidate.source_file_url) && !errored) {
+    return (
+      <img
+        src={getDocumentPreviewUrl(candidate.source_file_url)}
+        alt=""
+        loading="lazy"
+        className="w-10 h-10 rounded-lg object-cover border border-slate-200"
+        onError={() => setErrored(true)}
+      />
+    );
+  }
+  if (candidate.source === 'POSTER' || candidate.source === 'PDF') {
+    return (
+      <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-300">
+        {candidate.source === 'PDF' ? <FileText size={16} /> : <ImageIcon size={16} />}
+      </div>
+    );
+  }
+  return <div className="w-10 h-10" />;
+}
+
 // Module 9 Phase 3 — the admin review-first workflow: every AI-imported
 // offer lands here as REVIEW_REQUIRED and stays invisible to customers
 // (backend gates on Offer.status, not just this UI) until an admin
@@ -61,6 +95,7 @@ export default function DiscoveredOffersPanel() {
   const [actioningId, setActioningId] = useState(null);
   const [rejectTarget, setRejectTarget] = useState(null); // { ids: string[] } | null
   const [rejectReason, setRejectReason] = useState('');
+  const [reviewTarget, setReviewTarget] = useState(null); // candidate object | null
 
   const fetchCandidates = useCallback(() => {
     setLoading(true);
@@ -125,10 +160,17 @@ export default function DiscoveredOffersPanel() {
       .finally(() => setActioningId(null));
   };
 
-  const handleApprove = (id) => runAction(id, api.put(`/discovery/candidates/${id}/approve`), 'Offer approved and published.');
-  const handleTakedown = (id) => runAction(id, api.put(`/discovery/candidates/${id}/takedown`), 'Offer taken down.');
+  const handleApprove = (id) => {
+    setReviewTarget(null);
+    runAction(id, api.put(`/discovery/candidates/${id}/approve`), 'Offer approved and published.');
+  };
+  const handleTakedown = (id) => {
+    setReviewTarget(null);
+    runAction(id, api.put(`/discovery/candidates/${id}/takedown`), 'Offer taken down.');
+  };
 
   const openReject = (ids) => {
+    setReviewTarget(null);
     setRejectReason('');
     setRejectTarget({ ids });
   };
@@ -170,6 +212,9 @@ export default function DiscoveredOffersPanel() {
 
   return (
     <div className="space-y-6 animate-fadeIn text-left">
+      {/* Module 10 — poster/PDF upload entry point, feeds this same queue */}
+      <PosterUploadCard onCandidateReady={fetchCandidates} />
+
       {/* Search & filter console */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white/50 border border-slate-200/40 rounded-3xl p-4 shadow-sm">
         <div className="flex flex-wrap gap-1.5">
@@ -225,7 +270,7 @@ export default function DiscoveredOffersPanel() {
         <div className="text-center py-20 text-slate-400 font-bold text-sm">Loading discovered offers...</div>
       ) : items.length > 0 ? (
         <div className="bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-3xl shadow-md overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs font-semibold text-slate-600 min-w-[1000px]">
+          <table className="w-full border-collapse text-left text-xs font-semibold text-slate-600 min-w-[1080px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                 <th className="px-4 py-4">
@@ -236,6 +281,7 @@ export default function DiscoveredOffersPanel() {
                     className="w-3.5 h-3.5"
                   />
                 </th>
+                <th className="px-4 py-4"></th>
                 <th className="px-4 py-4">Offer / Business</th>
                 <th className="px-4 py-4">Source</th>
                 <th className="px-4 py-4">Confidence</th>
@@ -250,6 +296,9 @@ export default function DiscoveredOffersPanel() {
                 <tr key={c.id} className="hover:bg-slate-50/50 transition-colors align-top">
                   <td className="px-4 py-4">
                     <input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => toggleSelected(c.id)} className="w-3.5 h-3.5" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <CandidateThumbnail candidate={c} />
                   </td>
                   <td className="px-4 py-4 max-w-[260px]">
                     <div className="text-slate-800 font-bold text-sm line-clamp-1">{c.title}</div>
@@ -285,6 +334,13 @@ export default function DiscoveredOffersPanel() {
                   </td>
                   <td className="px-4 py-4 text-center">
                     <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        onClick={() => setReviewTarget(c)}
+                        title="Review — compare original vs. extracted"
+                        className="p-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 rounded-lg"
+                      >
+                        <Eye size={12} />
+                      </button>
                       {c.review_status !== 'APPROVED' && (
                         <button
                           disabled={actioningId === c.id}
@@ -381,6 +437,16 @@ export default function DiscoveredOffersPanel() {
           </div>
         </div>
       )}
+
+      {/* Review / comparison modal */}
+      <CandidateReviewModal
+        candidate={reviewTarget}
+        actioning={actioningId === reviewTarget?.id}
+        onClose={() => setReviewTarget(null)}
+        onApprove={handleApprove}
+        onReject={(id) => openReject([id])}
+        onTakedown={handleTakedown}
+      />
     </div>
   );
 }

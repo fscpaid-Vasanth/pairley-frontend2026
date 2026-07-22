@@ -27,41 +27,14 @@ import {
   UserCheck
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { api, API_URL } from '../../utils/api';
+import { api } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
+import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '../../utils/adminFilePreview';
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
 import DiscoveredOffersPanel from './DiscoveredOffersPanel';
 import ClaimRequestsPanel from './ClaimRequestsPanel';
 import SystemHealthTile from './SystemHealthTile';
 import './AdminDashboard.css';
-
-const isValidImageSrc = (src) => {
-  if (!src) return false;
-  const lower = src.toLowerCase();
-  return (
-    lower.startsWith('http://') ||
-    lower.startsWith('https://') ||
-    lower.startsWith('data:image/') ||
-    lower.startsWith('/uploads/')
-  );
-};
-
-// document-preview is admin-only server-side; since it's consumed as a raw
-// <img src>/<a href> URL (no Authorization header possible), the JWT is passed
-// as a query param instead — JwtAuthGuard falls back to it when no header is sent.
-const getDocumentPreviewUrl = (src) => {
-  if (!src) return '';
-  if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
-  const token = localStorage.getItem('pairley_token') || '';
-  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&token=${encodeURIComponent(token)}`;
-};
-
-const getDocumentDownloadUrl = (src) => {
-  if (!src) return '#';
-  if (src.startsWith('data:image/') || src.startsWith('http://') || src.startsWith('https://')) return src;
-  const token = localStorage.getItem('pairley_token') || '';
-  return `${API_URL}/business/document-preview?url=${encodeURIComponent(src)}&download=true&token=${encodeURIComponent(token)}`;
-};
 
 export default function AdminDashboard() {
   const { showToast } = useToast();
