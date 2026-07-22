@@ -15,6 +15,7 @@ import {
   PackageSearch,
   ArrowLeft,
   TrendingDown,
+  ShieldCheck,
 } from 'lucide-react';
 import DealCard from '../components/DealCard';
 import InterestButton from '../components/InterestButton';
@@ -160,6 +161,10 @@ const DealDetailPage = () => {
             avatar: data.business?.shop_photo || data.business?.profile_photo || null,
             rating: 4.5
           },
+          // Module 12 Phase 2 — drives the "Is this your business? Claim
+          // it." prompt below; only ever UNCLAIMED for AI-imported listings
+          // with no owner account yet.
+          businessStatus: data.business?.business_status || null,
           interestCount: data.joined_people || 0,
           maxParticipants: data.required_people || 2,
           location: data.business?.city || data.business?.address || 'Select Location',
@@ -453,6 +458,20 @@ const DealDetailPage = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Module 12 Phase 2 — unobtrusive claim prompt, shown only
+                  for AI-imported businesses with no owner account yet. */}
+              {deal.businessStatus === 'UNCLAIMED' && (
+                <Link
+                  to={`/claim/${deal.businessOwner.id}`}
+                  className="flex items-center gap-2.5 mt-3 px-4 py-3 rounded-2xl border border-dashed border-[#5B12D6]/30 bg-[#5B12D6]/5 hover:bg-[#5B12D6]/10 transition-colors"
+                >
+                  <ShieldCheck size={16} className="text-[#5B12D6] shrink-0" />
+                  <span className="text-xs font-semibold text-slate-600">
+                    Is this your business? <span className="text-[#5B12D6] font-bold">Claim it</span>
+                  </span>
+                </Link>
+              )}
 
               {/* Description */}
               <p className="deal-description">{deal.description}</p>
