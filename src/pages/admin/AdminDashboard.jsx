@@ -24,7 +24,8 @@ import {
   Headphones,
   Download,
   Radar,
-  UserCheck
+  UserCheck,
+  GitMerge
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
@@ -33,6 +34,7 @@ import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
 import DiscoveredOffersPanel from './DiscoveredOffersPanel';
 import ClaimRequestsPanel from './ClaimRequestsPanel';
+import BusinessDuplicatesPanel from './BusinessDuplicatesPanel';
 import SystemHealthTile from './SystemHealthTile';
 import './AdminDashboard.css';
 
@@ -392,6 +394,17 @@ export default function AdminDashboard() {
           >
             <UserCheck size={14} />
             Claim Requests
+          </button>
+          <button
+            onClick={() => handleTabChange('duplicates')}
+            className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'duplicates'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
+                : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
+            }`}
+          >
+            <GitMerge size={14} />
+            Business Duplicates
           </button>
           <button
             onClick={() => handleTabChange('tickets')}
@@ -762,6 +775,8 @@ export default function AdminDashboard() {
         {activeTab === 'discovered' && <DiscoveredOffersPanel />}
 
         {activeTab === 'claims' && <ClaimRequestsPanel />}
+
+        {activeTab === 'duplicates' && <BusinessDuplicatesPanel />}
 
         {activeTab === 'tickets' && (
           <div className="space-y-6 animate-fadeIn text-left">
