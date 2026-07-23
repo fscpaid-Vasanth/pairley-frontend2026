@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Store, MapPin, Handshake, Check, Sparkles } from 'lucide-react';
 import LandingButton from './LandingButton';
@@ -54,6 +54,7 @@ function LiveInterestChip() {
 // glance" visual. Two customers join the same BOGO offer, each pays half,
 // each walks away with one product, the merchant gets two confirmed buyers.
 function GroupDealCard() {
+  const reduce = useReducedMotion();
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.94, y: 20 }}
@@ -92,8 +93,34 @@ function GroupDealCard() {
               <p className="text-base font-extrabold text-pairley-purple font-outfit">{c.pay}</p>
             </div>
           ))}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white border border-slate-200 shadow-md flex items-center justify-center">
-            <Handshake size={16} className="text-pairley-green" />
+
+          {/* "Live pairing" — an energy dot travels A → B and the handshake
+              pulses radar rings, so the core pairing concept feels alive. */}
+          {!reduce && (
+            <motion.span
+              aria-hidden
+              className="absolute top-[26px] z-10 w-2 h-2 rounded-full bg-pairley-green shadow-[0_0_10px_2px_rgba(34,197,94,0.6)]"
+              initial={{ left: '25%' }}
+              animate={{ left: ['25%', '75%', '25%'], opacity: [0, 1, 1, 1, 0] }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.1, 0.5, 0.9, 1] }}
+            />
+          )}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <span className="relative flex w-9 h-9 items-center justify-center">
+              {!reduce && (
+                <>
+                  <motion.span aria-hidden className="absolute inset-0 rounded-full bg-pairley-green/40" animate={{ scale: [1, 2.1], opacity: [0.5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }} />
+                  <motion.span aria-hidden className="absolute inset-0 rounded-full bg-pairley-green/30" animate={{ scale: [1, 2.1], opacity: [0.5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: 1 }} />
+                </>
+              )}
+              <motion.span
+                className="relative w-9 h-9 rounded-full bg-white border border-slate-200 shadow-md flex items-center justify-center"
+                animate={reduce ? {} : { scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <Handshake size={16} className="text-pairley-green" />
+              </motion.span>
+            </span>
           </div>
         </div>
 

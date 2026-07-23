@@ -38,8 +38,16 @@ export default function HowItWorks() {
           variants={stagger}
           className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-6 lg:gap-4 relative"
         >
-          {/* Connecting line on desktop */}
-          <div className="hidden lg:block absolute top-7 left-[8%] right-[8%] h-0.5 bg-gradient-to-r from-pairley-purple/30 via-pairley-green/30 to-pairley-orange/30" />
+          {/* Connecting line on desktop, with a glowing light that flows
+              along it — reinforcing the single left-to-right journey. */}
+          <div className="hidden lg:block absolute top-7 left-[8%] right-[8%] h-0.5 bg-gradient-to-r from-pairley-purple/25 via-pairley-green/25 to-pairley-orange/25" />
+          <motion.span
+            aria-hidden
+            className="hidden lg:block absolute top-7 -translate-y-1/2 h-2 w-16 rounded-full bg-gradient-to-r from-transparent via-pairley-purple to-transparent blur-[1px] motion-reduce:hidden"
+            initial={{ left: '6%', opacity: 0 }}
+            animate={{ left: ['6%', '90%'], opacity: [0, 1, 1, 1, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'linear', times: [0, 0.08, 0.5, 0.92, 1] }}
+          />
 
           {STEPS.map((step, i) => (
             <motion.li key={step.title} variants={fadeInUp} className="relative flex lg:flex-col items-start lg:items-center gap-4 lg:gap-0 lg:text-center">

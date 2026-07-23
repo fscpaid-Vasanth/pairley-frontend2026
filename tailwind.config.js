@@ -72,6 +72,8 @@ export default {
         // Periodic light sweep across primary CTA buttons — draws the eye
         // without being constant; sweeps then rests for a few seconds.
         'cta-shine': 'ctaShine 5s ease-in-out infinite',
+        // Rotating conic-gradient border highlight (Launch Pass cards).
+        'border-spin': 'spin 6s linear infinite',
       },
       keyframes: {
         float: {

@@ -59,8 +59,11 @@ export default function WhyPairley() {
               variants={fadeInUp}
               className="group relative rounded-3xl border border-slate-200/70 bg-white p-8 shadow-[0_8px_40px_rgba(17,24,39,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_24px_60px_-15px_rgba(109,40,217,0.22)]"
             >
-              <div className={`w-14 h-14 rounded-2xl ${card.ring} flex items-center justify-center mb-6`}>
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${card.tint} flex items-center justify-center shadow-lg`}>
+              <div className={`relative w-14 h-14 rounded-2xl ${card.ring} flex items-center justify-center mb-6`}>
+                {/* Soft glow ring that breathes behind the icon, then the
+                    icon pops + tilts on card hover. */}
+                <span className={`absolute inset-0 rounded-2xl ${card.ring} animate-ping-slow motion-reduce:hidden`} />
+                <div className={`relative w-11 h-11 rounded-xl bg-gradient-to-br ${card.tint} flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6`}>
                   <card.icon size={22} className="text-white" />
                 </div>
               </div>

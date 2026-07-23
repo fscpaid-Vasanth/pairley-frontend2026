@@ -17,11 +17,20 @@ const launchDateLabel = new Date(LAUNCH_DATE).toLocaleDateString('en-IN', {
 
 function BenefitCard({ icon: Icon, eyebrow, title, blurb, benefits, cta, onClick, accent }) {
   const isPurple = accent === 'purple';
+  const arc = isPurple ? '#6D28D9' : '#22C55E';
   return (
     <motion.div
       variants={fadeInUp}
-      className="flex-1 rounded-3xl border border-slate-200/70 bg-white p-7 sm:p-8 shadow-[0_8px_40px_rgba(17,24,39,0.05)]"
+      className="relative flex-1 overflow-hidden rounded-3xl p-[2px] bg-slate-200/70 shadow-[0_8px_40px_rgba(17,24,39,0.05)]"
     >
+      {/* Rotating conic-gradient light that sweeps around the card border —
+          two opposite arcs so a glow crosses the edge twice per turn. */}
+      <span
+        aria-hidden
+        className="absolute inset-[-60%] animate-border-spin motion-reduce:hidden"
+        style={{ background: `conic-gradient(from 0deg, transparent 0deg, ${arc} 55deg, transparent 120deg, transparent 180deg, ${arc} 235deg, transparent 300deg, transparent 360deg)` }}
+      />
+      <div className="relative h-full rounded-[calc(1.5rem-2px)] bg-white p-7 sm:p-8">
       <div
         className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
           isPurple ? 'bg-gradient-to-br from-pairley-purple to-pairley-purple-light' : 'bg-gradient-to-br from-pairley-green to-pairley-green-dark'
@@ -54,6 +63,7 @@ function BenefitCard({ icon: Icon, eyebrow, title, blurb, benefits, cta, onClick
       >
         {cta} <ArrowRight size={15} />
       </button>
+      </div>
     </motion.div>
   );
 }
@@ -70,7 +80,14 @@ export default function LaunchPassSection() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={revealViewport} variants={fadeInUp} className="max-w-2xl mx-auto text-center">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-pairley-purple/15 bg-pairley-purple/[0.06] text-pairley-purple text-xs font-bold tracking-wide">
-            <Rocket size={13} /> Founding Members · Launching {launchDateLabel}
+            <motion.span
+              className="inline-flex"
+              animate={{ y: [0, -2.5, 0], rotate: [0, -14, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.8 }}
+            >
+              <Rocket size={13} />
+            </motion.span>
+            Founding Members · Launching {launchDateLabel}
           </span>
           <h2 className="mt-5 font-outfit text-3xl sm:text-4xl lg:text-[2.75rem] font-black tracking-tight text-pairley-ink text-balance">
             Get your free Launch Pass
