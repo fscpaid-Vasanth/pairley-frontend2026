@@ -5,20 +5,20 @@ import { Menu, X, LayoutDashboard, LogOut, ArrowRight } from 'lucide-react';
 import LogoMark from './LogoMark';
 import LandingButton from './LandingButton';
 
-// In-page anchors scroll to their section; "Explore Deals" and "Become a
-// Merchant" route into the real app. Kept in one list so the desktop and
-// mobile menus never drift apart.
+// In-page anchors scroll to their section. "Explore Deals" is deliberately
+// NOT in this list — it routes to /deals (not a section on this page) and
+// already has its own CTA button in the header, so listing it here too
+// just duplicated it. Kept in one list so the desktop and mobile menus
+// never drift apart.
 const NAV_LINKS = [
   { label: 'Home', id: 'top' },
-  { label: 'Explore Deals', to: '/deals' },
   { label: 'How It Works', id: 'how-it-works' },
   { label: 'For Customers', id: 'customer-benefits' },
   { label: 'For Merchants', id: 'merchant-benefits' },
-  { label: 'FAQ', id: 'faq' },
-  { label: 'Contact', id: 'contact' },
+  { label: 'Launch Pass', id: 'launch-pass' },
 ];
 
-const SPY_IDS = ['how-it-works', 'customer-benefits', 'merchant-benefits', 'faq', 'contact'];
+const SPY_IDS = ['how-it-works', 'customer-benefits', 'merchant-benefits', 'launch-pass'];
 
 export default function LandingNav() {
   const navigate = useNavigate();
