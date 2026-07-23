@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Users, Lightbulb, BadgeCheck } from 'lucide-react';
 import { fadeInUp, revealViewport } from './animations';
+import CountUp from './CountUp';
 
 const OPTIONS = [
   { price: 4900, interested: 18 },
@@ -17,6 +18,20 @@ const inr = (n) => `₹${n.toLocaleString('en-IN')}`;
 export default function PriceDiscovery() {
   const [selected, setSelected] = useState(4800);
   const chosen = OPTIONS.find((o) => o.price === selected);
+
+  // A gentle "someone just showed interest" pulse that cycles through the
+  // price rows, so the demand card feels live. Purely visual — never
+  // changes the numbers. Off entirely under reduced-motion.
+  const [pulseIdx, setPulseIdx] = useState(-1);
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    let i = 0;
+    const id = setInterval(() => {
+      setPulseIdx(i % OPTIONS.length);
+      i += 1;
+    }, 2600);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <section className="relative py-20 lg:py-28 overflow-hidden">
@@ -85,19 +100,28 @@ export default function PriceDiscovery() {
             <p className="mt-6 mb-3 text-[13px] font-bold text-slate-600">Customers choose their affordable price</p>
 
             <div className="flex flex-col gap-2.5">
-              {OPTIONS.map((o) => {
+              {OPTIONS.map((o, i) => {
                 const active = o.price === selected;
+                const pulsing = pulseIdx === i;
                 return (
                   <button
                     key={o.price}
                     onClick={() => setSelected(o.price)}
-                    className={`group w-full rounded-2xl border p-3.5 text-left transition-all ${
+                    className={`group relative overflow-hidden w-full rounded-2xl border p-3.5 text-left transition-all ${
                       active
                         ? 'border-pairley-green bg-pairley-green/[0.06] ring-1 ring-pairley-green/30'
                         : 'border-slate-200 bg-white hover:border-slate-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
+                    {/* Cycling live-activity pulse */}
+                    <motion.span
+                      aria-hidden
+                      className="absolute inset-0 rounded-2xl bg-pairley-green/10 pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: pulsing ? [0, 0.9, 0] : 0 }}
+                      transition={{ duration: 1.3, ease: 'easeInOut' }}
+                    />
+                    <div className="relative z-10 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <span
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
@@ -114,10 +138,10 @@ export default function PriceDiscovery() {
                         )}
                       </div>
                       <span className="flex items-center gap-1 text-[12px] font-bold text-slate-500 shrink-0">
-                        <Users size={12} /> {o.interested}
+                        <Users size={12} /> <CountUp target={o.interested} duration={1200} />
                       </span>
                     </div>
-                    <div className="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                    <div className="relative z-10 mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         whileInView={{ width: `${(o.interested / MAX) * 100}%` }}

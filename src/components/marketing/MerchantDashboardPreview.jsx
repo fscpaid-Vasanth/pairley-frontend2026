@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
 import { Users, Heart, IndianRupee, TrendingUp, MapPin, Clock, ArrowUpRight } from 'lucide-react';
 import { fadeInUp, stagger, revealViewport } from './animations';
+import CountUp from './CountUp';
 
 const KPIS = [
-  { label: "Today's Leads", value: '48', delta: '+12%', icon: Users, tint: 'text-pairley-purple', ring: 'bg-pairley-purple/10' },
-  { label: 'Interested Customers', value: '312', delta: '+8%', icon: Heart, tint: 'text-pairley-green-dark', ring: 'bg-pairley-green/12' },
-  { label: 'Most Popular Price', value: '₹4,800', delta: '37 want it', icon: IndianRupee, tint: 'text-pairley-orange', ring: 'bg-pairley-orange/12' },
-  { label: 'Revenue Opportunity', value: '₹1.4L', delta: '+21%', icon: TrendingUp, tint: 'text-pairley-purple', ring: 'bg-pairley-purple/10' },
+  { label: "Today's Leads", count: { target: 48 }, delta: '+12%', icon: Users, tint: 'text-pairley-purple', ring: 'bg-pairley-purple/10' },
+  { label: 'Interested Customers', count: { target: 312 }, delta: '+8%', icon: Heart, tint: 'text-pairley-green-dark', ring: 'bg-pairley-green/12' },
+  { label: 'Most Popular Price', count: { target: 4800, prefix: '₹' }, delta: '37 want it', icon: IndianRupee, tint: 'text-pairley-orange', ring: 'bg-pairley-orange/12' },
+  { label: 'Revenue Opportunity', count: { target: 1.4, prefix: '₹', suffix: 'L', decimals: 1 }, delta: '+21%', icon: TrendingUp, tint: 'text-pairley-purple', ring: 'bg-pairley-purple/10' },
 ];
 
 const SECONDARY = [
@@ -79,7 +80,9 @@ export default function MerchantDashboardPreview() {
                       <ArrowUpRight size={12} /> {k.delta}
                     </span>
                   </div>
-                  <p className="mt-3 text-2xl font-black text-pairley-ink font-outfit">{k.value}</p>
+                  <p className="mt-3 text-2xl font-black text-pairley-ink font-outfit">
+                    <CountUp {...k.count} />
+                  </p>
                   <p className="text-[12px] font-semibold text-slate-400">{k.label}</p>
                 </motion.div>
               ))}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Store, MapPin, Handshake, Check, Sparkles } from 'lucide-react';
@@ -5,6 +6,49 @@ import LandingButton from './LandingButton';
 import { fadeInUp, stagger } from './animations';
 
 const CITIES = ['Bangalore', 'Hubli', 'Hyderabad', 'Chennai', 'Pune'];
+
+// Small floating "live interest" chip on the example card. It sits inside
+// the card explicitly labeled "GROUP DEAL EXAMPLE", so the ticking count
+// reads as a demo of the live-interest feature, not a real global stat.
+function LiveInterestChip() {
+  const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const [count, setCount] = useState(23);
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => setCount((n) => (n < 41 ? n + 1 : n)), 5200);
+    return () => clearInterval(id);
+  }, [reduced]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: 0.9, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute -bottom-5 -left-3 sm:-left-5 z-20"
+    >
+      <div className="flex items-center gap-2.5 rounded-2xl bg-white border border-slate-200 shadow-[0_12px_30px_-8px_rgba(17,24,39,0.25)] px-3.5 py-2.5">
+        <div className="flex -space-x-2">
+          {[
+            { i: 'R', c: 'from-pairley-purple to-pairley-purple-light' },
+            { i: 'A', c: 'from-pairley-green to-pairley-green-dark' },
+            { i: 'M', c: 'from-pairley-orange to-amber-500' },
+          ].map((a) => (
+            <span key={a.i} className={`w-7 h-7 rounded-full bg-gradient-to-br ${a.c} border-2 border-white text-white text-[10px] font-bold flex items-center justify-center`}>
+              {a.i}
+            </span>
+          ))}
+        </div>
+        <div>
+          <p className="text-sm font-extrabold text-pairley-ink font-outfit leading-none flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-pairley-green animate-pulse motion-reduce:animate-none" />
+            {count} interested
+          </p>
+          <p className="text-[10px] font-semibold text-slate-400 mt-0.5">joining this deal now</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 // The group-deal illustration — the brief's core "explain Pairley in one
 // glance" visual. Two customers join the same BOGO offer, each pays half,
@@ -71,6 +115,8 @@ function GroupDealCard() {
           ))}
         </div>
       </div>
+
+      <LiveInterestChip />
     </motion.div>
   );
 }

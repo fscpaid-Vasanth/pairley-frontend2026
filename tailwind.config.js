@@ -69,6 +69,9 @@ export default {
         'drift-slow': 'drift 16s ease-in-out infinite',
         'drift-slow-2': 'drift2 20s ease-in-out infinite',
         'drift-slow-3': 'drift3 24s ease-in-out infinite',
+        // Periodic light sweep across primary CTA buttons — draws the eye
+        // without being constant; sweeps then rests for a few seconds.
+        'cta-shine': 'ctaShine 5s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -87,6 +90,10 @@ export default {
           '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
           '33%': { transform: 'translate(120px, 80px) scale(1.15)' },
           '66%': { transform: 'translate(-100px, -60px) scale(0.9)' },
+        },
+        ctaShine: {
+          '0%': { transform: 'translateX(-120%) skewX(-20deg)' },
+          '35%, 100%': { transform: 'translateX(320%) skewX(-20deg)' },
         },
         gradientShift: {
           '0%, 100%': { backgroundPosition: '0% 50%' },
