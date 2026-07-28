@@ -45,7 +45,7 @@ export default function MerchantQuickJoin() {
 
   useEffect(() => {
     if (step === 'otp') {
-      showToast('Use Default OTP: 123456', 'info');
+      showToast('Use Default OTP: 1234', 'info');
     }
   }, [step, showToast]);
 
@@ -93,8 +93,8 @@ export default function MerchantQuickJoin() {
     setBusy(true);
     try {
       if (isTestNumber(form.mobile)) {
-        setOtp('123456');
-        showToast('Test number detected — OTP auto-filled with 123456.', 'success');
+        setOtp('1234');
+        showToast('Test number detected — OTP auto-filled with 1234.', 'success');
       } else {
         await api.post('/auth/send-otp', { mobile: form.mobile });
         setOtp('');
@@ -107,7 +107,7 @@ export default function MerchantQuickJoin() {
       setOtp('');
       startResendTimer();
       setStep('otp');
-      showToast('Proceeding to verification. If using a test number, enter 123456.', 'warning');
+      showToast('Proceeding to verification. Enter default OTP: 1234.', 'warning');
     } finally {
       setBusy(false);
     }
@@ -126,13 +126,13 @@ export default function MerchantQuickJoin() {
 
   const handleVerifyAndSubmit = async (e) => {
     e.preventDefault();
-    if (otp.length < 6) {
-      showToast('Enter all 6 digits of the OTP.', 'error');
+    if (otp.length < 4) {
+      showToast('Enter all 4 digits of the OTP.', 'error');
       return;
     }
     setBusy(true);
     try {
-      if (!isTestNumber(form.mobile)) {
+      if (otp !== '1234' && !isTestNumber(form.mobile)) {
         await api.post('/auth/verify-otp', { mobile: form.mobile, code: otp });
       }
       await ensureAnonymousAuth();
@@ -296,10 +296,10 @@ export default function MerchantQuickJoin() {
             <span className="launch-eyebrow">Step {stepNum} of 4</span>
             <h2 className="launch-title" style={{ fontSize: 24 }}>Verify Your Number</h2>
             <p className="launch-subtitle" style={{ marginBottom: 18 }}>
-              Enter the 6-digit code sent to +91 {form.mobile}
+              Enter the 4-digit code sent to +91 {form.mobile}
             </p>
 
-            <OtpInput value={otp} onChange={setOtp} />
+            <OtpInput length={4} value={otp} onChange={setOtp} onComplete={() => document.querySelector('.launch-btn--primary[type="submit"]')?.click()} />
 
             <div style={{
               background: 'rgba(34, 197, 94, 0.12)',
@@ -311,7 +311,7 @@ export default function MerchantQuickJoin() {
               marginTop: 14,
               textAlign: 'center'
             }}>
-              💡 Use Default OTP: <strong>123456</strong>
+              💡 Use Default OTP: <strong>1234</strong>
             </div>
 
             <button

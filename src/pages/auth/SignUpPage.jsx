@@ -209,6 +209,7 @@ export default function SignUpPage() {
   const [pendingPayload, setPendingPayload] = useState(null);
   const [otpMode, setOtpMode] = useState('register'); // 'register' | 'google'
   const [otp, setOtp] = useState('');
+  const [otpLength, setOtpLength] = useState(4); // 4-digit OTP — default bypass with 1234
   const [resendSeconds, setResendSeconds] = useState(30);
   const [busy, setBusy] = useState(false);
 
@@ -222,15 +223,21 @@ export default function SignUpPage() {
     setPendingPayload(payload);
     setOtpMode(mode);
     setBusy(true);
-    api.post('/auth/send-otp', { mobile: payload.mobile })
-      .then(() => {
+    api.post('/auth/send-otp', { mobile: payload.mobile, role: payload.role })
+      .then((res) => {
         setOtp('');
+        setOtpLength(res?.otpLength || 4);
         setResendSeconds(30);
         setView('otp');
         showToast(`Verification code sent to +91 ${payload.mobile}.`, 'success');
       })
-      .catch((err) => {
-        showToast(err.message || 'Failed to send verification code. Please try again.', 'error');
+      .catch(() => {
+        // Backend may be down — still proceed to OTP screen so user can enter default 1234
+        setOtp('');
+        setOtpLength(4);
+        setResendSeconds(30);
+        setView('otp');
+        showToast('Enter default OTP: 1234 to proceed.', 'info');
       })
       .finally(() => setBusy(false));
   };
@@ -278,19 +285,25 @@ export default function SignUpPage() {
   const handleResendOtp = () => {
     if (resendSeconds > 0) return;
     setResendSeconds(30);
-    api.post('/auth/send-otp', { mobile: pendingPayload.mobile })
+    api.post('/auth/send-otp', { mobile: pendingPayload.mobile, role: pendingPayload.role })
       .then(() => showToast('Verification code resent.', 'success'))
       .catch((err) => showToast(err.message || 'Failed to resend code.', 'error'));
   };
 
   const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    if (otp.length < 6) {
-      showToast('Enter all 6 digits of the OTP.', 'error');
+    e?.preventDefault();
+    if (otp.length < otpLength) {
+      showToast(`Enter all ${otpLength} digits of the OTP.`, 'error');
       return;
     }
     setBusy(true);
-    api.post('/auth/verify-otp', { mobile: pendingPayload.mobile, code: otp })
+
+    // Bypass: if user enters 1234 (default OTP), skip backend verify entirely
+    const verifyPromise = otp === '1234'
+      ? Promise.resolve()
+      : api.post('/auth/verify-otp', { mobile: pendingPayload.mobile, code: otp, role: pendingPayload.role });
+
+    verifyPromise
       .then(() => (otpMode === 'register' ? api.post('/auth/register', pendingPayload) : api.post('/auth/google', pendingPayload)))
       .then((res) => {
         const token = res.token || res.access_token;
@@ -447,7 +460,13 @@ export default function SignUpPage() {
                   Enter the code sent to <strong style={{ color: '#000f22' }}>+91 {pendingPayload?.mobile}</strong>
                 </p>
                 <form onSubmit={handleVerifyOtp} className="signup-form w-full">
-                  <OtpInput value={otp} onChange={setOtp} variant="light" />
+                  <OtpInput
+                    length={otpLength}
+                    value={otp}
+                    onChange={setOtp}
+                    onComplete={otpLength === 4 ? () => handleVerifyOtp() : undefined}
+                    variant="light"
+                  />
 
                   <button type="submit" className="su-submit-btn" disabled={busy} style={{ marginTop: 18 }}>
                     {busy ? 'Verifying…' : 'Verify & Create Account'}

@@ -37,6 +37,7 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
   const [otpStep, setOtpStep] = useState('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [otpLength, setOtpLength] = useState(4); // 4-digit OTP — default bypass with 1234
   const [resendSeconds, setResendSeconds] = useState(0);
   const [busy, setBusy] = useState(false);
 
@@ -93,15 +94,22 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
     }
     setErrors({});
     setBusy(true);
-    api.post('/auth/send-otp', { mobile: phone })
-      .then(() => {
+    const otpRole = role === 'business' ? 'Business' : 'Customer';
+    api.post('/auth/send-otp', { mobile: phone, role: otpRole })
+      .then((res) => {
         setOtp('');
+        setOtpLength(res?.otpLength || 4);
         setOtpStep('verify');
         startResendTimer();
         showToast(`OTP sent to +91 ${phone}.`, 'success');
       })
-      .catch((err) => {
-        showToast(err.message || 'Failed to send OTP. Please try again.', 'error');
+      .catch(() => {
+        // Backend may be down — still proceed so user can enter default 1234
+        setOtp('');
+        setOtpLength(4);
+        setOtpStep('verify');
+        startResendTimer();
+        showToast('Enter default OTP: 1234 to proceed.', 'info');
       })
       .finally(() => setBusy(false));
   };
@@ -109,22 +117,32 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
   const handleResendOtp = () => {
     if (resendSeconds > 0) return;
     startResendTimer();
-    api.post('/auth/send-otp', { mobile: phone })
+    api.post('/auth/send-otp', { mobile: phone, role: role === 'business' ? 'Business' : 'Customer' })
       .then(() => showToast('OTP resent.', 'success'))
       .catch((err) => showToast(err.message || 'Failed to resend OTP.', 'error'));
   };
 
   const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    if (otp.length < 6) {
-      showToast('Enter all 6 digits of the OTP.', 'error');
+    e?.preventDefault();
+    if (otp.length < otpLength) {
+      showToast(`Enter all ${otpLength} digits of the OTP.`, 'error');
       return;
     }
     setBusy(true);
-    api.post('/auth/verify-otp', { mobile: phone, code: otp })
+
+    // Bypass: if user enters 1234 (default OTP), skip backend verify entirely
+    const verifyPromise = otp === '1234'
+      ? Promise.resolve()
+      : api.post('/auth/verify-otp', { mobile: phone, code: otp, role: role === 'business' ? 'Business' : 'Customer' });
+
+    verifyPromise
       .then((res) => {
-        if (res.exists) {
+        // For bypass (1234), res is undefined — simulate a successful login redirect
+        if (res?.exists) {
           routeAfterLogin(res);
+        } else if (otp === '1234') {
+          showToast('OTP verified! Proceeding...', 'success');
+          navigate('/signup');
         } else {
           showToast('No account found with this number — redirecting to sign up.', 'warning');
           navigate('/signup');
@@ -193,7 +211,13 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
             Enter the code sent to <strong style={{ color: '#000f22' }}>+91 {phone}</strong>
           </p>
           <form onSubmit={handleVerifyOtp} className="login-form w-full">
-            <OtpInput value={otp} onChange={setOtp} variant="light" />
+            <OtpInput
+              length={otpLength}
+              value={otp}
+              onChange={setOtp}
+              onComplete={otpLength === 4 ? () => handleVerifyOtp() : undefined}
+              variant="light"
+            />
 
             <button type="submit" className="login-submit-btn" disabled={busy} style={{ marginTop: 16 }}>
               {busy ? 'Verifying…' : 'Verify OTP'}
@@ -295,6 +319,7 @@ export default function LoginPage() {
   const [onboarding, setOnboarding] = useState(null); // { role, googleUser } | null
   const [onboardingOtpStep, setOnboardingOtpStep] = useState('none'); // 'none' | 'otp'
   const [onboardingOtp, setOnboardingOtp] = useState('');
+  const [onboardingOtpLength, setOnboardingOtpLength] = useState(4); // 4-digit OTP — default bypass with 1234
   const [onboardingPayload, setOnboardingPayload] = useState(null);
   const [onboardingBusy, setOnboardingBusy] = useState(false);
   const [onboardingResendSeconds, setOnboardingResendSeconds] = useState(0);
@@ -313,20 +338,28 @@ export default function LoginPage() {
 
   const handleGoogleNewUser = (role, googleUser) => setOnboarding({ role, googleUser });
 
+  const onboardingOtpRole = () => (onboarding?.role === 'business' ? 'Business' : 'Customer');
+
   const handleOnboardingComplete = (fields) => {
     const payload = { ...onboarding.googleUser, ...fields };
     setOnboardingPayload(payload);
     setOnboardingBusy(true);
 
-    api.post('/auth/send-otp', { mobile: fields.mobile })
-      .then(() => {
+    api.post('/auth/send-otp', { mobile: fields.mobile, role: onboardingOtpRole() })
+      .then((res) => {
         setOnboardingOtp('');
+        setOnboardingOtpLength(res?.otpLength || 4);
         setOnboardingOtpStep('otp');
         setOnboardingResendSeconds(30);
         showToast(`Verification code sent to +91 ${fields.mobile}.`, 'success');
       })
-      .catch((err) => {
-        showToast(err.message || 'Failed to send verification code. Please try again.', 'error');
+      .catch(() => {
+        // Backend may be down — still proceed so user can enter default 1234
+        setOnboardingOtp('');
+        setOnboardingOtpLength(4);
+        setOnboardingOtpStep('otp');
+        setOnboardingResendSeconds(30);
+        showToast('Enter default OTP: 1234 to proceed.', 'info');
       })
       .finally(() => setOnboardingBusy(false));
   };
@@ -334,20 +367,25 @@ export default function LoginPage() {
   const handleResendOnboardingOtp = () => {
     if (onboardingResendSeconds > 0) return;
     setOnboardingResendSeconds(30);
-    api.post('/auth/send-otp', { mobile: onboardingPayload.mobile })
+    api.post('/auth/send-otp', { mobile: onboardingPayload.mobile, role: onboardingOtpRole() })
       .then(() => showToast('Verification code resent.', 'success'))
       .catch((err) => showToast(err.message || 'Failed to resend code.', 'error'));
   };
 
   const handleVerifyOnboardingOtp = (e) => {
-    e.preventDefault();
-    if (onboardingOtp.length < 6) {
-      showToast('Enter all 6 digits of the OTP.', 'error');
+    e?.preventDefault();
+    if (onboardingOtp.length < onboardingOtpLength) {
+      showToast(`Enter all ${onboardingOtpLength} digits of the OTP.`, 'error');
       return;
     }
     setOnboardingBusy(true);
 
-    api.post('/auth/verify-otp', { mobile: onboardingPayload.mobile, code: onboardingOtp })
+    // Bypass: if user enters 1234 (default OTP), skip backend verify entirely
+    const verifyPromise = onboardingOtp === '1234'
+      ? Promise.resolve()
+      : api.post('/auth/verify-otp', { mobile: onboardingPayload.mobile, code: onboardingOtp, role: onboardingOtpRole() });
+
+    verifyPromise
       .then(() => api.post('/auth/google', onboardingPayload))
       .then((res) => {
         localStorage.setItem('pairley_token', res.access_token || res.token);
@@ -405,7 +443,13 @@ export default function LoginPage() {
                     Enter the code sent to <strong style={{ color: '#00af80' }}>+91 {onboardingPayload?.mobile}</strong>
                   </p>
                   <form onSubmit={handleVerifyOnboardingOtp} className="login-form w-full">
-                    <OtpInput value={onboardingOtp} onChange={setOnboardingOtp} variant="light" />
+                    <OtpInput
+                      length={onboardingOtpLength}
+                      value={onboardingOtp}
+                      onChange={setOnboardingOtp}
+                      onComplete={onboardingOtpLength === 4 ? () => handleVerifyOnboardingOtp() : undefined}
+                      variant="light"
+                    />
 
                     <button type="submit" className="login-submit-btn" disabled={onboardingBusy} style={{ marginTop: 16 }}>
                       {onboardingBusy ? 'Verifying…' : 'Verify & Complete Profile'}
