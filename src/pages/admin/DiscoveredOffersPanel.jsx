@@ -464,6 +464,7 @@ export default function DiscoveredOffersPanel() {
         onApprove={handleApprove}
         onReject={(id) => openReject([id])}
         onTakedown={handleTakedown}
+        onSaved={fetchCandidates}
       />
     </div>
   );

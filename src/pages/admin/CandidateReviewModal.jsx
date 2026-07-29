@@ -1,15 +1,115 @@
 import { useEffect, useState } from 'react';
-import { X, Check, RotateCcw, IndianRupee, FileText, ImageOff, ExternalLink, AlertTriangle, Copy } from 'lucide-react';
+import { X, Check, RotateCcw, FileText, ImageOff, ExternalLink, AlertTriangle, Copy, Save, Loader2 } from 'lucide-react';
 import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '../../utils/adminFilePreview';
-import { formatPrice } from '../../utils/constants';
 import { api } from '../../utils/api';
+import { confidenceBand, CONFIDENCE_BANDS } from '../../utils/discoverySource';
+import {
+  buildCandidateOverrides,
+  validateCandidateEdits,
+  fieldValue,
+} from '../../utils/candidateOverrides';
 import AiSuggestionsPanel from './AiSuggestionsPanel';
 
 function ConfidenceBadge({ score }) {
   const pct = Math.round((score ?? 0) * 100);
+  const band = confidenceBand(score);
   const tone =
-    pct >= 70 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : pct >= 40 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-rose-50 border-rose-200 text-rose-700';
-  return <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${tone}`}>{pct}% confidence</span>;
+    band === 'HIGH'
+      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+      : band === 'MEDIUM'
+        ? 'bg-amber-50 border-amber-200 text-amber-700'
+        : 'bg-rose-50 border-rose-200 text-rose-700';
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${tone}`}>
+      {pct}% · {CONFIDENCE_BANDS[band].label}
+    </span>
+  );
+}
+
+// Module 14 Phase 1 — every extracted field becomes editable before publish.
+// A controlled input whose value falls back to the extracted one until the
+// admin actually changes it, so an untouched field sends nothing at all and
+// the backend's "omitted means unchanged" contract keeps holding.
+function Field({ label, name, value, onChange, type = 'text', textarea, options, hint, span }) {
+  const id = `candidate-${name}`;
+  const shared =
+    'w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 outline-none focus:border-[#5B12D6]';
+
+  return (
+    <div className={span === 2 ? 'sm:col-span-2' : undefined}>
+      <label htmlFor={id} className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+        {label}
+      </label>
+      {textarea ? (
+        <textarea id={id} rows={3} value={value ?? ''} onChange={(e) => onChange(name, e.target.value)} className={`${shared} resize-y`} />
+      ) : options ? (
+        <select id={id} value={value ?? ''} onChange={(e) => onChange(name, e.target.value)} className={shared}>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          id={id}
+          type={type}
+          value={value ?? ''}
+          onChange={(e) => onChange(name, type === 'number' ? e.target.value : e.target.value)}
+          className={shared}
+        />
+      )}
+      {hint && <p className="text-[9px] font-semibold text-slate-400 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
+const OFFER_TYPE_OPTIONS = [
+  'STANDARD',
+  'PERCENTAGE_DISCOUNT',
+  'FLAT_DISCOUNT',
+  'FLASH_DEAL',
+  'BOGO',
+  'BOGT',
+  'GROUP_DISCOUNT',
+  'BULK_PURCHASE',
+  'MEMBERSHIP_CAMPAIGN',
+  'PACKAGE_DEAL',
+].map((value) => ({ value, label: value.replace(/_/g, ' ') }));
+
+const CATEGORY_OPTIONS = [
+  'dining',
+  'shopping',
+  'beauty',
+  'fitness',
+  'entertainment',
+  'travel',
+  'services',
+  'education',
+  'health',
+  'automotive',
+  'electronics',
+  'groceries',
+].map((value) => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1) }));
+
+// Formats a backend ISO date for a native <input type="date">, which only
+// accepts YYYY-MM-DD.
+function toDateInput(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
+
+function ExtractedRow({ label, value }) {
+  return (
+    <div className="flex gap-2 text-[10px]">
+      <span className="font-bold text-slate-400 w-20 flex-shrink-0">{label}</span>
+      <span className={`font-semibold ${value ? 'text-slate-600' : 'text-slate-300 italic'}`}>
+        {value || 'not detected'}
+      </span>
+    </div>
+  );
 }
 
 const DUPLICATE_WARNING_TEXT = new Set([
@@ -81,14 +181,22 @@ function DuplicateBanner({ candidate }) {
 // the full getCandidate() detail on open and upgrades to it once loaded
 // (`data` below), so the AI Suggestions panel has what it needs without
 // bloating every row of every page of the table.
-export default function CandidateReviewModal({ candidate, actioning, onClose, onApprove, onReject, onTakedown }) {
+export default function CandidateReviewModal({ candidate, actioning, onClose, onApprove, onReject, onTakedown, onSaved }) {
   const [imageLoadError, setImageLoadError] = useState(false);
   const [detail, setDetail] = useState(null);
-  const [overrides, setOverrides] = useState({});
+  // AI suggestion accept/edit/reject decisions (Module 11 Phase 4) and the
+  // admin's own field edits (Module 14 Phase 1) are tracked separately so
+  // the suggestions panel keeps owning its own state, then merged at submit.
+  const [suggestionOverrides, setSuggestionOverrides] = useState({});
+  const [edits, setEdits] = useState({});
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     setDetail(null);
-    setOverrides({});
+    setSuggestionOverrides({});
+    setEdits({});
+    setSaveError('');
     if (!candidate?.id) return;
     api
       .get(`/discovery/candidates/${candidate.id}`)
@@ -103,7 +211,53 @@ export default function CandidateReviewModal({ candidate, actioning, onClose, on
   const isPdf = data.source === 'PDF';
   const isWebsite = data.source === 'WEBSITE';
   const hasFile = !!data.source_file_url;
-  const hasOverrides = Object.keys(overrides).length > 0;
+
+  const handleEdit = (name, value) => {
+    setEdits((prev) => ({ ...prev, [name]: value }));
+    if (saveError) setSaveError('');
+  };
+
+  const get = (name, extracted) => fieldValue(edits, name, extracted);
+
+  // Field edits win over an accepted AI suggestion for the same field —
+  // an explicit typed value is a later, more deliberate decision than
+  // accepting a suggestion earlier in the same session.
+  const combinedOverrides = { ...suggestionOverrides, ...buildCandidateOverrides(edits) };
+  const hasOverrides = Object.keys(combinedOverrides).length > 0;
+  const validationError = validateCandidateEdits(edits, data);
+  const blocked = Boolean(validationError) || actioning || savingDraft;
+  const rawExtraction = detail?.import_job?.extracted_fields || null;
+
+  const handleSaveDraft = async () => {
+    if (validationError) {
+      setSaveError(validationError);
+      return;
+    }
+    setSavingDraft(true);
+    try {
+      await api.put(`/discovery/candidates/${data.id}/draft`, {
+        overrides: combinedOverrides,
+      });
+      const refreshed = await api.get(`/discovery/candidates/${data.id}`);
+      setDetail(refreshed);
+      setEdits({});
+      setSaveError('');
+      onSaved?.();
+    } catch (err) {
+      console.error('Failed to save draft:', err);
+      setSaveError(err.message || 'Could not save changes.');
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  const handleApprove = () => {
+    if (validationError) {
+      setSaveError(validationError);
+      return;
+    }
+    onApprove(data.id, hasOverrides ? combinedOverrides : undefined);
+  };
 
   return (
     <div className="review-modal-overlay flex items-center justify-center p-4 animate-modalFadeIn" onClick={onClose}>
@@ -161,46 +315,97 @@ export default function CandidateReviewModal({ candidate, actioning, onClose, on
                   <span className="text-[10px] font-bold">Preview unavailable</span>
                 </div>
               )}
+
+              {/* What the pipeline actually read off the source, before
+                  Pairley formatting — the comparison that lets an admin
+                  judge an extraction rather than just read its result. */}
+              {rawExtraction && (
+                <div className="mt-4">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">AI Extracted Content</span>
+                  <div className="mt-2 rounded-xl border border-slate-200 bg-white p-3 flex flex-col gap-2">
+                    <ExtractedRow label="Title" value={rawExtraction.title} />
+                    <ExtractedRow label="Description" value={rawExtraction.description} />
+                    <ExtractedRow
+                      label="Price"
+                      value={rawExtraction.price === null || rawExtraction.price === undefined ? null : `₹${rawExtraction.price}`}
+                    />
+                    {typeof rawExtraction.ocr_confidence === 'number' && (
+                      <ExtractedRow label="OCR confidence" value={`${Math.round(rawExtraction.ocr_confidence * 100)}%`} />
+                    )}
+                    {rawExtraction.rawText && (
+                      <details className="mt-1">
+                        <summary className="text-[10px] font-bold text-[#5B12D6] cursor-pointer">
+                          View raw extracted text
+                        </summary>
+                        <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap text-[10px] font-medium text-slate-500 bg-slate-50 rounded-lg p-2 border border-slate-100">
+                          {rawExtraction.rawText}
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Extracted fields */}
+            {/* Pairley-formatted offer — every field editable before publish */}
             <div className="p-5 md:p-6 flex flex-col gap-3.5">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Extracted Data</span>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center text-[9px] font-extrabold uppercase bg-indigo-50 border border-indigo-100 text-[#5B12D6] px-2 py-0.5 rounded-md">
-                  {data.source}
-                </span>
-                <ConfidenceBadge score={data.confidence_score} />
-              </div>
-
-              <div>
-                <span className="text-[10px] font-bold text-slate-400">Title</span>
-                <p className="text-sm font-bold text-slate-800">{data.title || '—'}</p>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-bold text-slate-400">Description</span>
-                <p className="text-xs font-medium text-slate-600 line-clamp-4">{data.description || '—'}</p>
-              </div>
-
-              <div className="flex gap-6">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400">Offer Price</span>
-                  <p className="flex items-center gap-0.5 text-sm font-bold text-slate-800">
-                    <IndianRupee size={12} />
-                    {data.offer_price ? formatPrice(data.offer_price).replace('₹', '') : '0'}
-                  </p>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Pairley Offer</span>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center text-[9px] font-extrabold uppercase bg-indigo-50 border border-indigo-100 text-[#5B12D6] px-2 py-0.5 rounded-md">
+                    {data.source}
+                  </span>
+                  <ConfidenceBadge score={data.confidence_score} />
                 </div>
-                {data.original_price ? (
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400">Original Price</span>
-                    <p className="flex items-center gap-0.5 text-sm font-bold text-slate-400 line-through">
-                      <IndianRupee size={12} />
-                      {formatPrice(data.original_price).replace('₹', '')}
-                    </p>
-                  </div>
-                ) : null}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Field label="Offer name" name="title" value={get('title', data.title)} onChange={handleEdit} span={2} />
+                <Field
+                  label="Description"
+                  name="description"
+                  textarea
+                  value={get('description', data.description)}
+                  onChange={handleEdit}
+                  span={2}
+                />
+                <Field label="Subtitle" name="subtitle" value={get('subtitle', detail?.subtitle)} onChange={handleEdit} span={2} />
+                <Field label="Category" name="category" options={CATEGORY_OPTIONS} value={get('category', data.category)} onChange={handleEdit} />
+                <Field label="Offer type" name="offerType" options={OFFER_TYPE_OPTIONS} value={get('offerType', detail?.offer_type)} onChange={handleEdit} />
+                <Field label="Original price (₹)" name="originalPrice" type="number" value={get('originalPrice', data.original_price)} onChange={handleEdit} />
+                <Field label="Offer price (₹)" name="offerPrice" type="number" value={get('offerPrice', data.offer_price)} onChange={handleEdit} />
+                <Field
+                  label="Minimum customers"
+                  name="requiredPeople"
+                  type="number"
+                  value={get('requiredPeople', detail?.required_people)}
+                  onChange={handleEdit}
+                />
+                <div />
+                <Field label="Starts" name="startDate" type="date" value={get('startDate', toDateInput(detail?.start_date))} onChange={handleEdit} />
+                <Field label="Ends" name="endDate" type="date" value={get('endDate', toDateInput(detail?.end_date))} onChange={handleEdit} />
+              </div>
+
+              <div className="pt-1">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Business</span>
+                <div className="grid sm:grid-cols-2 gap-3 mt-2">
+                  <Field label="Business name" name="businessName" value={get('businessName', detail?.business?.business_name ?? data.business_name)} onChange={handleEdit} span={2} />
+                  <Field label="Business category" name="businessCategory" value={get('businessCategory', detail?.business?.category)} onChange={handleEdit} />
+                  <Field label="Business type" name="merchantType" value={get('merchantType', detail?.business?.business_type)} onChange={handleEdit} />
+                  <Field
+                    label="Phone"
+                    name="businessMobile"
+                    value={get('businessMobile', detail?.business?.mobile)}
+                    onChange={handleEdit}
+                    hint="Verify before publishing — an extracted number may belong to someone else."
+                  />
+                  <Field label="Website" name="businessWebsite" value={get('businessWebsite', detail?.business?.website)} onChange={handleEdit} />
+                  <Field label="Address" name="businessAddress" value={get('businessAddress', detail?.business?.address)} onChange={handleEdit} span={2} />
+                  <Field label="City" name="businessCity" value={get('businessCity', detail?.business?.city)} onChange={handleEdit} />
+                  <Field label="State" name="businessState" value={get('businessState', detail?.business?.state)} onChange={handleEdit} />
+                  <Field label="Pincode" name="businessPincode" value={get('businessPincode', detail?.business?.pincode)} onChange={handleEdit} />
+                  <Field label="GST number" name="businessGstNumber" value={get('businessGstNumber', detail?.business?.gst_number)} onChange={handleEdit} />
+                </div>
               </div>
             </div>
           </div>
@@ -221,39 +426,57 @@ export default function CandidateReviewModal({ candidate, actioning, onClose, on
             <AiSuggestionsPanel
               enrichmentStatus={detail?.enrichment_status}
               enrichmentMetadata={detail?.enrichment_metadata}
-              onChange={setOverrides}
+              onChange={setSuggestionOverrides}
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 md:px-6 py-4 border-t border-slate-100 bg-slate-50/50">
-          {data.review_status !== 'REJECTED' && (
-            <button
-              disabled={actioning}
-              onClick={() => onReject(data.id)}
-              className="px-4 py-2 border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
-            >
-              <X size={13} /> Reject
-            </button>
+        <div className="px-5 md:px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+          {(validationError || saveError) && (
+            <p className="text-[10px] font-bold text-rose-600 mb-2.5 text-right">{validationError || saveError}</p>
           )}
-          {data.review_status === 'APPROVED' && (
-            <button
-              disabled={actioning}
-              onClick={() => onTakedown(data.id)}
-              className="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
-            >
-              <RotateCcw size={13} /> Take Down
-            </button>
-          )}
-          {data.review_status !== 'APPROVED' && (
-            <button
-              disabled={actioning}
-              onClick={() => onApprove(data.id, hasOverrides ? overrides : undefined)}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
-            >
-              <Check size={13} /> Approve &amp; Publish{hasOverrides ? ' (applying AI suggestions)' : ''}
-            </button>
-          )}
+          <div className="flex items-center justify-end gap-2 flex-wrap">
+            {data.review_status !== 'REJECTED' && (
+              <button
+                disabled={actioning || savingDraft}
+                onClick={() => onReject(data.id)}
+                className="px-4 py-2 border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <X size={13} /> Reject
+              </button>
+            )}
+            {data.review_status === 'APPROVED' && (
+              <button
+                disabled={actioning || savingDraft}
+                onClick={() => onTakedown(data.id)}
+                className="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <RotateCcw size={13} /> Take Down
+              </button>
+            )}
+            {/* Save Draft keeps the candidate in the review queue — the
+                stopping point for an admin who has corrected some fields
+                but isn't ready to publish. */}
+            {data.review_status !== 'APPROVED' && (
+              <button
+                disabled={blocked || !hasOverrides}
+                onClick={handleSaveDraft}
+                className="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {savingDraft ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                {savingDraft ? 'Saving...' : 'Save Draft'}
+              </button>
+            )}
+            {data.review_status !== 'APPROVED' && (
+              <button
+                disabled={blocked}
+                onClick={handleApprove}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Check size={13} /> Approve &amp; Publish{hasOverrides ? ' (with edits)' : ''}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

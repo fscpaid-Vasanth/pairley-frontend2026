@@ -4,30 +4,15 @@ import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import { API_URL, generateCorrelationId } from '../../utils/api';
 
-const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp,application/pdf';
+import { getFailureMessage, isJobTerminal } from '../../utils/discoverySource';
 
-const TERMINAL_STATUSES = new Set(['DONE', 'FAILED']);
+const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp,application/pdf';
 
 const JOB_STATUS_META = {
   QUEUED: { label: 'Queued', icon: Clock, tone: 'bg-slate-100 border-slate-200 text-slate-500' },
   PROCESSING: { label: 'Processing', icon: Loader2, tone: 'bg-amber-50 border-amber-200 text-amber-700', spin: true },
   DONE: { label: 'Done', icon: CheckCircle2, tone: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
   FAILED: { label: 'Failed', icon: XCircle, tone: 'bg-rose-50 border-rose-200 text-rose-700' },
-};
-
-// Maps the backend's ImportOrchestrationService failure reason codes (see
-// FileImportError) to language an admin — not a developer — can act on.
-// Falls back to the raw reason if a new one is added backend-side and this
-// list drifts out of sync, rather than hiding it.
-const FAILURE_MESSAGES = {
-  INVALID_FILE_TYPE: 'Unsupported file type — use JPEG, PNG, WebP, or a text-based PDF.',
-  FILE_TOO_LARGE: 'File is too large (15MB limit).',
-  INVALID_FILE_SIGNATURE: "File content doesn't match a supported image/PDF format.",
-  FILE_TYPE_MISMATCH: 'File extension does not match its actual content — re-export and retry.',
-  STORAGE_FAILED: 'Upload storage error — please retry in a moment.',
-  PDF_PARSE_FAILED: 'Could not parse this PDF — it may be corrupted.',
-  UNSUPPORTED_SCANNED_PDF: 'This PDF appears to be scanned/image-only — text-layer PDFs only.',
-  OCR_FAILED: 'Text recognition failed on this image — try a clearer photo.',
 };
 
 function JobRow({ job }) {
@@ -45,7 +30,7 @@ function JobRow({ job }) {
         </div>
         {job.status === 'FAILED' && job.error && (
           <div className="text-[10px] text-rose-500 font-semibold mt-0.5 line-clamp-1" title={job.error}>
-            {FAILURE_MESSAGES[job.error.split(':')[0]] || job.error}
+            {getFailureMessage(job.error)}
           </div>
         )}
       </div>
@@ -95,8 +80,7 @@ export default function PosterUploadCard({ onCandidateReady }) {
   }, [fetchJobs]);
 
   useEffect(() => {
-    const hasActiveJob = jobs.some((j) => !TERMINAL_STATUSES.has(j.status));
-    if (!hasActiveJob) return undefined;
+    if (!jobs.some((j) => !isJobTerminal(j))) return undefined;
     const interval = setInterval(fetchJobs, 3000);
     return () => clearInterval(interval);
   }, [jobs, fetchJobs]);
