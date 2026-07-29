@@ -1,25 +1,66 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Clock, Users, PartyPopper, Lock } from 'lucide-react';
+import { Sparkles, Clock, Users, PartyPopper, Lock, CheckCircle2, MessageCircleMore } from 'lucide-react';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
 import { getDealMode } from '../utils/offerTypes';
-import { buildNewLeadMessage, openWhatsAppMultiple } from '../utils/whatsapp';
+import { isDuplicateInterestError, formatLeadStatusLabel } from '../utils/leadInterest';
 import './InterestButton.css';
 
-export default function InterestButton({ deal, onInterest }) {
+/**
+ * Module 13 — the standard (non-legacy) interest confirmation card. Shown
+ * once deal.myLead exists, i.e. driven entirely by the backend response
+ * rather than local component state — it renders identically whether the
+ * lead was just created this session or the customer is revisiting after a
+ * refresh/logout/re-login, except for the headline copy (`justSubmitted`
+ * distinguishes "Sent Successfully" from "Already Sent" per the two example
+ * cards in the spec; everything else about the two states is the same).
+ */
+function InterestConfirmationCard({ lead, justSubmitted, onOpenChat }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="interest-confirmation-card"
+    >
+      <div className="interest-confirmation-card__head">
+        <CheckCircle2 size={22} className="interest-confirmation-card__check" />
+        <h4 className="interest-confirmation-card__title">
+          {justSubmitted ? 'Interest Sent Successfully' : 'Interest Already Sent'}
+        </h4>
+      </div>
+      <p className="interest-confirmation-card__body">
+        {justSubmitted
+          ? 'The merchant has been notified. You can now communicate securely using Pairley’s Anonymous Chat.'
+          : 'The merchant will contact you. You can continue the conversation securely using Pairley’s Anonymous Chat.'}
+      </p>
+      <button type="button" className="interest-confirmation-card__chat-btn" onClick={onOpenChat}>
+        <MessageCircleMore size={18} />
+        Open Anonymous Chat
+      </button>
+      <div className="interest-confirmation-card__status">
+        <span className="interest-confirmation-card__status-dot" />
+        Status: {formatLeadStatusLabel(lead.status)}
+      </div>
+    </motion.div>
+  );
+}
+
+export default function InterestButton({ deal, onInterest, onRefresh }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { orders, refreshOrders } = useCart();
-  const [interestState, setInterestState] = useState('none'); // 'none', 'loading', 'interested', 'paired'
+  const [interestState, setInterestState] = useState('none'); // legacy pair/group state machine — 'none', 'loading', 'interested', 'paired'
+  const [posting, setPosting] = useState(false); // standard-flow submit state
+  const [justSubmitted, setJustSubmitted] = useState(false);
 
   const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
-  const userHasJoinedInDb = deal?.interests?.some(i => 
-    i.customer_id === currentUser?.id || 
-    i.customer_id === currentUser?.sub || 
-    i.customer?.id === currentUser?.id || 
+  const userHasJoinedInDb = deal?.interests?.some(i =>
+    i.customer_id === currentUser?.id ||
+    i.customer_id === currentUser?.sub ||
+    i.customer?.id === currentUser?.id ||
     i.customer?.id === currentUser?.sub ||
     (currentUser?.mobile && i.customer?.mobile === currentUser.mobile) ||
     (currentUser?.email && i.customer?.email === currentUser.email)
@@ -27,9 +68,17 @@ export default function InterestButton({ deal, onInterest }) {
   const displayCount = (deal?.interestCount || 0) + (interestState === 'interested' && !userHasJoinedInDb ? 1 : 0);
   const isBusiness = currentUser?.role?.toLowerCase() === 'business' || !!currentUser?.business_name || !!currentUser?.businessName;
 
-  // Always call hooks before any conditional return (React rules of hooks)
+  const mode = getDealMode(deal);
+  const isPair = mode === 'pair';
+  const isStandard = mode === 'standard';
+
+  // Always call hooks before any conditional return (React rules of hooks) —
+  // this legacy history-polling effect only matters for pair/group offers
+  // now; standard offers get their interest state from deal.myLead instead
+  // (populated by GET /offers/details/:id, not this /customers/history call,
+  // which only ever sees OfferInterest rows — see Module 13 investigation).
   useEffect(() => {
-    if (isBusiness) return; // Skip for business accounts
+    if (isBusiness || isStandard) return;
     const token = localStorage.getItem('pairley_token');
     if (token && deal && deal.id) {
       api.get('/customers/history')
@@ -49,14 +98,14 @@ export default function InterestButton({ deal, onInterest }) {
           console.error('Failed to resolve interest history:', err);
         });
     }
-  }, [deal?.id, isBusiness]);
+  }, [deal?.id, isBusiness, isStandard]);
 
   useEffect(() => {
-    if (isBusiness) return;
+    if (isBusiness || isStandard) return;
     if (userHasJoinedInDb && interestState === 'none') {
       setInterestState('interested');
     }
-  }, [userHasJoinedInDb, isBusiness, interestState]);
+  }, [userHasJoinedInDb, isBusiness, isStandard, interestState]);
 
   // Show merchant view AFTER hooks
   if (isBusiness) {
@@ -67,6 +116,86 @@ export default function InterestButton({ deal, onInterest }) {
     );
   }
 
+  // ── Standard (non-legacy) flow — Module 13 ──────────────────────────────
+  // No WhatsApp redirect, no local-only "already interested" guess: driven
+  // entirely by deal.myLead, which the backend returns from a single source
+  // of truth (Lead), so it's correct on first load, after refresh, after
+  // logout/login, and on another device.
+  if (isStandard) {
+    const handleShowInterest = () => {
+      const token = localStorage.getItem('pairley_token');
+      if (!token) {
+        showToast('Please sign up or log in to join this deal!', 'error');
+        navigate('/login');
+        return;
+      }
+      if (posting || deal?.myLead) return;
+      setPosting(true);
+      api.post('/offers/lead', { offerId: deal.id })
+        .then((res) => {
+          setJustSubmitted(true);
+          if (onInterest) onInterest(res.lead);
+        })
+        .catch((err) => {
+          console.error('Failed to express interest:', err);
+          const msg = err.message || 'Failed to send interest. Please try again.';
+          if (isDuplicateInterestError(msg)) {
+            // Local state and backend disagreed (e.g. a second tab already
+            // sent it) — resync from the authoritative source instead of
+            // fabricating a lead we don't have the real id for.
+            showToast('You have already shown interest in this deal.', 'info');
+            if (onRefresh) onRefresh();
+          } else {
+            showToast(msg, 'error');
+          }
+        })
+        .finally(() => setPosting(false));
+    };
+
+    if (deal?.myLead) {
+      return (
+        <div className="interest-btn-container">
+          <InterestConfirmationCard
+            lead={deal.myLead}
+            justSubmitted={justSubmitted}
+            onOpenChat={() =>
+              navigate(`/customer/lead-chat/${deal.myLead.id}`, {
+                state: { offerName: deal.title, shopName: deal.businessOwner?.name },
+              })
+            }
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="interest-btn-container">
+        <motion.button
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileHover={{ scale: posting ? 1 : 1.02 }}
+          whileTap={{ scale: posting ? 1 : 0.98 }}
+          className={`btn btn-primary btn-lg w-full interest-btn interest-btn--default ${posting ? 'interest-btn--loading animate-pulse' : ''}`}
+          onClick={handleShowInterest}
+          disabled={posting}
+        >
+          {posting ? (
+            <>
+              <div className="interest-btn__spinner" />
+              Sending Interest...
+            </>
+          ) : (
+            <>
+              <Sparkles size={20} className="interest-btn__icon" />
+              Show Interest
+            </>
+          )}
+        </motion.button>
+      </div>
+    );
+  }
+
+  // ── Legacy pair/group matching flow — unchanged by Module 13 ───────────
   const handleShowInterest = () => {
     const token = localStorage.getItem('pairley_token');
     if (!token) {
@@ -79,21 +208,17 @@ export default function InterestButton({ deal, onInterest }) {
     setInterestState('loading');
 
     api.post('/offers/lead', { offerId: deal.id })
-      .then((res) => {
+      .then(() => {
         showToast('You have successfully joined the deal!', 'success');
         setInterestState('interested');
         if (onInterest) onInterest();
-
-        const { targetMobiles, offerName, shopName, customerName, customerMobile } = res;
-        const message = buildNewLeadMessage({ offerName, shopName, customerName, customerMobile });
-        openWhatsAppMultiple(targetMobiles, message);
       })
       .catch((err) => {
         console.error('Failed to express interest:', err);
         let errorMsg = err.message || 'Failed to join deal. Please try again.';
         if (
-          errorMsg.toLowerCase().includes('expressed interest') || 
-          errorMsg.toLowerCase().includes('already joined') || 
+          errorMsg.toLowerCase().includes('expressed interest') ||
+          errorMsg.toLowerCase().includes('already joined') ||
           errorMsg.toLowerCase().includes('already registered')
         ) {
           errorMsg = 'You have already joined this deal.';
@@ -126,10 +251,6 @@ export default function InterestButton({ deal, onInterest }) {
     }
   };
 
-  const mode = getDealMode(deal);
-  const isPair = mode === 'pair';
-  const isStandard = mode === 'standard';
-
   return (
     <div className="interest-btn-container">
       <AnimatePresence mode="wait">
@@ -145,7 +266,7 @@ export default function InterestButton({ deal, onInterest }) {
             onClick={handleShowInterest}
           >
             <Sparkles size={20} className="interest-btn__icon" />
-            {isStandard ? 'Show Interest' : 'Show Interest & Get Split Pricing'}
+            Show Interest & Get Split Pricing
           </motion.button>
         )}
 
@@ -172,20 +293,14 @@ export default function InterestButton({ deal, onInterest }) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`btn btn-outline btn-lg w-full interest-btn interest-btn--interested ${
-              isPair ? 'interest-btn--searching' : isStandard ? '' : 'interest-btn--joined'
+              isPair ? 'interest-btn--searching' : 'interest-btn--joined'
             }`}
-            disabled={isStandard}
-            onClick={isStandard ? undefined : () => setInterestState('none')} // Toggle off
+            onClick={() => setInterestState('none')} // Toggle off
           >
             {isPair ? (
               <>
                 <Clock size={20} className="interest-btn__icon animate-spin" />
                 Searching for Pair Partner... (Tap to Cancel)
-              </>
-            ) : isStandard ? (
-              <>
-                <PartyPopper size={20} className="interest-btn__icon" />
-                Interest Sent! The merchant will contact you.
               </>
             ) : (
               <>
@@ -240,4 +355,3 @@ export default function InterestButton({ deal, onInterest }) {
     </div>
   );
 }
-

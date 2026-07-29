@@ -172,6 +172,12 @@ const DealDetailPage = () => {
           status: data.status ? data.status.toLowerCase() : 'active',
           createdAt: data.created_at || data.createdAt || '2026-06-01',
           interests: data.interests || [],
+          // Module 13 — the logged-in customer's own Lead status for this
+          // offer (null if they haven't shown interest). Drives
+          // InterestButton's "standard" (non-legacy) rendering so the
+          // already-interested state survives refresh/logout/re-login/other
+          // devices, per the backend response rather than local-only state.
+          myLead: data.myLead || null,
           facilityImages: data.facility_images || [],
           facilityDetails: data.facility_details || null
         };
@@ -346,12 +352,22 @@ const DealDetailPage = () => {
   )}&url=${encodeURIComponent(window.location.href)}`;
 
   /* Handle user join interest reactively */
-  const handleInterestExpressed = () => {
+  // `lead`, when passed, is the raw Lead row from a successful POST
+  // /offers/lead — used to set deal.myLead directly for the standard
+  // (non-legacy) flow, so InterestButton doesn't need a second round-trip
+  // to learn the id it just created. Legacy pair/group offers don't pass
+  // this (they never call createLead in a way that needs it) and keep
+  // updating deal.interests exactly as before.
+  const handleInterestExpressed = (lead) => {
     if (!currentUser) return;
     setDeal((prev) => {
       if (!prev) return prev;
 
-      const userHasJoined = prev.interests?.some(
+      const withMyLead = lead
+        ? { ...prev, myLead: { id: lead.id, status: lead.status, unlocked: false, created_at: lead.created_at } }
+        : prev;
+
+      const userHasJoined = withMyLead.interests?.some(
         (i) => i.customer_id === currentUser.id ||
           i.customer_id === currentUser.sub ||
           i.customer?.id === currentUser.id ||
@@ -359,7 +375,7 @@ const DealDetailPage = () => {
           (currentUser.mobile && i.customer?.mobile === currentUser.mobile) ||
           (currentUser.email && i.customer?.email === currentUser.email)
       );
-      if (userHasJoined) return prev;
+      if (userHasJoined) return withMyLead;
 
       const newInterest = {
         customer_id: currentUser.id,
@@ -373,7 +389,7 @@ const DealDetailPage = () => {
       };
 
       return {
-        ...prev,
+        ...withMyLead,
         interestCount: prev.interestCount + 1,
         interests: [...(prev.interests || []), newInterest],
       };
@@ -789,7 +805,7 @@ const DealDetailPage = () => {
                         )}
                       </div>
                     ) : (
-                      <InterestButton deal={deal} onInterest={handleInterestExpressed} />
+                      <InterestButton deal={deal} onInterest={handleInterestExpressed} onRefresh={fetchDealDetails} />
                     )}
                   </div>
 

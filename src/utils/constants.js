@@ -26,6 +26,10 @@ export const ROUTES = {
   CUSTOMER_ORDER_DETAIL: '/customer/orders/:id',
   CUSTOMER_CHAT: '/customer/chat/:id',
   CUSTOMER_DEAL_CHAT: '/customer/deal-chat/:dealId',
+  // Module 13 — anonymous 1:1 chat for the standard (non-legacy) Show
+  // Interest flow. Distinct from CUSTOMER_DEAL_CHAT, which is the legacy
+  // BOGO/group-buy N-person pool chat scoped to an Offer, not a Lead.
+  CUSTOMER_LEAD_CHAT: '/customer/lead-chat/:leadId',
 
   // Business
   BUSINESS_DASHBOARD: '/business/dashboard',
@@ -34,6 +38,7 @@ export const ROUTES = {
   MANAGE_DEALS: '/business/manage-deals',
   BUSINESS_ORDERS: '/business/orders',
   BUSINESS_LEADS: '/business/leads',
+  BUSINESS_LEAD_CHAT: '/business/lead-chat/:leadId',
   BUSINESS_PAYOUTS: '/business/payouts',
   BUSINESS_SETTINGS: '/business/settings',
   CLAIM_BUSINESS: '/claim/:businessId',

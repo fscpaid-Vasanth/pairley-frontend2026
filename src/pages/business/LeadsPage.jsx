@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Users, MessageCircle, Phone, Tag } from 'lucide-react';
+import { Search, Users, MessageCircle, MessagesSquare, Phone, Tag, Lock, LockOpen } from 'lucide-react';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { buildContactLeadMessage, openWhatsApp } from '../../utils/whatsapp';
@@ -23,6 +24,7 @@ const STATUS_BADGE = {
 };
 
 export default function LeadsPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +70,27 @@ export default function LeadsPage() {
     if (lead.status === 'NEW') {
       handleStatusChange(lead.id, 'CONTACTED');
     }
+  };
+
+  // Module 13 — Phase 1 unlock: free, manual, one-way. Merges the unlocked
+  // fields (customer_name/customer_mobile/unlocked_at) straight from the
+  // response rather than refetching the whole list.
+  const handleUnlock = (lead) => {
+    api.post(`/leads/${lead.id}/unlock`)
+      .then((updated) => {
+        setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, ...updated } : l)));
+        showToast(`${updated.customer_name}'s contact details are now visible.`, 'success');
+      })
+      .catch((err) => {
+        console.error('Failed to unlock lead:', err);
+        showToast(err.message || 'Failed to unlock customer details.', 'error');
+      });
+  };
+
+  const handleOpenChat = (lead) => {
+    navigate(`/business/lead-chat/${lead.id}`, {
+      state: { offerName: lead.offer_name },
+    });
   };
 
   const filteredLeads = leads.filter((lead) => {
@@ -161,7 +184,10 @@ export default function LeadsPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-bold text-slate-800 text-sm">{lead.customer_name}</h4>
+                      <h4 className={`font-bold text-sm flex items-center gap-1.5 ${lead.unlocked_at ? 'text-slate-800' : 'text-slate-400 italic'}`}>
+                        {!lead.unlocked_at && <Lock size={12} />}
+                        {lead.customer_name}
+                      </h4>
                       <span
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${STATUS_BADGE[lead.status] || STATUS_BADGE.NEW}`}
                       >
@@ -185,9 +211,9 @@ export default function LeadsPage() {
                         <Tag size={11} /> {lead.offer_name}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Phone size={11} /> {lead.customer_mobile}
+                        <Phone size={11} /> {lead.unlocked_at ? lead.customer_mobile : '•••••••••• (locked)'}
                       </span>
-                      <span>{new Date(lead.created_at).toLocaleDateString()}</span>
+                      <span>Interested on {new Date(lead.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
 
@@ -204,11 +230,26 @@ export default function LeadsPage() {
                       ))}
                     </select>
                     <button
-                      onClick={() => handleContact(lead)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition"
+                      onClick={() => handleOpenChat(lead)}
+                      className="bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition"
                     >
-                      <MessageCircle size={13} /> Contact
+                      <MessagesSquare size={13} /> Anonymous Chat
                     </button>
+                    {lead.unlocked_at ? (
+                      <button
+                        onClick={() => handleContact(lead)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition"
+                      >
+                        <MessageCircle size={13} /> Contact
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleUnlock(lead)}
+                        className="bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition"
+                      >
+                        <LockOpen size={13} /> Unlock Customer Details
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

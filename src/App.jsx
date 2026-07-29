@@ -47,6 +47,7 @@ import CustomerOrdersPage from './pages/customer/CustomerOrdersPage';
 import CustomerOrderDetailPage from './pages/customer/CustomerOrderDetailPage';
 import CustomerChatPage from './pages/customer/CustomerChatPage';
 import CustomerDealChatPage from './pages/customer/CustomerDealChatPage';
+import CustomerLeadChatPage from './pages/customer/CustomerLeadChatPage';
 
 // Business Pages
 import BusinessDashboard from './pages/business/BusinessDashboard';
@@ -54,6 +55,7 @@ import CreateDealPage from './pages/business/CreateDealPage';
 import ManageDealsPage from './pages/business/ManageDealsPage';
 import BusinessOrdersPage from './pages/business/BusinessOrdersPage';
 import LeadsPage from './pages/business/LeadsPage';
+import BusinessLeadChatPage from './pages/business/BusinessLeadChatPage';
 import BusinessPayoutsPage from './pages/business/BusinessPayoutsPage';
 import BusinessSettingsPage from './pages/business/BusinessSettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -441,6 +443,14 @@ function AppContent() {
               </AppLayout>
             }
           />
+          <Route
+            path={ROUTES.CUSTOMER_LEAD_CHAT}
+            element={
+              <AppLayout>
+                <CustomerLeadChatPage />
+              </AppLayout>
+            }
+          />
 
           {/* Module 9 Phase 4 — public, unauthenticated claim flow */}
           <Route path={ROUTES.CLAIM_BUSINESS} element={<ClaimBusinessPage />} />
@@ -483,6 +493,14 @@ function AppContent() {
             element={
               <AppLayout>
                 <LeadsPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path={ROUTES.BUSINESS_LEAD_CHAT}
+            element={
+              <AppLayout>
+                <BusinessLeadChatPage />
               </AppLayout>
             }
           />

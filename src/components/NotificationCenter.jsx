@@ -28,6 +28,9 @@ export default function NotificationCenter({ user }) {
       case 'NEARBY': return '📍';
       case 'PARTNER_JOINED': return '🤝';
       case 'NEW_DEAL': return '🔥';
+      // Module 13 — sent to the merchant on every Show Interest (createLead).
+      // Previously had no case here, so clicking it fell through to '/'.
+      case 'NEW_LEAD': return '🎯';
       default: return '🔔';
     }
   };
@@ -47,6 +50,11 @@ export default function NotificationCenter({ user }) {
       }
     } else if (notif.type === 'CHAT') {
       navigate(user?.role?.toLowerCase() === 'business' ? '/business/dashboard' : '/customer/orders');
+    } else if (notif.type === 'NEW_LEAD') {
+      // "New Interested Customer" — always sent to the business, so this
+      // deep-links straight to the Leads / interested-customers panel
+      // instead of falling through to home.
+      navigate(ROUTES.BUSINESS_LEADS || '/business/leads');
     } else if (notif.type === 'ORDER') {
       navigate(user?.role?.toLowerCase() === 'business' ? '/business/orders' : '/customer/orders');
     } else {
