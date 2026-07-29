@@ -97,54 +97,143 @@
   margin-top: 4px;
 }
 
-.lead-chat-thread__composer {
+/* Deal Coordination Assistant action panel — a guided workflow, not a
+   messaging composer. All sections render stacked and always visible (no
+   tabs to switch); the panel itself scrolls independently of the message
+   feed so the component has a predictable height regardless of how many
+   sections the catalog returns. Deliberately no text input anywhere: every
+   message is a whitelisted template, picked, not typed. */
+.lead-chat-thread__panel {
   display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 14px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px 14px;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
   background: #fff;
+  max-height: 280px;
+  overflow-y: auto;
 }
 
-.lead-chat-thread__input {
-  flex: 1;
-  height: 44px;
+.lead-chat-thread__section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.lead-chat-thread__section-head {
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lead-chat-thread__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.lead-chat-thread__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.lead-chat-thread__item:hover:not(:disabled) {
+  border-color: #5B12D6;
+  background: rgba(91, 18, 214, 0.05);
+  color: #5B12D6;
+}
+
+.lead-chat-thread__item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lead-chat-thread__spin {
+  animation: lead-chat-spin 0.8s linear infinite;
+}
+
+@keyframes lead-chat-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lead-chat-thread__schedule {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px;
   border-radius: 14px;
+  background: rgba(91, 18, 214, 0.05);
+  border: 1px solid rgba(91, 18, 214, 0.14);
+  flex-wrap: wrap;
+}
+
+.lead-chat-thread__schedule-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lead-chat-thread__schedule-field label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #5B12D6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lead-chat-thread__schedule-field input {
+  height: 36px;
+  border-radius: 10px;
   border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #f8fafc;
-  padding: 0 16px;
-  font-size: 13px;
-  font-weight: 600;
+  background: #fff;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
   color: #1e293b;
   outline: none;
-  transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.lead-chat-thread__input:focus {
+.lead-chat-thread__schedule-field input:focus {
   border-color: #5B12D6;
-  background: #fff;
 }
 
-.lead-chat-thread__send-btn {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  border-radius: 14px;
+.lead-chat-thread__schedule-send {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
   border: none;
   background: linear-gradient(135deg, #22C55E, #16a34a);
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-.lead-chat-thread__send-btn:hover:not(:disabled) {
+.lead-chat-thread__schedule-send:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-.lead-chat-thread__send-btn:disabled {
+.lead-chat-thread__schedule-send:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }

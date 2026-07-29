@@ -231,9 +231,10 @@ export default function LeadsPage() {
                     </select>
                     <button
                       onClick={() => handleOpenChat(lead)}
+                      title="Chat with Your Offer Partner"
                       className="bg-[#5B12D6] hover:bg-[#430bb0] text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition"
                     >
-                      <MessagesSquare size={13} /> Anonymous Chat
+                      <MessagesSquare size={13} /> Chat
                     </button>
                     {lead.unlocked_at ? (
                       <button

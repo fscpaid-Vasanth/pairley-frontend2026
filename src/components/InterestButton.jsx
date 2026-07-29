@@ -33,12 +33,12 @@ function InterestConfirmationCard({ lead, justSubmitted, onOpenChat }) {
       </div>
       <p className="interest-confirmation-card__body">
         {justSubmitted
-          ? 'The merchant has been notified. You can now communicate securely using Pairley’s Anonymous Chat.'
-          : 'The merchant will contact you. You can continue the conversation securely using Pairley’s Anonymous Chat.'}
+          ? 'The merchant has been notified. Coordinate pickup securely — Chat with Your Offer Partner.'
+          : 'The merchant will contact you. Continue coordinating pickup securely — Chat with Your Offer Partner.'}
       </p>
       <button type="button" className="interest-confirmation-card__chat-btn" onClick={onOpenChat}>
         <MessageCircleMore size={18} />
-        Open Anonymous Chat
+        Chat with Your Offer Partner
       </button>
       <div className="interest-confirmation-card__status">
         <span className="interest-confirmation-card__status-dot" />

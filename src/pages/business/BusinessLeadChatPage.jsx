@@ -5,9 +5,10 @@ import BusinessNav from '../../components/BusinessNav';
 import './BusinessLeadChatPage.css';
 
 /**
- * Module 13 — the merchant side of the anonymous 1:1 lead chat, reached
- * from the "Anonymous Chat" action on LeadsPage. `offerName` comes through
- * router state when available; direct navigation still works without it.
+ * Module 13 Phase 2 — the merchant side of the Deal Coordination Assistant
+ * ("Chat with Your Offer Partner"), reached from the Leads page.
+ * `offerName` comes through router state when available; direct
+ * navigation still works without it.
  */
 export default function BusinessLeadChatPage() {
   const { leadId } = useParams();
@@ -26,7 +27,7 @@ export default function BusinessLeadChatPage() {
           </Link>
           <div>
             <h3 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
-              Anonymous Chat with Customer
+              Chat with Your Offer Partner
             </h3>
             <span className="text-[11px] font-bold text-slate-400">
               {offerName || 'Interested-customer conversation'}

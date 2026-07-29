@@ -4,13 +4,14 @@ import LeadChatThread from '../../components/LeadChatThread';
 import './CustomerLeadChatPage.css';
 
 /**
- * Module 13 — the customer side of the anonymous 1:1 lead chat, reached
- * from InterestButton's confirmation card after Show Interest, or directly
- * via a notification deep link. `offerName`/`shopName` come through
- * router state when available (DealDetailPage has them already loaded);
- * arriving without state (e.g. a bare deep link) still works — the header
- * just falls back to generic copy since this page doesn't have its own
- * lead-detail endpoint to call.
+ * Module 13 Phase 2 — the customer side of the Deal Coordination Assistant
+ * ("Chat with Your Offer Partner"), reached from InterestButton's
+ * confirmation card after Show Interest, or directly via a notification
+ * deep link. `offerName`/`shopName` come through router state when
+ * available (DealDetailPage has them already loaded); arriving without
+ * state (e.g. a bare deep link) still works — the header just falls back
+ * to generic copy since this page doesn't have its own lead-detail
+ * endpoint to call.
  */
 export default function CustomerLeadChatPage() {
   const { leadId } = useParams();
@@ -29,7 +30,7 @@ export default function CustomerLeadChatPage() {
           </Link>
           <div>
             <h3 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
-              Anonymous Chat with Merchant
+              Chat with Your Offer Partner
             </h3>
             <span className="text-[11px] font-bold text-slate-400">
               {offerName ? `${offerName}${shopName ? ` · ${shopName}` : ''}` : 'Your interest conversation'}
