@@ -1,11 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 import { MALLS } from '../../utils/constants';
 import '../../pages/auth/SignUpPage.css';
 import './KycOnboardingWizard.css';
-
-const validatePhone = (phone) => /^\d{10}$/.test(phone.replace(/\D/g, ''));
+import {
+  DEFAULT_FORM,
+  getStepErrors,
+  readSavedProgress,
+  saveProgress,
+  clearSavedProgress,
+  resumeStepIdx,
+} from './kycOnboardingSteps';
 
 const CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad', 'Kochi', 'Kolkata', 'Jaipur'];
 const STATES = ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'Gujarat', 'Kerala', 'West Bengal', 'Rajasthan'];
@@ -25,21 +31,29 @@ const BUSINESS_TYPES = ['Shop', 'Tour Operator', 'Restaurant', 'Salon/Spa', 'Gym
  *   (OTP send/verify, /auth/register or /auth/google) since that differs
  *   between the Login and Signup entry points.
  */
-export default function KycOnboardingWizard({ role, onComplete, onCancel }) {
+export default function KycOnboardingWizard({ role, onComplete, onCancel, persistKey }) {
   const isBusiness = role === 'business';
   const steps = isBusiness
     ? ['contact', 'business', 'identity', 'documents']
     : ['contact', 'address'];
-  const [stepIdx, setStepIdx] = useState(0);
+
+  // Read once on mount rather than on every render — a later save must not
+  // feed back in and re-clamp the step the user is currently on.
+  const saved = useMemo(() => readSavedProgress(persistKey), [persistKey]);
+  const restoredForm = useMemo(
+    () => ({ ...DEFAULT_FORM, ...(saved?.form || {}) }),
+    [saved],
+  );
+
+  const [form, setForm] = useState(restoredForm);
+  const [stepIdx, setStepIdx] = useState(() =>
+    saved ? resumeStepIdx(saved.stepIdx || 0, steps, restoredForm) : 0,
+  );
+  const [resumedAtStep] = useState(() =>
+    saved ? resumeStepIdx(saved.stepIdx || 0, steps, restoredForm) : 0,
+  );
   const step = steps[stepIdx];
 
-  const [form, setForm] = useState({
-    mobile: '', city: 'Bangalore', state: '', pincode: '',
-    address: '',
-    businessName: '', businessType: 'Shop', mallName: '',
-    aadhaar: '', pan: '', gst: '',
-    shopPhoto: '', aadhaarPhoto: '', panPhoto: '',
-  });
   const [errors, setErrors] = useState({});
   const [isScanningAadhaar, setIsScanningAadhaar] = useState(false);
   const [aadhaarScanProgress, setAadhaarScanProgress] = useState(0);
@@ -50,6 +64,12 @@ export default function KycOnboardingWizard({ role, onComplete, onCancel }) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
   };
+
+  // Save on every change rather than only on step advance, so a tab closed
+  // mid-step still keeps what was typed.
+  useEffect(() => {
+    saveProgress(persistKey, stepIdx, form);
+  }, [persistKey, stepIdx, form]);
 
   const scanAadhaarCard = async (file) => {
     setIsScanningAadhaar(true);
@@ -137,22 +157,7 @@ export default function KycOnboardingWizard({ role, onComplete, onCancel }) {
   };
 
   const validateStep = () => {
-    const errs = {};
-    if (step === 'contact') {
-      if (!validatePhone(form.mobile)) errs.mobile = 'Enter a valid 10-digit mobile number';
-      if (!form.state.trim()) errs.state = 'State is required';
-      if (!/^\d{6}$/.test(form.pincode)) errs.pincode = 'Pincode must be exactly 6 digits';
-    } else if (step === 'address') {
-      if (!form.address.trim()) errs.address = 'Detailed address is required';
-    } else if (step === 'business') {
-      if (!form.businessName.trim()) errs.businessName = 'Shop name is required';
-    } else if (step === 'identity') {
-      if (!/^\d{12}$/.test(form.aadhaar)) errs.aadhaar = 'Upload a clear Aadhaar photo to scan the number';
-      if (!form.aadhaarPhoto) errs.aadhaarPhoto = 'Aadhaar card image is required';
-    } else if (step === 'documents') {
-      if (!form.shopPhoto) errs.shopPhoto = 'Shop image is required';
-      if (form.gst.trim() && form.gst.trim().length !== 15) errs.gst = 'GST number must be exactly 15 characters';
-    }
+    const errs = getStepErrors(step, form);
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -162,6 +167,9 @@ export default function KycOnboardingWizard({ role, onComplete, onCancel }) {
     if (stepIdx < steps.length - 1) {
       setStepIdx((i) => i + 1);
     } else {
+      // Handing off to the caller to actually register — the draft has done
+      // its job and must not linger to be resumed into a completed account.
+      clearSavedProgress(persistKey);
       onComplete({
         mobile: form.mobile,
         city: form.city,
@@ -183,13 +191,24 @@ export default function KycOnboardingWizard({ role, onComplete, onCancel }) {
   };
 
   const goBack = () => {
-    if (stepIdx > 0) setStepIdx((i) => i - 1);
-    else onCancel();
+    if (stepIdx > 0) {
+      setStepIdx((i) => i - 1);
+    } else {
+      // Backing out of the first step is an explicit abandon, not an
+      // interruption — don't offer to resume it later.
+      clearSavedProgress(persistKey);
+      onCancel();
+    }
   };
 
   return (
     <div className="kyc-wizard">
       <span className="kyc-wizard__step-label">Step {stepIdx + 1} of {steps.length}</span>
+      {resumedAtStep > 0 && (
+        <p style={{ fontSize: 13, color: '#00875a', margin: '6px 0 0', fontWeight: 600 }}>
+          Welcome back — we picked up where you left off.
+        </p>
+      )}
       <h2 className="signup-card-title">
         {step === 'contact' && 'Where Are You Located?'}
         {step === 'address' && 'Your Delivery Address'}

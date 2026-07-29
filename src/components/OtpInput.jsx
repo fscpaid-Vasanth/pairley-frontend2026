@@ -2,17 +2,33 @@ import { useRef, useEffect } from 'react';
 import './OtpInput.css';
 
 /**
- * Six-box OTP input. Controlled by a single string `value` so callers don't
- * need to manage per-digit state themselves.
+ * OTP input, box count set by `length` (defaults to 6). Controlled by a
+ * single string `value` so callers don't need to manage per-digit state.
+ * `onComplete`, when passed, fires once as soon as `value` reaches `length`
+ * digits — used to auto-submit the merchant pilot's 4-digit flow without
+ * changing behavior for any caller that doesn't pass it.
  */
-export default function OtpInput({ length = 6, value, onChange, autoFocus = true, disabled = false, variant = 'dark' }) {
+export default function OtpInput({ length = 6, value, onChange, onComplete, autoFocus = true, disabled = false, variant = 'dark' }) {
   const digits = Array.from({ length }, (_, i) => value[i] || '');
   const refs = useRef(Array.from({ length }, () => null));
+  const firedRef = useRef(false);
 
   useEffect(() => {
     if (autoFocus) refs.current[0]?.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (value.length === length) {
+      if (!firedRef.current) {
+        firedRef.current = true;
+        onComplete?.(value);
+      }
+    } else {
+      firedRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, length]);
 
   const setDigit = (index, digit) => {
     const next = digits.slice();

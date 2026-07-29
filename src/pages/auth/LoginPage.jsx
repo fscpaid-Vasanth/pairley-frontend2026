@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
-import { api } from '../../utils/api';
+import { api, warmUpBackend } from '../../utils/api';
 import SEO from '../../components/SEO';
 import OtpInput from '../../components/OtpInput';
 import KycOnboardingWizard from '../../components/auth/KycOnboardingWizard';
@@ -324,6 +324,16 @@ export default function LoginPage() {
   const [onboardingBusy, setOnboardingBusy] = useState(false);
   const [onboardingResendSeconds, setOnboardingResendSeconds] = useState(0);
 
+  // Start waking the free-tier Render instance the moment the login page
+  // mounts. Measured against production: /api/auth/google is ~0.5s once the
+  // instance is awake but ~10-11s if the first request has to cold-start it,
+  // and that cold start otherwise lands squarely on the user right after the
+  // Google popup closes. The campaign entry pages already did this; the auth
+  // pages — where it matters most — did not.
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
+
   useEffect(() => {
     if (onboardingOtpStep !== 'otp' || onboardingResendSeconds <= 0) return;
     const interval = setInterval(() => setOnboardingResendSeconds((s) => s - 1), 1000);
@@ -396,7 +406,13 @@ export default function LoginPage() {
         } else {
           showToast('Profile completed and logged in!', 'success');
         }
-        window.location.href = dashboardPathFor(res.role);
+        // Client-side navigation, not window.location.href — the latter
+        // forces a full document reload, re-downloading and re-executing the
+        // whole bundle (~460 KB gzip of JS incl. the 108 KB Firebase chunk)
+        // and re-initializing Firebase, purely to move between two routes the
+        // SPA router already has loaded. Every other login path here already
+        // used navigate(); this one was the outlier.
+        navigate(dashboardPathFor(res.role));
       })
       .catch((err) => {
         console.error('Onboarding registration/verification failed:', err);
@@ -476,6 +492,14 @@ export default function LoginPage() {
                   role={onboarding.role === 'business' ? 'business' : 'customer'}
                   onComplete={handleOnboardingComplete}
                   onCancel={() => setOnboarding(null)}
+                  // Scoped to the signed-in Google identity so a shared or
+                  // demo device never resumes one person's draft into
+                  // another's onboarding.
+                  persistKey={
+                    onboarding.googleUser?.email
+                      ? `${onboarding.role}:${onboarding.googleUser.email}`
+                      : undefined
+                  }
                 />
               )}
             </div>

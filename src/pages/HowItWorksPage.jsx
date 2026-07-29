@@ -54,7 +54,7 @@ const FAQS = [
   },
   {
     q: 'How do I create deals as a business owner?',
-    a: 'Simple! Register your account as a Business Owner. Once logged in, you can go to your dashboard, click "Create New Deal", fill out the BOGO or tiered group details, upload images, and publish. Your deal goes live instantly for all customers to browse.',
+    a: 'Simple! Register your account as a Business Owner. Once logged in, you can go to your dashboard, click "Create Your Offer", fill out the BOGO or tiered group details, upload images, and publish. Your deal goes live instantly for all customers to browse.',
   },
   {
     q: 'What happens if a pair match is not found before the deal expires?',

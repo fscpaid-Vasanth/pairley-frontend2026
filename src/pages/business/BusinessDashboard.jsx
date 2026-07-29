@@ -34,6 +34,11 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
 };
 
+// Shared by the approved (Link) and pending (button) variants of the primary
+// action so the two render identically — only their behaviour differs.
+const CREATE_OFFER_BTN_CLASS =
+  'inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5B12D6] hover:bg-[#7C3AED] text-white font-bold rounded-xl text-xs shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-100';
+
 export default function BusinessDashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem('pairley_token');
@@ -44,6 +49,12 @@ export default function BusinessDashboard() {
       navigate('/login');
     }
   }, [token, business, navigate]);
+
+  // Pending merchants can now reach this dashboard, so publishing is gated
+  // here rather than the whole page being blocked. The API enforces the same
+  // rule authoritatively — this is the friendly half of it.
+  const isApproved = business?.verification_status === 'APPROVED';
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const [metrics, setMetrics] = useState({
     activeOffers: 0,
@@ -216,36 +227,30 @@ export default function BusinessDashboard() {
     return null;
   }
 
-  // Block PENDING / REJECTED merchants from accessing the dashboard
-  if (business.role === 'Business' && business.verification_status !== 'APPROVED') {
-    const isRejected = business.verification_status === 'REJECTED';
+  // Only REJECTED merchants are locked out of the dashboard — their
+  // application was already refused, so there's nothing here for them to set
+  // up. PENDING merchants now get the full dashboard while they wait; what
+  // stays gated for them is publishing an offer (see the approval modal on
+  // "Create Your Offer" below, and the API's own check, which is the
+  // authoritative one).
+  if (business.role === 'Business' && business.verification_status === 'REJECTED') {
     return (
       <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
         <div style={{ maxWidth: 520, width: '100%', background: 'linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 100%)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: 24, padding: '48px 40px', textAlign: 'center', boxShadow: '0 20px 60px rgba(78,43,196,0.1)' }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>{isRejected ? '❌' : '⏳'}</div>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>❌</div>
           <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: '0 0 12px' }}>
-            {isRejected ? 'Account Not Approved' : 'Awaiting Admin Approval'}
+            Account Not Approved
           </h2>
           <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.6, margin: '0 0 24px' }}>
-            {isRejected
-              ? 'Your merchant account application has been rejected. Please contact support at support@pairley.com for more details.'
-              : 'Your shop registration is under review. Our team typically reviews applications within 24–48 hours. You will be notified once approved.'}
+            Your merchant account application has been rejected. Please contact support at support@pairley.com for more details.
           </p>
-          <div style={{ background: isRejected ? 'rgba(239,68,68,0.08)' : 'rgba(78,43,196,0.08)', border: `1px solid ${isRejected ? 'rgba(239,68,68,0.2)' : 'rgba(78,43,196,0.2)'}`, borderRadius: 12, padding: '16px 20px', marginBottom: 28, textAlign: 'left' }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: isRejected ? '#ef4444' : '#5B12D6', margin: '0 0 6px' }}>📋 What happens next?</p>
-            {isRejected ? (
-              <ul style={{ fontSize: 13, color: '#64748b', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
-                <li>Contact support to understand the rejection reason</li>
-                <li>Address any compliance or documentation issues</li>
-                <li>Re-apply after resolving the issues</li>
-              </ul>
-            ) : (
-              <ul style={{ fontSize: 13, color: '#64748b', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
-                <li>Admin will review your shop details &amp; documents</li>
-                <li>You'll receive a notification once approved</li>
-                <li>Only then can you create deals and accept customers</li>
-              </ul>
-            )}
+          <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 28, textAlign: 'left' }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#ef4444', margin: '0 0 6px' }}>📋 What happens next?</p>
+            <ul style={{ fontSize: 13, color: '#64748b', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+              <li>Contact support to understand the rejection reason</li>
+              <li>Address any compliance or documentation issues</li>
+              <li>Re-apply after resolving the issues</li>
+            </ul>
           </div>
           <button
             onClick={() => { localStorage.removeItem('pairley_token'); localStorage.removeItem('pairley_user'); navigate('/login'); }}
@@ -275,11 +280,30 @@ export default function BusinessDashboard() {
             </h2>
             <p className="text-sm text-slate-500 mt-1">Manage your storefront BOGO deals and tiered group discounts.</p>
           </div>
-          <Link to="/business/create-deal" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#5B12D6] hover:bg-[#7C3AED] text-white font-bold rounded-xl text-xs shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-100">
-            <Plus size={14} />
-            Create New Deal
-          </Link>
+          {isApproved ? (
+            <Link to="/business/create-deal" className={CREATE_OFFER_BTN_CLASS}>
+              <Plus size={14} />
+              Create Your Offer
+            </Link>
+          ) : (
+            <button type="button" onClick={() => setShowApprovalModal(true)} className={CREATE_OFFER_BTN_CLASS}>
+              <Plus size={14} />
+              Create Your Offer
+            </button>
+          )}
         </motion.div>
+
+        {!isApproved && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, background: 'rgba(245,158,11,0.09)', border: '1px solid rgba(245,158,11,0.28)', borderRadius: 16, padding: '14px 18px', marginBottom: 24 }}>
+            <span style={{ fontSize: 20, lineHeight: 1 }}>⏳</span>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 800, color: '#b45309', margin: 0 }}>Awaiting admin approval</p>
+              <p style={{ fontSize: 13, color: '#78716c', margin: '4px 0 0', lineHeight: 1.5 }}>
+                You can explore your dashboard and finish setting up your storefront now. Publishing offers unlocks once our team approves your shop — usually within 24–48 hours.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Seller Sub-Navigation */}
         <BusinessNav />
@@ -513,6 +537,44 @@ export default function BusinessDashboard() {
 
         </div>
       </div>
+
+      {showApprovalModal && (
+        <div
+          onClick={() => setShowApprovalModal(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 1000 }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="approval-modal-title"
+            style={{ maxWidth: 460, width: '100%', background: '#fff', borderRadius: 24, padding: '36px 32px', textAlign: 'center', boxShadow: '0 24px 70px rgba(15,23,42,0.25)' }}
+          >
+            <div style={{ fontSize: 56, marginBottom: 12 }}>⏳</div>
+            <h3 id="approval-modal-title" style={{ fontSize: 21, fontWeight: 800, color: '#0f172a', margin: '0 0 10px' }}>
+              Waiting for Admin Approval
+            </h3>
+            <p style={{ fontSize: 14.5, color: '#475569', lineHeight: 1.6, margin: '0 0 20px' }}>
+              Your shop is still under review, so you can't publish offers just yet. Our team usually completes this within 24–48 hours, and you'll be notified the moment it's approved.
+            </p>
+            <div style={{ background: 'rgba(91,18,214,0.06)', border: '1px solid rgba(91,18,214,0.18)', borderRadius: 12, padding: '14px 18px', marginBottom: 24, textAlign: 'left' }}>
+              <p style={{ fontSize: 12.5, fontWeight: 700, color: '#5B12D6', margin: '0 0 6px' }}>Meanwhile, you can:</p>
+              <ul style={{ fontSize: 12.5, color: '#64748b', margin: 0, paddingLeft: 18, lineHeight: 1.8 }}>
+                <li>Complete your shop profile and upload your logo</li>
+                <li>Add your store timings and location details</li>
+                <li>Set up WhatsApp lead alerts</li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowApprovalModal(false)}
+              style={{ padding: '12px 32px', borderRadius: 99, background: '#5B12D6', color: 'white', fontWeight: 700, fontSize: 14.5, border: 'none', cursor: 'pointer', width: '100%' }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

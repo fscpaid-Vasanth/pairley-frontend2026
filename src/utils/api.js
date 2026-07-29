@@ -46,10 +46,18 @@ const handleResponse = async (response, correlationId) => {
 // instance as early as possible. Render's free tier can take 30-60s to
 // cold-start, which is fatal for a mall-booth QR scan if the first real
 // request is the OTP send. Call this the moment a campaign entry page
-// mounts (Launch Pass / merchant landing) so the instance is likely already
-// awake by the time the user reaches a form submission.
+// mounts (Launch Pass / merchant landing) OR an auth page mounts, so the
+// instance is likely already awake by the time the user reaches a form
+// submission or a Google sign-in.
+//
+// Deliberately pings the bare `/api` root (a plain string, zero DB work)
+// rather than `/api/public/stats`. Any request wakes the instance equally,
+// but measured against production, /api/public/stats takes ~6-9s (it runs
+// several sequential un-indexed aggregate counts) versus ~0.3-0.8s for the
+// root — so the old choice was both the slowest possible probe and an
+// accidental repeat of that heavy query on every page that warms up.
 export const warmUpBackend = () => {
-  fetch(`${API_URL}/public/stats`).catch(() => {});
+  fetch(API_URL).catch(() => {});
 };
 
 export const api = {

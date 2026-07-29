@@ -38,6 +38,32 @@ import BusinessDuplicatesPanel from './BusinessDuplicatesPanel';
 import SystemHealthTile from './SystemHealthTile';
 import './AdminDashboard.css';
 
+// Onboarding timestamps are shown alongside the status badge so an admin can
+// see how long a shop has been waiting without opening the detail panel.
+// en-IN to match the "Joined Date" column further down this file.
+const formatDateTime = (value) => {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
+// How long a PENDING shop has been waiting — the number an admin actually
+// triages on. Returns null for same-day so it never reads "0d waiting".
+const waitingFor = (value) => {
+  if (!value) return null;
+  const days = Math.floor((Date.now() - new Date(value).getTime()) / 86400000);
+  if (Number.isNaN(days) || days < 1) return null;
+  return days === 1 ? '1 day' : `${days} days`;
+};
+
 export default function AdminDashboard() {
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -535,63 +561,89 @@ export default function AdminDashboard() {
               <div className="text-center py-20 text-slate-400 font-bold text-sm">Loading onboarding stores...</div>
             ) : filteredBusinesses.length > 0 ? (
               <div className="bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-3xl shadow-md overflow-x-auto">
-                <table className="w-full border-collapse text-left text-xs font-semibold text-slate-600 min-w-[900px]">
+                <table className="w-full border-collapse text-left text-[11px] font-semibold text-slate-600 min-w-[760px]">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                      <th className="px-6 py-4">Shop Details</th>
-                      <th className="px-6 py-4">Shop Owner</th>
-                      <th className="px-6 py-4">Contact Info</th>
-                      <th className="px-6 py-4">Location</th>
-                      <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4 text-center">Action</th>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="px-3 py-2.5">Shop</th>
+                      <th className="px-3 py-2.5">Owner &amp; Contact</th>
+                      <th className="px-3 py-2.5">Location</th>
+                      <th className="px-3 py-2.5">Status &amp; Onboarded</th>
+                      <th className="px-3 py-2.5 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredBusinesses.map((b) => (
-                      <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="text-slate-800 font-bold text-sm">{b.business_name}</div>
-                          <div className="flex gap-2.5 mt-1">
-                            <span className="text-[10px] text-slate-400 font-bold uppercase bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-md">{b.business_type}</span>
-                            {b.gst_number && <span className="text-[9px] text-slate-400 font-semibold">GST: {b.gst_number}</span>}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 font-bold text-slate-700">
-                          👤 {b.owner_name}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div>📞 {b.mobile}</div>
-                          {b.email && <div className="text-slate-400 mt-0.5">✉️ {b.email}</div>}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div>📍 {b.city}, {b.state}</div>
-                          {b.mall_name && <div className="text-purple-600 mt-0.5 font-bold">🏪 {b.mall_name}</div>}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
-                            b.verification_status === 'APPROVED'
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                              : b.verification_status === 'REJECTED'
-                              ? 'bg-rose-50 border-rose-200 text-rose-700'
-                              : 'bg-orange-50 border-orange-200 text-orange-700 animate-pulse'
-                          }`}>
-                            {b.verification_status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button
-                            onClick={() => {
-                              setSelectedShop(b);
-                              setActiveDocPreview(b.shop_photo ? 'shop' : b.aadhaar_photo ? 'aadhaar' : b.pan_photo ? 'pan' : '');
-                            }}
-                            className="btn btn-primary bg-[#5B12D6] hover:bg-[#3D1FA3] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5"
-                          >
-                            <Eye size={12} />
-                            Review Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredBusinesses.map((b) => {
+                      const isPending = b.verification_status === 'PENDING';
+                      const registeredAt = formatDateTime(b.created_at);
+                      const waiting = isPending ? waitingFor(b.created_at) : null;
+                      // Only meaningful once a decision has actually been made,
+                      // and only when it's distinct from the registration write.
+                      const decidedAt =
+                        !isPending &&
+                        b.updated_at &&
+                        new Date(b.updated_at) - new Date(b.created_at) > 2000
+                          ? formatDateTime(b.updated_at)
+                          : null;
+
+                      return (
+                        <tr key={b.id} className="hover:bg-slate-50/50 transition-colors align-top">
+                          <td className="px-3 py-2.5">
+                            <div className="text-slate-800 font-bold text-[12.5px] leading-tight">{b.business_name}</div>
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              <span className="text-[9px] text-slate-400 font-bold uppercase bg-slate-50 border border-slate-200 px-1.5 py-px rounded">{b.business_type}</span>
+                              {b.gst_number && <span className="text-[9px] text-slate-400 font-semibold">GST {b.gst_number}</span>}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="text-slate-700 font-bold leading-tight">{b.owner_name}</div>
+                            <div className="text-slate-500 mt-0.5 tabular-nums">📞 {b.mobile}</div>
+                            {b.email && <div className="text-slate-400 truncate max-w-[200px]" title={b.email}>{b.email}</div>}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="text-slate-600 leading-tight">{b.city}, {b.state}</div>
+                            {b.mall_name && <div className="text-purple-600 mt-0.5 font-bold text-[10px]">🏪 {b.mall_name}</div>}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`px-2 py-px rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
+                                b.verification_status === 'APPROVED'
+                                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                  : b.verification_status === 'REJECTED'
+                                  ? 'bg-rose-50 border-rose-200 text-rose-700'
+                                  : 'bg-orange-50 border-orange-200 text-orange-700'
+                              }`}>
+                                {b.verification_status}
+                              </span>
+                              {waiting && (
+                                <span className="text-[9px] font-bold text-orange-600 whitespace-nowrap">{waiting} waiting</span>
+                              )}
+                            </div>
+                            {registeredAt && (
+                              <div className="text-[10px] text-slate-400 font-medium mt-1 tabular-nums whitespace-nowrap">
+                                Registered {registeredAt}
+                              </div>
+                            )}
+                            {decidedAt && (
+                              <div className="text-[10px] text-slate-400 font-medium tabular-nums whitespace-nowrap">
+                                {b.verification_status === 'APPROVED' ? 'Approved' : 'Rejected'} {decidedAt}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            <button
+                              onClick={() => {
+                                setSelectedShop(b);
+                                setActiveDocPreview(b.shop_photo ? 'shop' : b.aadhaar_photo ? 'aadhaar' : b.pan_photo ? 'pan' : '');
+                              }}
+                              className="bg-[#5B12D6] hover:bg-[#3D1FA3] text-white px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1 whitespace-nowrap"
+                            >
+                              <Eye size={11} />
+                              Review
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

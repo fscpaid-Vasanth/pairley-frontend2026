@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../../firebase';
 import { useToast } from '../../context/ToastContext';
-import { api } from '../../utils/api';
+import { api, warmUpBackend } from '../../utils/api';
 import SEO from '../../components/SEO';
 import OtpInput from '../../components/OtpInput';
 import KycOnboardingWizard from '../../components/auth/KycOnboardingWizard';
@@ -26,6 +26,7 @@ const PANEL_COPY = {
  * screen next to each other.
  */
 function SignupPanel({ role, onBasicInfoSubmit, onGoogleNewUser }) {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +74,10 @@ function SignupPanel({ role, onBasicInfoSubmit, onGoogleNewUser }) {
         localStorage.setItem('pairley_token', res.access_token || res.token);
         localStorage.setItem('pairley_user', JSON.stringify({ ...res.user, role: res.role }));
         showToast('Logged in with Google!', 'success');
-        window.location.href = res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard';
+        // Client-side navigation, not window.location.href — see the matching
+        // note in LoginPage. A full reload here re-downloads and re-executes
+        // the entire bundle just to change route.
+        navigate(res.role === 'Customer' ? '/customer/dashboard' : '/business/dashboard');
       } else {
         onGoogleNewUser(role, checkPayload);
       }
@@ -212,6 +216,13 @@ export default function SignUpPage() {
   const [otpLength, setOtpLength] = useState(4); // 4-digit OTP — default bypass with 1234
   const [resendSeconds, setResendSeconds] = useState(30);
   const [busy, setBusy] = useState(false);
+
+  // Wake the free-tier Render instance on mount so the cold start doesn't
+  // land on the user right after the Google popup closes — see the matching
+  // note in LoginPage.
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
 
   useEffect(() => {
     if (view !== 'otp' || resendSeconds <= 0) return;
@@ -446,6 +457,15 @@ export default function SignUpPage() {
                 role={kycContext.role === 'business' ? 'business' : 'customer'}
                 onComplete={handleKycComplete}
                 onCancel={() => { setKycContext(null); setView('panels'); }}
+                // Scoped to the identity being onboarded — Google email for
+                // the Google path, typed email for the standard signup path —
+                // so a shared device never resumes one person's draft into
+                // another's onboarding.
+                persistKey={
+                  (kycContext.googleUser?.email || kycContext.basicInfo?.email)
+                    ? `${kycContext.role}:${kycContext.googleUser?.email || kycContext.basicInfo?.email}`
+                    : undefined
+                }
               />
             </div>
           </div>
