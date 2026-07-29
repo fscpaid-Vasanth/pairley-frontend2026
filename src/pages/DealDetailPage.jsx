@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   TrendingDown,
   ShieldCheck,
+  ExternalLink,
 } from 'lucide-react';
 import DealCard from '../components/DealCard';
 import InterestButton from '../components/InterestButton';
@@ -25,6 +26,7 @@ import ImageWithFallback from '../components/ImageWithFallback';
 import { getDealById } from '../data/mockDeals';
 import { useSavedOffers } from '../hooks/useSavedOffers';
 import { api } from '../utils/api';
+import { resolveContactDisplay, websiteLabel, CONTACT_MODES } from '../utils/merchantContact';
 import {
   formatPrice,
   calculateSavings,
@@ -165,9 +167,15 @@ const DealDetailPage = () => {
           // it." prompt below; only ever UNCLAIMED for AI-imported listings
           // with no owner account yet.
           businessStatus: data.business?.business_status || null,
+          // Module 14 Phase 3A — merchant contact is no longer sent to
+          // viewers who aren't entitled to it, so the page renders what the
+          // backend says about availability rather than the values.
+          contact: resolveContactDisplay(data.business),
           interestCount: data.joined_people || 0,
           maxParticipants: data.required_people || 2,
-          location: data.business?.city || data.business?.address || 'Select Location',
+          // `address` is no longer part of the public projection (street
+          // address is protected); city/mall_name are the public locality.
+          location: data.business?.city || data.business?.mall_name || 'Select Location',
           validUntil: data.end_date || '2026-12-31',
           status: data.status ? data.status.toLowerCase() : 'active',
           createdAt: data.created_at || data.createdAt || '2026-06-01',
@@ -472,6 +480,28 @@ const DealDetailPage = () => {
                       <MapPin size={13} /> {deal.location}
                     </span>
                   </div>
+
+                  {/* Module 14 Phase 3A — merchant contact is protected. An
+                      anonymous visitor is told signing up unlocks it; an
+                      unclaimed merchant's own site is linked instead, since
+                      Pairley isn't the gatekeeper to a number they publish
+                      themselves. */}
+                  {deal.contact?.mode === CONTACT_MODES.SIGN_UP && (
+                    <div className="deal-owner-contact-note">
+                      {deal.contact.labels.phone}
+                    </div>
+                  )}
+                  {deal.contact?.mode === CONTACT_MODES.WEBSITE && (
+                    <a
+                      href={deal.contact.website}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="deal-owner-website-link"
+                    >
+                      <ExternalLink size={12} /> Visit official website
+                      {websiteLabel(deal.contact.website) ? ` (${websiteLabel(deal.contact.website)})` : ''}
+                    </a>
+                  )}
                 </div>
               </div>
 

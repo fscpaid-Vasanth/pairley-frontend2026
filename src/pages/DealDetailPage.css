@@ -195,6 +195,29 @@
   color: var(--text-secondary);
 }
 
+/* Module 14 Phase 3A — contact protection notices on the owner card. */
+.deal-owner-contact-note {
+  margin-top: 6px;
+  font-size: var(--text-xs, 12px);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.deal-owner-website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: var(--text-xs, 12px);
+  font-weight: 700;
+  color: #5B12D6;
+  text-decoration: none;
+}
+
+.deal-owner-website-link:hover {
+  text-decoration: underline;
+}
+
 .deal-owner-rating {
   display: inline-flex;
   align-items: center;
