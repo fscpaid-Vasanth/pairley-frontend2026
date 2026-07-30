@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { X, Check, RotateCcw, FileText, ImageOff, ExternalLink, AlertTriangle, Copy, Save, Loader2 } from 'lucide-react';
+import { X, Check, RotateCcw, FileText, ImageOff, ExternalLink, AlertTriangle, Copy, Save, Loader2, Sparkles } from 'lucide-react';
+import BannerStudioModal from './BannerStudioModal';
 import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '../../utils/adminFilePreview';
 import { api } from '../../utils/api';
 import { confidenceBand, CONFIDENCE_BANDS } from '../../utils/discoverySource';
@@ -191,6 +192,7 @@ export default function CandidateReviewModal({ candidate, actioning, onClose, on
   const [edits, setEdits] = useState({});
   const [savingDraft, setSavingDraft] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [showBannerStudio, setShowBannerStudio] = useState(false);
 
   useEffect(() => {
     setDetail(null);
@@ -454,6 +456,17 @@ export default function CandidateReviewModal({ candidate, actioning, onClose, on
                 <RotateCcw size={13} /> Take Down
               </button>
             )}
+            {/* Module 14 Phase 3C — the full generate/preview/template/
+                image workflow lives in its own modal, opened on top of this
+                one, since it's a whole screen's worth of controls in itself. */}
+            <button
+              type="button"
+              disabled={actioning || savingDraft}
+              onClick={() => setShowBannerStudio(true)}
+              className="px-4 py-2 border border-[#5B12D6]/30 bg-[#5B12D6]/5 hover:bg-[#5B12D6]/10 text-[#5B12D6] rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Sparkles size={13} /> Design Banner
+            </button>
             {/* Save Draft keeps the candidate in the review queue — the
                 stopping point for an admin who has corrected some fields
                 but isn't ready to publish. */}
@@ -479,6 +492,14 @@ export default function CandidateReviewModal({ candidate, actioning, onClose, on
           </div>
         </div>
       </div>
+
+      {showBannerStudio && (
+        <BannerStudioModal
+          offerId={data.id}
+          businessName={data.business_name}
+          onClose={() => setShowBannerStudio(false)}
+        />
+      )}
     </div>
   );
 }
