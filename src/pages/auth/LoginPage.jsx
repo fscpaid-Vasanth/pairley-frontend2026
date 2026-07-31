@@ -183,6 +183,16 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
 
   return (
     <div className={`login-panel login-panel--${role === 'business' ? 'business' : 'customer'}`}>
+      {/* Set by api.js when a stored token is rejected (expired, or signed
+          with a since-rotated secret). Without this the user is silently
+          dumped back here with no idea why they were signed out. */}
+      {typeof window !== 'undefined' &&
+        new URLSearchParams(window.location.search).get('expired') === '1' && (
+          <div className="login-panel__expired" role="status">
+            Your session expired. Please sign in again to continue.
+          </div>
+        )}
+
       {!isAdminLogin && (
         <div className="login-panel__header">
           <span className="login-panel__icon material-symbols-outlined">{copy.icon}</span>

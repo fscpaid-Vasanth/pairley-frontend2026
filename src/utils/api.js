@@ -31,12 +31,45 @@ const getHeaders = (token, correlationId) => {
   return headers;
 };
 
-const handleResponse = async (response, correlationId) => {
+// Endpoints where a 401 is a normal answer about the credentials being
+// submitted ("wrong password", "bad OTP"), not a statement about a stored
+// session. These must never trigger the session teardown below, or a single
+// typo'd password would wipe the user's login and bounce them mid-form.
+const AUTH_ENDPOINT_PREFIX = '/auth/';
+
+/**
+ * A 401 on a request we attached a stored token to means that token is no
+ * longer valid — expired, or signed with a secret that has since been
+ * rotated. Nothing the user does will fix it while the dead token stays in
+ * localStorage: every poller just keeps retrying and failing.
+ *
+ * Before this, that state surfaced as an endless console stream ("Invalid or
+ * expired token" ~20x) and misleading UI ("Failed to load dashboard metrics.
+ * Check backend connection.") that blamed the backend while it was healthy
+ * and correctly rejecting a stale credential. Now the dead session is
+ * cleared and the user is sent to log in once, which is the only thing that
+ * actually resolves it.
+ */
+const endStaleSession = () => {
+  if (typeof window === 'undefined') return;
+  if (!localStorage.getItem('pairley_token')) return; // never had a session
+  localStorage.removeItem('pairley_token');
+  localStorage.removeItem('pairley_user');
+  // Guard against a redirect loop if the login page itself 401s.
+  if (!window.location.pathname.startsWith('/login')) {
+    window.location.assign('/login?expired=1');
+  }
+};
+
+const handleResponse = async (response, correlationId, endpoint = '') => {
   if (!response.ok) {
     const err = await response.json().catch(() => ({ message: 'Request failed' }));
     const error = new Error(err.message || 'Request failed');
     error.status = response.status;
     error.correlationId = correlationId;
+    if (response.status === 401 && !endpoint.startsWith(AUTH_ENDPOINT_PREFIX)) {
+      endStaleSession();
+    }
     throw error;
   }
   return response.json();
@@ -67,7 +100,7 @@ export const api = {
       method: 'GET',
       headers: getHeaders(token, correlationId),
     });
-    return handleResponse(response, correlationId);
+    return handleResponse(response, correlationId, endpoint);
   },
 
   post: async (endpoint, body, token) => {
@@ -77,7 +110,7 @@ export const api = {
       headers: getHeaders(token, correlationId),
       body: JSON.stringify(body),
     });
-    return handleResponse(response, correlationId);
+    return handleResponse(response, correlationId, endpoint);
   },
 
   put: async (endpoint, body, token) => {
@@ -87,7 +120,7 @@ export const api = {
       headers: getHeaders(token, correlationId),
       body: JSON.stringify(body),
     });
-    return handleResponse(response, correlationId);
+    return handleResponse(response, correlationId, endpoint);
   },
 
   delete: async (endpoint, token) => {
@@ -96,6 +129,6 @@ export const api = {
       method: 'DELETE',
       headers: getHeaders(token, correlationId),
     });
-    return handleResponse(response, correlationId);
+    return handleResponse(response, correlationId, endpoint);
   },
 };
