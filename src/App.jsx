@@ -5,6 +5,12 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { AnimatePresence } from 'framer-motion';
 import { getGoogleRedirectResult } from './firebase';
 import { api } from './utils/api';
+import {
+  requestNotificationPermission,
+  getWebFCMToken,
+  listenForForegroundMessages,
+  saveFCMToken,
+} from './utils/notifications';
 
 
 // Layout & Components
@@ -62,7 +68,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
 // Providers
-import { ToastProvider } from './context/ToastContext';
+import { ToastProvider, useToast } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { LocationProvider } from './context/LocationContext';
 
@@ -113,6 +119,7 @@ function ScrollToTop() {
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   /**
    * Android Google Sign-In: Capture redirect result on app mount.
@@ -257,6 +264,54 @@ function AppContent() {
         .catch(err => console.error('Failed to associate push token:', err));
     }
   }, [location.pathname]);
+
+  // Web push registration — Capacitor builds are handled entirely by the
+  // native effect above. Permission is only requested once the visitor is
+  // logged in (product decision: don't prompt anonymous traffic). Re-runs
+  // on route change, same as the native re-association effect above —
+  // harmless, since requestNotificationPermission() and getToken() are
+  // both no-ops once permission/registration already happened.
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) return;
+    const activeToken = localStorage.getItem('pairley_token');
+    if (!activeToken) return;
+
+    (async () => {
+      const permission = await requestNotificationPermission();
+      if (permission !== 'granted') return;
+      const fcmToken = await getWebFCMToken();
+      if (fcmToken) {
+        await saveFCMToken(undefined, fcmToken);
+      }
+    })();
+  }, [location.pathname]);
+
+  // Foreground FCM messages (web). Background/closed-tab delivery is
+  // handled by public/firebase-messaging-sw.js; FCM web doesn't
+  // auto-display anything while the tab is focused, so this is the only
+  // way a foregrounded web session ever sees a push. Dispatches the same
+  // custom event native's pushNotificationReceived listener already uses,
+  // so a single toast listener below serves both platforms.
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) return;
+    listenForForegroundMessages((payload) => {
+      window.dispatchEvent(new CustomEvent('pairley-notification-received', { detail: payload }));
+    });
+  }, []);
+
+  // Foreground toast for any received push, native or web. Previously
+  // neither platform rendered anything visible when a push arrived while
+  // the app was open — the event was dispatched but nothing listened.
+  useEffect(() => {
+    const handleForegroundNotification = (event) => {
+      const detail = event.detail || {};
+      const title = detail.notification?.title || detail.title || 'New notification';
+      const body = detail.notification?.body || detail.body || '';
+      showToast(body ? `${title}: ${body}` : title, 'info');
+    };
+    window.addEventListener('pairley-notification-received', handleForegroundNotification);
+    return () => window.removeEventListener('pairley-notification-received', handleForegroundNotification);
+  }, [showToast]);
 
   return (
     <div className="app-root flex flex-col min-h-screen">

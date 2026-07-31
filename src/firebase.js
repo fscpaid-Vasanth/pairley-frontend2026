@@ -43,6 +43,7 @@ import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 
 import { getFirestore } from 'firebase/firestore';
+import { getMessaging, isSupported } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC_x8crWxMXiaPI-I96tpvurzrX37g2FV8',
@@ -61,6 +62,18 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
+
+/**
+ * FCM web push messaging — guarded with isSupported() since getMessaging()
+ * throws outright in browsers without Push API/Service Worker support
+ * (e.g. Safari in some configurations). Resolves to null there instead of
+ * crashing app boot. Native (Capacitor) push does not use this at all —
+ * it goes through @capacitor/push-notifications, wired separately in
+ * App.jsx.
+ */
+export const messagingPromise = isSupported().then((ok) =>
+  ok ? getMessaging(app) : null
+);
 
 // Add required OAuth scopes
 googleProvider.addScope('profile');

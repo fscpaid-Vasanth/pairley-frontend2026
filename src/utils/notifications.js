@@ -1,5 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { getToken, onMessage } from 'firebase/messaging';
+import { messagingPromise } from '../firebase';
 import { api } from './api';
 
 export const NOTIFICATION_TYPES = {
@@ -49,6 +51,50 @@ export async function saveFCMToken(userId, token) {
   } catch (err) {
     console.warn('Failed to save FCM token to backend:', err);
   }
+}
+
+/**
+ * getWebFCMToken
+ * --------------
+ * Web-only counterpart to the native token registration already wired in
+ * App.jsx. Requires the service worker registered in main.jsx to be ready
+ * first — that registration happens unconditionally on app load, so by the
+ * time this is called (after the user has granted permission) it's
+ * normally already there. Returns null (never throws) on any failure —
+ * this is a best-effort enhancement, not something that should ever break
+ * app usage.
+ */
+export async function getWebFCMToken() {
+  const messaging = await messagingPromise;
+  if (!messaging) return null;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    });
+    return token || null;
+  } catch (err) {
+    console.warn('Failed to get web FCM token:', err);
+    return null;
+  }
+}
+
+/**
+ * listenForForegroundMessages
+ * ----------------------------
+ * FCM web push only auto-displays a system notification when the tab is
+ * backgrounded (handled by public/firebase-messaging-sw.js). When the tab
+ * is focused, delivery is silent unless the app handles it manually — this
+ * wires that up. Safe to call even when messaging isn't supported in this
+ * browser (isSupported() resolved messagingPromise to null); onReceive
+ * then simply never fires.
+ */
+export function listenForForegroundMessages(onReceive) {
+  messagingPromise.then((messaging) => {
+    if (!messaging) return;
+    onMessage(messaging, onReceive);
+  });
 }
 
 export function formatNotificationTime(timestamp) {
