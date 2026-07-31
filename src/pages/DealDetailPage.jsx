@@ -81,6 +81,7 @@ const DealDetailPage = () => {
   const { id } = useParams();
   const { showToast } = useToast();
   const [deal, setDeal] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [similarDeals, setSimilarDeals] = useState([]);
   const { savedIds, toggleSave } = useSavedOffers();
@@ -146,6 +147,13 @@ const DealDetailPage = () => {
   const fetchDealDetails = () => {
     api.get(`/offers/details/${id}`)
       .then((data) => {
+        // cover_image/gallery_images are the current media model (Module 3+,
+        // and what Offer Publisher writes); offer_image is the legacy
+        // single-field fallback for older offers that predate it.
+        const realImages = [data.cover_image, ...(data.gallery_images || [])].filter(Boolean);
+        const images = realImages.length
+          ? realImages
+          : [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'];
         const mapped = {
           id: data.id,
           title: data.title,
@@ -156,7 +164,7 @@ const DealDetailPage = () => {
           badge: data.badge || null,
           originalPrice: data.original_price,
           pairleyPrice: data.offer_price,
-          images: [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          images,
           businessOwner: {
             id: data.business?.id || data.business_id,
             name: data.business?.business_name || 'Local Seller',
@@ -190,6 +198,7 @@ const DealDetailPage = () => {
           facilityDetails: data.facility_details || null
         };
         setDeal(mapped);
+        setActiveImageIndex(0);
         setLoading(false);
 
         const currentUser = JSON.parse(localStorage.getItem('pairley_user') || 'null');
@@ -435,7 +444,7 @@ const DealDetailPage = () => {
               <div className="deal-hero-banner">
                 <ImageWithFallback
                   className="deal-hero-image"
-                  src={deal.images?.[0]}
+                  src={deal.images?.[activeImageIndex] ?? deal.images?.[0]}
                   alt={deal.title}
                   fallbackType="deal"
                   category={deal.category}
@@ -462,6 +471,33 @@ const DealDetailPage = () => {
                   <h1 className="deal-hero-title">{deal.title}</h1>
                 </div>
               </div>
+
+              {/* Gallery strip — offers with more than one image (hero +
+                  gallery_images) get a thumbnail row to switch the hero
+                  photo. A single-image offer renders nothing here, same as
+                  before this existed. */}
+              {deal.images?.length > 1 && (
+                <div className="deal-gallery-strip" role="tablist" aria-label="Offer photos">
+                  {deal.images.map((src, i) => (
+                    <button
+                      key={src + i}
+                      type="button"
+                      role="tab"
+                      aria-selected={i === activeImageIndex}
+                      onClick={() => setActiveImageIndex(i)}
+                      className={`deal-gallery-thumb ${i === activeImageIndex ? 'deal-gallery-thumb--active' : ''}`}
+                    >
+                      <ImageWithFallback
+                        className="deal-gallery-thumb-image"
+                        src={src}
+                        alt={`${deal.title} photo ${i + 1}`}
+                        fallbackType="deal"
+                        category={deal.category}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Business owner */}
               <div className="deal-owner-card">

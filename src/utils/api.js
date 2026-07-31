@@ -75,6 +75,27 @@ const handleResponse = async (response, correlationId, endpoint = '') => {
   return response.json();
 };
 
+// Multipart requests (file uploads) can't go through api.post() — that
+// always JSON.stringifies the body and sets Content-Type: application/json,
+// which breaks a FormData body. This was previously duplicated, nearly
+// verbatim, in both MediaUploadPanel.jsx and bulkImportApi.js; a third
+// near-identical copy for Offer Publisher is what made extracting it here
+// worthwhile. No Content-Type header is set deliberately — the browser
+// derives the multipart boundary from the FormData body itself, and
+// setting it manually strips that boundary.
+export const postMultipart = async (endpoint, formData) => {
+  const correlationId = generateCorrelationId();
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('pairley_token') || ''}`,
+      'X-Request-Id': correlationId,
+    },
+    body: formData,
+  });
+  return handleResponse(response, correlationId, endpoint);
+};
+
 // Fire-and-forget request to start waking a sleeping free-tier backend
 // instance as early as possible. Render's free tier can take 30-60s to
 // cold-start, which is fatal for a mall-booth QR scan if the first real
@@ -117,6 +138,16 @@ export const api = {
     const correlationId = generateCorrelationId();
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: 'PUT',
+      headers: getHeaders(token, correlationId),
+      body: JSON.stringify(body),
+    });
+    return handleResponse(response, correlationId, endpoint);
+  },
+
+  patch: async (endpoint, body, token) => {
+    const correlationId = generateCorrelationId();
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: 'PATCH',
       headers: getHeaders(token, correlationId),
       body: JSON.stringify(body),
     });

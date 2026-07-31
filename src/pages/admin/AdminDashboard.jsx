@@ -24,8 +24,7 @@ import {
   Headphones,
   Download,
   UserCheck,
-  GitMerge,
-  UploadCloud
+  GitMerge
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
@@ -33,7 +32,7 @@ import { formatPrice } from '../../utils/constants';
 import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '../../utils/adminFilePreview';
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
 import ClaimRequestsPanel from './ClaimRequestsPanel';
-import BulkImportPanel from './BulkImportPanel';
+import OfferPublisherPanel from './OfferPublisherPanel';
 import LeadManagementPanel from './LeadManagementPanel';
 import BusinessDuplicatesPanel from './BusinessDuplicatesPanel';
 import SystemHealthTile from './SystemHealthTile';
@@ -401,15 +400,15 @@ export default function AdminDashboard() {
             Deals Moderation
           </button>
           <button
-            onClick={() => handleTabChange('bulk-import')}
+            onClick={() => handleTabChange('offer-publisher')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'bulk-import'
+              activeTab === 'offer-publisher'
                 ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
-            <UploadCloud size={14} />
-            Bulk Import
+            <Sparkles size={14} />
+            Offer Publisher
           </button>
           <button
             onClick={() => handleTabChange('leads')}
@@ -836,7 +835,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {activeTab === 'bulk-import' && <BulkImportPanel />}
+        {activeTab === 'offer-publisher' && <OfferPublisherPanel />}
 
         {activeTab === 'leads' && <LeadManagementPanel />}
 
