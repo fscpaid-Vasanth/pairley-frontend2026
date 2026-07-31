@@ -187,40 +187,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
 
-    <!-- Preload critical logo -->
-    <link rel="preload" as="image" href="/logo.png" type="image/png" />
+    <!-- /logo.png is NOT preloaded: its only consumer is ParticleLogoIntro.jsx,
+         a lazily-loaded launch-intro chunk, so on every other route the browser
+         fetched 83KB it never used and warned "preloaded but not used within a
+         few seconds". It still loads normally on the route that needs it. -->
 
     <!-- Fonts — loaded with display=swap for non-blocking render -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
-    <!-- Tailwind CSS CDN (existing — preserved to avoid breaking functionality) -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "primary": "#000f22",
-              "secondary": "#5B12D6",
-              "vibrant-violet": "#6D4EE3",
-              "surface-container": "rgba(255, 255, 255, 0.4)",
-              "surface-subtle": "rgba(255, 255, 255, 0.3)",
-              "surface-dim": "rgba(255, 255, 255, 0.2)",
-              "background": "transparent",
-              "surface": "rgba(255, 255, 255, 0.45)",
-              "on-surface": "#091d2d",
-              "on-surface-variant": "#43474d",
-              "outline": "rgba(255, 255, 255, 0.55)",
-              "outline-variant": "rgba(255, 255, 255, 0.35)",
-            }
-          }
-        }
-      };
-    </script>
+    <!-- Tailwind is compiled at build time (tailwind.config.js + postcss.config.js
+         + the @tailwind directives in src/index.css) and ships in the CSS bundle.
+         The cdn.tailwindcss.com <script> that used to sit here was redundant with
+         that bundle, warned "should not be used in production" on every page load,
+         and re-generated overlapping utilities at runtime (visible as struck-out
+         duplicate .py-10 / .min-h-screen rules in devtools). Its two genuine
+         contributions have been moved into the build: the inline colour palette is
+         now in tailwind.config.js, and Preflight's border defaults are in
+         src/index.css's reset. Do not reintroduce it. -->
 
     <!-- =========================================================
          STEP 13 — Google Analytics 4 Placeholder

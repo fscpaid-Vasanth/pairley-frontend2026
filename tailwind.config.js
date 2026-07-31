@@ -41,6 +41,26 @@ export default {
           ink: '#111827',
           mist: '#FAF9FF', // faint tinted section background
         },
+        // Ported verbatim from the inline `tailwind.config` that used to
+        // accompany the cdn.tailwindcss.com <script> in index.html. That CDN
+        // build was the ONLY source of these tokens, so `text-primary` (15
+        // uses) and `text-secondary` (42 uses, across HomePage,
+        // DealDetailPage, CreateDealPage and four components) silently
+        // resolved to nothing the moment the script was removed. Kept as a
+        // faithful copy rather than remapped onto brand.* so removing the
+        // CDN is a no-op visually; consolidating these onto the brand
+        // palette is a separate, deliberate change.
+        primary: '#000f22',
+        secondary: '#5B12D6',
+        'vibrant-violet': '#6D4EE3',
+        'surface-container': 'rgba(255, 255, 255, 0.4)',
+        'surface-subtle': 'rgba(255, 255, 255, 0.3)',
+        'surface-dim': 'rgba(255, 255, 255, 0.2)',
+        surface: 'rgba(255, 255, 255, 0.45)',
+        'on-surface': '#091d2d',
+        'on-surface-variant': '#43474d',
+        outline: 'rgba(255, 255, 255, 0.55)',
+        'outline-variant': 'rgba(255, 255, 255, 0.35)',
       },
       fontFamily: {
         sans: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],

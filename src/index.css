@@ -153,6 +153,20 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /* Tailwind's `border-*` utilities set border WIDTH only; they rely on
+     Preflight to supply `border-style: solid` and a default colour. This
+     build sets `corePlugins.preflight: false` (see tailwind.config.js — it
+     would otherwise reset this file's own base styles), so until now those
+     three declarations were coming from the cdn.tailwindcss.com script,
+     which shipped Preflight regardless. Removing that script without this
+     block would silently render all ~1,874 `border-*` usages in src/
+     invisible, since the CSS default is `border-style: none`.
+     Deliberately only the border slice of Preflight — not its heading,
+     list, or margin resets, which are what preflight:false exists to
+     avoid. */
+  border-width: 0;
+  border-style: solid;
+  border-color: #e5e7eb;
 }
 
 html {
