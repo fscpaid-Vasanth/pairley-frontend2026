@@ -1,13 +1,86 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Clock, Users, PartyPopper, Lock, CheckCircle2, MessageCircleMore } from 'lucide-react';
+import { Sparkles, Clock, Users, PartyPopper, Lock, CheckCircle2, Phone, MessageCircleMore, MapPin, Navigation } from 'lucide-react';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
 import { getDealMode } from '../utils/offerTypes';
 import { isDuplicateInterestError, formatLeadStatusLabel } from '../utils/leadInterest';
+import { buildWaLink, buildCustomerInquiryMessage } from '../utils/whatsapp';
 import './InterestButton.css';
+
+/** Standard Google Maps URL API — no API key needed for a search/directions deep link. */
+function mapsSearchUrl(lat, lng) {
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+}
+function mapsDirectionsUrl(lat, lng) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+/**
+ * Lead-generation revision — LEAD_FOLLOWUP_MODE. Under the default
+ * ADMIN_MANAGED mode, `business.mobile` is never present (see
+ * offerVisibility.ts), so this renders nothing and the "Thank you" card is
+ * all a customer sees. If the platform is later switched to
+ * MERCHANT_MANAGED, the backend starts including contact fields once
+ * interest is expressed on a CLAIMED business, and this block activates
+ * automatically — no frontend redeploy needed, which is the whole point of
+ * making the mode configurable rather than hard-removing this capability.
+ */
+function ContactRevealBlock({ business, offerName }) {
+  if (!business?.mobile) return null;
+  const waLink = buildWaLink(
+    business.whatsapp || business.mobile,
+    buildCustomerInquiryMessage({ offerName, shopName: business.business_name }),
+  );
+  const hasGeo = business.geo_lat != null && business.geo_lng != null;
+
+  return (
+    <div className="interest-confirmation-card__contact">
+      <a className="interest-confirmation-card__contact-btn" href={`tel:${business.mobile}`}>
+        <Phone size={16} />
+        Call {business.mobile}
+      </a>
+      <a
+        className="interest-confirmation-card__contact-btn interest-confirmation-card__contact-btn--whatsapp"
+        href={waLink}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <MessageCircleMore size={16} />
+        WhatsApp
+      </a>
+      {business.address && (
+        <div className="interest-confirmation-card__address">
+          <MapPin size={14} />
+          {business.address}
+        </div>
+      )}
+      {hasGeo && (
+        <div className="interest-confirmation-card__contact-row">
+          <a
+            className="interest-confirmation-card__contact-link"
+            href={mapsSearchUrl(business.geo_lat, business.geo_lng)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <MapPin size={14} /> View on Map
+          </a>
+          <a
+            className="interest-confirmation-card__contact-link"
+            href={mapsDirectionsUrl(business.geo_lat, business.geo_lng)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Navigation size={14} /> Get Directions
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /**
  * Module 13 — the standard (non-legacy) interest confirmation card. Shown
@@ -15,10 +88,17 @@ import './InterestButton.css';
  * rather than local component state — it renders identically whether the
  * lead was just created this session or the customer is revisiting after a
  * refresh/logout/re-login, except for the headline copy (`justSubmitted`
- * distinguishes "Sent Successfully" from "Already Sent" per the two example
- * cards in the spec; everything else about the two states is the same).
+ * distinguishes the first-submission message from a revisit).
+ *
+ * Lead-generation revision: under the default ADMIN_MANAGED mode, Pairley
+ * is a lead-capture marketplace, not a contact broker — the card confirms
+ * the interest was recorded and sets the expectation that the merchant/
+ * admin follows up manually. ContactRevealBlock renders nothing in that
+ * mode (business.mobile is absent from the API response entirely), so the
+ * "Thank you" message is genuinely all that shows; it only appears for
+ * real once MERCHANT_MANAGED mode is switched on.
  */
-function InterestConfirmationCard({ lead, justSubmitted, onOpenChat }) {
+function InterestConfirmationCard({ lead, justSubmitted, business, offerName }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -28,18 +108,17 @@ function InterestConfirmationCard({ lead, justSubmitted, onOpenChat }) {
       <div className="interest-confirmation-card__head">
         <CheckCircle2 size={22} className="interest-confirmation-card__check" />
         <h4 className="interest-confirmation-card__title">
-          {justSubmitted ? 'Interest Sent Successfully' : 'Interest Already Sent'}
+          {business?.mobile
+            ? (justSubmitted ? 'Interest Sent Successfully' : 'Interest Already Sent')
+            : (justSubmitted ? 'Thank you for your interest!' : 'Interest Already Sent')}
         </h4>
       </div>
       <p className="interest-confirmation-card__body">
-        {justSubmitted
-          ? 'The merchant has been notified. Coordinate pickup securely — Chat with Your Offer Partner.'
-          : 'The merchant will contact you. Continue coordinating pickup securely — Chat with Your Offer Partner.'}
+        {business?.mobile
+          ? 'The merchant has been notified. Reach out directly using the details below.'
+          : 'Your request has been recorded successfully. Our team or the merchant will contact you shortly.'}
       </p>
-      <button type="button" className="interest-confirmation-card__chat-btn" onClick={onOpenChat}>
-        <MessageCircleMore size={18} />
-        Chat with Your Offer Partner
-      </button>
+      <ContactRevealBlock business={business} offerName={offerName} />
       <div className="interest-confirmation-card__status">
         <span className="interest-confirmation-card__status-dot" />
         Status: {formatLeadStatusLabel(lead.status)}
@@ -131,10 +210,20 @@ export default function InterestButton({ deal, onInterest, onRefresh }) {
       }
       if (posting || deal?.myLead) return;
       setPosting(true);
-      api.post('/offers/lead', { offerId: deal.id })
+      api.post('/offers/lead', {
+        offerId: deal.id,
+        source: Capacitor.isNativePlatform() ? 'MOBILE_APP' : 'WEBSITE',
+      })
         .then((res) => {
           setJustSubmitted(true);
           if (onInterest) onInterest(res.lead);
+          // Lead-generation revision — under MERCHANT_MANAGED mode, this
+          // Lead row is exactly what satisfies offerVisibility.ts's
+          // "expressed interest" check, but the contact fields themselves
+          // only arrive on a fresh GET, never from this POST response.
+          // Under the default ADMIN_MANAGED mode this is a harmless
+          // no-op refresh (business.mobile still won't be present).
+          if (onRefresh) onRefresh();
         })
         .catch((err) => {
           console.error('Failed to express interest:', err);
@@ -158,11 +247,8 @@ export default function InterestButton({ deal, onInterest, onRefresh }) {
           <InterestConfirmationCard
             lead={deal.myLead}
             justSubmitted={justSubmitted}
-            onOpenChat={() =>
-              navigate(`/customer/lead-chat/${deal.myLead.id}`, {
-                state: { offerName: deal.title, shopName: deal.businessOwner?.name },
-              })
-            }
+            business={deal.business}
+            offerName={deal.title}
           />
         </div>
       );

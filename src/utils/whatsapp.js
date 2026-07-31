@@ -1,11 +1,12 @@
-// Shared WhatsApp deep-link helper for the merchant's own, explicit outreach
-// (LeadsPage's "Contact" button) — a merchant-initiated channel, not the
-// primary customer interaction path. Module 13 removed the automatic
-// customer-side wa.me redirect this file used to also power (Show
-// Interest used to open WhatsApp immediately; it no longer does — see
-// InterestButton.jsx and the anonymous in-app lead chat). This file's
-// generic deal-share links (ShareCard.jsx etc.) are a separate concern and
-// live elsewhere.
+// Shared WhatsApp deep-link helper. Originally scoped to the merchant's own
+// outreach (LeadsPage's "Contact" button) after Module 13 removed the
+// automatic customer-side wa.me redirect Show Interest used to trigger.
+// Bulk-import revision reintroduces a customer-facing use: once a customer
+// has shown interest and is entitled to contact details (see
+// offerVisibility.ts), InterestButton.jsx links out to the merchant's
+// WhatsApp using buildWaLink + buildCustomerInquiryMessage below, same
+// helper, opposite direction. This file's generic deal-share links
+// (ShareCard.jsx etc.) are a separate concern and live elsewhere.
 
 function cleanMobile(mobile) {
   return (mobile || '').replace(/\D/g, '').slice(-10);
@@ -30,4 +31,12 @@ We'd love to help you with your booking! Let us know if you have any questions.
 
 Thank you,
 *${shopName}*`;
+}
+
+// Sent from the customer's side, once they're entitled to contact details
+// (see offerVisibility.ts — expressed interest + an entitled business) —
+// the opening message on the merchant's WhatsApp when they tap "WhatsApp"
+// in InterestButton.jsx's contact-reveal card.
+export function buildCustomerInquiryMessage({ offerName, shopName }) {
+  return `Hi ${shopName || 'there'}, I found your offer "${offerName}" on Pairley and I'm interested. Could you share more details?`;
 }

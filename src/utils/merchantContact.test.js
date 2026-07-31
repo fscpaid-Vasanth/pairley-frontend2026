@@ -6,61 +6,26 @@ import {
   CONTACT_MODES,
 } from './merchantContact';
 
+// Lead-generation revision: Pairley never hands merchant contact fields to
+// a customer through this endpoint anymore, regardless of business status
+// or expressed interest — see offerVisibility.ts. The only thing left to
+// display is the merchant's own published website (always public,
+// independent of the contact-reveal policy).
 describe('resolveContactDisplay', () => {
-  it('shows real contact when the backend sent it', () => {
-    const result = resolveContactDisplay({
-      contact_available: true,
-      contact_notice: 'AVAILABLE',
-      mobile: '9876543210',
-    });
-    expect(result.mode).toBe(CONTACT_MODES.AVAILABLE);
-  });
-
-  it('offers the signup prompt to an anonymous viewer', () => {
-    const result = resolveContactDisplay({
-      contact_available: false,
-      contact_notice: 'SIGN_UP_REQUIRED',
-    });
-    expect(result.mode).toBe(CONTACT_MODES.SIGN_UP);
-    expect(result.labels.phone).toMatch(/after free signup/);
-    expect(result.labels.whatsapp).toMatch(/after signup/);
-    expect(result.labels.email).toMatch(/after signup/);
-  });
-
-  it('points at the merchant’s own site for an unclaimed business', () => {
-    const result = resolveContactDisplay({
-      contact_available: false,
-      contact_notice: 'USE_OFFICIAL_WEBSITE',
-      website: 'https://specgym.in',
-    });
+  it('points at the merchant’s own site when a website is present', () => {
+    const result = resolveContactDisplay({ website: 'https://specgym.in' });
     expect(result.mode).toBe(CONTACT_MODES.WEBSITE);
     expect(result.website).toBe('https://specgym.in/');
   });
 
-  // A "Visit Official Website" button with nowhere to go is worse than no
-  // button — Show Interest is the path in that case.
-  it('renders nothing rather than a dead website affordance', () => {
-    const result = resolveContactDisplay({
-      contact_available: false,
-      contact_notice: 'USE_OFFICIAL_WEBSITE',
-      website: null,
-    });
-    expect(result.mode).toBe(CONTACT_MODES.NONE);
+  it('shows nothing when there is no website', () => {
+    expect(resolveContactDisplay({ website: null }).mode).toBe(CONTACT_MODES.NONE);
+    expect(resolveContactDisplay({}).mode).toBe(CONTACT_MODES.NONE);
   });
 
   it('handles a missing business object', () => {
     expect(resolveContactDisplay(null).mode).toBe(CONTACT_MODES.NONE);
     expect(resolveContactDisplay(undefined).mode).toBe(CONTACT_MODES.NONE);
-  });
-
-  // Defensive: an older backend, or a response shape change, must degrade to
-  // showing nothing rather than to showing contact.
-  it('defaults to NONE when the notice is unrecognised', () => {
-    expect(
-      resolveContactDisplay({ contact_available: false, contact_notice: 'SOMETHING_NEW' })
-        .mode,
-    ).toBe(CONTACT_MODES.NONE);
-    expect(resolveContactDisplay({}).mode).toBe(CONTACT_MODES.NONE);
   });
 });
 

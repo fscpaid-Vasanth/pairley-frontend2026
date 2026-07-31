@@ -1,62 +1,28 @@
 // Module 14 Phase 3A — how the customer-facing UI presents merchant contact
 // details (or their absence).
 //
-// The backend decides entitlement and simply does not send protected values
-// to a viewer who isn't entitled to them — see offerVisibility.ts. This
-// module only decides what to *say* in each case. It never reconstructs or
-// infers a hidden value, and it must not: if a field isn't in the payload,
-// it isn't available, full stop.
+// Lead-generation revision: Pairley never hands merchant contact fields
+// (mobile/whatsapp/address) to a customer through the offer detail page at
+// all anymore — see offerVisibility.ts's resolveContactAccess. The only
+// thing left for this module to display is the merchant's own published
+// website, which was always public independent of the contact-reveal
+// policy (it's the merchant's own front door, not something Pairley
+// gates). It never reconstructs or infers a hidden value.
 
 export const CONTACT_MODES = {
-  /** Backend sent the real details. */
-  AVAILABLE: 'AVAILABLE',
-  /** Anonymous viewer — signing up unlocks contact. */
-  SIGN_UP: 'SIGN_UP',
-  /**
-   * The merchant hasn't claimed their Pairley listing, so Pairley doesn't
-   * present itself as the route to them. Point at their own site instead.
-   */
+  /** The business has a published website — link to it. */
   WEBSITE: 'WEBSITE',
-  /** Nothing to show and nowhere to send them. */
+  /** No website to show. */
   NONE: 'NONE',
-};
-
-const SIGN_UP_LABELS = {
-  phone: '📞 Contact available after free signup',
-  whatsapp: 'WhatsApp available after signup',
-  email: 'Available after signup',
 };
 
 /**
  * @param business the `business` object from GET /offers/details/:id
- * @returns {{mode: string, labels: object, website: string|null}}
+ * @returns {{mode: string, website: string|null}}
  */
 export function resolveContactDisplay(business) {
-  if (!business) {
-    return { mode: CONTACT_MODES.NONE, labels: {}, website: null };
-  }
-
-  const website = normalizeWebsite(business.website);
-
-  if (business.contact_available) {
-    return { mode: CONTACT_MODES.AVAILABLE, labels: {}, website };
-  }
-
-  if (business.contact_notice === 'USE_OFFICIAL_WEBSITE') {
-    // Without a website there is genuinely nowhere to send the customer, so
-    // don't render a dead affordance — Show Interest is the path instead.
-    return {
-      mode: website ? CONTACT_MODES.WEBSITE : CONTACT_MODES.NONE,
-      labels: {},
-      website,
-    };
-  }
-
-  if (business.contact_notice === 'SIGN_UP_REQUIRED') {
-    return { mode: CONTACT_MODES.SIGN_UP, labels: SIGN_UP_LABELS, website };
-  }
-
-  return { mode: CONTACT_MODES.NONE, labels: {}, website };
+  const website = normalizeWebsite(business?.website);
+  return { mode: website ? CONTACT_MODES.WEBSITE : CONTACT_MODES.NONE, website };
 }
 
 /**

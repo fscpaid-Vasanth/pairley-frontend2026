@@ -23,19 +23,18 @@ import {
   X,
   Headphones,
   Download,
-  Radar,
   UserCheck,
   GitMerge,
-  Bot
+  UploadCloud
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../utils/api';
 import { formatPrice } from '../../utils/constants';
 import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '../../utils/adminFilePreview';
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
-import DiscoveredOffersPanel from './DiscoveredOffersPanel';
-import AiOfferDiscoveryPanel from './AiOfferDiscoveryPanel';
 import ClaimRequestsPanel from './ClaimRequestsPanel';
+import BulkImportPanel from './BulkImportPanel';
+import LeadManagementPanel from './LeadManagementPanel';
 import BusinessDuplicatesPanel from './BusinessDuplicatesPanel';
 import SystemHealthTile from './SystemHealthTile';
 import './AdminDashboard.css';
@@ -402,26 +401,26 @@ export default function AdminDashboard() {
             Deals Moderation
           </button>
           <button
-            onClick={() => handleTabChange('discovered')}
+            onClick={() => handleTabChange('bulk-import')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'discovered'
+              activeTab === 'bulk-import'
                 ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
-            <Radar size={14} />
-            Discovered Offers
+            <UploadCloud size={14} />
+            Bulk Import
           </button>
           <button
-            onClick={() => handleTabChange('ai-discovery')}
+            onClick={() => handleTabChange('leads')}
             className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
-              activeTab === 'ai-discovery'
+              activeTab === 'leads'
                 ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
                 : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
             }`}
           >
-            <Bot size={14} />
-            AI Offer Discovery
+            <Users size={14} />
+            Leads
           </button>
           <button
             onClick={() => handleTabChange('claims')}
@@ -837,11 +836,9 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {activeTab === 'ai-discovery' && (
-          <AiOfferDiscoveryPanel onOpenReviewQueue={() => handleTabChange('discovered')} />
-        )}
+        {activeTab === 'bulk-import' && <BulkImportPanel />}
 
-        {activeTab === 'discovered' && <DiscoveredOffersPanel />}
+        {activeTab === 'leads' && <LeadManagementPanel />}
 
         {activeTab === 'claims' && <ClaimRequestsPanel />}
 

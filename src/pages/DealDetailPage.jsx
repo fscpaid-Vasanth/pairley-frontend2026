@@ -481,16 +481,10 @@ const DealDetailPage = () => {
                     </span>
                   </div>
 
-                  {/* Module 14 Phase 3A — merchant contact is protected. An
-                      anonymous visitor is told signing up unlocks it; an
-                      unclaimed merchant's own site is linked instead, since
-                      Pairley isn't the gatekeeper to a number they publish
-                      themselves. */}
-                  {deal.contact?.mode === CONTACT_MODES.SIGN_UP && (
-                    <div className="deal-owner-contact-note">
-                      {deal.contact.labels.phone}
-                    </div>
-                  )}
+                  {/* Lead-generation revision — merchant contact fields are
+                      never shown to a customer at all anymore; only the
+                      merchant's own published website, which was always
+                      public independent of that policy. */}
                   {deal.contact?.mode === CONTACT_MODES.WEBSITE && (
                     <a
                       href={deal.contact.website}
