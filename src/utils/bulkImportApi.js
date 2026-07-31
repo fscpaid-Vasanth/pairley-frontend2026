@@ -34,6 +34,7 @@ export const bulkImportApi = {
   getBatch: (id) => api.get(`/admin/bulk-import/${id}`),
   getPreview: (id) => api.get(`/admin/bulk-import/${id}/preview`),
   getErrorRows: (id) => api.get(`/admin/bulk-import/${id}/errors`),
+  getBatchOffers: (id) => api.get(`/admin/bulk-import/${id}/offers`),
   createDrafts: (id) => api.post(`/admin/bulk-import/${id}/create-drafts`, {}),
   publish: (id) => api.post(`/admin/bulk-import/${id}/publish`, {}),
 
