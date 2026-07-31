@@ -112,7 +112,12 @@ const DealsPage = () => {
           badge: d.badge || null,
           originalPrice: d.original_price,
           pairleyPrice: d.offer_price,
-          images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          // cover_image is the current media model (what Offer Publisher
+          // writes); offer_image is the legacy field older offers still
+          // carry. Must check cover_image first — an Offer Publisher offer
+          // has no offer_image at all, so checking that alone silently
+          // fell through to the generic stock-photo fallback below.
+          images: [d.cover_image || d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
           businessOwner: {
             id: d.business_id,
             name: d.business?.business_name || 'Local Seller',

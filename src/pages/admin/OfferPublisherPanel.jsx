@@ -231,6 +231,11 @@ export default function OfferPublisherPanel() {
               Every image you upload becomes its own draft offer — fill in the details next. Accepted: JPG · JPEG ·
               PNG · WEBP — as individual files, a folder, or a ZIP.
             </p>
+            <p className="text-xs text-slate-400 font-medium mt-1">
+              Recommended cover image size: <span className="font-bold text-slate-500">1200×450px (roughly 2.7:1, wide)</span> —
+              the deal page displays it in a wide banner and crops to fill, so a taller or more square image (especially one
+              with text baked in) may get its edges cut off.
+            </p>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-3">
