@@ -3,6 +3,23 @@ import { api } from '../utils/api';
 
 const CartContext = createContext(null);
 
+/**
+ * Orders belong to a Customer session only. Roles are stored on
+ * `pairley_user.role` as 'Customer' | 'Business' | 'Admin' (see AuthContext);
+ * a missing/unparseable user is treated as not-a-customer, which is the safe
+ * direction — the order list simply stays empty rather than firing a request
+ * that can only 403.
+ */
+function isCustomerSession() {
+  try {
+    const raw = localStorage.getItem('pairley_user');
+    if (!raw) return false;
+    return JSON.parse(raw)?.role === 'Customer';
+  } catch {
+    return false;
+  }
+}
+
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
@@ -18,7 +35,12 @@ export function CartProvider({ children }) {
 
   const refreshOrders = () => {
     const token = localStorage.getItem('pairley_token');
-    if (token) {
+    // GET /customers/history is @Roles(Role.CUSTOMER) on the backend, so an
+    // Admin or Business session correctly gets a 403. CartProvider wraps the
+    // whole app, so without this role check every admin/merchant page load
+    // fired a request guaranteed to fail and logged it as an error — noise
+    // that reads like a real fault while debugging something else.
+    if (token && isCustomerSession()) {
       setOrdersLoading(true);
       return api.get('/customers/history')
         .then((history) => {
