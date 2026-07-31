@@ -12,9 +12,10 @@ import {
   History,
   Users,
   Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { bulkImportApi, downloadErrorReport } from '../../utils/bulkImportApi';
+import { bulkImportApi, downloadErrorReport, matchesAccept } from '../../utils/bulkImportApi';
 
 const POLL_INTERVAL_MS = 2000;
 const ACTIVE_STATUSES = ['CREATING', 'PUBLISHING'];
@@ -57,9 +58,25 @@ function StatBadge({ label, value, tone = 'slate' }) {
   );
 }
 
-function Dropzone({ icon: Icon, title, subtitle, onFiles, multiple, disabled, accept }) {
+function Dropzone({ icon: Icon, title, subtitle, onFiles, onReject, multiple, disabled, accept }) {
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
+
+  // `accept` only filters the OS browse dialog — a drag-and-dropped file
+  // ignores it completely. Without this, dropping (say) a PNG on the
+  // CSV/XLSX zone uploaded it just to have the server reject it, which read
+  // as a server fault rather than the wrong file.
+  const handleFiles = (fileList) => {
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+    const allowed = files.filter((f) => matchesAccept(f, accept));
+    const rejected = files.filter((f) => !matchesAccept(f, accept));
+    if (rejected.length > 0) {
+      onReject?.(rejected);
+      if (allowed.length === 0) return;
+    }
+    onFiles(allowed);
+  };
 
   return (
     <div
@@ -69,7 +86,7 @@ function Dropzone({ icon: Icon, title, subtitle, onFiles, multiple, disabled, ac
         e.preventDefault();
         setDragging(false);
         if (disabled) return;
-        onFiles(e.dataTransfer.files);
+        handleFiles(e.dataTransfer.files);
       }}
       onClick={() => !disabled && inputRef.current?.click()}
       className={`flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center transition-colors cursor-pointer ${
@@ -95,7 +112,7 @@ function Dropzone({ icon: Icon, title, subtitle, onFiles, multiple, disabled, ac
         directory={multiple ? '' : undefined}
         className="hidden"
         disabled={disabled}
-        onChange={(e) => { onFiles(e.target.files); e.target.value = ''; }}
+        onChange={(e) => { handleFiles(e.target.files); e.target.value = ''; }}
       />
     </div>
   );
@@ -165,6 +182,24 @@ export default function BulkImportPanel() {
     }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [activeBatchId, batch, fetchHistory]);
+
+  // Named per dropzone so the message says what that zone actually wants —
+  // a generic "invalid file" would leave an admin guessing which of the
+  // three zones they got wrong.
+  const rejectSheet = (files) =>
+    showToast(
+      `"${files[0].name}" isn't a spreadsheet. This step takes the offer details as CSV or XLSX — upload offer images in Step 2, after the drafts exist.`,
+      'error',
+    );
+  const rejectImages = (files) =>
+    showToast(
+      files.length === 1
+        ? `"${files[0].name}" isn't a supported image. Use JPG, PNG or WEBP.`
+        : `${files.length} files skipped — only JPG, PNG and WEBP images are supported.`,
+      'error',
+    );
+  const rejectZip = (files) =>
+    showToast(`"${files[0].name}" isn't a ZIP archive.`, 'error');
 
   const handleSheetFiles = (files) => {
     const file = files?.[0];
@@ -251,18 +286,22 @@ export default function BulkImportPanel() {
       {/* New import */}
       <div className="bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-3xl shadow-md p-6">
         <h3 className="text-sm font-extrabold text-slate-700 mb-1 flex items-center gap-2">
-          <Sparkles size={16} className="text-[#5B12D6]" /> New Bulk Offer Import
+          <Sparkles size={16} className="text-[#5B12D6]" /> Step 1 — Offer Details (spreadsheet)
         </h3>
         <p className="text-xs text-slate-400 font-medium mb-4">
-          Upload a CSV or XLSX file of offers (generated with ChatGPT or curated manually). No AI processing, no
-          crawling — every row is validated deterministically before anything is created.
+          This step takes the offer <strong className="text-slate-500">text</strong> only — merchant, title, prices,
+          dates — as a CSV or XLSX file (generated with ChatGPT or curated manually). Every row is validated
+          deterministically before anything is created.{' '}
+          <strong className="text-slate-500">Offer images are not uploaded here</strong> — they come in Step 2, after
+          the drafts exist.
         </p>
         <Dropzone
           icon={FileSpreadsheet}
           title={uploading ? 'Uploading…' : 'Drop a CSV/XLSX file here, or click to browse'}
-          subtitle="Up to 10,000 offers per file"
+          subtitle="Spreadsheet only — not images. Up to 10,000 offers per file."
           accept=".csv,.xlsx"
           onFiles={handleSheetFiles}
+          onReject={rejectSheet}
           disabled={uploading}
         />
       </div>
@@ -356,7 +395,7 @@ export default function BulkImportPanel() {
           {['CREATED', 'PUBLISHING', 'COMPLETED'].includes(batch.status) && (
             <div className="space-y-4 pt-2 border-t border-slate-100">
               <h4 className="text-xs font-extrabold text-slate-600 uppercase tracking-wide flex items-center gap-2">
-                <ImagePlus size={14} /> Bulk Image Upload
+                <ImagePlus size={14} /> Step 2 — Bulk Image Upload
               </h4>
               <p className="text-[11px] text-slate-400 font-medium -mt-2">
                 Match images to offers by filename — e.g. <code className="bg-slate-100 px-1 rounded">OFF{String(1).padStart(6, '0')}.jpg</code> for
@@ -368,17 +407,19 @@ export default function BulkImportPanel() {
                   icon={ImagePlus}
                   title="Drop image files, or a folder"
                   subtitle="JPG, PNG, WEBP"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                   multiple
                   onFiles={handleImageFiles}
+                  onReject={rejectImages}
                   disabled={imageUploading}
                 />
                 <Dropzone
                   icon={FolderArchive}
                   title="Drop a ZIP of images"
                   subtitle="Streamed, so a large archive is fine"
-                  accept=".zip"
+                  accept=".zip,application/zip,application/x-zip-compressed"
                   onFiles={handleImageZip}
+                  onReject={rejectZip}
                   disabled={imageUploading}
                 />
               </div>
@@ -408,16 +449,19 @@ export default function BulkImportPanel() {
 
       {/* Import history */}
       <div className="bg-white/80 border border-slate-200/50 backdrop-blur-md rounded-3xl shadow-md p-6">
-        <h3 className="text-sm font-extrabold text-slate-700 mb-4 flex items-center gap-2">
+        <h3 className="text-sm font-extrabold text-slate-700 mb-1 flex items-center gap-2">
           <History size={16} className="text-[#5B12D6]" /> Import History
         </h3>
+        <p className="text-xs text-slate-400 font-medium mb-4">
+          Click any import below to open it — that&apos;s where you upload offer images (Step 2) and publish.
+        </p>
         {loadingHistory ? (
           <div className="text-center py-10 text-slate-400 font-bold text-sm">Loading…</div>
         ) : history.length === 0 ? (
           <div className="text-center py-10 text-slate-400 font-bold text-sm">No imports yet.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs font-semibold text-slate-600 min-w-[820px]">
+            <table className="w-full border-collapse text-left text-xs font-semibold text-slate-600 min-w-[930px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                   <th className="px-4 py-3">File</th>
@@ -427,6 +471,7 @@ export default function BulkImportPanel() {
                   <th className="px-4 py-3 text-center">Published</th>
                   <th className="px-4 py-3 text-center">Images</th>
                   <th className="px-4 py-3">Uploaded</th>
+                  <th className="px-4 py-3 w-px" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -457,6 +502,16 @@ export default function BulkImportPanel() {
                     <td className="px-4 py-3 text-slate-400">
                       <span className="flex items-center gap-1">
                         <Users size={11} /> {new Date(b.created_at).toLocaleDateString('en-IN')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center gap-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+                          b.id === activeBatchId ? 'text-[#5B12D6]' : 'text-slate-400'
+                        }`}
+                      >
+                        {b.id === activeBatchId ? 'Open' : 'Add images'}
+                        <ChevronRight size={13} />
                       </span>
                     </td>
                   </tr>
