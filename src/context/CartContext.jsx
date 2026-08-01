@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import { toDateOnly } from '../utils/safeDate';
 
 const CartContext = createContext(null);
 
@@ -70,12 +71,17 @@ export function CartProvider({ children }) {
             pairleyPrice: item.offer.offer_price,
             totalPaid: item.offer.offer_price,
             status: statusMapping[item.status] || 'searching',
-            date: new Date(item.created_at).toISOString().split('T')[0],
+            date: toDateOnly(item.created_at),
             matchPartner: item.status !== 'INTERESTED' ? {
               name: 'Matched Partner',
               avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=partner',
               city: item.offer.city || uCity,
-              matchDate: new Date(item.updated_at).toISOString().split('T')[0]
+              // offer_interests has no updated_at column, so this is always
+              // undefined — `new Date(undefined).toISOString()` threw
+              // RangeError mid-map and failed the entire history load. Only
+              // non-INTERESTED rows reach this branch, which is why it looked
+              // intermittent.
+              matchDate: toDateOnly(item.updated_at)
             } : null,
             countdownMinutes: item.status === 'INTERESTED' ? 120 : 0,
             progressPercent: item.status === 'INTERESTED' ? 50 : 100,

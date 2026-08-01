@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Save, Trash2, ImageOff } from 'lucide-react';
 import MediaUploadPanel from '../../components/business/MediaUploadPanel';
 import { getDocumentPreviewUrl } from '../../utils/adminFilePreview';
+import { toDateOnly } from '../../utils/safeDate';
 import { offerPublisherApi } from '../../utils/offerPublisherApi';
 import { useToast } from '../../context/ToastContext';
 import { categories } from '../../data/categories';
@@ -13,7 +14,9 @@ const STATUS_STYLES = {
   ACTIVE: 'bg-blue-50 text-blue-600 border-blue-200',
 };
 
-const toDateInput = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '');
+// Guarded against unparseable values, not just null: a non-empty but invalid
+// date string passed the old `d ?` check and then threw RangeError.
+const toDateInput = (d) => toDateOnly(d, '');
 
 function Field({ label, children }) {
   return (

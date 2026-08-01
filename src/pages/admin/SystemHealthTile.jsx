@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Activity, Database, HardDrive, ExternalLink, RefreshCw } from 'lucide-react';
+import { Activity, Database, HardDrive, Bell, ExternalLink, RefreshCw } from 'lucide-react';
 import { api } from '../../utils/api';
 import './SystemHealthTile.css';
 
@@ -70,6 +70,48 @@ export default function SystemHealthTile() {
             <span><HardDrive size={13} /> Storage</span>
             {health ? <StatusPill value={health.checks.storage} /> : <span className="health-pill">…</span>}
           </div>
+          {/* Which provider is actually serving uploads — the backend has
+              reported this since the Firebase migration, but the tile never
+              rendered it, so a silent fallback to S3 would have been
+              invisible here. */}
+          {health?.storageProvider && (
+            <div className="system-health-row">
+              <span>Storage provider</span>
+              <span className="system-health-value">{health.storageProvider}</span>
+            </div>
+          )}
+          {health?.storageError && (
+            <div className="system-health-row">
+              <span>Storage error</span>
+              <span className="system-health-value">{health.storageError}</span>
+            </div>
+          )}
+
+          {/* Push notifications. `mode: mock` means nothing is actually being
+              delivered, which is otherwise indistinguishable from working. */}
+          {health?.notifications && (
+            <>
+              <div className="system-health-row">
+                <span><Bell size={13} /> Notifications</span>
+                <StatusPill value={health.notifications.mode === 'live' ? 'ok' : 'degraded'} />
+              </div>
+              <div className="system-health-row">
+                <span>FCM credential</span>
+                <span className="system-health-value">
+                  {health.notifications.credentialSource === 'none'
+                    ? 'not configured'
+                    : health.notifications.credentialSource}
+                </span>
+              </div>
+              {health.notifications.projectId && (
+                <div className="system-health-row">
+                  <span>Firebase project</span>
+                  <span className="system-health-value">{health.notifications.projectId}</span>
+                </div>
+              )}
+            </>
+          )}
+
           <div className="system-health-row">
             <span>Release</span>
             <span className="system-health-value">{health?.release?.slice(0, 7) || '—'}</span>

@@ -8,6 +8,7 @@ import {
   AlertCircle,
   IndianRupee,
   ShieldCheck,
+  Shield,
   Eye,
   Search,
   Building2,
@@ -33,6 +34,7 @@ import { isValidImageSrc, getDocumentPreviewUrl, getDocumentDownloadUrl } from '
 import LaunchPassAdminPanel from './LaunchPassAdminPanel';
 import ClaimRequestsPanel from './ClaimRequestsPanel';
 import OfferPublisherPanel from './OfferPublisherPanel';
+import EntitlementPanel from './EntitlementPanel';
 import LeadManagementPanel from './LeadManagementPanel';
 import BusinessDuplicatesPanel from './BusinessDuplicatesPanel';
 import SystemHealthTile from './SystemHealthTile';
@@ -420,6 +422,17 @@ export default function AdminDashboard() {
           >
             <Users size={14} />
             Leads
+          </button>
+          <button
+            onClick={() => handleTabChange('entitlement')}
+            className={`admin-tab-btn flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all ${
+              activeTab === 'entitlement'
+                ? 'active-tab bg-[#5B12D6] text-white shadow-md shadow-[#5B12D6]/20'
+                : 'bg-white/75 border border-slate-200/40 text-slate-600 hover:bg-white hover:text-slate-800'
+            }`}
+          >
+            <Shield size={14} />
+            Entitlement
           </button>
           <button
             onClick={() => handleTabChange('claims')}
@@ -836,6 +849,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'offer-publisher' && <OfferPublisherPanel />}
+        {activeTab === 'entitlement' && <EntitlementPanel />}
 
         {activeTab === 'leads' && <LeadManagementPanel />}
 
