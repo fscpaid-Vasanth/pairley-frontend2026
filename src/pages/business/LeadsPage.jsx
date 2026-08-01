@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Users, MessageCircle, MessagesSquare, Phone, Tag, Lock, LockOpen } from 'lucide-react';
+import { Search, Users, MessageCircle, MessagesSquare, Phone, Tag, Lock, LockOpen, Sparkles } from 'lucide-react';
 import { api } from '../../utils/api';
 import { useToast } from '../../context/ToastContext';
 import { buildContactLeadMessage, openWhatsApp } from '../../utils/whatsapp';
@@ -30,6 +30,7 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [entitlement, setEntitlement] = useState(null);
 
   const fetchLeads = () => {
     setLoading(true);
@@ -45,8 +46,23 @@ export default function LeadsPage() {
       });
   };
 
+  // M1.2 — the merchant's current unlock entitlement. The backend resolves
+  // which policy applies; this page only renders what it's told, so pricing
+  // or campaign changes never require a frontend deploy.
+  const fetchEntitlement = () => {
+    api.get('/business/entitlement')
+      .then((data) => setEntitlement(data))
+      .catch((err) => {
+        // Non-fatal: leads still list and unlock still works or fails on the
+        // server's own verdict. Only the banner is lost.
+        console.warn('Failed to load entitlement status:', err);
+        setEntitlement(null);
+      });
+  };
+
   useEffect(() => {
     fetchLeads();
+    fetchEntitlement();
   }, []);
 
   const handleStatusChange = (leadId, status) => {
@@ -124,6 +140,44 @@ export default function LeadsPage() {
 
         <BusinessNav />
 
+        {/* M1.2 — entitlement banner. A promotional policy is called out as
+            a limited-time benefit so merchants understand it is a campaign,
+            not a permanent entitlement. Copy and dates come from the policy
+            itself, never from this file. */}
+        {entitlement && entitlement.isPromotional && entitlement.allowed && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 px-4 py-3 rounded-2xl mb-4">
+            <span className="flex items-center gap-2 text-amber-900 font-extrabold text-xs">
+              <Sparkles size={15} className="shrink-0" />
+              Launch Benefit: Unlimited Lead Unlocks
+            </span>
+            <span className="text-[11px] text-amber-700 leading-relaxed">
+              {entitlement.policyName} — free while the campaign runs
+              {entitlement.endsAt
+                ? `, until ${new Date(entitlement.endsAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                : ''}
+              .
+            </span>
+          </div>
+        )}
+
+        {entitlement && !entitlement.isPromotional && entitlement.remaining !== null && (
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-2xl mb-4">
+            <Lock size={13} className="text-slate-400 shrink-0" />
+            <span className="text-[11px] text-slate-600 font-semibold">
+              {entitlement.message}
+            </span>
+          </div>
+        )}
+
+        {entitlement && !entitlement.allowed && (
+          <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 px-4 py-2.5 rounded-2xl mb-4">
+            <Lock size={13} className="text-rose-500 shrink-0" />
+            <span className="text-[11px] text-rose-800 font-semibold">
+              {entitlement.message}
+            </span>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/80 p-3 rounded-2xl shadow-sm mb-4">
           <div className="flex gap-1.5 p-1 bg-slate-100 rounded-xl w-full sm:w-max overflow-x-auto">
             {STATUS_TABS.map((tab) => (
@@ -184,10 +238,18 @@ export default function LeadsPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className={`font-bold text-sm flex items-center gap-1.5 ${lead.unlocked_at ? 'text-slate-800' : 'text-slate-400 italic'}`}>
-                        {!lead.unlocked_at && <Lock size={12} />}
+                      <h4 className={`font-bold text-sm flex items-center gap-1.5 ${lead.unlocked_at ? 'text-slate-800' : 'text-slate-500'}`}>
+                        {!lead.unlocked_at && <Lock size={12} className="text-amber-500" />}
                         {lead.customer_name}
                       </h4>
+                      {/* Names the masking explicitly. Previously a greyed
+                          italic "Anonymous Customer" read as missing data
+                          rather than as a deliberate, reversible state. */}
+                      {!lead.unlocked_at && (
+                        <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase border bg-amber-50 text-amber-700 border-amber-200">
+                          Details Hidden
+                        </span>
+                      )}
                       <span
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${STATUS_BADGE[lead.status] || STATUS_BADGE.NEW}`}
                       >
@@ -246,7 +308,13 @@ export default function LeadsPage() {
                     ) : (
                       <button
                         onClick={() => handleUnlock(lead)}
-                        className="bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition"
+                        disabled={entitlement ? !entitlement.allowed : false}
+                        title={
+                          entitlement && !entitlement.allowed
+                            ? entitlement.message
+                            : 'Reveal this customer’s name and mobile number'
+                        }
+                        className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-[10px] px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition"
                       >
                         <LockOpen size={13} /> Unlock Customer Details
                       </button>
