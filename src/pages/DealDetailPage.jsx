@@ -19,6 +19,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import DealCard from '../components/DealCard';
+import SEO from '../components/SEO';
 import InterestButton from '../components/InterestButton';
 import PricingTierCard from '../components/PricingTierCard';
 import { useToast } from '../context/ToastContext';
@@ -417,8 +418,34 @@ const DealDetailPage = () => {
   const shownAvatars = MOCK_INTERESTED_AVATARS.slice(0, Math.min(deal.interestCount, 4));
   const extraCount = Math.max(0, deal.interestCount - 4);
 
+  // Launch-audit finding: every deal page previously served the same
+  // generic site-wide title/description — Google saw what looked like
+  // duplicate thin content across every offer, and sharing a deal link on
+  // WhatsApp showed generic Pairley branding instead of the deal itself,
+  // undermining the "share to hit the group threshold" mechanic the whole
+  // product depends on. SEO.jsx already existed, fully built, just never
+  // wired in here.
+  //
+  // Note: WhatsApp/Facebook/Twitter link-preview crawlers generally do not
+  // execute JavaScript, so this reliably fixes Google's indexing (Googlebot
+  // does render JS) and any share path that reads the live DOM, but does
+  // NOT guarantee a rich preview from crawlers that only fetch the raw,
+  // unrendered HTML. A guaranteed fix for those needs server-side/edge
+  // rendering for known bot user-agents — a separate, larger change, out of
+  // scope for this fix.
+  const shareDescription = deal.description
+    ? `${deal.description.slice(0, 140)}${deal.description.length > 140 ? '…' : ''} Save ₹${(deal.originalPrice - deal.pairleyPrice).toLocaleString('en-IN')} at ${deal.businessOwner?.name || 'this merchant'}.`
+    : `₹${deal.pairleyPrice?.toLocaleString('en-IN')} at ${deal.businessOwner?.name || 'this merchant'} — join together, save together on Pairley.`;
+
   return (
     <div className="page-wrapper">
+      <SEO
+        title={deal.title}
+        description={shareDescription}
+        canonical={`https://www.pairley.com/deals/${id}`}
+        ogImage={deal.images?.[0]}
+        ogType="product"
+      />
       <div className="deal-detail-page">
         <div className="container">
           {/* Breadcrumb */}

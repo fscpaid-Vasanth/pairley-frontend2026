@@ -96,6 +96,9 @@ export default defineConfig({
   // component/RTL setup.
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.test.js'],
+    // scripts/**/*.test.js added for generate-sitemap's own tests — a
+    // build-time script, not app code, but it found and fixed a real bug
+    // (regex-metacharacter escaping) worth locking in the same way.
+    include: ['src/**/*.test.js', 'scripts/**/*.test.js'],
   },
 });
