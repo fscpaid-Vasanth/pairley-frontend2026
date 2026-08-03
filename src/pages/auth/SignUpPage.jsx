@@ -62,7 +62,11 @@ function SignupPanel({ role, onBasicInfoSubmit, onGoogleNewUser }) {
     try {
       const firebaseUser = await signInWithGoogle();
       if (!firebaseUser) return;
+      // Sent to the backend for server-side verification (getAuth().verifyIdToken)
+      // — the backend no longer trusts email/name/uid from this request body alone.
+      const idToken = await firebaseUser.getIdToken();
       const checkPayload = {
+        idToken,
         name: firebaseUser.displayName || 'Google User',
         email: firebaseUser.email,
         role: role === 'customer' ? 'Customer' : 'Business',

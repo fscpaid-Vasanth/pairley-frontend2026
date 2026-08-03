@@ -48,6 +48,7 @@ export default function LaunchRegister() {
   const [googleUid, setGoogleUid] = useState(null);
   const [googlePhoto, setGooglePhoto] = useState(null);
   const [googleAuthed, setGoogleAuthed] = useState(false);
+  const [googleIdToken, setGoogleIdToken] = useState(null);
 
   useEffect(() => {
     if (step === 'otp') {
@@ -121,6 +122,9 @@ export default function LaunchRegister() {
     try {
       const firebaseUser = await signInWithGoogle();
       if (!firebaseUser) return;
+      // Sent to the backend for server-side verification (getAuth().verifyIdToken)
+      // — the backend no longer trusts email/name/uid from this request body alone.
+      const idToken = await firebaseUser.getIdToken();
 
       // Check if already registered in Firestore
       const memberRef = doc(db, 'launchPassMembers', firebaseUser.uid);
@@ -131,6 +135,7 @@ export default function LaunchRegister() {
 
         // Log in to the backend so the session is restored correctly
         const checkPayload = {
+          idToken,
           name: firebaseUser.displayName || 'Google User',
           email: firebaseUser.email,
           role: 'Customer',
@@ -159,6 +164,7 @@ export default function LaunchRegister() {
       }));
       setGoogleUid(firebaseUser.uid);
       setGooglePhoto(firebaseUser.photoURL || null);
+      setGoogleIdToken(idToken);
       setGoogleAuthed(true);
       showToast('Google verified! Please enter your mobile number and verify it via OTP.', 'success');
       // Do NOT skip to interests. Keep user on details step to verify mobile number.
@@ -226,6 +232,7 @@ export default function LaunchRegister() {
         // out of this payload entirely rather than defaulting to a dummy one.
         registerRes = await api.post('/auth/google', {
           ...registerPayload,
+          idToken: googleIdToken,
           google_uid: googleUid,
           profile_photo: googlePhoto || undefined,
         });
