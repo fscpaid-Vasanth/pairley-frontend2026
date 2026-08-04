@@ -110,7 +110,7 @@ export default function BusinessDashboard() {
           location: d.business?.city || d.city || business.city || 'Mumbai',
           interestCount: d.joined_people || 0,
           maxParticipants: d.required_people || 2,
-          images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          images: [d.cover_image || d.gallery_images?.[0] || d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
           status: d.status ? d.status.toLowerCase() : 'active'
         }));
         setDeals(mappedDeals);
@@ -130,7 +130,7 @@ export default function BusinessDashboard() {
               location: d.city || business.city || 'Mumbai',
               interestCount: d.joined_people || 0,
               maxParticipants: d.required_people || 2,
-              images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+              images: [d.cover_image || d.gallery_images?.[0] || d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
               status: d.status ? d.status.toLowerCase() : 'active'
             }));
             setDeals(mappedDeals);

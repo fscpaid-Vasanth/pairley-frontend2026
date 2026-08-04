@@ -58,7 +58,7 @@ export default function ManageDealsPage() {
           mode: getDealMode(d.offer_type),
           originalPrice: d.original_price,
           pairleyPrice: d.offer_price,
-          images: [d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          images: [d.cover_image || d.gallery_images?.[0] || d.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
           businessOwner: {
             id: d.business_id,
             name: d.business?.business_name || 'Local Seller',

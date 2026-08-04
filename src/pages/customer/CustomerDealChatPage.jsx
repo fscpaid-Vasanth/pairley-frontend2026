@@ -260,7 +260,7 @@ export default function CustomerDealChatPage() {
           originalPrice: data.original_price,
           pairleyPrice: data.offer_price,
           category: data.category ? data.category.toLowerCase() : 'shopping',
-          images: [data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          images: [data.cover_image || data.gallery_images?.[0] || data.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
           businessOwner: {
             name: data.business?.business_name || 'Local Seller',
             location: data.business?.city || data.business?.address || 'Bangalore'

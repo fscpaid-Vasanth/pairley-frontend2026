@@ -116,7 +116,7 @@ export default function CustomerDashboard() {
             title: h.offer.title,
             category: h.offer.category ? h.offer.category.toLowerCase() : 'shopping',
             pairleyPrice: h.offer.offer_price,
-            images: [h.offer.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop']
+            images: [h.offer.cover_image || h.offer.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop']
           })).slice(0, 3)
         );
 
@@ -128,7 +128,7 @@ export default function CustomerDashboard() {
               title: h.offer.title,
               category: h.offer.category ? h.offer.category.toLowerCase() : 'shopping',
               pairleyPrice: h.offer.offer_price,
-              images: [h.offer.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+              images: [h.offer.cover_image || h.offer.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
               partnerName: 'Matched Partner',
               status: h.status
             };
@@ -505,6 +505,11 @@ export default function CustomerDashboard() {
               pairleyPrice: d.offer_price || d.pairleyPrice,
               originalPrice: d.original_price || d.originalPrice,
               images: d.offer_image ? [d.offer_image] : d.images,
+              // cover_image/gallery_images are the current media model (Module 3+,
+              // what Offer Publisher writes) — offer_image is legacy-only and no
+              // longer set by new offers. NearbyDealsSection reads `coverImage`
+              // specifically (see its own imageUrl fallback chain).
+              coverImage: d.cover_image || d.gallery_images?.[0] || d.offer_image,
               interestCount: d.joined_people || d.interestCount || 0,
               maxParticipants: d.required_people || d.maxParticipants || 10,
               latitude: d.geo_lat,
@@ -569,7 +574,7 @@ export default function CustomerDashboard() {
                     {isCompleted ? (
                       <div className="block text-slate-800 flex-1 cursor-default">
                         <div className="relative overflow-hidden h-40 bg-slate-100">
-                          <ImageWithFallback className="w-full h-full object-cover" src={deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
+                          <ImageWithFallback className="w-full h-full object-cover" src={deal.cover_image || deal.gallery_images?.[0] || deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
                           <div className="absolute top-3 left-3">
                             <span className="px-2.5 py-1 bg-white/95 backdrop-blur-sm shadow-sm rounded-full text-[10px] font-bold text-slate-700 flex items-center gap-1">
                               {cat?.icon || '🛍️'} {cat?.name || 'General'}
@@ -599,7 +604,7 @@ export default function CustomerDashboard() {
                     ) : (
                       <Link to={`/deals/${deal.id}`} className="block text-slate-800 flex-1 hover:no-underline group">
                         <div className="relative overflow-hidden h-40 bg-slate-100">
-                          <ImageWithFallback className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
+                          <ImageWithFallback className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={deal.cover_image || deal.gallery_images?.[0] || deal.offer_image} alt={deal.title} fallbackType="deal" category={deal.category} />
                           <div className="absolute top-3 left-3">
                             <span className="px-2.5 py-1 bg-white/95 backdrop-blur-sm shadow-sm rounded-full text-[10px] font-bold text-slate-700 flex items-center gap-1">
                               {cat?.icon || '🛍️'} {cat?.name || 'General'}
