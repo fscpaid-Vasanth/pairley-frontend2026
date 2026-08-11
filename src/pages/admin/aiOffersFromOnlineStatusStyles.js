@@ -8,6 +8,7 @@ export const AI_OFFER_STATUS_STYLES = {
   PUBLISHED: 'bg-emerald-100 border-emerald-300 text-emerald-800',
   FAILED: 'bg-rose-50 border-rose-200 text-rose-700',
   REJECTED: 'bg-slate-100 border-slate-300 text-slate-600',
+  DUPLICATE_SUPPRESSED: 'bg-amber-50 border-amber-200 text-amber-700',
 };
 
 export const AI_OFFER_STATUS_LABELS = {
@@ -17,4 +18,5 @@ export const AI_OFFER_STATUS_LABELS = {
   PUBLISHED: 'Published',
   FAILED: 'Failed',
   REJECTED: 'Rejected',
+  DUPLICATE_SUPPRESSED: 'Duplicate',
 };

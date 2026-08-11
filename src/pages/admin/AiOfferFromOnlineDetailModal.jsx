@@ -191,8 +191,10 @@ export default function AiOfferFromOnlineDetailModal({ offerId, onClose, onChang
                     {offer.matched_business_id ? 'Matched to existing business' : 'New merchant created'} · <code className="text-xs">{businessId}</code>
                   </div>
                 ) : (
-                  <p className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-                    No merchant selected yet — match an existing business or create one before publishing.
+                  <p className="mb-2 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm text-indigo-800">
+                    No merchant selected yet — that's fine. Publishing will match an existing business automatically (same phone, or same
+                    name + city), or create a new UNCLAIMED one from this offer's own details. It shows on Pairley with a "Claim it" prompt
+                    until the real owner claims it.
                   </p>
                 )}
 
@@ -291,12 +293,11 @@ export default function AiOfferFromOnlineDetailModal({ offerId, onClose, onChang
                   <div className="flex flex-wrap gap-3">
                     <button
                       onClick={() => act('publish', () => aiOffersFromOnlineApi.publish(offerId))}
-                      disabled={busy === 'publish' || !businessId}
-                      title={!businessId ? 'Select a merchant first' : undefined}
+                      disabled={busy === 'publish'}
                       className="inline-flex items-center gap-2 rounded-lg bg-[#5B12D6] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#4a0fb0] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {busy === 'publish' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-                      Publish to Pairley
+                      {offer.status === 'DUPLICATE_SUPPRESSED' ? 'Re-check & Publish' : 'Publish to Pairley'}
                     </button>
                     <button
                       onClick={() => setShowReject((v) => !v)}
@@ -307,7 +308,24 @@ export default function AiOfferFromOnlineDetailModal({ offerId, onClose, onChang
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
                     Publishing runs the existing Offer Publisher pipeline — the offer is created, validated, approved and set live in one step.
+                    A duplicate check runs first; a high-confidence match is flagged instead of published.
                   </p>
+
+                  {offer.status === 'DUPLICATE_SUPPRESSED' && (
+                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      <p className="font-semibold">Flagged as a likely duplicate — not published.</p>
+                      {offer.duplicate_of_offer_id && (
+                        <p className="mt-1 text-xs">
+                          Matches existing offer <code className="text-xs">{offer.duplicate_of_offer_id}</code>
+                          {offer.duplicate_score != null ? ` · confidence ${Math.round(offer.duplicate_score * 100)}%` : ''}
+                        </p>
+                      )}
+                      {(offer.duplicate_reasons || []).length > 0 && (
+                        <p className="mt-1 text-xs">{offer.duplicate_reasons.join(', ')}</p>
+                      )}
+                      <p className="mt-1 text-xs">If this is wrong, correct a field above (e.g. the title) and publish again to re-check.</p>
+                    </div>
+                  )}
 
                   {showReject && (
                     <div className="mt-3 flex gap-2">

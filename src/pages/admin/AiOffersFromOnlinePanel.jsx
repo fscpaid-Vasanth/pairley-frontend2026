@@ -11,12 +11,13 @@ const STATUS_FILTERS = [
   { value: 'MERCHANT_MATCHED', label: 'Merchant Matched' },
   { value: 'READY_TO_PUBLISH', label: 'Ready to Publish' },
   { value: 'FAILED', label: 'Failed' },
+  { value: 'DUPLICATE_SUPPRESSED', label: 'Duplicate' },
   { value: 'PUBLISHED', label: 'Published' },
   { value: 'REJECTED', label: 'Rejected' },
 ];
 
-/** Only an offer that isn't already live (or declined) can be part of a publish batch. */
-const SELECTABLE_STATUSES = ['PENDING_ADMIN_REVIEW', 'MERCHANT_MATCHED', 'READY_TO_PUBLISH', 'FAILED'];
+/** Only an offer that isn't already live (or declined) can be part of a publish batch. DUPLICATE_SUPPRESSED stays selectable — it's a re-checkable finding, not terminal, so correcting a field (e.g. the title) and republishing can clear a false positive. */
+const SELECTABLE_STATUSES = ['PENDING_ADMIN_REVIEW', 'MERCHANT_MATCHED', 'READY_TO_PUBLISH', 'FAILED', 'DUPLICATE_SUPPRESSED'];
 
 /**
  * "AI Offers From Online" — offers exported from the standalone AI Offer
@@ -89,8 +90,8 @@ export default function AiOffersFromOnlinePanel() {
       const unresolved = (result.results || []).filter((r) => r.outcome !== 'PUBLISHED').map((r) => r.id);
       setSelectedIds(new Set(unresolved));
       showToast(
-        `${result.published} published${result.needsMerchant ? `, ${result.needsMerchant} need a merchant` : ''}${result.failed ? `, ${result.failed} failed` : ''}`,
-        result.failed || result.needsMerchant ? 'info' : 'success',
+        `${result.published} published${result.duplicate ? `, ${result.duplicate} flagged as duplicate` : ''}${result.failed ? `, ${result.failed} failed` : ''}`,
+        result.failed || result.duplicate ? 'info' : 'success',
       );
       fetchOffers();
     } catch (err) {
@@ -166,7 +167,7 @@ export default function AiOffersFromOnlinePanel() {
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
           <div className="flex flex-wrap gap-4 text-sm font-semibold">
             <span className="text-emerald-700">✓ {batchResult.published} Published</span>
-            {batchResult.needsMerchant > 0 && <span className="text-amber-700">⚠ {batchResult.needsMerchant} Needs Merchant</span>}
+            {batchResult.duplicate > 0 && <span className="text-amber-700">⚠ {batchResult.duplicate} Flagged as Duplicate</span>}
             {batchResult.failed > 0 && <span className="text-rose-700">✕ {batchResult.failed} Failed</span>}
           </div>
           {(batchResult.results || []).some((r) => r.outcome !== 'PUBLISHED') && (
@@ -179,7 +180,8 @@ export default function AiOffersFromOnlinePanel() {
                     <li key={r.id} className="flex gap-2">
                       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-500" />
                       <span>
-                        <strong>{offer?.merchant_name || r.id}</strong> — {r.error}
+                        <strong>{offer?.merchant_name || r.id}</strong> —{' '}
+                        {r.outcome === 'DUPLICATE' ? 'looks like a duplicate of an existing offer — see Details' : r.error}
                       </span>
                     </li>
                   );
@@ -265,6 +267,11 @@ export default function AiOffersFromOnlinePanel() {
                   {offer.status === 'FAILED' && offer.failure_reason && (
                     <p className="pt-1 text-[11px] text-rose-600" title={offer.failure_reason}>
                       {offer.failure_reason}
+                    </p>
+                  )}
+                  {offer.status === 'DUPLICATE_SUPPRESSED' && (
+                    <p className="pt-1 text-[11px] text-amber-700" title={(offer.duplicate_reasons || []).join(', ')}>
+                      Matches an existing offer — {(offer.duplicate_reasons || []).join(', ') || 'see Details'}
                     </p>
                   )}
                 </div>
