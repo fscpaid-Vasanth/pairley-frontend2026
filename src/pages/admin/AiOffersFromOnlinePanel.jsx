@@ -252,7 +252,9 @@ export default function AiOffersFromOnlinePanel() {
                     {offer.offer_title}
                   </p>
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-sm font-bold text-[#5B12D6]">₹{offer.offer_price}</span>
+                    <span className="text-sm font-bold text-[#5B12D6]">
+                      {offer.offer_price != null ? `₹${offer.offer_price}` : 'Promotional offer'}
+                    </span>
                     <button
                       onClick={() => setDetailTarget(offer.id)}
                       className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-[#5B12D6]"
