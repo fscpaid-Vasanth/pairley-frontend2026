@@ -37,7 +37,9 @@ export default function AiOffersFromOnlinePanel() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [publishing, setPublishing] = useState(false);
+  const [validating, setValidating] = useState(false);
   const [batchResult, setBatchResult] = useState(null);
+  const [dryRunResult, setDryRunResult] = useState(null);
   const [detailTarget, setDetailTarget] = useState(null);
 
   const fetchOffers = useCallback(() => {
@@ -78,10 +80,29 @@ export default function AiOffersFromOnlinePanel() {
   const selectAll = () => setSelectedIds(new Set(selectableOffers.map((o) => o.id)));
   const clearSelection = () => setSelectedIds(new Set());
 
+  const validateSelected = async () => {
+    if (selectedIds.size === 0) return;
+    setValidating(true);
+    setDryRunResult(null);
+    try {
+      const result = await aiOffersFromOnlineApi.validateSelected([...selectedIds]);
+      setDryRunResult(result);
+      showToast(
+        `Dry run: ${result.readyToPublish} ready, ${result.categoryFixable} category-fixable, ${result.priceRequired} price-required, ${result.otherFailures} other`,
+        'info',
+      );
+    } catch (err) {
+      showToast(err.message || 'Validation failed', 'error');
+    } finally {
+      setValidating(false);
+    }
+  };
+
   const publishSelected = async () => {
     if (selectedIds.size === 0) return;
     setPublishing(true);
     setBatchResult(null);
+    setDryRunResult(null);
     try {
       const result = await aiOffersFromOnlineApi.publishSelected([...selectedIds]);
       setBatchResult(result);
@@ -153,15 +174,59 @@ export default function AiOffersFromOnlinePanel() {
             {selectedIds.size} offer{selectedIds.size === 1 ? '' : 's'} selected
           </span>
         </div>
-        <button
-          onClick={publishSelected}
-          disabled={selectedIds.size === 0 || publishing}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#5B12D6] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a0fb0] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
-          Publish Selected{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={validateSelected}
+            disabled={selectedIds.size === 0 || validating}
+            className="inline-flex items-center gap-2 rounded-lg border border-[#5B12D6] px-4 py-2 text-sm font-semibold text-[#5B12D6] hover:bg-[#5B12D6]/5 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {validating && <Loader2 className="h-4 w-4 animate-spin" />}
+            Validate (Dry Run){selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
+          </button>
+          <button
+            onClick={publishSelected}
+            disabled={selectedIds.size === 0 || publishing}
+            className="inline-flex items-center gap-2 rounded-lg bg-[#5B12D6] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a0fb0] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
+            Publish Selected{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
+          </button>
+        </div>
       </div>
+
+      {dryRunResult && (
+        <div className="rounded-lg border border-[#5B12D6]/30 bg-[#5B12D6]/5 p-4">
+          <div className="flex flex-wrap gap-4 text-sm font-semibold">
+            <span className="text-gray-700">Total: {dryRunResult.total}</span>
+            <span className="text-emerald-700">Ready to publish: {dryRunResult.readyToPublish}</span>
+            {dryRunResult.categoryFixable > 0 && (
+              <span className="text-amber-700">Category-fixable: {dryRunResult.categoryFixable}</span>
+            )}
+            {dryRunResult.priceRequired > 0 && <span className="text-amber-700">Price-required: {dryRunResult.priceRequired}</span>}
+            {dryRunResult.otherFailures > 0 && <span className="text-rose-700">Other failures: {dryRunResult.otherFailures}</span>}
+          </div>
+          {dryRunResult.items.some((i) => i.outcome !== 'READY' || i.categoryNote) && (
+            <ul className="mt-3 space-y-1 text-xs text-gray-600">
+              {dryRunResult.items
+                .filter((i) => i.outcome !== 'READY' || i.categoryNote)
+                .map((i) => {
+                  const offer = offers.find((o) => o.id === i.id);
+                  return (
+                    <li key={i.id} className="flex gap-2">
+                      <AlertTriangle className={`mt-0.5 h-3.5 w-3.5 flex-shrink-0 ${i.outcome === 'READY' ? 'text-[#5B12D6]' : 'text-amber-500'}`} />
+                      <span>
+                        <strong>{offer?.merchant_name || i.id}</strong> — {i.message || i.categoryNote}
+                      </span>
+                    </li>
+                  );
+                })}
+            </ul>
+          )}
+          <p className="mt-3 text-xs text-gray-500">
+            Nothing has been published yet — this is a preview. Fix category/price issues, then run Publish Selected.
+          </p>
+        </div>
+      )}
 
       {batchResult && (
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
@@ -247,9 +312,25 @@ export default function AiOffersFromOnlinePanel() {
                 </button>
 
                 <div className="space-y-1 p-3">
-                  <p className="truncate text-sm font-semibold text-gray-900" title={offer.merchant_name}>
-                    {offer.merchant_name}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate text-sm font-semibold text-gray-900" title={offer.merchant_name}>
+                      {offer.merchant_name}
+                    </p>
+                    {/* 2026-08-12 — the linked business's claim status,
+                        surfaced right in the grid (not just the detail
+                        modal) — most relevant once an offer is PUBLISHED
+                        and live for customers. */}
+                    {offer.claim_status === 'UNCLAIMED' && (
+                      <span className="shrink-0 rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-700">
+                        Unclaimed
+                      </span>
+                    )}
+                    {offer.claim_status === 'CLAIMED' && (
+                      <span className="shrink-0 rounded-full border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-700">
+                        Claimed
+                      </span>
+                    )}
+                  </div>
                   <p className="line-clamp-2 text-xs text-gray-500" title={offer.offer_title}>
                     {offer.offer_title}
                   </p>

@@ -16,6 +16,7 @@ export const aiOffersFromOnlineApi = {
   createMerchant: (id) => api.put(`/admin/ai-offers-from-online/${id}/create-merchant`),
   correct: (id, fields) => api.patch(`/admin/ai-offers-from-online/${id}`, fields),
   publish: (id) => api.post(`/admin/ai-offers-from-online/${id}/publish`),
+  validateSelected: (ids) => api.post('/admin/ai-offers-from-online/validate-selected', { ids }),
   publishSelected: (ids) => api.post('/admin/ai-offers-from-online/publish-selected', { ids }),
   reject: (id, reason) => api.post(`/admin/ai-offers-from-online/${id}/reject`, { reason: reason || undefined }),
 };
