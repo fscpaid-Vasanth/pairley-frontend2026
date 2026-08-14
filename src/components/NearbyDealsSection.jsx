@@ -180,15 +180,26 @@ export default function NearbyDealsSection({
                     {deal.merchantName ?? deal.merchant?.name ?? ''}
                   </div>
 
+                  {/* pairleyPrice: 0 means no verified numeric price (BOGO/
+                      percentage/couple/group offers are still valid), not a
+                      real ₹0 deal — never show it as a price. */}
                   <div className="nearby-card__price-row">
-                    {originalPrice > pairleyPrice && (
-                      <span className="nearby-card__original">
-                        ₹{originalPrice.toLocaleString('en-IN')}
+                    {pairleyPrice ? (
+                      <>
+                        {originalPrice > pairleyPrice && (
+                          <span className="nearby-card__original">
+                            ₹{originalPrice.toLocaleString('en-IN')}
+                          </span>
+                        )}
+                        <span className="nearby-card__pairley">
+                          ₹{pairleyPrice.toLocaleString('en-IN')}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="nearby-card__pairley" style={{ fontSize: '0.8em' }}>
+                        See offer for details
                       </span>
                     )}
-                    <span className="nearby-card__pairley">
-                      ₹{pairleyPrice.toLocaleString('en-IN')}
-                    </span>
                   </div>
 
                   <div className="nearby-card__mini-bar">

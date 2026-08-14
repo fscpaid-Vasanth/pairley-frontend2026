@@ -299,24 +299,34 @@ function InnerMap({ deals, userLat, userLng, onDealClick }) {
                   gap: 6,
                 }}
               >
-                <span
-                  style={{
-                    fontWeight: 800,
-                    fontSize: 14,
-                    color: '#5B12D6',
-                  }}
-                >
-                  ₹{pairleyPrice.toLocaleString('en-IN')}
-                </span>
-                {originalPrice > pairleyPrice && (
-                  <span
-                    style={{
-                      textDecoration: 'line-through',
-                      fontSize: 11,
-                      color: '#9ca3af',
-                    }}
-                  >
-                    ₹{originalPrice.toLocaleString('en-IN')}
+                {/* pairleyPrice: 0 means no verified numeric price, not a
+                    real ₹0 deal. */}
+                {pairleyPrice ? (
+                  <>
+                    <span
+                      style={{
+                        fontWeight: 800,
+                        fontSize: 14,
+                        color: '#5B12D6',
+                      }}
+                    >
+                      ₹{pairleyPrice.toLocaleString('en-IN')}
+                    </span>
+                    {originalPrice > pairleyPrice && (
+                      <span
+                        style={{
+                          textDecoration: 'line-through',
+                          fontSize: 11,
+                          color: '#9ca3af',
+                        }}
+                      >
+                        ₹{originalPrice.toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span style={{ fontWeight: 700, fontSize: 12, color: '#64748b' }}>
+                    See offer for details
                   </span>
                 )}
               </div>
