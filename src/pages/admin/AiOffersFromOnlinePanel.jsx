@@ -5,11 +5,11 @@ import { aiOffersFromOnlineApi } from '../../utils/aiOffersFromOnlineApi';
 import AiOfferFromOnlineDetailModal from './AiOfferFromOnlineDetailModal';
 import { AI_OFFER_STATUS_STYLES, AI_OFFER_STATUS_LABELS } from './aiOffersFromOnlineStatusStyles';
 
-// Order matches the dry-run summary chips above — blocking reasons a
-// correction fixes first (price, category), then the ones that don't
-// (expired, other).
+// Order matches the dry-run summary chips above — the correctable blocking
+// reason (category), then the ones that don't have a correction (expired,
+// other). Price is deliberately not a dry-run reason at all (2026-08-14) —
+// a price-less offer classifies READY, same as one with a real price.
 const DRY_RUN_GROUPS = [
-  { outcome: 'PRICE_REQUIRED', heading: 'Price Required', icon: AlertTriangle, color: 'text-amber-700' },
   { outcome: 'CATEGORY_REQUIRED', heading: 'Category Required', icon: AlertTriangle, color: 'text-amber-700' },
   { outcome: 'EXPIRED', heading: 'Expired', icon: Clock, color: 'text-slate-500' },
   { outcome: 'OTHER_FAILURE', heading: 'Other', icon: XCircle, color: 'text-rose-700' },
@@ -19,7 +19,6 @@ const STATUS_FILTERS = [
   { value: '', label: 'All' },
   { value: 'PENDING_ADMIN_REVIEW', label: 'Pending Review' },
   { value: 'MERCHANT_MATCHED', label: 'Merchant Matched' },
-  { value: 'PRICE_REQUIRED', label: 'Price Required' },
   { value: 'CATEGORY_REQUIRED', label: 'Category Required' },
   { value: 'READY_TO_PUBLISH', label: 'Ready to Publish' },
   { value: 'EXPIRED', label: 'Expired' },
@@ -31,18 +30,17 @@ const STATUS_FILTERS = [
 
 /**
  * Only an offer that isn't already live (or declined) can be part of a
- * publish batch. PRICE_REQUIRED/CATEGORY_REQUIRED stay selectable — these
- * are admin-correctable review states, and re-selecting + Publish Selected
- * is how a correction gets re-attempted after PATCHing the offer.
- * DUPLICATE_SUPPRESSED also stays selectable for the same reason — a
- * re-checkable finding, not terminal. EXPIRED is deliberately excluded:
- * there's no "extend validity" action, so the only real next step for an
- * expired offer is Reject, via the detail modal, not a bulk republish.
+ * publish batch. CATEGORY_REQUIRED stays selectable — an admin-correctable
+ * review state, and re-selecting + Publish Selected is how a correction
+ * gets re-attempted after PATCHing the offer. DUPLICATE_SUPPRESSED also
+ * stays selectable for the same reason — a re-checkable finding, not
+ * terminal. EXPIRED is deliberately excluded: there's no "extend validity"
+ * action, so the only real next step for an expired offer is Reject, via
+ * the detail modal, not a bulk republish.
  */
 const SELECTABLE_STATUSES = [
   'PENDING_ADMIN_REVIEW',
   'MERCHANT_MATCHED',
-  'PRICE_REQUIRED',
   'CATEGORY_REQUIRED',
   'READY_TO_PUBLISH',
   'FAILED',
@@ -128,7 +126,7 @@ export default function AiOffersFromOnlinePanel() {
       const result = await aiOffersFromOnlineApi.validateSelected([...selectedIds]);
       setDryRunResult(result);
       showToast(
-        `Dry run: ${result.readyToPublish} ready, ${result.priceRequired} price-required, ${result.categoryRequired} category-required, ${result.expired} expired, ${result.otherFailures} other`,
+        `Dry run: ${result.readyToPublish} ready, ${result.categoryRequired} category-required, ${result.expired} expired, ${result.otherFailures} other`,
         'info',
       );
     } catch (err) {
@@ -250,7 +248,6 @@ export default function AiOffersFromOnlinePanel() {
           <div className="flex flex-wrap gap-4 text-sm font-semibold">
             <span className="text-gray-700">Total: {dryRunResult.total}</span>
             <span className="text-emerald-700">Ready to Publish: {dryRunResult.readyToPublish}</span>
-            {dryRunResult.priceRequired > 0 && <span className="text-amber-700">Price Required: {dryRunResult.priceRequired}</span>}
             {dryRunResult.categoryRequired > 0 && <span className="text-amber-700">Category Required: {dryRunResult.categoryRequired}</span>}
             {dryRunResult.expired > 0 && <span className="text-slate-500">Expired: {dryRunResult.expired}</span>}
             {dryRunResult.otherFailures > 0 && <span className="text-rose-700">Other: {dryRunResult.otherFailures}</span>}
@@ -318,7 +315,6 @@ export default function AiOffersFromOnlinePanel() {
           <div className="flex flex-wrap gap-4 text-sm font-semibold">
             <span className="text-emerald-700">✓ {batchResult.published} Published</span>
             {batchResult.duplicate > 0 && <span className="text-amber-700">⚠ {batchResult.duplicate} Flagged as Duplicate</span>}
-            {batchResult.priceRequired > 0 && <span className="text-amber-700">⚠ {batchResult.priceRequired} Price Required</span>}
             {batchResult.categoryRequired > 0 && <span className="text-amber-700">⚠ {batchResult.categoryRequired} Category Required</span>}
             {batchResult.expired > 0 && <span className="text-slate-500">⚠ {batchResult.expired} Expired</span>}
             {batchResult.failed > 0 && <span className="text-rose-700">✕ {batchResult.failed} Failed</span>}
@@ -433,7 +429,7 @@ export default function AiOffersFromOnlinePanel() {
                       <Eye className="h-3.5 w-3.5" /> Details
                     </button>
                   </div>
-                  {['FAILED', 'PRICE_REQUIRED', 'CATEGORY_REQUIRED', 'EXPIRED'].includes(offer.status) && offer.failure_reason && (
+                  {['FAILED', 'CATEGORY_REQUIRED', 'EXPIRED'].includes(offer.status) && offer.failure_reason && (
                     <p
                       className={`pt-1 text-[11px] ${offer.status === 'FAILED' ? 'text-rose-600' : 'text-amber-700'}`}
                       title={offer.failure_reason}

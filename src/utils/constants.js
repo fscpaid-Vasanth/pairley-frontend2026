@@ -42,6 +42,7 @@ export const ROUTES = {
   BUSINESS_LEAD_CHAT: '/business/lead-chat/:leadId',
   BUSINESS_PAYOUTS: '/business/payouts',
   BUSINESS_SETTINGS: '/business/settings',
+  BUSINESS_PLANS: '/business/plans',
   CLAIM_BUSINESS: '/claim/:businessId',
 
   // Admin
@@ -129,7 +130,14 @@ export const getTimeGreeting = () => {
   return 'Good Evening';
 };
 
+// 2026-08-14 — a Pairley offer with no verified numeric price (BOGO,
+// percentage-off with no source price, couple/group offers, etc.) stores
+// pairleyPrice as 0, never a real ₹ figure — see ai-offers-from-online
+// .service.ts. That 0 is a "no fixed price" sentinel, not a real ₹0 deal,
+// so it must never compute a percentage/savings figure — a naive
+// (0 - originalPrice) calculation would report "100% OFF", which is wrong.
 export const calculateSavings = (originalPrice, pairleyPrice) => {
+  if (!pairleyPrice || !originalPrice) return { saved: null, percentage: null };
   const saved = originalPrice - pairleyPrice;
   const percentage = Math.round((saved / originalPrice) * 100);
   return { saved, percentage };

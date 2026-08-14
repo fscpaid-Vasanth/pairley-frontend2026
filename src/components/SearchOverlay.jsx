@@ -285,9 +285,15 @@ export default function SearchOverlay({ isOpen, onClose }) {
                             {cat?.icon} {cat?.name} · {deal.location} · {modeLabel}
                           </div>
                         </div>
-                        <span className="search-overlay__result-price">
-                          {formatPrice(deal.pairleyPrice)}
-                        </span>
+                        {/* pairleyPrice is 0 for a deal with no verified
+                            numeric price (BOGO/percentage/couple/group
+                            offers are still valid) — the title already
+                            states the mechanic, so skip a misleading ₹0. */}
+                        {!!deal.pairleyPrice && (
+                          <span className="search-overlay__result-price">
+                            {formatPrice(deal.pairleyPrice)}
+                          </span>
+                        )}
                       </Link>
                     );
                   })

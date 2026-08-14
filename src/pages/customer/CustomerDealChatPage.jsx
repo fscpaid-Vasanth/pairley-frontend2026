@@ -603,16 +603,24 @@ export default function CustomerDealChatPage() {
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-3 mt-4 flex justify-between items-center text-xs font-semibold leading-relaxed text-slate-500">
-                <div>
-                  <span className="block text-[10px] text-slate-400">Pairley Price</span>
-                  <span className="text-sm font-extrabold text-[#5B12D6]">{formatPrice(deal.pairleyPrice)}</span>
+              {/* pairleyPrice: 0 means no verified numeric price, not a real
+                  ₹0 deal. */}
+              {deal.pairleyPrice ? (
+                <div className="border-t border-slate-100 pt-3 mt-4 flex justify-between items-center text-xs font-semibold leading-relaxed text-slate-500">
+                  <div>
+                    <span className="block text-[10px] text-slate-400">Pairley Price</span>
+                    <span className="text-sm font-extrabold text-[#5B12D6]">{formatPrice(deal.pairleyPrice)}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-[10px] text-slate-400">Original Price</span>
+                    <span className="text-xs font-bold text-slate-400 line-through">{formatPrice(deal.originalPrice)}</span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="block text-[10px] text-slate-400">Original Price</span>
-                  <span className="text-xs font-bold text-slate-400 line-through">{formatPrice(deal.originalPrice)}</span>
+              ) : (
+                <div className="border-t border-slate-100 pt-3 mt-4 text-xs font-semibold text-slate-500">
+                  No fixed price — see offer terms
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Date & Time Coordination Widget */}

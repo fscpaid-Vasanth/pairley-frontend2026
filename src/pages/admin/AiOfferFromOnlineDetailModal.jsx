@@ -16,7 +16,7 @@ const EDITABLE_FIELDS = [
   { key: 'offerTitle', dbKey: 'offer_title', label: 'Offer Title' },
   { key: 'description', dbKey: 'description', label: 'Description' },
   { key: 'originalPrice', dbKey: 'original_price', label: 'Original Price', type: 'number' },
-  { key: 'offerPrice', dbKey: 'offer_price', label: 'Offer Price', type: 'number', highlight: true },
+  { key: 'offerPrice', dbKey: 'offer_price', label: 'Offer Price (optional)', type: 'number', highlight: true },
   { key: 'terms', dbKey: 'terms', label: 'Terms' },
 ];
 
@@ -324,25 +324,6 @@ export default function AiOfferFromOnlineDetailModal({ offerId, onClose, onChang
                         <p className="mt-1 text-xs">{offer.duplicate_reasons.join(', ')}</p>
                       )}
                       <p className="mt-1 text-xs">If this is wrong, correct a field above (e.g. the title) and publish again to re-check.</p>
-                    </div>
-                  )}
-
-                  {offer.status === 'PRICE_REQUIRED' && (
-                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                      <p className="font-semibold">⚠ Price Required</p>
-                      <p className="mt-1 text-xs">{offer.failure_reason || 'Source price could not be verified.'}</p>
-                      <p className="mt-2 text-xs">
-                        {offer.source_url ? (
-                          <>
-                            <a href={offer.source_url} target="_blank" rel="noreferrer" className="font-semibold underline">
-                              Open Source
-                            </a>{' '}
-                            → verify the real price → enter it in <strong>Offer Price</strong> below → Save changes → Publish.
-                          </>
-                        ) : (
-                          <>Enter a verified price in <strong>Offer Price</strong> below → Save changes → Publish.</>
-                        )}
-                      </p>
                     </div>
                   )}
 

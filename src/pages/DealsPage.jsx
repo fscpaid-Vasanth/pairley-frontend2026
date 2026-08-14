@@ -11,7 +11,7 @@ import RadiusSelector from '../components/RadiusSelector';
 import { useLocationContext } from '../context/LocationContext';
 import { useSavedOffers } from '../hooks/useSavedOffers';
 import { api } from '../utils/api';
-import { MALLS } from '../utils/constants';
+import { MALLS, calculateSavings } from '../utils/constants';
 import { getDealMode } from '../utils/offerTypes';
 import SEO from '../components/SEO';
 import './DealsPage.css';
@@ -186,8 +186,11 @@ const DealsPage = () => {
         deals.sort((a, b) => b.interestCount - a.interestCount);
         break;
       case 'savings': {
-        const savings = (d) =>
-          Math.round(((d.originalPrice - d.pairleyPrice) / d.originalPrice) * 100);
+        // A deal with no verified numeric price (pairleyPrice: 0 sentinel —
+        // see ai-offers-from-online.service.ts) has no real savings % to
+        // rank by; calculateSavings returns null for it rather than a
+        // misleading "100% OFF", and null-percentage deals sort last.
+        const savings = (d) => calculateSavings(d.originalPrice, d.pairleyPrice).percentage ?? -1;
         deals.sort((a, b) => savings(b) - savings(a));
         break;
       }

@@ -5,7 +5,7 @@ import { Heart, Search, Users, Gift, ArrowRight, Check, TrendingUp, Sparkles, Ba
 import { api } from '../utils/api';
 import HeroSection from '../components/HeroSection';
 import ImageWithFallback from '../components/ImageWithFallback';
-import { ROUTES, formatPrice } from '../utils/constants';
+import { ROUTES, formatPrice, calculateSavings } from '../utils/constants';
 import { categories } from '../data/categories';
 import SEO from '../components/SEO';
 import './HomePage.css';
@@ -118,7 +118,10 @@ export default function HomePage() {
 
   const getMappedDeal = (deal) => {
     if (deal.original_price !== undefined) {
-      const discountPct = Math.round(((deal.original_price - deal.offer_price) / deal.original_price) * 100);
+      // offer_price is 0 for a deal with no verified numeric price (BOGO/
+      // percentage/couple/group offers are still valid) — never a real
+      // ₹0, and never a real "% OFF" figure to compute from it.
+      const { percentage } = calculateSavings(deal.original_price, deal.offer_price);
       const categoryName = deal.category ? deal.category.toLowerCase() : 'shopping';
       return {
         id: deal.id,
@@ -127,7 +130,7 @@ export default function HomePage() {
         category: categoryName,
         originalPrice: deal.original_price,
         pairleyPrice: deal.offer_price,
-        discount: `${discountPct}% OFF`,
+        discount: percentage != null ? `${percentage}% OFF` : 'Special Offer',
         progress: Math.min(100, Math.round(((deal.joined_people || 0) / (deal.required_people || 2)) * 100)),
         joined: `${deal.joined_people || 0}/${deal.required_people || 2} Joined`,
         image: deal.offer_image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=350&fit=crop'
@@ -327,11 +330,18 @@ export default function HomePage() {
                               <h3 className="popular-deal-title">{deal.title}</h3>
                               <p className="popular-deal-merchant">{deal.merchant}</p>
 
-                              {/* Pricing */}
-                              <div className="popular-deal-pricing">
-                                <span className="popular-deal-price">{formatPrice(deal.pairleyPrice)}</span>
-                                <span className="popular-deal-original">{formatPrice(deal.originalPrice)}</span>
-                              </div>
+                              {/* Pricing — pairleyPrice: 0 means no verified
+                                  numeric price, not a real ₹0 deal. */}
+                              {deal.pairleyPrice ? (
+                                <div className="popular-deal-pricing">
+                                  <span className="popular-deal-price">{formatPrice(deal.pairleyPrice)}</span>
+                                  <span className="popular-deal-original">{formatPrice(deal.originalPrice)}</span>
+                                </div>
+                              ) : (
+                                <div className="popular-deal-pricing">
+                                  <span className="popular-deal-price" style={{ fontSize: '0.75em' }}>See offer for details</span>
+                                </div>
+                              )}
 
                               {/* Progress */}
                               <div className="popular-deal-progress-row">

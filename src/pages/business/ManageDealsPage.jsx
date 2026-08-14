@@ -22,7 +22,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 // Removed mock imports to prevent dashboard fallbacks
-import { formatPrice } from '../../utils/constants';
+import { formatPrice, calculateSavings } from '../../utils/constants';
 import { api } from '../../utils/api';
 import { getCategoryById } from '../../data/categories';
 import { getDealMode, getOfferTypeIcon, getOfferTypeMeta } from '../../utils/offerTypes';
@@ -399,15 +399,22 @@ export default function ManageDealsPage() {
                                 </div>
                               )}
                             </td>
-                            {/* Column 5: Pricing */}
+                            {/* Column 5: Pricing — pairleyPrice: 0 means no
+                                verified numeric price, not a real ₹0 deal. */}
                             <td className="p-4">
                               <div className="flex flex-col">
-                                <span className="font-extrabold text-emerald-600 text-sm">
-                                  {formatPrice(deal.pairleyPrice)}
-                                </span>
-                                <span className="text-xs text-slate-400 line-through">
-                                  {formatPrice(deal.originalPrice)}
-                                </span>
+                                {deal.pairleyPrice ? (
+                                  <>
+                                    <span className="font-extrabold text-emerald-600 text-sm">
+                                      {formatPrice(deal.pairleyPrice)}
+                                    </span>
+                                    <span className="text-xs text-slate-400 line-through">
+                                      {formatPrice(deal.originalPrice)}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="text-xs font-semibold text-slate-500">No fixed price</span>
+                                )}
                               </div>
                             </td>
                             {/* Column 6: Actions */}
@@ -499,17 +506,24 @@ export default function ManageDealsPage() {
                             
                             <h4 className="font-bold text-slate-800 text-md line-clamp-1 mb-3">{deal.title}</h4>
 
-                            {/* Info grid */}
-                            <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl mb-4 text-xs">
-                              <div>
-                                <span className="text-slate-400 block font-medium">Retail Price</span>
-                                <span className="line-through text-slate-500 font-bold">{formatPrice(deal.originalPrice)}</span>
+                            {/* Info grid — pairleyPrice: 0 means no verified
+                                numeric price, not a real ₹0 deal. */}
+                            {deal.pairleyPrice ? (
+                              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl mb-4 text-xs">
+                                <div>
+                                  <span className="text-slate-400 block font-medium">Retail Price</span>
+                                  <span className="line-through text-slate-500 font-bold">{formatPrice(deal.originalPrice)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-400 block font-medium">Deal Price</span>
+                                  <span className="text-emerald-600 font-extrabold">{formatPrice(deal.pairleyPrice)}</span>
+                                </div>
                               </div>
-                              <div>
-                                <span className="text-slate-400 block font-medium">Deal Price</span>
-                                <span className="text-emerald-600 font-extrabold">{formatPrice(deal.pairleyPrice)}</span>
+                            ) : (
+                              <div className="bg-slate-50 p-3 rounded-xl mb-4 text-xs">
+                                <span className="text-slate-500 font-semibold">No fixed price — see offer terms</span>
                               </div>
-                            </div>
+                            )}
 
                             {/* Progress bar info */}
                             {isStandard ? (
@@ -647,22 +661,33 @@ export default function ManageDealsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 border-y border-slate-100 py-4 bg-slate-50/50 rounded-2xl px-4 text-xs md:text-sm">
-                  <div>
-                    <span className="text-slate-400 block font-medium">Original Retail</span>
-                    <span className="line-through text-slate-500 font-bold">{formatPrice(previewDeal.originalPrice)}</span>
+                {/* pairleyPrice: 0 means no verified numeric price, not a
+                    real ₹0 deal — never a real "% OFF" to compute from it. */}
+                {previewDeal.pairleyPrice ? (
+                  <div className="grid grid-cols-3 gap-4 border-y border-slate-100 py-4 bg-slate-50/50 rounded-2xl px-4 text-xs md:text-sm">
+                    <div>
+                      <span className="text-slate-400 block font-medium">Original Retail</span>
+                      <span className="line-through text-slate-500 font-bold">{formatPrice(previewDeal.originalPrice)}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-medium">Deal Price</span>
+                      <span className="text-emerald-600 font-extrabold">{formatPrice(previewDeal.pairleyPrice)}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-medium">Total Savings</span>
+                      <span className="text-[#5B12D6] font-extrabold">
+                        {(() => {
+                          const { percentage } = calculateSavings(previewDeal.originalPrice, previewDeal.pairleyPrice);
+                          return percentage != null ? `${percentage}% OFF` : '—';
+                        })()}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium">Deal Price</span>
-                    <span className="text-emerald-600 font-extrabold">{formatPrice(previewDeal.pairleyPrice)}</span>
+                ) : (
+                  <div className="border-y border-slate-100 py-4 bg-slate-50/50 rounded-2xl px-4 text-xs md:text-sm">
+                    <span className="text-slate-500 font-semibold">No fixed price — see offer terms for the mechanic</span>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block font-medium">Total Savings</span>
-                    <span className="text-[#5B12D6] font-extrabold">
-                      {Math.round(((previewDeal.originalPrice - previewDeal.pairleyPrice) / previewDeal.originalPrice) * 100)}% OFF
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 <div>
                   <h4 className="font-bold text-slate-800 text-sm mb-1.5">Listing Description</h4>

@@ -220,22 +220,34 @@ export default function DealCard({ deal, onClick, distance, isSaved: isSavedProp
             </>
           )}
 
-          {/* Bottom: price + savings */}
-          <div className="deal-card__bottom">
-            <div>
-              <span className="deal-card__price-pairley">{formatPrice(deal.pairleyPrice || deal.offer_price)}</span>
-              <span className="deal-card__price-original">{formatPrice(deal.originalPrice || deal.original_price)}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-              <div className="deal-card__savings-badge">
-                <Zap size={10} style={{ marginRight: 3 }} />
-                {percentage}% OFF
+          {/* Bottom: price + savings. offer_price is 0 for a deal with no
+              verified numeric price (BOGO/percentage/couple/group offers
+              are still valid Pairley deals) — the mechanic is already
+              stated in the title above, so this zone just points at it
+              rather than showing a misleading ₹0 or "% OFF" figure. */}
+          {(deal.pairleyPrice || deal.offer_price) ? (
+            <div className="deal-card__bottom">
+              <div>
+                <span className="deal-card__price-pairley">{formatPrice(deal.pairleyPrice || deal.offer_price)}</span>
+                <span className="deal-card__price-original">{formatPrice(deal.originalPrice || deal.original_price)}</span>
               </div>
-              {savingsAmt && (
-                <div className="deal-card__save-amount">💰 Save {savingsAmt}</div>
-              )}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                {percentage != null && (
+                  <div className="deal-card__savings-badge">
+                    <Zap size={10} style={{ marginRight: 3 }} />
+                    {percentage}% OFF
+                  </div>
+                )}
+                {savingsAmt && (
+                  <div className="deal-card__save-amount">💰 Save {savingsAmt}</div>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="deal-card__bottom">
+              <span className="deal-card__price-pairley" style={{ fontSize: '0.85em' }}>See offer for details</span>
+            </div>
+          )}
 
           {/* Hover CTA */}
           <div className="deal-card__join-cta">{isStandard ? 'Show Interest →' : 'Join This Deal →'}</div>

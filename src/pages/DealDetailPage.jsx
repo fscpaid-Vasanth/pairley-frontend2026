@@ -433,9 +433,17 @@ const DealDetailPage = () => {
   // unrendered HTML. A guaranteed fix for those needs server-side/edge
   // rendering for known bot user-agents — a separate, larger change, out of
   // scope for this fix.
+  // pairleyPrice is 0 for a deal with no verified numeric price (BOGO/
+  // percentage/couple/group offers are still valid) — never subtract
+  // against it or print it as a ₹ figure in share/meta text.
+  const hasVerifiedPrice = !!deal.pairleyPrice;
   const shareDescription = deal.description
-    ? `${deal.description.slice(0, 140)}${deal.description.length > 140 ? '…' : ''} Save ₹${(deal.originalPrice - deal.pairleyPrice).toLocaleString('en-IN')} at ${deal.businessOwner?.name || 'this merchant'}.`
-    : `₹${deal.pairleyPrice?.toLocaleString('en-IN')} at ${deal.businessOwner?.name || 'this merchant'} — join together, save together on Pairley.`;
+    ? `${deal.description.slice(0, 140)}${deal.description.length > 140 ? '…' : ''}${
+        hasVerifiedPrice ? ` Save ₹${(deal.originalPrice - deal.pairleyPrice).toLocaleString('en-IN')}` : ''
+      } at ${deal.businessOwner?.name || 'this merchant'}.`
+    : hasVerifiedPrice
+      ? `₹${deal.pairleyPrice.toLocaleString('en-IN')} at ${deal.businessOwner?.name || 'this merchant'} — join together, save together on Pairley.`
+      : `${deal.title || 'Special offer'} at ${deal.businessOwner?.name || 'this merchant'} — join together, save together on Pairley.`;
 
   return (
     <div className="page-wrapper">
@@ -536,7 +544,17 @@ const DealDetailPage = () => {
                   name={deal.businessOwner.name}
                 />
                 <div className="deal-owner-info">
-                  <div className="deal-owner-name">{deal.businessOwner.name}</div>
+                  <div className="deal-owner-name" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {deal.businessOwner.name}
+                    {/* Module 12 Phase 2 — the merchant-facing status, shown
+                        plainly rather than only implied by whether the claim
+                        prompt below happens to appear. */}
+                    {deal.businessStatus === 'UNCLAIMED' && (
+                      <span className="text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-700">
+                        Unclaimed
+                      </span>
+                    )}
+                  </div>
                   <div className="deal-owner-meta">
                     {renderStars(deal.businessOwner.rating)}
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -733,28 +751,46 @@ const DealDetailPage = () => {
             >
               {/* Premium Pricing Card */}
               <div className="deal-pricing-card">
-                {/* Gradient header */}
+                {/* Gradient header. pairleyPrice is 0 for a deal with no
+                    verified numeric price (BOGO/percentage/couple/group
+                    offers are still valid Pairley deals) — the offer's own
+                    title already states the mechanic, so this header points
+                    at it instead of showing a misleading ₹0/% figure. */}
                 <div className="deal-pricing-card__header">
                   <div className="deal-pricing-card__label">
-                    {isStandardOffer ? 'Offer Price' : isPair ? 'Pair Deal Price' : 'Group Deal — Starting From'}
+                    {deal.pairleyPrice
+                      ? (isStandardOffer ? 'Offer Price' : isPair ? 'Pair Deal Price' : 'Group Deal — Starting From')
+                      : 'Special Offer'}
                   </div>
-                  <div className="deal-pricing-card__price-row">
-                    <span className="deal-pricing-card__price-current">
-                      {formatPrice(deal.pairleyPrice)}
-                    </span>
-                    <span className="deal-pricing-card__price-original">
-                      {formatPrice(deal.originalPrice)}
-                    </span>
-                  </div>
-                  <span className="deal-pricing-card__savings-pill">
-                    <TrendingDown size={11} /> Save {percentage}% — ₹{saved} off
-                  </span>
+                  {deal.pairleyPrice ? (
+                    <>
+                      <div className="deal-pricing-card__price-row">
+                        <span className="deal-pricing-card__price-current">
+                          {formatPrice(deal.pairleyPrice)}
+                        </span>
+                        <span className="deal-pricing-card__price-original">
+                          {formatPrice(deal.originalPrice)}
+                        </span>
+                      </div>
+                      {percentage != null && (
+                        <span className="deal-pricing-card__savings-pill">
+                          <TrendingDown size={11} /> Save {percentage}% — ₹{saved} off
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <div className="deal-pricing-card__price-row">
+                      <span className="deal-pricing-card__price-current" style={{ fontSize: '0.7em' }}>
+                        {deal.title}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card body */}
                 <div className="deal-pricing-card__body">
                   {/* Pair: per-person price */}
-                  {isPair && (
+                  {isPair && !!deal.pairleyPrice && (
                     <div className="deal-per-person">
                       <div className="deal-per-person-label">Each person pays</div>
                       <div className="deal-per-person-price">
@@ -830,9 +866,15 @@ const DealDetailPage = () => {
                                       <span className="text-[9px] text-slate-400 font-semibold px-2 py-0.5 bg-slate-50 rounded-md border border-slate-100">{interest.customer?.city || 'No City'}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-slate-500 mt-1">
-                                      <a href={`tel:${interest.customer?.mobile}`} className="hover:underline text-[#5B12D6] flex items-center gap-0.5 font-bold">
-                                        📞 {interest.customer?.mobile}
-                                      </a>
+                                      {interest.customer?.mobile ? (
+                                        <a href={`tel:${interest.customer.mobile}`} className="hover:underline text-[#5B12D6] flex items-center gap-0.5 font-bold">
+                                          📞 {interest.customer.mobile}
+                                        </a>
+                                      ) : (
+                                        <span className="flex items-center gap-1 font-bold text-slate-400">
+                                          🔒 Unlock to view contact
+                                        </span>
+                                      )}
                                       {interest.status === 'COMPLETED' ? (
                                         <span className="text-[9px] font-extrabold rounded-lg px-2.5 py-1 border bg-emerald-50 border-emerald-200 text-emerald-700">
                                           Completed ✓
