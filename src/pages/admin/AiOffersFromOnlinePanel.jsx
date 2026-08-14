@@ -1,23 +1,53 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { CheckSquare, Square, Eye, Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { CheckSquare, Square, Eye, Loader2, AlertTriangle, XCircle, Clock, RefreshCw } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { aiOffersFromOnlineApi } from '../../utils/aiOffersFromOnlineApi';
 import AiOfferFromOnlineDetailModal from './AiOfferFromOnlineDetailModal';
 import { AI_OFFER_STATUS_STYLES, AI_OFFER_STATUS_LABELS } from './aiOffersFromOnlineStatusStyles';
 
+// Order matches the dry-run summary chips above — blocking reasons a
+// correction fixes first (price, category), then the ones that don't
+// (expired, other).
+const DRY_RUN_GROUPS = [
+  { outcome: 'PRICE_REQUIRED', heading: 'Price Required', icon: AlertTriangle, color: 'text-amber-700' },
+  { outcome: 'CATEGORY_REQUIRED', heading: 'Category Required', icon: AlertTriangle, color: 'text-amber-700' },
+  { outcome: 'EXPIRED', heading: 'Expired', icon: Clock, color: 'text-slate-500' },
+  { outcome: 'OTHER_FAILURE', heading: 'Other', icon: XCircle, color: 'text-rose-700' },
+];
+
 const STATUS_FILTERS = [
   { value: '', label: 'All' },
   { value: 'PENDING_ADMIN_REVIEW', label: 'Pending Review' },
   { value: 'MERCHANT_MATCHED', label: 'Merchant Matched' },
+  { value: 'PRICE_REQUIRED', label: 'Price Required' },
+  { value: 'CATEGORY_REQUIRED', label: 'Category Required' },
   { value: 'READY_TO_PUBLISH', label: 'Ready to Publish' },
+  { value: 'EXPIRED', label: 'Expired' },
   { value: 'FAILED', label: 'Failed' },
   { value: 'DUPLICATE_SUPPRESSED', label: 'Duplicate' },
   { value: 'PUBLISHED', label: 'Published' },
   { value: 'REJECTED', label: 'Rejected' },
 ];
 
-/** Only an offer that isn't already live (or declined) can be part of a publish batch. DUPLICATE_SUPPRESSED stays selectable — it's a re-checkable finding, not terminal, so correcting a field (e.g. the title) and republishing can clear a false positive. */
-const SELECTABLE_STATUSES = ['PENDING_ADMIN_REVIEW', 'MERCHANT_MATCHED', 'READY_TO_PUBLISH', 'FAILED', 'DUPLICATE_SUPPRESSED'];
+/**
+ * Only an offer that isn't already live (or declined) can be part of a
+ * publish batch. PRICE_REQUIRED/CATEGORY_REQUIRED stay selectable — these
+ * are admin-correctable review states, and re-selecting + Publish Selected
+ * is how a correction gets re-attempted after PATCHing the offer.
+ * DUPLICATE_SUPPRESSED also stays selectable for the same reason — a
+ * re-checkable finding, not terminal. EXPIRED is deliberately excluded:
+ * there's no "extend validity" action, so the only real next step for an
+ * expired offer is Reject, via the detail modal, not a bulk republish.
+ */
+const SELECTABLE_STATUSES = [
+  'PENDING_ADMIN_REVIEW',
+  'MERCHANT_MATCHED',
+  'PRICE_REQUIRED',
+  'CATEGORY_REQUIRED',
+  'READY_TO_PUBLISH',
+  'FAILED',
+  'DUPLICATE_SUPPRESSED',
+];
 
 /**
  * "AI Offers From Online" — offers exported from the standalone AI Offer
@@ -67,6 +97,9 @@ export default function AiOffersFromOnlinePanel() {
   const selectableOffers = useMemo(() => offers.filter((o) => SELECTABLE_STATUSES.includes(o.status)), [offers]);
   const allSelectableSelected = selectableOffers.length > 0 && selectableOffers.every((o) => selectedIds.has(o.id));
 
+  // A dry run's readyToPublish count only describes the selection it was
+  // run against — any change to that selection invalidates it, so the
+  // Publish button must not go on quoting a stale number.
   const toggleOne = (offer) => {
     if (!SELECTABLE_STATUSES.includes(offer.status)) return;
     setSelectedIds((prev) => {
@@ -75,10 +108,17 @@ export default function AiOffersFromOnlinePanel() {
       else next.add(offer.id);
       return next;
     });
+    setDryRunResult(null);
   };
 
-  const selectAll = () => setSelectedIds(new Set(selectableOffers.map((o) => o.id)));
-  const clearSelection = () => setSelectedIds(new Set());
+  const selectAll = () => {
+    setSelectedIds(new Set(selectableOffers.map((o) => o.id)));
+    setDryRunResult(null);
+  };
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setDryRunResult(null);
+  };
 
   const validateSelected = async () => {
     if (selectedIds.size === 0) return;
@@ -88,7 +128,7 @@ export default function AiOffersFromOnlinePanel() {
       const result = await aiOffersFromOnlineApi.validateSelected([...selectedIds]);
       setDryRunResult(result);
       showToast(
-        `Dry run: ${result.readyToPublish} ready, ${result.categoryFixable} category-fixable, ${result.priceRequired} price-required, ${result.otherFailures} other`,
+        `Dry run: ${result.readyToPublish} ready, ${result.priceRequired} price-required, ${result.categoryRequired} category-required, ${result.expired} expired, ${result.otherFailures} other`,
         'info',
       );
     } catch (err) {
@@ -185,11 +225,22 @@ export default function AiOffersFromOnlinePanel() {
           </button>
           <button
             onClick={publishSelected}
-            disabled={selectedIds.size === 0 || publishing}
+            disabled={selectedIds.size === 0 || publishing || (dryRunResult && dryRunResult.readyToPublish === 0)}
+            title={
+              dryRunResult && dryRunResult.readyToPublish < selectedIds.size
+                ? `${selectedIds.size - dryRunResult.readyToPublish} of ${selectedIds.size} selected offers are not ready — only the ready ones will publish`
+                : undefined
+            }
             className="inline-flex items-center gap-2 rounded-lg bg-[#5B12D6] px-4 py-2 text-sm font-semibold text-white hover:bg-[#4a0fb0] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
-            Publish Selected{selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
+            {/* A dry run just ran: be honest about how many of the N
+                selected will actually go live, rather than implying all N
+                will. Without a dry run, we don't know yet, so it just
+                names the selection count. */}
+            {dryRunResult
+              ? `Publish Ready Offers (${dryRunResult.readyToPublish})`
+              : `Publish Selected${selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}`}
           </button>
         </div>
       </div>
@@ -198,32 +249,66 @@ export default function AiOffersFromOnlinePanel() {
         <div className="rounded-lg border border-[#5B12D6]/30 bg-[#5B12D6]/5 p-4">
           <div className="flex flex-wrap gap-4 text-sm font-semibold">
             <span className="text-gray-700">Total: {dryRunResult.total}</span>
-            <span className="text-emerald-700">Ready to publish: {dryRunResult.readyToPublish}</span>
-            {dryRunResult.categoryFixable > 0 && (
-              <span className="text-amber-700">Category-fixable: {dryRunResult.categoryFixable}</span>
-            )}
-            {dryRunResult.priceRequired > 0 && <span className="text-amber-700">Price-required: {dryRunResult.priceRequired}</span>}
-            {dryRunResult.otherFailures > 0 && <span className="text-rose-700">Other failures: {dryRunResult.otherFailures}</span>}
+            <span className="text-emerald-700">Ready to Publish: {dryRunResult.readyToPublish}</span>
+            {dryRunResult.priceRequired > 0 && <span className="text-amber-700">Price Required: {dryRunResult.priceRequired}</span>}
+            {dryRunResult.categoryRequired > 0 && <span className="text-amber-700">Category Required: {dryRunResult.categoryRequired}</span>}
+            {dryRunResult.expired > 0 && <span className="text-slate-500">Expired: {dryRunResult.expired}</span>}
+            {dryRunResult.otherFailures > 0 && <span className="text-rose-700">Other: {dryRunResult.otherFailures}</span>}
           </div>
-          {dryRunResult.items.some((i) => i.outcome !== 'READY' || i.categoryNote) && (
-            <ul className="mt-3 space-y-1 text-xs text-gray-600">
-              {dryRunResult.items
-                .filter((i) => i.outcome !== 'READY' || i.categoryNote)
-                .map((i) => {
-                  const offer = offers.find((o) => o.id === i.id);
-                  return (
-                    <li key={i.id} className="flex gap-2">
-                      <AlertTriangle className={`mt-0.5 h-3.5 w-3.5 flex-shrink-0 ${i.outcome === 'READY' ? 'text-[#5B12D6]' : 'text-amber-500'}`} />
-                      <span>
-                        <strong>{offer?.merchant_name || i.id}</strong> — {i.message || i.categoryNote}
-                      </span>
-                    </li>
-                  );
-                })}
-            </ul>
-          )}
+
+          {/* Grouped by reason, not one flat list — an admin scanning this
+              after a batch run wants "what's blocking these 8" answered by
+              group, not by re-reading every row's message individually. */}
+          <div className="mt-3 space-y-3">
+            {DRY_RUN_GROUPS.map(({ outcome, heading, icon: Icon, color }) => {
+              const items = dryRunResult.items.filter((i) => i.outcome === outcome);
+              if (items.length === 0) return null;
+              return (
+                <div key={outcome}>
+                  <p className={`text-xs font-bold uppercase tracking-wide ${color}`}>{heading}</p>
+                  <ul className="mt-1 space-y-1 text-xs text-gray-600">
+                    {items.map((i) => {
+                      const offer = offers.find((o) => o.id === i.id);
+                      return (
+                        <li key={i.id} className="flex gap-2">
+                          <Icon className={`mt-0.5 h-3.5 w-3.5 flex-shrink-0 ${color}`} />
+                          <span>
+                            <strong>{offer?.merchant_name || i.id}</strong>
+                            {i.message ? <> — {i.message}</> : null}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+            {/* READY items with a normalization note are informational, not
+                blocking — shown separately so they don't read as failures. */}
+            {dryRunResult.items.some((i) => i.outcome === 'READY' && i.categoryNote) && (
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-[#5B12D6]">Ready — Category Auto-Normalized</p>
+                <ul className="mt-1 space-y-1 text-xs text-gray-600">
+                  {dryRunResult.items
+                    .filter((i) => i.outcome === 'READY' && i.categoryNote)
+                    .map((i) => {
+                      const offer = offers.find((o) => o.id === i.id);
+                      return (
+                        <li key={i.id} className="flex gap-2">
+                          <CheckSquare className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#5B12D6]" />
+                          <span>
+                            <strong>{offer?.merchant_name || i.id}</strong> — {i.categoryNote}
+                          </span>
+                        </li>
+                      );
+                    })}
+                </ul>
+              </div>
+            )}
+          </div>
+
           <p className="mt-3 text-xs text-gray-500">
-            Nothing has been published yet — this is a preview. Fix category/price issues, then run Publish Selected.
+            Nothing has been published yet — this is a preview. Fix price/category issues (Details → Edit Offer), then Publish Ready Offers.
           </p>
         </div>
       )}
@@ -233,6 +318,9 @@ export default function AiOffersFromOnlinePanel() {
           <div className="flex flex-wrap gap-4 text-sm font-semibold">
             <span className="text-emerald-700">✓ {batchResult.published} Published</span>
             {batchResult.duplicate > 0 && <span className="text-amber-700">⚠ {batchResult.duplicate} Flagged as Duplicate</span>}
+            {batchResult.priceRequired > 0 && <span className="text-amber-700">⚠ {batchResult.priceRequired} Price Required</span>}
+            {batchResult.categoryRequired > 0 && <span className="text-amber-700">⚠ {batchResult.categoryRequired} Category Required</span>}
+            {batchResult.expired > 0 && <span className="text-slate-500">⚠ {batchResult.expired} Expired</span>}
             {batchResult.failed > 0 && <span className="text-rose-700">✕ {batchResult.failed} Failed</span>}
           </div>
           {(batchResult.results || []).some((r) => r.outcome !== 'PUBLISHED') && (
@@ -345,8 +433,11 @@ export default function AiOffersFromOnlinePanel() {
                       <Eye className="h-3.5 w-3.5" /> Details
                     </button>
                   </div>
-                  {offer.status === 'FAILED' && offer.failure_reason && (
-                    <p className="pt-1 text-[11px] text-rose-600" title={offer.failure_reason}>
+                  {['FAILED', 'PRICE_REQUIRED', 'CATEGORY_REQUIRED', 'EXPIRED'].includes(offer.status) && offer.failure_reason && (
+                    <p
+                      className={`pt-1 text-[11px] ${offer.status === 'FAILED' ? 'text-rose-600' : 'text-amber-700'}`}
+                      title={offer.failure_reason}
+                    >
                       {offer.failure_reason}
                     </p>
                   )}

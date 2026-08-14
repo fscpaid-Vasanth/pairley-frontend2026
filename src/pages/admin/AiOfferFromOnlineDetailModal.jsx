@@ -327,6 +327,41 @@ export default function AiOfferFromOnlineDetailModal({ offerId, onClose, onChang
                     </div>
                   )}
 
+                  {offer.status === 'PRICE_REQUIRED' && (
+                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      <p className="font-semibold">⚠ Price Required</p>
+                      <p className="mt-1 text-xs">{offer.failure_reason || 'Source price could not be verified.'}</p>
+                      <p className="mt-2 text-xs">
+                        {offer.source_url ? (
+                          <>
+                            <a href={offer.source_url} target="_blank" rel="noreferrer" className="font-semibold underline">
+                              Open Source
+                            </a>{' '}
+                            → verify the real price → enter it in <strong>Offer Price</strong> below → Save changes → Publish.
+                          </>
+                        ) : (
+                          <>Enter a verified price in <strong>Offer Price</strong> below → Save changes → Publish.</>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {offer.status === 'CATEGORY_REQUIRED' && (
+                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      <p className="font-semibold">⚠ Category Required</p>
+                      <p className="mt-1 text-xs">{offer.failure_reason}</p>
+                      <p className="mt-2 text-xs">Correct <strong>Category</strong> below to a valid Pairley category → Save changes → Publish.</p>
+                    </div>
+                  )}
+
+                  {offer.status === 'EXPIRED' && (
+                    <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                      <p className="font-semibold">Expired</p>
+                      <p className="mt-1 text-xs">{offer.failure_reason}</p>
+                      <p className="mt-1 text-xs">There's no automatic recovery for an expired offer — Reject it, or re-export a fresh one from the Collector if the deal is still running.</p>
+                    </div>
+                  )}
+
                   {showReject && (
                     <div className="mt-3 flex gap-2">
                       <input
