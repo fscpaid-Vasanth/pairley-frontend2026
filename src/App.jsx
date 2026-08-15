@@ -29,9 +29,13 @@ import RefundPolicyPage from './pages/RefundPolicyPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 // Marketing Pages (investor-ready, own layout)
-import LandingPage from './pages/marketing/LandingPage';
 import MerchantPage from './pages/marketing/MerchantPage';
 import CustomerMarketingPage from './pages/marketing/CustomerMarketingPage';
+
+// Customer-acquisition homepage ("/") — replaces the investor-focused
+// LandingPage as the public root. LandingPage.jsx itself is untouched and
+// still exists on disk (unmounted) in case it's needed again.
+import CustomerLandingPage from './pages/marketing/CustomerLandingPage';
 
 // Launch Pass (pre-launch campaign)
 import LaunchHome from './pages/launch/LaunchHome';
@@ -320,7 +324,7 @@ function AppContent() {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
           {/* Marketing Routes — own layout, no AppLayout wrapper */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<CustomerLandingPage />} />
           <Route path="/customer" element={<CustomerMarketingPage />} />
           <Route path="/merchant" element={<MerchantPage />} />
 
