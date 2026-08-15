@@ -10,9 +10,6 @@ import { useToast } from '../../context/ToastContext';
 import { ensureAnonymousAuth } from '../../firebase';
 import { registerMerchantLead } from '../../utils/launchFirestore';
 
-const TEST_NUMBERS = ['9962045143', '1234567890'];
-const isTestNumber = (mobile) =>
-  TEST_NUMBERS.includes(mobile) || ['99999', '88888', '77777', '66666'].some((p) => mobile.startsWith(p));
 const STEPS = ['business', 'contact', 'otp', 'done'];
 
 export default function MerchantQuickJoin() {
@@ -42,12 +39,6 @@ export default function MerchantQuickJoin() {
   useEffect(() => {
     warmUpBackend();
   }, []);
-
-  useEffect(() => {
-    if (step === 'otp') {
-      showToast('Use Default OTP: 1234', 'info');
-    }
-  }, [step, showToast]);
 
   const stepNum = STEPS.indexOf(step) + 1;
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
@@ -92,22 +83,18 @@ export default function MerchantQuickJoin() {
     if (!validateContact()) return;
     setBusy(true);
     try {
-      if (isTestNumber(form.mobile)) {
-        setOtp('1234');
-        showToast('Test number detected — OTP auto-filled with 1234.', 'success');
-      } else {
-        await api.post('/auth/send-otp', { mobile: form.mobile });
-        setOtp('');
-        showToast(`Verification code sent to +91 ${form.mobile}.`, 'success');
-      }
+      await api.post('/auth/send-otp', { mobile: form.mobile });
+      setOtp('');
+      showToast(`Verification code sent to +91 ${form.mobile}.`, 'success');
       startResendTimer();
       setStep('otp');
     } catch (err) {
+      // A failed send must never advance to the OTP entry screen — there is
+      // no real code to enter. Previously this proceeded anyway and told
+      // the user to type a hardcoded default, which bypassed OTP
+      // verification entirely regardless of MSG91's actual delivery status.
       console.error('send-otp failed', err);
-      setOtp('');
-      startResendTimer();
-      setStep('otp');
-      showToast('Proceeding to verification. Enter default OTP: 1234.', 'warning');
+      showToast(err.message || 'Failed to send OTP. Please try again.', 'error');
     } finally {
       setBusy(false);
     }
@@ -132,9 +119,8 @@ export default function MerchantQuickJoin() {
     }
     setBusy(true);
     try {
-      if (otp !== '1234' && !isTestNumber(form.mobile)) {
-        await api.post('/auth/verify-otp', { mobile: form.mobile, code: otp });
-      }
+      // Always server-verified — no shortcut.
+      await api.post('/auth/verify-otp', { mobile: form.mobile, code: otp });
       await ensureAnonymousAuth();
       const badge = await registerMerchantLead({
         shopName: form.shopName,
@@ -300,19 +286,6 @@ export default function MerchantQuickJoin() {
             </p>
 
             <OtpInput length={4} value={otp} onChange={setOtp} onComplete={() => document.querySelector('.launch-btn--primary[type="submit"]')?.click()} />
-
-            <div style={{
-              background: 'rgba(34, 197, 94, 0.12)',
-              border: '1px solid rgba(34, 197, 94, 0.3)',
-              borderRadius: 12,
-              padding: '8px 12px',
-              fontSize: 13,
-              color: '#4ade80',
-              marginTop: 14,
-              textAlign: 'center'
-            }}>
-              💡 Use Default OTP: <strong>1234</strong>
-            </div>
 
             <button
               className="launch-btn launch-btn--primary launch-btn--block"

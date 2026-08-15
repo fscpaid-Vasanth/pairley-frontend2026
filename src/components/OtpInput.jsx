@@ -2,13 +2,12 @@ import { useRef, useEffect } from 'react';
 import './OtpInput.css';
 
 /**
- * OTP input, box count set by `length` (defaults to 6). Controlled by a
- * single string `value` so callers don't need to manage per-digit state.
- * `onComplete`, when passed, fires once as soon as `value` reaches `length`
- * digits — used to auto-submit the merchant pilot's 4-digit flow without
- * changing behavior for any caller that doesn't pass it.
+ * OTP input, box count set by `length` (defaults to 4, matching
+ * OtpService.generateOtp()). Controlled by a single string `value` so
+ * callers don't need to manage per-digit state. `onComplete`, when passed,
+ * fires once as soon as `value` reaches `length` digits.
  */
-export default function OtpInput({ length = 6, value, onChange, onComplete, autoFocus = true, disabled = false, variant = 'dark' }) {
+export default function OtpInput({ length = 4, value, onChange, onComplete, autoFocus = true, disabled = false, variant = 'dark' }) {
   const digits = Array.from({ length }, (_, i) => value[i] || '');
   const refs = useRef(Array.from({ length }, () => null));
   const firedRef = useRef(false);

@@ -348,7 +348,7 @@ export default function ClaimBusinessPage() {
                   <OtpInput value={otp} onChange={setOtp} variant="light" />
                   <button
                     onClick={handleVerifyOtp}
-                    disabled={verifying || otp.length < 6}
+                    disabled={verifying || otp.length < 4}
                     className="w-full py-3 rounded-xl bg-[#22C55E] hover:bg-[#16a34a] text-white font-bold text-sm disabled:opacity-50"
                   >
                     {verifying ? 'Verifying...' : 'Verify & Claim Business'}

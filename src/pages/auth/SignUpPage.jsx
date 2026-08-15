@@ -217,7 +217,7 @@ export default function SignUpPage() {
   const [pendingPayload, setPendingPayload] = useState(null);
   const [otpMode, setOtpMode] = useState('register'); // 'register' | 'google'
   const [otp, setOtp] = useState('');
-  const [otpLength, setOtpLength] = useState(4); // 4-digit OTP — default bypass with 1234
+  const [otpLength, setOtpLength] = useState(4); // matches OtpService.generateOtp() — real code length
   const [resendSeconds, setResendSeconds] = useState(30);
   const [busy, setBusy] = useState(false);
 
@@ -246,13 +246,13 @@ export default function SignUpPage() {
         setView('otp');
         showToast(`Verification code sent to +91 ${payload.mobile}.`, 'success');
       })
-      .catch(() => {
-        // Backend may be down — still proceed to OTP screen so user can enter default 1234
-        setOtp('');
-        setOtpLength(4);
-        setResendSeconds(30);
-        setView('otp');
-        showToast('Enter default OTP: 1234 to proceed.', 'info');
+      .catch((err) => {
+        // A failed send must never advance to the OTP entry screen — there
+        // is no real code to enter. Previously this silently proceeded
+        // anyway and told the user to type a hardcoded default, which
+        // bypassed OTP verification entirely regardless of MSG91's actual
+        // delivery status.
+        showToast(err.message || 'Failed to send verification code. Please try again.', 'error');
       })
       .finally(() => setBusy(false));
   };
@@ -313,12 +313,10 @@ export default function SignUpPage() {
     }
     setBusy(true);
 
-    // Bypass: if user enters 1234 (default OTP), skip backend verify entirely
-    const verifyPromise = otp === '1234'
-      ? Promise.resolve()
-      : api.post('/auth/verify-otp', { mobile: pendingPayload.mobile, code: otp, role: pendingPayload.role });
-
-    verifyPromise
+    // Always server-verified before /auth/register or /auth/google is
+    // called — a wrong/expired/missing code rejects via .catch() below and
+    // no account is ever created from an unproven phone number.
+    api.post('/auth/verify-otp', { mobile: pendingPayload.mobile, code: otp, role: pendingPayload.role })
       .then(() => (otpMode === 'register' ? api.post('/auth/register', pendingPayload) : api.post('/auth/google', pendingPayload)))
       .then((res) => {
         const token = res.token || res.access_token;
@@ -488,7 +486,7 @@ export default function SignUpPage() {
                     length={otpLength}
                     value={otp}
                     onChange={setOtp}
-                    onComplete={otpLength === 4 ? () => handleVerifyOtp() : undefined}
+                    onComplete={() => handleVerifyOtp()}
                     variant="light"
                   />
 

@@ -37,7 +37,7 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
   const [otpStep, setOtpStep] = useState('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
-  const [otpLength, setOtpLength] = useState(4); // 4-digit OTP — default bypass with 1234
+  const [otpLength, setOtpLength] = useState(4); // matches OtpService.generateOtp() — real code length, backend confirms via otpLength in the send-otp response
   const [resendSeconds, setResendSeconds] = useState(0);
   const [busy, setBusy] = useState(false);
 
@@ -103,13 +103,13 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
         startResendTimer();
         showToast(`OTP sent to +91 ${phone}.`, 'success');
       })
-      .catch(() => {
-        // Backend may be down — still proceed so user can enter default 1234
-        setOtp('');
-        setOtpLength(4);
-        setOtpStep('verify');
-        startResendTimer();
-        showToast('Enter default OTP: 1234 to proceed.', 'info');
+      .catch((err) => {
+        // A failed send must never advance to the OTP entry screen — there
+        // is no real code to enter. Previously this silently proceeded
+        // anyway and told the user to type a hardcoded default, which
+        // bypassed OTP verification entirely regardless of MSG91's actual
+        // delivery status.
+        showToast(err.message || 'Failed to send OTP. Please try again.', 'error');
       })
       .finally(() => setBusy(false));
   };
@@ -130,19 +130,12 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
     }
     setBusy(true);
 
-    // Bypass: if user enters 1234 (default OTP), skip backend verify entirely
-    const verifyPromise = otp === '1234'
-      ? Promise.resolve()
-      : api.post('/auth/verify-otp', { mobile: phone, code: otp, role: role === 'business' ? 'Business' : 'Customer' });
-
-    verifyPromise
+    // Always server-verified — no shortcut. A wrong/expired/missing code
+    // rejects via the .catch() below, exactly like a real SMS-OTP flow must.
+    api.post('/auth/verify-otp', { mobile: phone, code: otp, role: role === 'business' ? 'Business' : 'Customer' })
       .then((res) => {
-        // For bypass (1234), res is undefined — simulate a successful login redirect
         if (res?.exists) {
           routeAfterLogin(res);
-        } else if (otp === '1234') {
-          showToast('OTP verified! Proceeding...', 'success');
-          navigate('/signup');
         } else {
           showToast('No account found with this number — redirecting to sign up.', 'warning');
           navigate('/signup');
@@ -229,7 +222,7 @@ function LoginPanel({ role, isAdminLogin = false, onGoogleNewUser, onForgotPassw
               length={otpLength}
               value={otp}
               onChange={setOtp}
-              onComplete={otpLength === 4 ? () => handleVerifyOtp() : undefined}
+              onComplete={() => handleVerifyOtp()}
               variant="light"
             />
 
@@ -333,7 +326,7 @@ export default function LoginPage() {
   const [onboarding, setOnboarding] = useState(null); // { role, googleUser } | null
   const [onboardingOtpStep, setOnboardingOtpStep] = useState('none'); // 'none' | 'otp'
   const [onboardingOtp, setOnboardingOtp] = useState('');
-  const [onboardingOtpLength, setOnboardingOtpLength] = useState(4); // 4-digit OTP — default bypass with 1234
+  const [onboardingOtpLength, setOnboardingOtpLength] = useState(4); // matches OtpService.generateOtp() — real code length
   const [onboardingPayload, setOnboardingPayload] = useState(null);
   const [onboardingBusy, setOnboardingBusy] = useState(false);
   const [onboardingResendSeconds, setOnboardingResendSeconds] = useState(0);
@@ -377,13 +370,10 @@ export default function LoginPage() {
         setOnboardingResendSeconds(30);
         showToast(`Verification code sent to +91 ${fields.mobile}.`, 'success');
       })
-      .catch(() => {
-        // Backend may be down — still proceed so user can enter default 1234
-        setOnboardingOtp('');
-        setOnboardingOtpLength(4);
-        setOnboardingOtpStep('otp');
-        setOnboardingResendSeconds(30);
-        showToast('Enter default OTP: 1234 to proceed.', 'info');
+      .catch((err) => {
+        // A failed send must never advance to the OTP entry screen — see
+        // the identical fix in handleSendOtp above.
+        showToast(err.message || 'Failed to send verification code. Please try again.', 'error');
       })
       .finally(() => setOnboardingBusy(false));
   };
@@ -404,12 +394,10 @@ export default function LoginPage() {
     }
     setOnboardingBusy(true);
 
-    // Bypass: if user enters 1234 (default OTP), skip backend verify entirely
-    const verifyPromise = onboardingOtp === '1234'
-      ? Promise.resolve()
-      : api.post('/auth/verify-otp', { mobile: onboardingPayload.mobile, code: onboardingOtp, role: onboardingOtpRole() });
-
-    verifyPromise
+    // Always server-verified before the account is created/updated via
+    // /auth/google — a wrong/expired/missing code rejects via .catch()
+    // below and /auth/google is never called.
+    api.post('/auth/verify-otp', { mobile: onboardingPayload.mobile, code: onboardingOtp, role: onboardingOtpRole() })
       .then(() => api.post('/auth/google', onboardingPayload))
       .then((res) => {
         localStorage.setItem('pairley_token', res.access_token || res.token);
@@ -477,7 +465,7 @@ export default function LoginPage() {
                       length={onboardingOtpLength}
                       value={onboardingOtp}
                       onChange={setOnboardingOtp}
-                      onComplete={onboardingOtpLength === 4 ? () => handleVerifyOnboardingOtp() : undefined}
+                      onComplete={() => handleVerifyOnboardingOtp()}
                       variant="light"
                     />
 
