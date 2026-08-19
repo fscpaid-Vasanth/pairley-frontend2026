@@ -238,6 +238,30 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
     -->
+
+    <!-- =========================================================
+         STEP 16 — Meta Pixel
+         Base code loads once per full page load — a plain <script> tag
+         in index.html is never re-executed by Vite's dev server or HMR
+         (only App/component modules are hot-reloaded), so this can't
+         double-init during development the way an in-app useEffect could.
+         ========================================================= -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1373751987584349');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+           src="https://www.facebook.com/tr?id=1373751987584349&ev=PageView&noscript=1"/>
+    </noscript>
   </head>
   <body>
     <!-- GTM NoScript Fallback (uncomment when GTM ID is set) -->
