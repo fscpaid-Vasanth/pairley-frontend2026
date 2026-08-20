@@ -63,6 +63,11 @@ export default function BusinessDashboard() {
     completedDeals: 0
   });
   const [deals, setDeals] = useState([]);
+  // Anonymous Group Chat — aggregated demand numbers only (active member
+  // count, today's growth). Never includes message content; see
+  // GroupChatService.getBusinessGroupSummary(), which never selects a
+  // text column at all. Keyed by offer id: { [offerId]: { activeMembers, todayGrowth } }.
+  const [groupSummary, setGroupSummary] = useState({});
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newLeadsCount, setNewLeadsCount] = useState(0);
@@ -97,6 +102,12 @@ export default function BusinessDashboard() {
     api.get('/leads?status=NEW')
       .then((data) => setNewLeadsCount((data || []).length))
       .catch((err) => console.error('Failed to fetch new leads count:', err));
+
+    // Anonymous Group Chat aggregate — counts only, never blocks the
+    // primary deals list on failure.
+    api.get('/group-chat/summary')
+      .then((data) => setGroupSummary(data || {}))
+      .catch((err) => console.error('Failed to fetch group chat summary:', err));
 
     const bId = business.id;
     api.get(`/offers/list?businessId=${bId}&status=ALL`)
@@ -413,6 +424,12 @@ export default function BusinessDashboard() {
                           <div className="text-xs font-bold text-slate-700 mt-0.5">
                             {deal.interestCount} {isPair ? '/ 2 waiting' : isStandard ? 'interested' : 'joined'}
                           </div>
+                          {groupSummary[deal.id]?.activeMembers > 0 && (
+                            <div className="text-[10px] text-[#5B12D6] font-bold mt-1">
+                              👥 {groupSummary[deal.id].activeMembers} in group chat
+                              {groupSummary[deal.id].todayGrowth > 0 && ` · +${groupSummary[deal.id].todayGrowth} today`}
+                            </div>
+                          )}
                         </div>
 
                         {!isStandard && (

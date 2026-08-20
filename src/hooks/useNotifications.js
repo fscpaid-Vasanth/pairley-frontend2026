@@ -23,6 +23,10 @@ export function useNotifications(user) {
         body: n.body || n.message || '',
         read: n.is_read || false,
         type: n.notification_type || 'system',
+        // Optional deep-link target (e.g. an offer_id for
+        // GROUP_MEMBER_JOINED) — see NotificationService.sendNotification's
+        // relatedId param.
+        relatedId: n.related_id || null,
         createdAt: n.created_at || new Date().toISOString()
       }));
 

@@ -31,6 +31,12 @@ export const ROUTES = {
   // flow. Distinct from CUSTOMER_DEAL_CHAT, which is the legacy
   // BOGO/group-buy N-person pool chat scoped to an Offer, not a Lead.
   CUSTOMER_LEAD_CHAT: '/customer/lead-chat/:leadId',
+  // Anonymous Customer-to-Customer Offer Group Chat — every customer who
+  // has shown interest in this offer (a Lead row), chatting anonymously
+  // with each other. The merchant is never a participant. Distinct from
+  // both CUSTOMER_DEAL_CHAT (legacy 2-person BOGO pairing) and
+  // CUSTOMER_LEAD_CHAT (1:1 customer<->merchant coordination) above.
+  CUSTOMER_GROUP_CHAT: '/customer/group-chat/:offerId',
 
   // Business
   BUSINESS_DASHBOARD: '/business/dashboard',

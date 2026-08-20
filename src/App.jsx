@@ -58,6 +58,7 @@ import CustomerOrderDetailPage from './pages/customer/CustomerOrderDetailPage';
 import CustomerChatPage from './pages/customer/CustomerChatPage';
 import CustomerDealChatPage from './pages/customer/CustomerDealChatPage';
 import CustomerLeadChatPage from './pages/customer/CustomerLeadChatPage';
+import CustomerGroupChatPage from './pages/customer/CustomerGroupChatPage';
 
 // Business Pages
 import BusinessDashboard from './pages/business/BusinessDashboard';
@@ -87,7 +88,9 @@ import { ROUTES } from './utils/constants';
 function AppLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const isChatPage = location.pathname.includes('/customer/deal-chat');
+  const isChatPage =
+    location.pathname.includes('/customer/deal-chat') ||
+    location.pathname.includes('/customer/group-chat');
 
   const handleSearchClick = () => {
     if (location.pathname !== '/deals') {
@@ -507,6 +510,14 @@ function AppContent() {
             element={
               <AppLayout>
                 <CustomerLeadChatPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path={ROUTES.CUSTOMER_GROUP_CHAT}
+            element={
+              <AppLayout>
+                <CustomerGroupChatPage />
               </AppLayout>
             }
           />

@@ -962,6 +962,31 @@ const DealDetailPage = () => {
                     </div>
                   )}
 
+                  {/* Anonymous Customer-to-Customer Offer Group Chat — fires
+                      for EVERY offer type (gated on deal.myLead, the
+                      universal Show Interest record), unlike the legacy
+                      block above which only fires for OfferInterest-based
+                      legacy-matching offers. The merchant is never a
+                      participant in this chat. */}
+                  {deal?.myLead && !isBusiness && (
+                    <div className="group-chat-card p-4 rounded-2xl bg-indigo-50/50 border border-[#5B12D6]/20 mt-4 text-left shadow-sm">
+                      <h4 className="text-xs font-extrabold text-[#5B12D6] flex items-center gap-1.5 mb-1.5">
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>groups</span>
+                        Anonymous Group Chat
+                      </h4>
+                      <p className="text-[10px] text-slate-500 leading-normal mb-3 font-semibold">
+                        Chat freely with other Pairley members interested in this deal — under a stable anonymous name, never your real identity. The merchant can't see this conversation.
+                      </p>
+                      <Link
+                        to={`/customer/group-chat/${id}`}
+                        state={{ offerName: deal.title, shopName: deal.businessOwner?.name }}
+                        className="w-full btn btn-primary bg-[#5B12D6] hover:bg-[#430bb0] text-white py-2.5 rounded-xl text-[11px] font-bold text-center block transition shadow-sm"
+                      >
+                        Enter Group Chat
+                      </Link>
+                    </div>
+                  )}
+
                   {/* Days remaining */}
                   {daysLeft > 0 && (
                     <div className={`deal-days-left ${daysLeft <= 7 ? 'deal-days-left--urgent' : 'deal-days-left--normal'}`}>

@@ -31,6 +31,9 @@ export default function NotificationCenter({ user }) {
       // Module 13 — sent to the merchant on every Show Interest (createLead).
       // Previously had no case here, so clicking it fell through to '/'.
       case 'NEW_LEAD': return '🎯';
+      // Anonymous Group Chat — sent to existing members when a new
+      // customer joins their offer's group (never to the new joiner).
+      case 'GROUP_MEMBER_JOINED': return '👥';
       default: return '🔔';
     }
   };
@@ -57,6 +60,11 @@ export default function NotificationCenter({ user }) {
       navigate(ROUTES.BUSINESS_LEADS || '/business/leads');
     } else if (notif.type === 'ORDER') {
       navigate(user?.role?.toLowerCase() === 'business' ? '/business/orders' : '/customer/orders');
+    } else if (notif.type === 'GROUP_MEMBER_JOINED') {
+      // relatedId carries the offer_id (see NotificationService.sendNotification's
+      // optional relatedId param) — deep-links straight into that offer's
+      // group chat rather than a generic list page.
+      navigate(notif.relatedId ? `/customer/group-chat/${notif.relatedId}` : ROUTES.CUSTOMER_ORDERS || '/customer/orders');
     } else {
       navigate('/');
     }
@@ -66,7 +74,7 @@ export default function NotificationCenter({ user }) {
   const filteredNotifications = notifications.filter(n => {
     if (activeTab === 'ALL') return true;
     if (activeTab === 'DEALS') return n.type === 'NEW_DEAL' || n.type === 'DEAL_EXPIRY';
-    if (activeTab === 'CHATS') return n.type === 'CHAT' || n.type === 'PARTNER_JOINED';
+    if (activeTab === 'CHATS') return n.type === 'CHAT' || n.type === 'PARTNER_JOINED' || n.type === 'GROUP_MEMBER_JOINED';
     if (activeTab === 'ORDERS') return n.type === 'ORDER';
     return true;
   });
